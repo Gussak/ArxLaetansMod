@@ -1,0 +1,43 @@
+ANY OS
+
+  use ArxLibertatisFTLConverter <https://github.com/fredlllll/ArxLibertatisFTLConverter/releases> to convert ftl to obj and get the texture name (*1). if it dont import correctly on blender, like missing empties and inverted rotation model, just use the arx_addon
+  
+  to prevent blender object name too big error when import a ftl with the arx_addon:
+    configure the blender flt import/export addon path to match the path from where you are running blender at ex.:
+      running blender at:
+        /home/myuser/.../ArxFatalisInstallFolder/_ArxData/game/graph/obj3d/interactive/items/movable/seat_stool4_goblin/
+      cfg path to
+        /home/myuser/.../ArxFatalisInstallFolder/_ArxData/
+
+  open blender
+  import the .ftl using arxLibertatis plugin arx_addon
+  fix the shader by changing the arxmaterial for principledBSDF
+  OR: increasing details of a vanilla model, tip (but do it the way you prefer):
+    + in edit mode, duplicate the mesh to use as size reference later (*2)
+    + subdivide edges many times of the original mesh (*4) (subdivide 1, smooth 1, repeat...)
+    + then smooth vertices of orig mesh (*4) to look roundy and nice (but you may want to mesh/transform/randomize the vertices too depending on the object)
+    + extrude faces of orig mesh (*4) (will create a new mesh (*3)) along normals til it restore the original mesh (*4) size
+    + delete the other temp meshes (*2) (*4) keeping only the final extruded faces roundy/random mesh (*3)
+    + decimate the mesh may be about 0.5, it must still look good of course
+    + set the material name to ex.: GRAPH\OBJ3D\TEXTURES\ITEM_BONES.PNG to help on fixing the .mtl file later
+  !OR!: preparing a new model (this is better because you may get CC-BY models and re-release them still in CC-BY!)
+    + make it sure the textures are all in CLIP mode, and unwrap the UV properly if needed
+    + join all objects into a single one, to it become a single mesh
+    + import the vanilla .ftl, scale the new model to match it, delete the vanilla object and unlink the vanilla textures
+    + decimate to lower poly count but keeping good quality
+    + instead of the ./textures default folder for blender, create a subfolder tree like: graph/obj3d/textures/ and place textures there, this will make exporting to .obj.mtl easier when converting to .json and then to .ftl
+    + if textures are too big use imagemagick: convert texture.jpg -resize 512x512 texture.jpg.new;mv texture.jpg.new texture.jpg
+  save the blend file
+  export to wavefront .obj
+  fix the .mtl texture name (*1) LINUX: and also replace all / with \\
+  use ArxLibertatisFTLConverter to convert the blender exported .obj to .ftl
+
+LINUX
+
+  to run ex.: arx-convert bottle_wine.ftl.unpack.json --from=json --to=ftl --output=bottle_wine.ftl
+  to run ex.: arx-convert bottle_wine.ftl --from=ftl --to=json --output=bottle_wine.ftl.unpack.json
+    Installing Node Version Manager on linux
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+    Once you have Node Version Manager installed
+    run in your terminal nvm install 18 to install version 18 of Node
+    run nvm use 18 to start using version 18 of Node

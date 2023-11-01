@@ -1,0 +1,16 @@
+These tools and scripts are meant to be temporarily used until something permanent is implemented.
+They consist mainly of workarounds.
+
+LINUX:
+  HOW TO PREPARE .FTL MODEL:
+    Symlink these files to the unpacked data files subfolder where the .ftl you want to edit is located:
+      convertFTLtoOBJ.sh
+      convertOBJtoFTL.sh
+      plugins/blender/arx_addon/unpackFtl.simpleCmdLine.sh'
+    Obs.: but I suggest working at a folder inside that named _blenderSafeWork (TODO:BeSure: because blender or some addon (or my mistake?) may randomly erase the working folder?), ex.: game/graph/obj3d/interactive/items/provisions/bottle_water/_blenderSafeWork/, so you also need to copy the .ftl to that work folder.
+    cd to .../_blenderSafeWork and run ex.:
+      blender (then import vanilla bottle_water.ftl using arx_addon)
+    read: HowTo.interim.ImportExportFtl.txt or just edit and export to wavefront .obj+.mtl
+    run the converter script that will guide you on preparing the final model
+      ./convertOBJtoFTL.sh bottle_water # it has many dependencies validated on the top of the script
+    on arx, just reloading the game F9 will update most of the models w/o requiring a restart. It seems to update textures also but only if they already exist and are in png format?

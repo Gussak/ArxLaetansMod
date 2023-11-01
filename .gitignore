@@ -1,0 +1,40 @@
+*
+
+# project files
+!3d models tips.txt
+!gitgui.sh
+!ModelGenericInfoToLinkAtFtlFileFolder.README.txt
+!prepareFile.sh
+!prepareWindowsLinkCreators.sh
+!prepareWindowsLinkCreators.sh.bat
+!README.md
+!.gitignore
+
+!bin/
+!bin/buildArxLibertatis.sh
+!bin/runArxLibertatis.sh
+
+!plugins/
+!plugins/blender/
+!plugins/blender/arx_addon/
+!plugins/blender/arx_addon/README.txt
+!plugins/blender/arx_addon/unpackFtl.simpleCmdLine.py
+!plugins/blender/arx_addon/unpackFtl.simpleCmdLine.sh
+
+!screenshots
+!screenshots/*.png
+!screenshots/*.txt
+
+!tools/
+!tools/interim/
+!tools/interim/0.Interim.README-FIRST.txt
+!tools/interim/convertFTLtoOBJ.sh
+!tools/interim/convertOBJtoFTL.sh
+!tools/interim/convertOBJtoFTL.sh.WIP
+!tools/interim/HowTo.interim.ImportExportFtl.txt
+
+# mod files (3D models etc)
+!ArxLaetansMod.MagicPotions.7z
+!ArxLaetansMod.RestorationPotions.7z
+!ArxLaetansMod.MagicGlassBottles.7z
+!ArxLaetansMod.Beverages.7z

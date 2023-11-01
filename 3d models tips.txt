@@ -1,0 +1,9 @@
+- to use these folders: "follow link to original file" (they are all relative folders now)
+
+- some models update on the fly by pressing F9 (quick load) ex.:
+   game/graph/obj3d/interactive/items/movable/skull/skull.ftl
+   game/graph/obj3d/interactive/items/provisions/bone/bone.ftl
+   game/graph/obj3d/interactive/items/movable/bones/bone_bassin.ftl
+   game/graph/obj3d/interactive/items/weapons/bone_weap/bone_weap.ftl
+  others do NOT update, like:
+   game/graph/obj3d/interactive/items/movable/seat_stool4_goblin/seat_stool4_goblin.ftl

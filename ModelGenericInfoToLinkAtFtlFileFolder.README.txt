@@ -1,0 +1,11 @@
+This model filename (that is generic or unrelated to arx universe) needs to override Arx Fatalis related model.
+For linux, the relative symlink is ready.
+For windows, you need to run the .bat file. For that you need developer mode enabled, or use windows explorer to create the link.
+
+The .ftl file may be imported into blender using the plugin "ArxLibertatis/plugins/blender/arx_addon".
+
+The blender model can be converted into .ftl by exporting it with the ftl plugin (if the export is working) or by exporting it to obj/mtl and using the linux scripts convertOBJtoFTL.sh (it may work on cygwin too).
+
+PS.: 
+  Tested only on linux. instructions clarifications (like to make it work on other OS) and scripts improvements are welcome.
+  Pressing F9 to reload, may update some models and may not update other models, but textures renaming/updates may need to restart the game.

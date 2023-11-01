@@ -1,0 +1,7 @@
+SHADOWS:
+  how to fix the dark shadow of new models?
+  is the problem related to the number of vertexes or faces?
+  why POLY_NO_SHADOW faceType flag doesnt seem to work?
+
+WINE BOTTLE TRANSPARENCY:
+  to make the glass darker, does the texture needs to be less dark and then use transparence between 0 and 1.0?
