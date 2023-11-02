@@ -26,7 +26,8 @@ cmake -DDEVELOPER=ON ..
 make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 set +x 
 
-echoc -w deploy
+: ${bAutoDeploy:=true} #help
+if ! $bAutoDeploy;then echoc -w deploy;fi
 set -x
 while ! cp -vR * ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/;do
   echoc -w retry

@@ -82,3 +82,4 @@ ISSUE: if there are many high poly objects on the view sight, it will degrade th
 TODO: fix the dropped items' shadows, they are too big and too dark not matching replaced models' shadows.  
 TODO: windows automatic setup compatibility (generate the .bat files to prepare the relative links with mklink and prepare a top .bat that will call all the others)  
 TODO: Crafting/mixing/etc could optionally drop new (droppable/non-quest?) things on the ground. Increases challenge (like in that you need a place to craft things, even if it is on the ground) but also let the user appreciate new crafted models.  
+TODO: hitting a wall with bare hands will damage the player or the melee weapon.
