@@ -19,6 +19,8 @@ __LICENSES__
 
 The licenses are inside each compressed package.  
 
+___
+
 __DevelopmentEnvironment__  
 
 These models were prepared using these linux scripts (that may run on windows cygwin but were only tested on linux ubuntu 22.04, so I suggest using a VirtualMachine with minimal linux on it):  
@@ -41,6 +43,8 @@ The setup package has relative symlinks that can be easily created in `nemo` or 
 
 On `git gui`, using these tools to easify splitting changes into many branches to create pull requests:  
 `https://github.com/AquariusPower/CppDebugMessages/tree/master/.devsPrefs/AquariusPower/git%20tools`  
+
+___
 
 __Mod Merging (or mixing with overwriting priorities) Suggestion__  
 
@@ -68,6 +72,8 @@ Suggestion: Instead of overwriting exiting files with mods' ones, I use mergerfs
   "ArxLibertatis"
 ```
 Obs.: this is not a recommended layer sort order, this is just an example as I have not fully tested if all are working as intended.  
+
+___
 
 __Issues/Todo__  
 
