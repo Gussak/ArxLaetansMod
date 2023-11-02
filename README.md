@@ -44,6 +44,11 @@ The setup package has relative symlinks that can be easily created in `nemo` or 
 On `git gui`, using these tools to easify splitting changes into many branches to create pull requests:  
 `https://github.com/AquariusPower/CppDebugMessages/tree/master/.devsPrefs/AquariusPower/git%20tools`  
 
+On blender, you can prepare materials with all textures for basecolor, normal, emission, metalic, rugness etc.  
+Then add some lights and bake with cycles (w/o clearing the texture), it will bake into the base color, then +- confirm in material preview without scene lights and scene world options.  
+When exporting to .obj .mtl it will export all the textures, but convertOBJtoFTL.sh will only use the basecolor to prepare the .ftl file.  
+TODO: WIP: it seems that the game engine uses alpha from png textures! therefore the transparency of facetypes may be ignored for better quality results I guess.  
+
 Lower all textures resolution on the current folder:  
 `ls |while read strFl;do convert "$strFl" -resize 512x "${strFl}.new";mv -vf "${strFl}.new" "$strFl";done`  
 `ls |while read strFl;do convert "$strFl" -resize 1024x "${strFl}.new";mv -vf "${strFl}.new" "$strFl";done`  
