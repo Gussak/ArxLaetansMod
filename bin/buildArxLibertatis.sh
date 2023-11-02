@@ -22,7 +22,8 @@ cd ArxLibertatis.github
 pwd
 mkdir -vp build && cd build
 pwd
-cmake -DDEVELOPER=ON ..
+#  -DARX_DEBUG=1
+cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DARX_DEBUG_SHADOWBLOB " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 set +x 
 
