@@ -28,5 +28,7 @@ set +x
 
 echoc -w deploy
 set -x
-cp -vR * ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/
+while ! cp -vR * ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/;do
+  echoc -w retry
+done
 set +x

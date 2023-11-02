@@ -39,7 +39,10 @@ These 2 files need to be placed at the same folder where blender addon is instal
 
 The setup package has relative symlinks that can be easily created in `nemo` or `nautilus` using an action calling `sec.Symlink.MakeRelative.NautilusScript.sh`.
 
-__ModMergingSuggestion__  
+On `git gui`, using these tools to easify splitting changes into many branches to create pull requests:  
+`https://github.com/AquariusPower/CppDebugMessages/tree/master/.devsPrefs/AquariusPower/git%20tools`  
+
+__Mod Merging (or mixing with overwriting priorities) Suggestion__  
 
 Suggestion: Instead of overwriting exiting files with mods' ones, I use mergerfs thru `secOverrideMultiLayerMountPoint.sh ArxLibertatis`, but you can just run something like (btw, all folders and files must be readonly only least the write layer) ex.:  
 ```

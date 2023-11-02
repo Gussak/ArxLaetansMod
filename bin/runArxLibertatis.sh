@@ -36,6 +36,8 @@ if [[ -n "$nNewestSaveIndex" ]] && echoc -t 6 -q "load newest savegame $nNewestS
 fi
 acmd=(./arx "${acmdParams[@]}" "$@")
 
+export ARX_LIMIT_SHADOWBLOB=100
+
 #./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 echoc --info "EXEC: ${acmd[@]}"
 "${acmd[@]}"
