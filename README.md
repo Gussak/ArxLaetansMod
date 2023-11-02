@@ -44,6 +44,10 @@ The setup package has relative symlinks that can be easily created in `nemo` or 
 On `git gui`, using these tools to easify splitting changes into many branches to create pull requests:  
 `https://github.com/AquariusPower/CppDebugMessages/tree/master/.devsPrefs/AquariusPower/git%20tools`  
 
+Lower all textures resolution on the current folder:  
+`ls |while read strFl;do convert "$strFl" -resize 512x "${strFl}.new";mv -vf "${strFl}.new" "$strFl";done`  
+`ls |while read strFl;do convert "$strFl" -resize 1024x "${strFl}.new";mv -vf "${strFl}.new" "$strFl";done`  
+
 ___
 
 __Mod Merging (or mixing with overwriting priorities) Suggestion__  
