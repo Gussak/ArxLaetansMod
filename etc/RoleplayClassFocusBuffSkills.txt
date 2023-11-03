@@ -23,7 +23,7 @@ FT=T5+BT0=5
 ___
 
 Spreadind total class buff per Warrior skill ex.:
-(the float truncs to integer to fit skills based on integer values but could round nearest on othe systems)
+(the float truncs to integer to fit skills based on integer values but could round nearest on other systems)
 
 User option: fDifficulty from 0.00 to 1.00 
 0 means hardest, no bonus.
@@ -36,6 +36,7 @@ PW=BW*fDifficulty/W=1.25;    #PW means Per Warrior skill point.
 
 Wa=4 Wb=15 Wc=1   #Warrior skills a b c, used a total of 20 points (W=20 look on the top)
 
+# skills final values
 Waf=Wa+Wa*PW=9
 Wbf=Wb+Wb*PW=33.75=33
 Wcf=Wc+Wc*PW=2.25=2
