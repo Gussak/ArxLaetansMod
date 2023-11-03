@@ -86,3 +86,6 @@ Wa=4 Wb=15 Wc=1   #Warrior skills a b c, used a total of 20 points (W=20 look on
 # Obs.: the system automatically gives bonus for focused class development and softens the bonuses when going multiclass.
 
 # PS.: it makes the game easier on the beggining at least (or if focusing a single class til the end), therefore makes it less challenging.
+
+# CHANGES:
+# added a normalizer to let the difficulty setting clearly control the final results
