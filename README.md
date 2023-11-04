@@ -47,7 +47,7 @@ On `git gui`, using these tools to easify splitting changes into many branches t
 On blender, you can prepare materials with all textures for basecolor, normal, emission, metalic, rugness etc.  
 Then add some lights and bake with cycles (w/o clearing the texture), it will bake into the base color, then +- confirm in material preview without scene lights and scene world options.  
 When exporting to .obj .mtl it will export all the textures, but convertOBJtoFTL.sh will only use the basecolor to prepare the .ftl file.  
-TODO: WIP: it seems that the game engine uses alpha from png textures! therefore the transparency of facetypes may be ignored for better quality results I guess.  
+The game engine seems to use alpha from png textures, but seems to be +- like if alpha < 0.5 it is 100% transparent, if >= 0.5 it is 100% opaque.
 
 Lower all textures resolution on the current folder:  
 `ls |while read strFl;do convert "$strFl" -resize 512x "${strFl}.new";mv -vf "${strFl}.new" "$strFl";done`  

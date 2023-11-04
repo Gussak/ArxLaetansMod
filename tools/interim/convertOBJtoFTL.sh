@@ -131,21 +131,73 @@ done
 # IMPORTANT validate CFG vars here before writing them all...
 if $bWriteCfgVars;then SECFUNCcfgAutoWriteAllVars;fi #this will also show all config vars
 if $bExitAfterConfig;then exit 0;fi
-
-#help ISSUE/LIMITATION: while a ftl exporter in blender could provide each face with a specific transparency value, this script can only provide one transparency value for all the faces using each texture container TODO:NO:OverlyComplex: code a gradient transparency min/max && (up/down &&/|| left/right) based on vertex locations
-
 ### collect optional/required named params
 #help params: [strFlCoreName] | <strFlCoreName> [strFlCoreNameProprietary] #strFlCoreName can be any filename you create. strFlCoreNameProprietary can be the current folder name (ex.: bottle_wine) or must be a proprietary model name that does not match the folder name ex.: game/graph/obj3d/interactive/items/movable/bones/bone_bassin.ftl (only the basename, w/o the path and the extension .ftl)
 strFlCoreName="${1-}";shift&&:
 strFlCoreNameProprietary="${1-}";shift&&:
+
+#help ISSUE/LIMITATION: while a ftl exporter in blender could provide each face with a specific transparency value, this script can only provide one transparency value for all the faces using each texture container TODO:NO:OverlyComplex: code a gradient transparency min/max && (up/down &&/|| left/right) based on vertex locations
+
+#CFG
+#help config these environment variables to your need
+: ${WINEPREFIX:="$HOME/Wine/ArxFatalis.64bits"} #help this let you run the windows build but it also let you run the linux build (I run the linux build tho but is on the same path)
+declare -p WINEPREFIX
+: ${strArxInstallPath:="$WINEPREFIX/drive_c/Program Files/JoWood"}
+export strArxInstallPath;declare -p strArxInstallPath
+: ${strPathFtlToObj:="${strFlCoreName}_FTLToOBJ"} #help
+export strPathFtlToObj;mkdir -vp "$strPathFtlToObj";declare -p strPathFtlToObj
+: ${strPathObjToFtl:="${strFlCoreName}_OBJToFTL"} #help
+export strPathObjToFtl;mkdir -vp "$strPathObjToFtl";declare -p strPathObjToFtl
+: ${strBlenderSafePath:="_blenderSafeWork"};mkdir -vp "$strBlenderSafePath" #help sometimes, blender (?) or some plugin (?) may completely erase the working path with everything inside it w/o sending files to trash... that's why _blenderSafeWork exists (and you should backup it often!) TODO do backup every time this script is run in a fast tar.gz or tar.bz2. Try to recreate the problem to grant what causes it.
+export strBlenderSafePath;declare -p strBlenderSafePath
+: ${strTXPathRelative:="graph/obj3d/textures"} #help
+export strTXPathRelative;declare -p strTXPathRelative
+: ${strDeveloperWorkingPath:="${strArxInstallPath}/10.DevWork/ArxLaetansMod.github"} #help
+export strDeveloperWorkingPath;declare -p strDeveloperWorkingPath
+ln -vsfT "${strDeveloperWorkingPath}/graph" "${strBlenderSafePath}/graph"
+ln -vsfT "../${strPathObjToFtl}" "${strBlenderSafePath}/${strPathObjToFtl}"
+if ! ls -l "$strBlenderSafePath/${strTXPathRelative}";then echoc -t 3 -p "WARN: textures path is empty";fi
+(cd "$strBlenderSafePath";ln -vsfT "${strTXPathRelative}" "textures";)
+: ${strArxUnpackedDataFolder:="${strArxInstallPath}/_ArxData"}
+export strArxUnpackedDataFolder;declare -p strArxUnpackedDataFolder
+: ${strPathTools:="${strArxInstallPath}/05.LinuxTools/"} #help
+export strPathTools;declare -p strPathTools
+: ${strPathDeployAtModInstallFolder:="${strArxInstallPath}/ArxLibertatis.layer9000.GFX-ArxLaetansMod"} #help
+export strPathDeployAtModInstallFolder;declare -p strPathDeployAtModInstallFolder
+: ${strAppTextEditor:="geany"} #help
+export strAppTextEditor;declare -p strAppTextEditor
+: ${strFlWFObj:="`realpath "${strPathObjToFtl}/${strFlCoreName}.obj"`"}&&: #wavefront obj3d file
+export strFlWFObj;declare -p strFlWFObj
+: ${strFlWFMtl:="`realpath "${strPathObjToFtl}/${strFlCoreName}.mtl"`"}&&: #wavefront obj3d file
+export strFlWFMtl;declare -p strFlWFMtl
+: ${strPathReleaseHelper:="`pwd`/RELEASE/ArxLaetansMod/$strFlCoreName/"} #help
+mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
+export strPathReleaseHelper;declare -p strPathReleaseHelper
+: ${strPathReleaseSetupHelper:="`pwd`/RELEASE/ArxLaetansModSetup/$strFlCoreName/"} #help
+mkdir -vp "${strPathReleaseSetupHelper}"
+export strPathReleaseSetupHelper;declare -p strPathReleaseSetupHelper
+pwd
+strRelativeDeployPath="`pwd |sed -r "s@.*${strDeveloperWorkingPath}/@@"`"  #AUTOCFG
+#declare -p strRelativeDeployPath;exit
+#strRelativeDeployPath="${strRelativeDeployPath%${strBlenderSafePath}}"
+export strRelativeDeployPath
+declare -p strRelativeDeployPath
+if [[ "${strRelativeDeployPath:0:1}" == "/" ]];then
+  echoc -p "strRelativeDeployPath='$strRelativeDeployPath' should be a relative path from strDeveloperWorkingPath='$strDeveloperWorkingPath', move this folder inside there. Or on the terminal, paste the path from the filemanager in case you are in a path tree that have symlinks in between."
+  exit 1
+fi
+
 if [[ -n "$strFlCoreName" ]];then
   if [[ -z "$strFlCoreNameProprietary" ]];then
     if $bDaemon;then
       strFlCoreNameProprietary=""
       echoc --info "the daemon is used after everything is already setup and the user is only updating things on the model, therefore strFlCoreNameProprietary is uneccessary and also shall not have an automatic default."
     else
-      strFlCoreNameProprietary="$(basename "$(pwd)")"
-      if ! echoc -q "the automatic reference file will be  strFlCoreNameProprietary='$strFlCoreNameProprietary' ok? if not it will just be ignored.";then
+      strFlCoreNameProprietary="$(basename "$(pwd)" |tr '[:upper:]' '[:lower:]')"
+      if ! echoc -t $fPromptTm -q "the automatic reference file will be  strFlCoreNameProprietary='$strFlCoreNameProprietary' ok? if not it will just be ignored.@Dy";then
+        strFlCoreNameProprietary=""
+      elif [[ ! -f "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" ]];then
+        echoc --info "strFlCoreNameProprietary='$strFlCoreNameProprietary' does not exist, ignoring it."
         strFlCoreNameProprietary=""
       fi
     fi
@@ -194,7 +246,7 @@ if SECFUNCarrayCheck -n astrRemainingParams;then :;fi
 
 #COPY TO HERE: for simple scripts
 
-function FUNCchkDep() { local lstrMsg="$1";shift;if ! SECFUNCexecA -ce "$@";then echoc -p "$lstrMsg";return 1;fi; }
+function FUNCchkDep() { local lstrMsg="$1";shift;if ! SECFUNCexecA -ce "$@";then echoc --info "${lstrMsg} (may exit now)";return 1;fi; }
 function FUNCchkVersion() { local lstrCmd="$1";shift;local lstrVersion="$1";shift;if [[ "`"$lstrCmd" --version |head -n 1`" != "$lstrVersion" ]];then echoc --info "WARN: '$lstrCmd' version is not '$lstrVersion' and may not work properly.";fi; }
 FUNCchkDep "install moreutils" which sponge
 FUNCchkDep "install python3" which python3
@@ -205,7 +257,7 @@ if ! bash -ci "nvm --version" |egrep -q "0\.39\.3";then FUNCchkVersion nvm "0.39
 FUNCchkDep "install arx-covert: npm i arx-convert -g" arx-convert --version
 FUNCchkVersion arx-convert "arx-convert - version 7.1.0"
 FUNCchkDep "install blender" blender --version&&: #skippable in case you have many blender versions and do not use a global one
-FUNCchkVersion blender "Blender 3.6.4"
+FUNCchkVersion blender "Blender 3.6.4" #help this new version is important as the exported .obj .mtl may fail to be converted if from older blender versions
 
 #function FUNCexecEcho() { echo;echo "EXEC: $@" >&2;"$@"; };export -f FUNCexecEcho
 #function FUNCexecEcho() { echo;SECFUNCexecA -ce "$@" };export -f FUNCexecEcho
@@ -369,53 +421,6 @@ if $bJustApplyTweaks;then
   exit 0
 fi
 
-#CFG
-#help config these environment variables to your need
-: ${WINEPREFIX:="$HOME/Wine/ArxFatalis.64bits"} #help this let you run the windows build but it also let you run the linux build (I run the linux build tho but is on the same path)
-declare -p WINEPREFIX
-: ${strArxInstallPath:="$WINEPREFIX/drive_c/Program Files/JoWood"}
-export strArxInstallPath;declare -p strArxInstallPath
-: ${strPathFtlToObj:="${strFlCoreName}_FTLToOBJ"} #help
-export strPathFtlToObj;mkdir -vp "$strPathFtlToObj";declare -p strPathFtlToObj
-: ${strPathObjToFtl:="${strFlCoreName}_OBJToFTL"} #help
-export strPathObjToFtl;mkdir -vp "$strPathObjToFtl";declare -p strPathObjToFtl
-: ${strBlenderSafePath:="_blenderSafeWork"};mkdir -vp "$strBlenderSafePath" #help sometimes, blender (?) or some plugin (?) may completely erase the working path with everything inside it w/o sending files to trash... that's why _blenderSafeWork exists (and you should backup it often!) TODO do backup every time this script is run in a fast tar.gz or tar.bz2. Try to recreate the problem to grant what causes it.
-export strBlenderSafePath;declare -p strBlenderSafePath
-: ${strTXPathRelative:="graph/obj3d/textures"} #help
-export strTXPathRelative;declare -p strTXPathRelative
-: ${strDeveloperWorkingPath:="${strArxInstallPath}/10.DevWork/ArxLaetansMod.github"} #help
-export strDeveloperWorkingPath;declare -p strDeveloperWorkingPath
-ln -vsfT "${strDeveloperWorkingPath}/graph" "${strBlenderSafePath}/graph"
-ln -vsfT "../${strPathObjToFtl}" "${strBlenderSafePath}/${strPathObjToFtl}"
-if ! ls -l "$strBlenderSafePath/${strTXPathRelative}";then echoc -p "WARN: textures path is empty";fi
-(cd "$strBlenderSafePath";ln -vsfT "${strTXPathRelative}" "textures";)
-: ${strArxUnpackedDataFolder:="${strArxInstallPath}/_ArxData"}
-export strArxUnpackedDataFolder;declare -p strArxUnpackedDataFolder
-: ${strPathTools:="${strArxInstallPath}/05.LinuxTools/"} #help
-export strPathTools;declare -p strPathTools
-: ${strPathDeployAtModInstallFolder:="${strArxInstallPath}/ArxLibertatis.layer9000.GFX-ArxLaetansMod"} #help
-export strPathDeployAtModInstallFolder;declare -p strPathDeployAtModInstallFolder
-: ${strAppTextEditor:="geany"} #help
-export strAppTextEditor;declare -p strAppTextEditor
-: ${strFlWFObj:="`realpath "${strPathObjToFtl}/${strFlCoreName}.obj"`"}&&: #wavefront obj3d file
-export strFlWFObj;declare -p strFlWFObj
-: ${strFlWFMtl:="`realpath "${strPathObjToFtl}/${strFlCoreName}.mtl"`"}&&: #wavefront obj3d file
-export strFlWFMtl;declare -p strFlWFMtl
-: ${strPathReleaseHelper:="`pwd`/RELEASE/ArxLaetansMod/$strFlCoreName/"} #help
-mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
-export strPathReleaseHelper;declare -p strPathReleaseHelper
-
-pwd
-strRelativeDeployPath="`pwd |sed -r "s@.*${strDeveloperWorkingPath}/@@"`"  #AUTOCFG
-#declare -p strRelativeDeployPath;exit
-#strRelativeDeployPath="${strRelativeDeployPath%${strBlenderSafePath}}"
-export strRelativeDeployPath
-declare -p strRelativeDeployPath
-if [[ "${strRelativeDeployPath:0:1}" == "/" ]];then
-  echoc -p "strRelativeDeployPath='$strRelativeDeployPath' should be a relative path from strDeveloperWorkingPath='$strDeveloperWorkingPath', move this folder inside there."
-  exit 1
-fi
-
 if $bDaemon;then
   while true;do
     bProccessNow=false
@@ -460,6 +465,7 @@ export strGeanyWorkaround="you may need to 'menu:file/reload' on geany"
 
 function FUNCprepareProprietaryModelAsJSON() { #helpf to help on fixing the new model with extra/missing data
   cd "$strPathMain"
+  if [[ -z "$strFlCoreNameProprietary" ]];then return 0;fi
   strFlPrettyJSon="${strFlCoreNameProprietary}.proprietary.ftl.unpack.json"
   if [[ ! -f "${strFlPrettyJSon}" ]];then
     echoc --info "preparing the json of the proprietary/reference .ftl file"
@@ -476,7 +482,6 @@ function FUNCprepareProprietaryModelAsJSON() { #helpf to help on fixing the new 
     if $bShowTextFiles;then SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlPrettyJSon}";fi
   fi
 }
-
 FUNCprepareProprietaryModelAsJSON
 #if [[ ! -f "${strFlCoreNameProprietary}.ftl" ]];then 
   ##SECFUNCexecA -ce "${strSelf}" --help
@@ -630,51 +635,12 @@ else #OBJ TO FTL ###############################################################
   
   declare -A astrAutoCfgList
   #if $bCanAutoFixTxPath && 
-  echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"POLY_NO_SHADOW|POLY_WATER\";fTr=1.85;   so, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there)"
-  #IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(egrep "newmtl|map_Kd" "${strFlWFMtl}" |sed -r -e "s@newmtl (.*)@strCfgLn='\1';@" -e "s@map_Kd (.*)@strTxNm='\1';@" |tr -d "\n" |sed -r -e 's@strCfgLn.*@\n&@')&&:
-  IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(egrep "newmtl|map_Kd" "${strFlWFMtl}" |sed -r -e 's@\\@/@g' -e "s@map_Kd (.*)@strTxNm='\1';_TOKEN_ADDNEWLINE_@i" -e "s@newmtl (.*)@\1@" |tr -d '\n' |sed -r -e 's@_TOKEN_ADDNEWLINE_@\n@g')&&:
-  SECFUNCarrayShow -v astrAutoCfgTmpList
-  #sed -i -r -e 's@\\@/@g' "${strFlWFMtl}" #undo windows folder separator to avoid overcomplexity
-  iTextureContainerIndex=-1
-  bErrorCfgMissing=false
-  for strAutoCfg in "${astrAutoCfgTmpList[@]}";do
-    ((iTextureContainerIndex++))&&:
-    declare -p strAutoCfg
-    if ! [[ "$strAutoCfg" =~ ^sM=.*sFT= ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
-    #if ! echo "$strAutoCfg" |egrep "newmtl sM=.*sFT=";then echo "SKIP, no valid cfg found";continue;fi
-    #newmtl sM=Bottle;sFT="POLY_NO_SHADOW|POLY_TRANS";fTr=0.95;
-    eval "$strAutoCfg"
-    declare -p sM sFT fTr strTxNm&&:
-    if [[ -z "${sM-}" ]];then echo "SKIP, no valid sM (strMaterialId) found above";bErrorCfgMissing=true;continue;fi
-    #strTxNm="`basename "$strTxNm"`" #astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
-    strTxNm="$(echo "$strTxNm" |sed -r -e "s@.*${strTXPathRelative}/(.*)@\1@")" #inside strTXPathRelative path, there may exist a subpath and it shall be part of the texture name
-    #strLTxNm="`echo "$strTxNm" |tr '[:upper:]' '[:lower:]'`" #strLTxNm="`echo "$strTxNm" |sed -r 's@.*/([^/]*)@\1@'`"
-    strMaterialId="$sM"
-    #astrAutoCfgList["${sM}"]="iTextureContainerIndex=$iTextureContainerIndex; strTxNm='$strTxNm'; strMaterialId='$strMaterialId'; strFaceTypeOpt='${sFT}'; ${fTr+fFaceTranspValOpt='${fTr}';}"
-    if ! [[ "${fTr-0}" =~ ^[0-9.]*$ ]];then
-      echoc -p "invalid fTr='$fTr', did you add a ';' at the end of the material name? (it is the last var and shall have a separator before strTxNm that will be appended here)"
-      exit 1
-    fi
-    astrAutoCfgList["${strMaterialId}"]="iTextureContainerIndex=$iTextureContainerIndex; strTxNm='$strTxNm'; strMaterialId='$strMaterialId'; strFaceTypeOpt='${sFT}'; iFaceTypeOpt=$(($sFT)); fFaceTranspValOpt=${fTr-0};"
-    echoc --info "BlenderAutoCfg[$strMaterialId]=${astrAutoCfgList[${strMaterialId}]}"
-    #FUNCclearMaterialVars #cleanup to not mess next
-    #cleanup to not mess next
-    unset sM sFT fTr;
-    unset strTxNm strMaterialId strFaceTypeOpt iFaceTypeOpt fFaceTranspValOpt; 
-    # do not unset iTextureContainerIndex tho as it is being calculated here!
-  done
-  SECFUNCarrayShow -v astrAutoCfgList
-  if $bErrorCfgMissing;then
-    echoc -p 'yoy need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT="POLY_NO_SHADOW|POLY_WATER";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there'
-    exit 1
-  fi
-  
-  #if $bCanAutoFixTxPath;then
+  echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there)"
+  sed -i"`SECFUNCdtFmt --filename`.bkp" -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
   if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
     # preview
     astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
     SECFUNCexecA -ce sed "${astrCmdAutoFixParams[@]}"
-    
     #strResp=""
     #if $bCanAutoFixTxPath;then
       #read -n 1 -p "fix the above manually (if not, will apply the above auto patch) (y/...)?" strResp;
@@ -693,7 +659,85 @@ else #OBJ TO FTL ###############################################################
       echoc -w
     fi
   fi
+  #IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(egrep "newmtl|map_Kd" "${strFlWFMtl}" |sed -r -e "s@newmtl (.*)@strCfgLn='\1';@" -e "s@map_Kd (.*)@strTxNm='\1';@" |tr -d "\n" |sed -r -e 's@strCfgLn.*@\n&@')&&:
+  IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <( \
+    egrep "newmtl|map_Kd" "${strFlWFMtl}" \
+      |sed -r \
+        -e 's@\\@/@g' \
+        -e "s@map_Kd (.*)@;strTxNm='\1';_TOKEN_ADDNEWLINE_@i" \
+        -e 's@;;@;@g' \
+        -e "s@newmtl (.*)@\1@" \
+      |tr -d '\n' \
+      |sed -r -e 's@_TOKEN_ADDNEWLINE_@\n@g' \
+  )&&:
+  SECFUNCarrayShow -v astrAutoCfgTmpList
+  #sed -i -r -e 's@\\@/@g' "${strFlWFMtl}" #undo windows folder separator to avoid overcomplexity
+  iTextureContainerIndex=-1
+  bErrorCfgMissing=false
+  for strAutoCfg in "${astrAutoCfgTmpList[@]}";do
+    ((iTextureContainerIndex++))&&:
+    declare -p strAutoCfg
+    if ! [[ "$strAutoCfg" =~ ^sM=.*sFT= ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
+    #if ! echo "$strAutoCfg" |egrep "newmtl sM=.*sFT=";then echo "SKIP, no valid cfg found";continue;fi
+    #newmtl sM=Bottle;sFT="POLY_NO_SHADOW|POLY_TRANS";fTr=0.95;
+    eval "$strAutoCfg"
+    declare -p sM sFT strTxNm #required
+    declare -p fTr&&: #optional
+    if [[ -z "${sM-}" ]];then echo "SKIP, no valid sM (strMaterialId) found above";bErrorCfgMissing=true;continue;fi
+    ##strTxNm="`basename "$strTxNm"`" #astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
+    #strTxNm="$(echo "$strTxNm" |sed -r -e "s@.*${strTXPathRelative}/(.*)@\1@")" #inside strTXPathRelative path, there may exist a subpath and it shall be part of the texture name
+    ##strLTxNm="`echo "$strTxNm" |tr '[:upper:]' '[:lower:]'`" #strLTxNm="`echo "$strTxNm" |sed -r 's@.*/([^/]*)@\1@'`"
+    strMaterialId="$sM"
+    #astrAutoCfgList["${sM}"]="iTextureContainerIndex=$iTextureContainerIndex; strTxNm='$strTxNm'; strMaterialId='$strMaterialId'; strFaceTypeOpt='${sFT}'; ${fTr+fFaceTranspValOpt='${fTr}';}"
+    if ! [[ "${fTr-0}" =~ ^[0-9.]*$ ]];then #TODO RM this check, unnecessary now
+      echoc -p "invalid fTr='$fTr', did you add a ';' at the end of the material name? (it is the last var and shall have a separator before strTxNm that will be appended here)"
+      exit 1
+    fi
+    if [[ "$sFT" =~ ^[a-zA-Z] ]];then
+      if ! [[ "$sFT" =~ POLY_ ]];then #add POLY_ to all parts to let it calc
+        sFT="$(echo "$sFT" |tr "|" "\n" |sed -r -e 's@.*@POLY_&|@' |tr -d "\n")0" #final 0 is to complete the a|b|c| as a|b|c|0 to let it calc
+        declare -p sFT
+      fi
+    fi
+    astrAutoCfgList["${strMaterialId}"]="iTextureContainerIndex=$iTextureContainerIndex; strTxNm='$strTxNm'; strMaterialId='$strMaterialId'; strFaceTypeOpt='${sFT}'; iFaceTypeOpt=$(($sFT)); fFaceTranspValOpt=${fTr-0};"
+    echoc --info "BlenderAutoCfg[$strMaterialId]=${astrAutoCfgList[${strMaterialId}]}"
+    #FUNCclearMaterialVars #cleanup to not mess next
+    #cleanup to not mess next
+    unset sM sFT fTr;
+    unset strTxNm strMaterialId strFaceTypeOpt iFaceTypeOpt fFaceTranspValOpt; 
+    # do not unset iTextureContainerIndex tho as it is being calculated here!
+  done
+  SECFUNCarrayShow -v astrAutoCfgList
+  if $bErrorCfgMissing;then
+    echoc -p 'yoy need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT="POLY_NO_SHADOW|POLY_WATER";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there'
+    exit 1
+  fi
+  
+  ##if $bCanAutoFixTxPath;then
+  #if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
+    ## preview
+    #astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
+    #SECFUNCexecA -ce sed "${astrCmdAutoFixParams[@]}"
+    
+    ##strResp=""
+    ##if $bCanAutoFixTxPath;then
+      ##read -n 1 -p "fix the above manually (if not, will apply the above auto patch) (y/...)?" strResp;
+    ##fi
+    ##if ! ${bCanAutoFixTxPath} || [[ "${strResp}" == y ]];then
+    ###read -n 1 -p "press a key to fix '${strFlWFMtl}' file manually"
+      ##SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child geany "${strFlWFMtl}"
+      ##echoc -w
+    ##else
+      ##SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" "${astrCmdAutoFixParams[@]}"
+    ##fi
+    #if echoc -t $fPromptTm -q "are the above relative texture path correct? (if not will open a text editor)@Dy";then
+      #SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" "${astrCmdAutoFixParams[@]}"
+    #else
+      #SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlWFMtl}"
+      #echoc -w
+    #fi
   #fi
+  ##fi
 
   (
     SECFUNCexecA -ce cd "$strPathTools"; #must be run from where it is installed to find required deps: ArxLibertatisFTLConverter.pdb libArxIO.so.0
@@ -703,20 +747,18 @@ else #OBJ TO FTL ###############################################################
 
   ls -l "${strFlCoreName}_FTLToOBJ"&&:
 
-  strFlNew="${strFlCoreName}.ftl";
-  declare -p strFlNew
-  SECFUNCexecA -ce ls -l "${strPathObjToFtl}/${strFlNew}"
+  SECFUNCexecA -ce ls -l "${strPathObjToFtl}/${strFlCoreName}.ftl"
 
-  strLnHint="${strFlCoreName}.ftl.HIGH_POLY_LOCATION_HINT"
-  declare -p strLnHint
-  SECFUNCexecA -ce ln -vsfT "${strPathObjToFtl}/${strFlNew}" "${strLnHint}" #so you will know where it is
-  SECFUNCexecA -ce ls -l "${strLnHint}"
+  #strLnHint="${strFlCoreName}.ftl.HIGH_POLY_LOCATION_HINT"
+  #declare -p strLnHint
+  #SECFUNCexecA -ce ln -vsfT "${strPathObjToFtl}/${strFlCoreName}.ftl" "${strLnHint}" #so you will know where it is
+  #SECFUNCexecA -ce ls -l "${strLnHint}"
 
   strPathDeploy="${strPathDeployAtModInstallFolder}/${strRelativeDeployPath}/"
   declare -p strPathDeploy
   SECFUNCexecA -ce find "${strPathDeployAtModInstallFolder}/" -type d -perm -u-w -exec chmod -v u+w '{}' \;
   SECFUNCexecA -ce mkdir -vp "$strPathDeploy"
-  if [[ -f "${strPathDeploy}/${strFlNew}" ]];then SECFUNCexecA -ce chmod -v u+w "${strPathDeploy}/${strFlNew}";fi
+  if [[ -f "${strPathDeploy}/${strFlCoreName}.ftl" ]];then SECFUNCexecA -ce chmod -v u+w "${strPathDeploy}/${strFlCoreName}.ftl";fi
   
   if echoc -t $fPromptTm -q "prepare json file? (it will convert from ftl to json to fix the origin (hit spot) and let you manually fix it too)@Dy";then
     FUNCprepareProprietaryModelAsJSON
@@ -821,8 +863,8 @@ else #OBJ TO FTL ###############################################################
   
   echoc --info "deploying at mod folder"
   cd "$strPathMain"
-  while ! SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlNew}" "$strPathDeploy";do echoc -w "deploy failed, hit a key to retry";done
-  SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlNew}"
+  while ! SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathDeploy";do echoc -w "deploy failed, hit a key to retry";done
+  SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}.ftl"
   if [[ -n "$strFlCoreNameProprietary" ]];then # prepare replacer/override at installed mod folder
     ( 
       SECFUNCexecA -ce cd "${strPathDeploy}";
@@ -834,22 +876,37 @@ else #OBJ TO FTL ###############################################################
   
   echoc -t $fPromptTm -w "hit a key to prepare release files"
   if ! SECFUNCexecA -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
-    echoc -p "license file not found"
+    echoc -t 3 -p "license file not found"
   fi
-  SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlNew}" "$strPathReleaseHelper/"
+  SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathReleaseHelper/"
   SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "${strBlenderSafePath}/${strFlCoreName}.blend" #TODOA chk blender file if all is ok
   egrep "map_Kd" "$strFlWFMtl" |sed -r -e 's@\\@/@g' -e 's@map_Kd @@' |while read strFlTx;do
+    SECFUNCdrawLine "$strFlTx"
     #textures
     pwd
     declare -p strBlenderSafePath strFlTx strPathReleaseHelper strPathDeployAtModInstallFolder strTXPathRelative
-    SECFUNCexecA -ce cp -vf "${strBlenderSafePath}/$strFlTx" "$strPathReleaseHelper/textures/"
-    SECFUNCexecA -ce cp -vf "${strBlenderSafePath}/$strFlTx" "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
+    SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlTx"* "${strPathReleaseHelper}/textures/"
+    SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlTx"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
     
-    strFlNoBT="${strBlenderSafePath}/$(dirname "$strFlTx")/NoBakedTextures/$(basename "$strFlTx")"
-    if [[ -f "$strFlNoBT" ]];then
-      SECFUNCexecA -ce cp -vf "$strFlNoBT" "$strPathReleaseHelper/textures/NoBakedTextures/"
+    strFlNoBakeTx="${strBlenderSafePath}/$(dirname "$strFlTx")/NoBakedTextures/$(basename "$strFlTx")"
+    if [[ -f "$strFlNoBakeTx" ]];then
+      SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
     fi
   done
+  echoc --info "scripts etc"
+  strRelativeScriptPath="`pwd |sed -r "s@.*${strDeveloperWorkingPath}/game/@@"`"  #AUTOCFG
+  astrFlExtraList=("${strFlCoreName}[icon].png" "${strFlCoreName}.asl")
+  for strFlExtra in "${astrFlExtraList[@]}";do
+    if [[ -f "${strRelativeScriptPath}/${strFlExtra}" ]];then
+      # release folder
+      SECFUNCexecA -ce mkdir -vp "${strPathReleaseSetupHelper}/${strRelativeScriptPath}/"
+      SECFUNCexecA -ce cp -vf "${strRelativeScriptPath}/${strFlExtra}"* "${strPathReleaseSetupHelper}/${strRelativeScriptPath}/"
+      # mod folder
+      SECFUNCexecA -ce mkdir -vp "${strPathDeployAtModInstallFolder}/${strRelativeScriptPath}/"
+      SECFUNCexecA -ce cp -vf "${strRelativeScriptPath}/${strFlExtra}"* "${strPathDeployAtModInstallFolder}/${strRelativeScriptPath}/"
+    fi
+  done
+  # report
   ls -lR "$strPathReleaseHelper"
 fi
 
