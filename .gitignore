@@ -11,8 +11,10 @@
 !.gitignore
 
 !bin/
-!bin/buildArxLibertatis.sh
-!bin/runArxLibertatis.sh
+!bin/*.sh
+
+!docs
+!docs/*.txt
 
 !plugins/
 !plugins/blender/

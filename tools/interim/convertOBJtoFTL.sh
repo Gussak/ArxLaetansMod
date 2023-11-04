@@ -67,7 +67,7 @@ bExitAfterConfig=false
 bShowTextFiles=true
 : ${fPromptTm:=9999} #help just not go sleep
 export fPromptTm
-bDaemon=false
+export bDaemon=false
 export strMTSuffix="MultiThreadWorking"
 CFGstrTest="Test"
 CFGstrSomeCfgValue=""
@@ -435,8 +435,10 @@ if $bDaemon;then
       fi
     fi
     if $bProccessNow;then
+      echoc --say "${strFlCoreName} modified"
       if ! "${strSelf}" "$strFlCoreName";then
         echoc -p "errored above"
+        echoc --say "${strFlCoreName} failed"
       fi
     fi
     echoc -w -t 3 "checking for changes"
@@ -479,7 +481,9 @@ function FUNCprepareProprietaryModelAsJSON() { #helpf to help on fixing the new 
     fi
   fi
   if [[ -f "${strFlPrettyJSon}" ]];then
-    if $bShowTextFiles;then SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlPrettyJSon}";fi
+    if $bShowTextFiles && ! $bDaemon;then 
+      SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlPrettyJSon}";
+    fi
   fi
 }
 FUNCprepareProprietaryModelAsJSON
@@ -853,7 +857,9 @@ else #OBJ TO FTL ###############################################################
       FUNCapplyTweaksFinalize
     fi
     
-    if $bShowTextFiles;then SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlCoreName}.ftl.unpack.json";fi
+    if $bShowTextFiles && ! $bDaemon;then 
+      SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlCoreName}.ftl.unpack.json";
+    fi
     
     if echoc -t $fPromptTm -q "apply the changes to json creating a new ftl file?@Dy";then
       SECFUNCexecA -ce mv -vT "${strFlCoreName}.ftl" "${strFlCoreName}.ftl.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
@@ -908,7 +914,8 @@ else #OBJ TO FTL ###############################################################
   done
   # report
   ls -lR "$strPathReleaseHelper"
+  echoc --say "${strFlCoreName} deployed"
 fi
 
 echo
-echo "SUCCESS!!! (expectedly...)"
+echoc --info "SUCCESS!!! (expectedly...)"

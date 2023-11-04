@@ -30,7 +30,7 @@ It will try to prepare the development environment and guide you to complete tha
 If you have any problems, open an issue detailing it.  
 If some dependency doesnt work well, check one of my forks, this script should work with them.  
 `tools/interim/convertOBJtoFTL.sh`  
-If everything is working correcly, running it to update changes from blender, may be as simple as this and may take about 25s, ex.:  
+If everything is working correcly, running it to update changes from blender, may be as simple as this and may take less than a minute, ex.:  
 `./convertOBJtoFTL.sh --noprompt WineBottle bottle_wine`
 
 These 2 files need to be placed at the same folder where blender addon is installed or extracted:  
@@ -48,6 +48,8 @@ On blender, you can prepare materials with all textures for basecolor, normal, e
 Then add some lights and bake with cycles (w/o clearing the texture), it will bake into the base color, then +- confirm in material preview without scene lights and scene world options.  
 When exporting to .obj .mtl it will export all the textures, but convertOBJtoFTL.sh will only use the basecolor to prepare the .ftl file.  
 The game engine seems to use alpha from png textures, but seems to be +- like if alpha < 0.5 it is 100% transparent, if >= 0.5 it is 100% opaque.
+
+In game: save F5 then on every load F9 it will update most models and at least png textures. Tho, new textures requires a restart.
 
 Lower all textures resolution on the current folder:  
 `ls |while read strFl;do convert "$strFl" -resize 512x "${strFl}.new";mv -vf "${strFl}.new" "$strFl";done`  
