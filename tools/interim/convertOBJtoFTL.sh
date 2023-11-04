@@ -64,15 +64,22 @@ declare -p SECstrUserScriptCfgPath >&2
 strExample="DefaultValue"
 bExample=false
 bExitAfterConfig=false
-bShowTextFiles=true
-: ${fPromptTm:=9999} #help just not go sleep
-export fPromptTm
-export bDaemon=false
+: ${bShowTextFiles:=true};export bShowTextFiles #help
+: ${fPromptTm:=9999};export fPromptTm #help just not go sleep
+: ${bDoBkpEverything:=false} #help will create historical bkp files for anything it touches
+bDaemon=false #do not export
+: ${bSpeak:=false};export bSpeak #help speak important events
+: ${SECnSayVolume:=50};export SECnSayVolume #help set this from 0 to 100 to change the speech volume
 export strMTSuffix="MultiThreadWorking"
 CFGstrTest="Test"
 CFGstrSomeCfgValue=""
 astrRemainingParams=()
 astrAllParams=("${@-}") # this may be useful
+
+strSedBkpOpt="-i" #to edit inplace always
+if $bDoBkpEverything;then
+  strSedBkpOpt="-i`SECFUNCdtFmt --filename`.bkp" #will also bkp
+fi
 
 SECFUNCcfgReadDB ########### AFTER!!! default variables value setup above, and BEFORE the skippable ones!!!
 
@@ -99,6 +106,7 @@ while ! ${1+false} && [[ "${1:0:1}" == "-" ]];do # checks if param is set
 	elif [[ "$1" == "-d" || "$1" == "--daemon" ]];then #help monitors changes to obj and auto converts into ftl, implies --noprompt
 		bDaemon=true
     fPromptTm=0.1
+    bShowTextFiles=false
 	elif [[ "$1" == "-f" || "$1" == "--facetype" ]];then #help ~single paste facetype ex.: POLY_NO_SHADOW|POLY_TRANS and this will return an integer to use in blender sFT material name
     FUNCfacetypeInfo
 		strFaceTypeCalc="`echoc -S "Paste facetype (if you want no bit cfg use just 0)"`"
@@ -171,7 +179,6 @@ export strFlWFObj;declare -p strFlWFObj
 : ${strFlWFMtl:="`realpath "${strPathObjToFtl}/${strFlCoreName}.mtl"`"}&&: #wavefront obj3d file
 export strFlWFMtl;declare -p strFlWFMtl
 : ${strPathReleaseHelper:="`pwd`/RELEASE/ArxLaetansMod/$strFlCoreName/"} #help
-mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
 export strPathReleaseHelper;declare -p strPathReleaseHelper
 : ${strPathReleaseSetupHelper:="`pwd`/RELEASE/ArxLaetansModSetup/$strFlCoreName/"} #help
 mkdir -vp "${strPathReleaseSetupHelper}"
@@ -300,7 +307,7 @@ function FUNCapplyTweaksFinalize() {
     #cat "${lstrFlUgly}25faces.tx${li}.json" >>"${lstrFlUgly}25faces.json"
     cat "${lstrFlUgly}25faces.tx${li}.json" |tr -d '\n' |sed -r -e "s@}}],@}},@" >>"${lstrFlUgly}25faces.json" #this sed trick will grant the faces section will be properly closed by removing the existing closure '}}],' and recreating it at the end of the file, see below
   done
-  sed -i"`SECFUNCdtFmt --filename`.bkp" -r -e 's@(.*)}},$@\1}}],@' "${lstrFlUgly}25faces.json" # recreates the faces section closure
+  sed ${strSedBkpOpt} -r -e 's@(.*)}},$@\1}}],@' "${lstrFlUgly}25faces.json" # recreates the faces section closure
   
   local li;for((li=1;li<=${#astrJSONSectionList[@]};li++));do
     strFlSect="${lstrFlUgly}25${astrJSONSectionList[li-1]}.json"
@@ -312,10 +319,6 @@ function FUNCapplyTweaksFinalize() {
   
   if ! SECFUNCexecA -ce python3 -m json.tool "${lstrFlUgly}.json" >"${strFlCoreName}.ftl.unpack.json";then #prettyfy
     ls -l "${lstrFlUgly}.json"
-    if echoc -q "failed, try cleaning the cache? (but may be a bug in this script...)";then
-      SECFUNCtrash "${lstrFlUgly}"*
-      echoc --info "please run this script again, if the problem persists, create a bug report."
-    fi
     exit 1
   fi
   ls -l "${strFlCoreName}.ftl.unpack.json"
@@ -366,7 +369,7 @@ function FUNCapplyTweaks() { #helpf
       local lstrSubsect="${astrJSONSubsectionList[li]}"
       echo ">>>>>>>>>>>>>>>> PREPARING: SECTION=$lstrFlSect, SUB=$lstrSubsect li=$li <<<<<<<<<<<<<<<<"
       head -n $((li+1)) "${lstrFlUgly}20splitInLines.json" |tail -n 1 >"$lstrFlSect"
-      SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" -r 's@[{]"('"${lstrSubsect}"')"@\n{"\1"@g' "$lstrFlSect" #one per line
+      SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@[{]"('"${lstrSubsect}"')"@\n{"\1"@g' "$lstrFlSect" #one per line
       #cat "$lstrFlSect"
       wc -l "$lstrFlSect"
     done
@@ -387,27 +390,13 @@ function FUNCapplyTweaks() { #helpf
     egrep '"textureIdx":'"${liTxIndex}," "${lstrFlUgly}25faces.json" |wc -l
   }
   FUNCreport
-  #SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" -r 's@("faceType":)([0-9]*)(,.*"textureIdx":'"$liTxIndex"',.*"transval":)[0-9.]*(,)@\1'"${liFaceType}"'\3'"${lfFaceTranspVal}"'\4@' "${lstrFlUgly}25faces.json" #patches the whole faces file
-  SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" -r 's@("faceType":)([0-9]*)(,.*"textureIdx":'"$liTxIndex"',.*"transval":)[0-9.]*(,)@\1'"${liFaceType}"'\3'"${lfFaceTranspVal}"'\4@' "${lstrFlUgly}25faces.tx${liTxIndex}.json" #patches each texture subset extracted from the bloated faces file
+  #SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@("faceType":)([0-9]*)(,.*"textureIdx":'"$liTxIndex"',.*"transval":)[0-9.]*(,)@\1'"${liFaceType}"'\3'"${lfFaceTranspVal}"'\4@' "${lstrFlUgly}25faces.json" #patches the whole faces file
+  SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@("faceType":)([0-9]*)(,.*"textureIdx":'"$liTxIndex"',.*"transval":)[0-9.]*(,)@\1'"${liFaceType}"'\3'"${lfFaceTranspVal}"'\4@' "${lstrFlUgly}25faces.tx${liTxIndex}.json" #patches each texture subset extracted from the bloated faces file
   SECFUNCtrash "${liTxIndex}.${strMTSuffix}"
   FUNCreport
   
   local lbFUNCapplyTweaks_FinalizeJSONFile;: ${lbFUNCapplyTweaks_FinalizeJSONFile:=true} #helpf
   if $lbFUNCapplyTweaks_FinalizeJSONFile;then
-    #echo ">>>>>>>>>>>>>>>>>>> finalize ugly json <<<<<<<<<<<<<<<"
-    #echo -n >"${lstrFlUgly}30final.json"; #clear/create
-    #local li;for((li=0;li<liTotTx;li++));do
-      #cat "${lstrFlUgly}25faces.tx${li}.json" >>"${lstrFlUgly}25faces.json"
-    #done
-    #local li;for((li=1;li<=${#astrJSONSectionList[@]};li++));do
-      #strFlSect="${lstrFlUgly}25${astrJSONSectionList[li-1]}.json"
-      #cat "$strFlSect" |tr -d '\n' >>"${lstrFlUgly}30final.json";
-    #done
-    #ls -l "${lstrFlUgly}"* |egrep -v ".bkp$"
-    #cp -vf "${lstrFlUgly}30final.json" "${lstrFlUgly}.json"
-    
-    #SECFUNCexecA -ce python3 -m json.tool "${lstrFlUgly}.json" >"${strFlCoreName}.ftl.unpack.json" #prettyfy
-    #ls -l "${strFlCoreName}.ftl.unpack.json"
     FUNCapplyTweaksFinalize
   fi
 };export -f FUNCapplyTweaks
@@ -422,8 +411,9 @@ if $bJustApplyTweaks;then
 fi
 
 if $bDaemon;then
+  bSpeak=true
+  bProccessNow=false
   while true;do
-    bProccessNow=false
     ls -l "${strFlWFObj}" "${strFlWFMtl}" "${strPathObjToFtl}/${strFlCoreName}.ftl" &&:
     #TODO grant files are not modified before starting processing them #strKey="$(sha1sum "${strFlWFObj}" "${strFlWFMtl}" "${strPathObjToFtl}/${strFlCoreName}.ftl")"&&:;echo "${strKey-}"
     if [[ "${strFlWFObj}" -nt "${strPathObjToFtl}/${strFlCoreName}.ftl" ]];then
@@ -435,13 +425,22 @@ if $bDaemon;then
       fi
     fi
     if $bProccessNow;then
-      echoc --say "${strFlCoreName} modified"
+      if $bSpeak;then echoc --say "${strFlCoreName} modified";fi
       if ! "${strSelf}" "$strFlCoreName";then
         echoc -p "errored above"
-        echoc --say "${strFlCoreName} failed"
+        if $bSpeak;then echoc --say "${strFlCoreName} failed";fi
+        if echoc -q "failed, try cleaning the cache? (but may be a bug in this script...)";then
+          SECFUNCtrash "${strPathObjToFtl}/"*".json"
+          echoc --info "please run this script again, if the problem persists, create a bug report."
+        fi
       fi
     fi
-    echoc -w -t 3 "checking for changes"
+    
+    if echoc -t 3 -q "checking for changes, force once now?";then
+      bProccessNow=true;
+    else
+      bProccessNow=false
+    fi
   done
   exit
 fi
@@ -481,7 +480,7 @@ function FUNCprepareProprietaryModelAsJSON() { #helpf to help on fixing the new 
     fi
   fi
   if [[ -f "${strFlPrettyJSon}" ]];then
-    if $bShowTextFiles && ! $bDaemon;then 
+    if $bShowTextFiles;then 
       SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlPrettyJSon}";
     fi
   fi
@@ -595,7 +594,7 @@ else #OBJ TO FTL ###############################################################
     #fi
     #strNewMTL="`echo "$strNewMTL" |sed -r -e 's@[\]@\\\\\\\\@g'`"
     #declare -p strNewMTL
-    #SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" -r "s@map_Kd .*@map_Kd ${strNewMTL}@" "${strFlWFMtl}" #will fix the .mtl
+    #SECFUNCexecA -ce sed ${strSedBkpOpt} -r "s@map_Kd .*@map_Kd ${strNewMTL}@" "${strFlWFMtl}" #will fix the .mtl
     #SECFUNCexecA -ce egrep "map_Kd" "${strFlWFMtl}"
   #else
   
@@ -640,7 +639,7 @@ else #OBJ TO FTL ###############################################################
   declare -A astrAutoCfgList
   #if $bCanAutoFixTxPath && 
   echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there)"
-  sed -i"`SECFUNCdtFmt --filename`.bkp" -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
+  sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
   if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
     # preview
     astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
@@ -654,10 +653,10 @@ else #OBJ TO FTL ###############################################################
       #SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child geany "${strFlWFMtl}"
       #echoc -w
     #else
-      #SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" "${astrCmdAutoFixParams[@]}"
+      #SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
     #fi
     if echoc -t $fPromptTm -q "are the above relative texture path correct? (if not will open a text editor)@Dy";then
-      SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" "${astrCmdAutoFixParams[@]}"
+      SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
     else
       SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlWFMtl}"
       echoc -w
@@ -732,10 +731,10 @@ else #OBJ TO FTL ###############################################################
       ##SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child geany "${strFlWFMtl}"
       ##echoc -w
     ##else
-      ##SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" "${astrCmdAutoFixParams[@]}"
+      ##SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
     ##fi
     #if echoc -t $fPromptTm -q "are the above relative texture path correct? (if not will open a text editor)@Dy";then
-      #SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" "${astrCmdAutoFixParams[@]}"
+      #SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
     #else
       #SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlWFMtl}"
       #echoc -w
@@ -790,7 +789,7 @@ else #OBJ TO FTL ###############################################################
     declare -p iOriginVectorIndex
     if iOriginVectorIndex="$(echoc -t $fPromptTm -S "set iOriginVectorIndex='$iOriginVectorIndex'? You can also chose one from the above list (then, as this is a index, subtract 1 from it) if this one is not good, it must be the vertex that will hit the ground when dragging the object in-game, so usually the lowest one from the model@D${iOriginVectorIndex}")";then
       SECFUNCexecA -ce egrep '"origin":' "${strFlCoreName}.ftl.unpack.json"
-      SECFUNCexecA -ce sed -i"`SECFUNCdtFmt --filename`.bkp" -r 's@(.*"origin": *)[0-9]*(,.*)@\1'"$iOriginVectorIndex"'\2@' "${strFlCoreName}.ftl.unpack.json" "${strFlCoreName}.ftl.unpack.ugly.json"
+      SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@(.*"origin": *)[0-9]*(,.*)@\1'"$iOriginVectorIndex"'\2@' "${strFlCoreName}.ftl.unpack.json" "${strFlCoreName}.ftl.unpack.ugly.json"
     fi
     
     echo '
@@ -857,7 +856,9 @@ else #OBJ TO FTL ###############################################################
       FUNCapplyTweaksFinalize
     fi
     
-    if $bShowTextFiles && ! $bDaemon;then 
+    declare -p bShowTextFiles bDaemon
+    if $bShowTextFiles;then 
+      declare -p LINENO
       SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlCoreName}.ftl.unpack.json";
     fi
     
@@ -881,6 +882,8 @@ else #OBJ TO FTL ###############################################################
   fi
   
   echoc -t $fPromptTm -w "hit a key to prepare release files"
+  SECFUNCtrash "$strPathReleaseHelper/"
+  mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
   if ! SECFUNCexecA -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
     echoc -t 3 -p "license file not found"
   fi
@@ -914,7 +917,7 @@ else #OBJ TO FTL ###############################################################
   done
   # report
   ls -lR "$strPathReleaseHelper"
-  echoc --say "${strFlCoreName} deployed"
+  if $bSpeak;then echoc --say "${strFlCoreName} deployed";fi
 fi
 
 echo
