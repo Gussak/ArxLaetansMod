@@ -17,7 +17,14 @@
 
 #TODO set default facetypes to missing tx cfgs: cat ManaPotion_OBJToFTL/ManaPotion.ftl.unpack.ugly25textureContainers.json |egrep '"filename"' |sed -r 's@\{"filename":"([^"]*)".*@\1@'
 
-if ! which ScriptEchoColor;then echo "ERROR: install https://sourceforge.net/projects/scriptechocolor/files/Ubuntu%20.deb%20packages/ (Obs.: TODO: echoc and SECFUNC... may be easily replaced with equivalent cmds, then remove this check line)";fi
+if ! which ScriptEchoColor;then 
+  echo "ERROR: this scripts depends on ScriptEchoColor https://sourceforge.net/projects/scriptechocolor."
+  echo "install .deb packages"
+  echo " https://sourceforge.net/projects/scriptechocolor/files/Ubuntu%20.deb%20packages/"
+  echo "OR for single user on any distro with latests updates:"
+  echo " https://sourceforge.net/projects/scriptechocolor/files/Ubuntu%20.deb%20packages/secSingleUserInstall.sh/download"
+  echo "Obs.: echoc and SECFUNC... may be easily replaced with equivalent cmds, then remove this check line."
+fi
 source <(secinit) #init echoc and SECFUNC... #set -eEu #ScriptEchoColor
 
 strSelf="`realpath "$0"`"
@@ -66,10 +73,10 @@ bExample=false
 bExitAfterConfig=false
 : ${bShowTextFiles:=true};export bShowTextFiles #help
 : ${fPromptTm:=9999};export fPromptTm #help just not go sleep
-: ${bDoBkpEverything:=false} #help will create historical bkp files for anything it touches
+: ${bDoBkpEverything:=false};export bDoBkpEverything #help will create historical bkp files for anything it touches
 bDaemon=false #do not export
 : ${bSpeak:=false};export bSpeak #help speak important events
-: ${SECnSayVolume:=50};export SECnSayVolume #help set this from 0 to 100 to change the speech volume
+: ${SECnSayVolume:=75};export SECnSayVolume #help set this from 0 to 100 to change the speech volume
 export strMTSuffix="MultiThreadWorking"
 CFGstrTest="Test"
 CFGstrSomeCfgValue=""
@@ -255,14 +262,22 @@ if SECFUNCarrayCheck -n astrRemainingParams;then :;fi
 
 function FUNCchkDep() { local lstrMsg="$1";shift;if ! SECFUNCexecA -ce "$@";then echoc --info "${lstrMsg} (may exit now)";return 1;fi; }
 function FUNCchkVersion() { local lstrCmd="$1";shift;local lstrVersion="$1";shift;if [[ "`"$lstrCmd" --version |head -n 1`" != "$lstrVersion" ]];then echoc --info "WARN: '$lstrCmd' version is not '$lstrVersion' and may not work properly.";fi; }
+
+#FUNCchkDep "install uchardet" which uchardet #no, results doesnt match geany
+FUNCchkDep "install file" which file
+
 FUNCchkDep "install moreutils" which sponge
-FUNCchkDep "install python3" which python3
+
+FUNCchkDep "install python3" which python3;
 FUNCchkVersion python3 "Python 3.10.12"
+
 #if [[ -z "`(nvm --version)`" ]];then echoc -p "install arx-convert dependency: https://stackoverflow.com/a/76318697/1422630";exit 1;fi
 FUNCchkDep "install nvm (to make it easy to install the arx-convert dependency correct version of node.js): https://stackoverflow.com/a/76318697/1422630 : curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash; bash; nvm install 18; nvm use 18; #obs.: to be able to use nvm, you need to run a new bash instance to let is update access to nvm on every terminal you need to use it" declare -p NVM_DIR
 if ! bash -ci "nvm --version" |egrep -q "0\.39\.3";then FUNCchkVersion nvm "0.39.3";fi #nvm needs subshell with login to load the .bashrc file with it's configs and activate self, so this is a trick
+
 FUNCchkDep "install arx-covert: npm i arx-convert -g" arx-convert --version
 FUNCchkVersion arx-convert "arx-convert - version 7.1.0"
+
 FUNCchkDep "install blender" blender --version&&: #skippable in case you have many blender versions and do not use a global one
 FUNCchkVersion blender "Blender 3.6.4" #help this new version is important as the exported .obj .mtl may fail to be converted if from older blender versions
 
@@ -558,7 +573,9 @@ if $bFtlToObj;then #FTL TO OBJ #################################################
     local lstrFlTXCoreNmSafeRegex="`echo "${lstrFlTXCoreNm}" |sed -r 's@.@[&]@g'`"
     
     function FUNClnTexture2() {
-      SECFUNCexecA -ce mv -v "$lstrFlIn" "${lstrFlIn}.bkp"
+      if $bDoBkpEverything;then
+        SECFUNCexecA -ce mv -v "$lstrFlIn" "${lstrFlIn}.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
+      fi
       SECFUNCexecA -ce ln -vsT "$1" "$lstrFlIn"
       SECFUNCexecA -ce ls -l "$1"
     };export -f FUNClnTexture2
@@ -582,7 +599,9 @@ else #OBJ TO FTL ###############################################################
     echoc -wp "file strFlWFObj='${strFlWFObj}' is missing, may be you need to export it from blender? or may be it is not the correct filename strFlCoreName='$strFlCoreName' that should be passed as a param to this script. Btw, work with the .blend file at '$strBlenderSafePath'."
   done
 
-  cp -v "${strFlWFMtl}" "${strFlWFMtl}.bkp_`date +%Y_%m_%d-%H_%M_%S_%N`"
+  if $bDoBkpEverything;then
+    cp -v "${strFlWFMtl}" "${strFlWFMtl}.bkp_`date +%Y_%m_%d-%H_%M_%S_%N`"
+  fi
 
   #strNewMTL="`grep "newmtl" "${strFlWFMtl}" |sed -r -e 's@newmtl @@'`" # -e 's@[\]@\\\\@g'`"
   #declare -p strNewMTL
@@ -638,7 +657,7 @@ else #OBJ TO FTL ###############################################################
   
   declare -A astrAutoCfgList
   #if $bCanAutoFixTxPath && 
-  echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there)"
+  echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there. fTr is optional, will default to 0)"
   sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
   if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
     # preview
@@ -655,7 +674,7 @@ else #OBJ TO FTL ###############################################################
     #else
       #SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
     #fi
-    if echoc -t $fPromptTm -q "are the above relative texture path correct? (if not will open a text editor)@Dy";then
+    if echoc -t $fPromptTm -q "are the above relative texture paths correct (only map_Kd matters for now tho)? (if not will open a text editor)@Dy";then
       SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
     else
       SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlWFMtl}"
@@ -863,7 +882,9 @@ else #OBJ TO FTL ###############################################################
     fi
     
     if echoc -t $fPromptTm -q "apply the changes to json creating a new ftl file?@Dy";then
-      SECFUNCexecA -ce mv -vT "${strFlCoreName}.ftl" "${strFlCoreName}.ftl.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
+      if $bDoBkpEverything;then
+        SECFUNCexecA -ce mv -vT "${strFlCoreName}.ftl" "${strFlCoreName}.ftl.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
+      fi
       SECFUNCexecA -ce arx-convert "${strFlCoreName}.ftl.unpack.json" --from=json --to=ftl --output="${strFlCoreName}.ftl"
     fi
   fi
@@ -883,38 +904,71 @@ else #OBJ TO FTL ###############################################################
   
   echoc -t $fPromptTm -w "hit a key to prepare release files"
   SECFUNCtrash "$strPathReleaseHelper/"
+  SECFUNCtrash "$strPathReleaseSetupHelper/"
   mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
   if ! SECFUNCexecA -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
     echoc -t 3 -p "license file not found"
   fi
   SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathReleaseHelper/"
   SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "${strBlenderSafePath}/${strFlCoreName}.blend" #TODOA chk blender file if all is ok
-  egrep "map_Kd" "$strFlWFMtl" |sed -r -e 's@\\@/@g' -e 's@map_Kd @@' |while read strFlTx;do
-    SECFUNCdrawLine "$strFlTx"
+  egrep "map_Kd" "$strFlWFMtl" |sed -r -e 's@\\@/@g' -e 's@map_Kd @@' |while read strFlRelatPathTx;do
+    SECFUNCdrawLine "$strFlRelatPathTx"
+    astrFlRelatPathTxCpList=("$strFlRelatPathTx")
+    declare -p astrFlRelatPathTxCpList
+    bHasManyIndexes=false
+    if [[ "$strFlRelatPathTx" =~ .*[.]index[0-9]*[.].* ]];then #blender is only using one of these textures that will be changed/tweaked in-game from player actions probably
+      bHasManyIndexes=true
+      strFlRelatPathTxNmBase="$(echo "$strFlRelatPathTx" |sed -r 's@(.*[.]index)[0-9]*[.].*@\1@')"
+      declare -p strFlRelatPathTxNmBase
+      pwd
+      IFS=$'\n' read -d '' -r -a astrFlRelatPathTxCpList < <(cd "${strBlenderSafePath}";ls -1 "${strFlRelatPathTxNmBase}"*)&&:
+    fi
+    declare -p astrFlRelatPathTxCpList
+    SECFUNCarrayShow -v astrFlRelatPathTxCpList
+    if((`SECFUNCarraySize astrFlRelatPathTxCpList`==0));then
+      echoc -p "invalid empty astrFlRelatPathTxCpList"
+      exit 1
+    fi
+    
     #textures
     pwd
-    declare -p strBlenderSafePath strFlTx strPathReleaseHelper strPathDeployAtModInstallFolder strTXPathRelative
-    SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlTx"* "${strPathReleaseHelper}/textures/"
-    SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlTx"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
-    
-    strFlNoBakeTx="${strBlenderSafePath}/$(dirname "$strFlTx")/NoBakedTextures/$(basename "$strFlTx")"
-    if [[ -f "$strFlNoBakeTx" ]];then
-      SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
-    fi
+    for strFlRelatPathTxCp in "${astrFlRelatPathTxCpList[@]}";do
+      declare -p strBlenderSafePath strFlRelatPathTxCp strPathReleaseHelper strPathDeployAtModInstallFolder strTXPathRelative
+      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathReleaseHelper}/textures/"
+      
+      SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}"* #this prevents overwriting symlinks target if any there
+      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
+      
+      strFlNoBakeTx="${strBlenderSafePath}/$(dirname "$strFlRelatPathTxCp")/NoBakedTextures/$(basename "$strFlRelatPathTxCp")"
+      if [[ -f "$strFlNoBakeTx" ]];then
+        #TODO? SECFUNCtrash strFlNoBakeTx at "$strPathReleaseHelper/textures/NoBakedTextures/"
+        SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
+      fi
+    done
   done
+  
   echoc --info "scripts etc"
   strRelativeScriptPath="`pwd |sed -r "s@.*${strDeveloperWorkingPath}/game/@@"`"  #AUTOCFG
   astrFlExtraList=("${strFlCoreName}[icon].png" "${strFlCoreName}.asl")
   for strFlExtra in "${astrFlExtraList[@]}";do
     if [[ -f "${strRelativeScriptPath}/${strFlExtra}" ]];then
+      if [[ "$strFlExtra" =~ .*\.asl ]];then
+        while ! "$(dirname "$strSelf")/../../bin/chkEncoding.sh" "${strRelativeScriptPath}/$strFlExtra";do
+          pwd
+          ls -l "${strRelativeScriptPath}/$strFlExtra"
+          echoc -w "please fix above error."
+        done
+      fi
       # release folder
       SECFUNCexecA -ce mkdir -vp "${strPathReleaseSetupHelper}/${strRelativeScriptPath}/"
-      SECFUNCexecA -ce cp -vf "${strRelativeScriptPath}/${strFlExtra}"* "${strPathReleaseSetupHelper}/${strRelativeScriptPath}/"
+      SECFUNCexecA -ce cp -v "${strRelativeScriptPath}/${strFlExtra}"* "${strPathReleaseSetupHelper}/${strRelativeScriptPath}/"
       # mod folder
       SECFUNCexecA -ce mkdir -vp "${strPathDeployAtModInstallFolder}/${strRelativeScriptPath}/"
-      SECFUNCexecA -ce cp -vf "${strRelativeScriptPath}/${strFlExtra}"* "${strPathDeployAtModInstallFolder}/${strRelativeScriptPath}/"
+      SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strRelativeScriptPath}/${strFlExtra}"* #there may have other files there so remove only what would be replaced (the cp error may happen if you symlinked the script there to your developement path script, it says is the same file)
+      SECFUNCexecA -ce cp -v "${strRelativeScriptPath}/${strFlExtra}"* "${strPathDeployAtModInstallFolder}/${strRelativeScriptPath}/"
     fi
   done
+  
   # report
   ls -lR "$strPathReleaseHelper"
   if $bSpeak;then echoc --say "${strFlCoreName} deployed";fi

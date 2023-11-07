@@ -15,8 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+source <(secinit)
+
 strPathIni="`pwd`"
 strPathRun="`realpath ../ArxLibertatis`"
+strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
+mkdir -vp "`dirname "$strFlLog"`"
 
 while true;do
   : ${bBuildB4Run:=true} #help
@@ -50,7 +54,8 @@ while true;do
 
   #./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
   echoc --info "EXEC: ${acmd[@]}"
-  "${acmd[@]}"
+  ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest
+  unbuffer "${acmd[@]}" 2>&1 |tee "$strFlLog"
   
   echoc -w "re-run"
 done

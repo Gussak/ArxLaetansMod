@@ -30,7 +30,7 @@ set +x
 : ${bAutoDeploy:=true} #help
 if ! $bAutoDeploy;then echoc -w deploy;fi
 set -x
-while ! cp -vR * ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/;do
+while ! cp -vRu * ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/;do
   echoc -w retry
 done
 set +x

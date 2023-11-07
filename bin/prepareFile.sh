@@ -51,6 +51,9 @@ for strWork in "${astrWorkList[@]}";do
   
   # VALIDATIONS
   
+  echoc --info "validate encoding for scripts"
+  "$strMainPath/bin/chkEncoding.sh"
+  
   echoc --info "validate relative symlinks"
   FUNCchkLnk() { 
     echo "SYMLINK: $1 '`readlink "$1"`'";
