@@ -657,7 +657,7 @@ else #OBJ TO FTL ###############################################################
   
   declare -A astrAutoCfgList
   #if $bCanAutoFixTxPath && 
-  echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there. fTr is optional, will default to 0)"
+  echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there. fTr is optional, will default to 0). Textures matching regex '.*[.]index[0-9]*' will be auto deployed, so you need to set only one in blender to all of them be detected."
   sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
   if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
     # preview
@@ -811,6 +811,8 @@ else #OBJ TO FTL ###############################################################
       SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@(.*"origin": *)[0-9]*(,.*)@\1'"$iOriginVectorIndex"'\2@' "${strFlCoreName}.ftl.unpack.json" "${strFlCoreName}.ftl.unpack.ugly.json"
     fi
     
+    if false;then #TODO:WIP
+    echoc --info "MELEE WEAPONS:"
     echo '
       "actions": [
           {
@@ -833,7 +835,6 @@ else #OBJ TO FTL ###############################################################
           }
       ],
     '
-    echoc --info "MELEE WEAPONS:"
     echo 'Look at the above "actions", they are required for melee weapons: 
     Melee weapons need a section like that. 
     See the vertexIdx? it should be the vertex index you can see in blender:
@@ -846,6 +847,7 @@ else #OBJ TO FTL ###############################################################
     You have to set the correct vertexIdx matching the empties.
     Obs.:TODO:TEST/TRY: if it is not the index from blender, you can find out their index by creating a tiny triangle there and setting that face to a dummy texture named like HIT_10.png. When exporting to wavefront obj, and then to ftl, the HIT_10 faces for that texture HIT_10.png, will have the corresponding axes you can choose from. WIP:TODO: compare with blender vertex index.
     '
+    fi
 
     echoc --info "GROUPS: for now copy the '\"groups\": [' section from the vanilla ftl (if it is filled there) that was converted to json, and set origin to the same origin from header section"
     
@@ -918,7 +920,7 @@ else #OBJ TO FTL ###############################################################
     bHasManyIndexes=false
     if [[ "$strFlRelatPathTx" =~ .*[.]index[0-9]*[.].* ]];then #blender is only using one of these textures that will be changed/tweaked in-game from player actions probably
       bHasManyIndexes=true
-      strFlRelatPathTxNmBase="$(echo "$strFlRelatPathTx" |sed -r 's@(.*[.]index)[0-9]*[.].*@\1@')"
+      strFlRelatPathTxNmBase="$(echo "$strFlRelatPathTx" |sed -r 's@(.*[.]index)[0-9]*.*@\1@')"
       declare -p strFlRelatPathTxNmBase
       pwd
       IFS=$'\n' read -d '' -r -a astrFlRelatPathTxCpList < <(cd "${strBlenderSafePath}";ls -1 "${strFlRelatPathTxNmBase}"*)&&:
@@ -934,15 +936,19 @@ else #OBJ TO FTL ###############################################################
     pwd
     for strFlRelatPathTxCp in "${astrFlRelatPathTxCpList[@]}";do
       declare -p strBlenderSafePath strFlRelatPathTxCp strPathReleaseHelper strPathDeployAtModInstallFolder strTXPathRelative
-      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathReleaseHelper}/textures/"
+      #SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathReleaseHelper}/textures/"
+      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp" "${strPathReleaseHelper}/textures/"
       
-      SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}"* #this prevents overwriting symlinks target if any there
-      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
+      #SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}"* #this prevents overwriting symlinks target if any there
+      SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}" #this prevents overwriting symlinks target if any there
+      #SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
+      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp" "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
       
       strFlNoBakeTx="${strBlenderSafePath}/$(dirname "$strFlRelatPathTxCp")/NoBakedTextures/$(basename "$strFlRelatPathTxCp")"
       if [[ -f "$strFlNoBakeTx" ]];then
         #TODO? SECFUNCtrash strFlNoBakeTx at "$strPathReleaseHelper/textures/NoBakedTextures/"
-        SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
+        #SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
+        SECFUNCexecA -ce cp -vfL "$strFlNoBakeTx" "$strPathReleaseHelper/textures/NoBakedTextures/"
       fi
     done
   done
