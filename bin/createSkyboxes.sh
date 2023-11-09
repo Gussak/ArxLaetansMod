@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#help download all the collections of skyboxes from: https://opengameart.org/art-search?keys=humus
+#help download all the collections of skyboxes from: https://opengameart.org/content/humus-skyboxes
 #help extract them all somewhere
 #help place a symlink to this script there too
 #help run this script w/o parameters, will montage all tiles into skyboxes textures
@@ -28,7 +28,7 @@ egrep "[#]help" $0
 
 : ${strFlSkyBoxOutput:="skybox.png"} #help
 
-if [[ "${1-}" == --prepareHologramIndexedSkyboxes ]];then #help this works with path naming for https://opengameart.org/art-search?keys=humus
+if [[ "${1-}" == --prepareHologramIndexedSkyboxes ]];then #help this works with path naming for https://opengameart.org/content/humus-skyboxes
   : ${iIndexCount:=0} #help this is there the index count will begin
   : ${strSkyboxFlPrefix:="Hologram.skybox.index"} #help
   if ls -l "graph/obj3d/textures/${strSkyboxFlPrefix}"*;then
@@ -88,6 +88,11 @@ fi
 
 # default cfg works with http://www.humus.name
 : ${sEmpt:="`pwd`/empty.png"}  #help
+if [[ ! -f "$sEmpt" ]];then
+  echoc --info "the empty square image will fill the empty tiles for the skybox"
+  echoc -p "the file sEmpt='$sEmpt' has to be created manually for now as 16x16 (or any square tiny size) in black color (or any color you want)"
+  exit 1
+fi
 : ${sT0x0:="${sEmpt}"}; : ${sT0x1:="posy.jpg"}; : ${sT0x2:="${sEmpt}"}; : ${sT0x3:="${sEmpt}"};  #help
 : ${sT1x0:="negx.jpg"}; : ${sT1x1:="posz.jpg"}; : ${sT1x2:="posx.jpg"}; : ${sT1x3:="negz.jpg"};  #help
 : ${sT2x0:="${sEmpt}"}; : ${sT2x1:="negy.jpg"}; : ${sT2x2:="${sEmpt}"}; : ${sT2x3:="${sEmpt}"};  #help
@@ -115,7 +120,7 @@ function FUNCskybox() {
       "${sT0x0}" "${sT0x1}" "${sT0x2}" "${sT0x3}" \
       "${sT1x0}" "${sT1x1}" "${sT1x2}" "${sT1x3}" \
       "${sT2x0}" "${sT2x1}" "${sT2x2}" "${sT2x3}" #if something is missing this will fail as montage wont
-    # this works with http://www.humus.name  , the empty.jpg has to be created manually for now as 1024x1024 in black color
+    # this works with http://www.humus.name
     SECFUNCexecA -ce montage -geometry ${nTileSz}x -tile 4x3          \
       "${sT0x0}" "${sT0x1}" "${sT0x2}" "${sT0x3}" \
       "${sT1x0}" "${sT1x1}" "${sT1x2}" "${sT1x3}" \
