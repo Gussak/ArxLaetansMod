@@ -1,18 +1,16 @@
 in blender (the result is not 100% perfect tho):
 
 - create a cube
-- in UV, unwrap (you will probably need to rotate it 90o, so hold ctrl)
-- use scale tool to align with the skybox fallen cross texture each axis individually, but if it is too difficult to align the edges, just scale again a tiny bit, you will lose 1 or 2 pixels in the edges but it is ok
+- in UV, it is already unwrapped as a cross. you will probably need to rotate it 90o, so hold ctrl.
+- use scale tool (hold ctrl) to align with the skybox fallen cross texture with the edges. use the "UV Vertex" values to manually type the exact numbers there to fit exactly at the edges. Max zoom in to help.
 - edit mesh
   - normals: recalculate inside
-  - subdivide edges for the cube 10x
-  - smooth vertices laplacian:
-    - unckeck preserve volume
-    - iter 1, lambda 172.25
-    - click on background and re-select the meshaxis
-    - iter 200, lambda 0.010
-  - axes distribution is not 100% uniform but is ok
+  - subdivide edges for the cube
+    - 10x
+    - smoothness 1.0
+  - axes distribution is not 100% uniform but is ok as this is a "skysphere" and not a skybox
   - triangulate faces to work with converter to arx .ftl
   - shading: smooth faces
+  - recalculate normals inside
 
 obs.: if it is an item, to be able to drop it, dimensions (or height) must be around 165m

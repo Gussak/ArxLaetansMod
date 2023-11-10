@@ -17,20 +17,71 @@
 
 #help download all the collections of skyboxes from: https://opengameart.org/content/humus-skyboxes
 #help extract them all somewhere
-#help place a symlink to this script there too
+#help place a symlink to this script (and the empty png) there too
 #help run this script w/o parameters, will montage all tiles into skyboxes textures
 #help run this script with --prepareHologramIndexedSkyboxes param, it will prepare the skybox to the hologram item
 #help obs.: there are many var options you can tweak if you want here.
 
 source <(secinit)
 
-egrep "[#]help" $0
+: ${strFlSkyBoxOutput:="skybox.png"};export strFlSkyBoxOutput #help
+: ${iIndexCount:=0};export iIndexCount  #help this is there the index count will begin
+: ${strSkyboxFlPrefix:="Hologram.skybox.index"};export strSkyboxFlPrefix #help
 
-: ${strFlSkyBoxOutput:="skybox.png"} #help
+nRealCpuCores="$(cat /proc/cpuinfo |grep "core id" |sort -u |egrep "[0-9]*" -o |sort -n |tail -n 1)";((nRealCpuCores++))&&:
+declare -p nRealCpuCores
+: ${bMultithread:=false};export bMultithread #help
+: ${nThreads:=${nRealCpuCores}};export nThreads #help
+
+FUNCfinish() {
+  echoc --info "you can now update the related skyboxes script max index with the value: $iIndexCount (the .asl  requires it to be +1 for random exclusive max (ex.: from 0 to 10 it needs to be ^rnd_11) so: ^rnd_${iIndexCount}"
+  echoc -p "YOU MUST MAKE IT SURE ALL THE LICENSE FILES ARE CORRECT."
+}
+
+if [[ "${1-}" == --help ]];then #help
+  egrep "[#]help" $0
+  exit
+fi
+
+#TODO resize: convert "$strFl" -resize 1024x "${strFl}.new"
+
+if [[ "${1-}" == --reindex ]];then #help use this after --prepareHologramIndexedSkyboxes and after having removed files 
+  IFS=$'\n' read -d '' -r -a astrFlList < <(find -mindepth 1 -maxdepth 1 -iregex ".*index[0-9]*\.png")&&:
+  if [[ -d reindexed ]];then
+    (
+      cd reindexed
+      ls -1 |egrep -v "license|index[0-9]*.png" |sed -r -e 's@Hologram.skybox.index[0-9]*.@@' -e 's@[.]png@@' -e 's@_@-skyboxes/@' |sort
+    )
+    echoc -p "delete folder reindexed please"
+    exit 1
+  fi
+  mkdir -vp reindexed
+  : ${iIndexCount:=0} #help start at 
+  for strFl in "${astrFlList[@]}";do
+    SECFUNCdrawLine " $strFl "
+    strFl="${strFl#./}"
+    strFlLic="${strFl%.png}"
+    strFlLic="`ls -1 "${strFlLic}"*.txt`"
+    strFlDesc="${strFl%.png}"
+    strFlDesc="`find -mindepth 1 -maxdepth 1 -type l -iname "${strFlDesc}*"`"
+    strFlDesc="${strFlDesc#./}"
+    strDesc="$(echo "$strFlDesc" |sed -r 's@.*index[0-9]*[.](.*)[.]png@\1@')"
+    declare -p strFl strFlLic strFlDesc strDesc
+    
+    SECFUNCexecA -ce cp -v "$strFl" "reindexed/${strSkyboxFlPrefix}${iIndexCount}.png"
+    SECFUNCexecA -ce cp -v "$strFlLic" "reindexed/${strSkyboxFlPrefix}${iIndexCount}.png.license.txt"
+    (
+      cd "reindexed"
+      SECFUNCexecA -ce ln -vsfT "./${strSkyboxFlPrefix}${iIndexCount}.png" "${strSkyboxFlPrefix}${iIndexCount}.${strDesc}.png"
+    )
+    
+    ((iIndexCount++))&&:
+  done
+  FUNCfinish
+  exit
+fi
 
 if [[ "${1-}" == --prepareHologramIndexedSkyboxes ]];then #help this works with path naming for https://opengameart.org/content/humus-skyboxes
-  : ${iIndexCount:=0} #help this is there the index count will begin
-  : ${strSkyboxFlPrefix:="Hologram.skybox.index"} #help
   if ls -l "graph/obj3d/textures/${strSkyboxFlPrefix}"*;then
     echoc --info "there are the above files already there. If you are recreating, you should delete them all before continuing."
     if echoc -q "are you instead really appending new skyboxes?";then 
@@ -74,9 +125,7 @@ if [[ "${1-}" == --prepareHologramIndexedSkyboxes ]];then #help this works with 
     )
     ((iIndexCount++))&&:
   done
-  echoc -p "now, you (not me who just created this helper script) YOU!!! YOU MUST be sure all the license files are correct"
-  echoc -w "I AGREEE TO MAKE IT SURE ALL THE LICENSE FILES ARE CORRECT."
-  echoc --info "you can now update the related skyboxes script max index with the value: $iIndexCount (the .asl  requires it to be +1 for random exclusive max so: ^rnd_$((iIndexCount+1))"
+  FUNCfinish
   exit
 fi
 
@@ -87,10 +136,10 @@ fi
 #          down  -y
 
 # default cfg works with http://www.humus.name
-: ${sEmpt:="`pwd`/empty.png"}  #help
+: ${sEmpt:="`pwd`/createSkyboxesEmpty.png"}  #help
 if [[ ! -f "$sEmpt" ]];then
   echoc --info "the empty square image will fill the empty tiles for the skybox"
-  echoc -p "the file sEmpt='$sEmpt' has to be created manually for now as 16x16 (or any square tiny size) in black color (or any color you want)"
+  echoc -p "the file sEmpt='$sEmpt' has to be created manually for now as 16x16 in transparent color"
   exit 1
 fi
 : ${sT0x0:="${sEmpt}"}; : ${sT0x1:="posy.jpg"}; : ${sT0x2:="${sEmpt}"}; : ${sT0x3:="${sEmpt}"};  #help
@@ -102,6 +151,21 @@ export sT2x0; export sT2x1; export sT2x2; export sT2x3;
 
 function FUNCskybox() {
   strFlRef="$1";shift
+  
+  if $bMultithread;then
+    #while true;do
+      #ls -l createSkyBox.Thread.*.tmp
+      #nRunningThreads=$(ls -1 createSkyBox.Thread.*.tmp |wc -l)
+      #if((nRunningThreads>=nThreads));then
+        #echoc -t 1 -w "waiting other $nRunningThreads threads end";
+        #continue
+      #fi
+      #break
+    #done
+    strFlThread="`pwd`/createSkyBox.Thread.$$.tmp"
+    echo >"$strFlThread"
+  fi
+  
   nTileSz="$(identify "$strFlRef" |sed -r 's@.* ([0-9]*)x[0-9]* .*@\1@')"
   strPath="$(dirname "$strFlRef")"
   
@@ -110,10 +174,13 @@ function FUNCskybox() {
   pwd
   declare -p nTileSz
   
-  strIdSB="$(identify "${strFlSkyBoxOutput}")"&&:
+  strIdSB="";
+  if [[ -f "$strFlSkyBoxOutput" ]];then
+    strIdSB="$(identify "${strFlSkyBoxOutput}")"
+  fi
   #if [[ -f "${strFlSkyBoxOutput}" ]];then 
   bWorkFinished=false
-  if [[ "$(echo "$strIdSB" |sed -r 's@.* ([0-9]*x[0-9]*) .*@\1@')" == "$((nTileSz*4))x$((nTileSz*3))" ]];then
+  if [[ "$(echo "${strIdSB}" |sed -r 's@.* ([0-9]*x[0-9]*) .*@\1@')" == "$((nTileSz*4))x$((nTileSz*3))" ]];then
     echoc --info "ALREADY PREPARED."
   else
     SECFUNCexecA -ce ls -l \
@@ -121,7 +188,7 @@ function FUNCskybox() {
       "${sT1x0}" "${sT1x1}" "${sT1x2}" "${sT1x3}" \
       "${sT2x0}" "${sT2x1}" "${sT2x2}" "${sT2x3}" #if something is missing this will fail as montage wont
     # this works with http://www.humus.name
-    SECFUNCexecA -ce montage -geometry ${nTileSz}x -tile 4x3          \
+    SECFUNCexecA -ce montage -background none -geometry ${nTileSz}x -tile 4x3 \
       "${sT0x0}" "${sT0x1}" "${sT0x2}" "${sT0x3}" \
       "${sT1x0}" "${sT1x1}" "${sT1x2}" "${sT1x3}" \
       "${sT2x0}" "${sT2x1}" "${sT2x2}" "${sT2x3}" \
@@ -136,7 +203,32 @@ function FUNCskybox() {
   identify "${strFlSkyBoxOutput}"
   ls -l "`realpath "${strFlSkyBoxOutput}"`"
   : ${bWaitCpuCooldown:=false}  #help
-  if $bWorkFinished && $bWaitCpuCooldown;then echoc -w -t 60 "let the cpu cooldown";fi
+  if $bMultithread;then
+    rm -v "$strFlThread";
+    #echoc -w;
+  else
+    if $bWorkFinished && $bWaitCpuCooldown;then echoc -w -t 60 "let the cpu cooldown";fi
+  fi
 };export -f FUNCskybox
-  
-find -iname "posx.*" -exec bash -c "FUNCskybox '{}'" \;
+
+function FUNCskyboxMultithread() {
+  SECFUNCdrawLine " $1 "
+  while true;do
+    ls -l createSkyBox.Thread.*.tmp
+    nRunningThreads=$(ls -1 createSkyBox.Thread.*.tmp |wc -l)
+    if((nRunningThreads>=nThreads));then
+      echoc -t 1 -w "waiting other $nRunningThreads threads end";
+      continue
+    fi
+    break
+  done
+  xterm -e bash -c "FUNCskybox '$1'"&
+  sleep 1
+};export -f FUNCskyboxMultithread
+
+if $bMultithread;then
+  rm -v createSkyBox.Thread.*.tmp&&:
+  find -iname "posx.*" -exec bash -c "FUNCskyboxMultithread '{}'" \;
+else
+  find -iname "posx.*" -exec bash -c "FUNCskybox '{}'" \;
+fi

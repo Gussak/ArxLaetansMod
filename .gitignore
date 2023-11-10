@@ -12,6 +12,7 @@
 
 !bin/
 !bin/*.sh
+!bin/*.png
 
 !docs
 !docs/*.txt
