@@ -731,7 +731,7 @@ else #OBJ TO FTL ###############################################################
   done
   SECFUNCarrayShow -v astrAutoCfgList
   if $bErrorCfgMissing;then
-    echoc -p 'yoy need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT="POLY_NO_SHADOW|POLY_WATER";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there'
+    echoc -p "yoy need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT=\"POLY_NO_SHADOW|POLY_WATER\";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there"
     exit 1
   fi
   

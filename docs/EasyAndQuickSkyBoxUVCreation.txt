@@ -1,7 +1,9 @@
 in blender (the result is not 100% perfect tho):
 
+SKYBOX CUBEMAP
 - create a cube
 - in UV, it is already unwrapped as a cross. you will probably need to rotate it 90o, so hold ctrl.
+- UV: bottom and top will have seams, shrinking/moving the edges 0.0005 or more may fix it (will lose these edge pixels tho)
 - use scale tool (hold ctrl) to align with the skybox fallen cross texture with the edges. use the "UV Vertex" values to manually type the exact numbers there to fit exactly at the edges. Max zoom in to help.
 - edit mesh
   - normals: recalculate inside
@@ -14,3 +16,4 @@ in blender (the result is not 100% perfect tho):
   - recalculate normals inside
 
 obs.: if it is an item, to be able to drop it, dimensions (or height) must be around 165m
+PS.: the SKYBOX UVSphere has not the seam problem.
