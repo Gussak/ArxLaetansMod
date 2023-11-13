@@ -159,9 +159,9 @@ for strFl in "${astrFlList[@]}";do
   
   FUNCexec -v unbuffer colordiff --ignore-all-space "$strFl" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
   echo "=== grep '${strGrepCheckNew}' ==="
-  FUNCexec unbuffer egrep --color=always "${strGrepCheckNew}" -i -B1 "$strModPathTmp/$strFl"
+  FUNCexec unbuffer egrep --color=always "${strGrepCheckNew}" -ia -B1 "$strModPathTmp/$strFl"
   : ${bManualPatch:=true} #help you can manually patch the final file if this autopatch fails, and report the problem so I can fix it, or drop a pull request thx!
-  if ! egrep -qi "${strGrepCheckNew}" "$strModPathTmp/$strFl";then
+  if ! egrep -qia "${strGrepCheckNew}" "$strModPathTmp/$strFl";then
     FUNCecho "WARN: failed to patch, no '${strGrepCheckNew}' patch found at final patch file."
     if ! $bManualPatch;then exit 1;fi
     FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
@@ -173,14 +173,14 @@ for strFl in "${astrFlList[@]}";do
     FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
   fi
   
-  if egrep ".*timer.*${strGrepCheckNew}" -i "$strModPathTmp/$strFl";then
+  if egrep ".*timer.*${strGrepCheckNew}" -ia "$strModPathTmp/$strFl";then
     if FUNCask "there are timer(s), and it require manually patching. They are commented for now. Edit them?";then
       FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
     fi
   fi
   
   : ${bMinimumPatch:=false} #help this will keep only the first match, so if adding an item to inventory, it will only keep the first command doing that. If it is too simple, you will be asked to edit manually too for each file where it may be required.
-  if $bMinimumPatch && (($(egrep "${strGrepCheckNew}" -i "$strModPathTmp/$strFl" |egrep -vi "//.*${strGrepCheckNew}" |wc -l)>1));then
+  if $bMinimumPatch && (($(egrep "${strGrepCheckNew}" -ia "$strModPathTmp/$strFl" |egrep -via "//.*${strGrepCheckNew}" |wc -l)>1));then
     FUNCecho "bMinimumPatch=$bMinimumPatch: More than one non commented line with the patch found. Keeping only the first one."
     bManuallyPatched=false
     if FUNCask "To do this, all commented new patched lines must be removed, edit it manually first?";then
@@ -191,12 +191,12 @@ for strFl in "${astrFlList[@]}";do
       FUNCexec -v sed -i.bkp -r -e "/\/\/.*${strGrepCheckNew}/Id" "$strModPathTmp/$strFl"
       FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
       
-      nLnFirst="$(egrep "${strGrepCheckNew}" -n "$strModPathTmp/$strFl" |head -n 1 |cut -d: -f1)"
+      nLnFirst="$(egrep "${strGrepCheckNew}" -na "$strModPathTmp/$strFl" |head -n 1 |cut -d: -f1)"
       nLnFrom=$((nLnFirst+1))&&:
       FUNCexec -v sed -i.bkp -r -e "${nLnFrom},"'$'" s@.*${strGrepCheckNew}.*@//&@i" "$strModPathTmp/$strFl"
       FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
       
-      FUNCexec -v egrep -n "${strGrepCheckNew}" "$strModPathTmp/$strFl" |egrep -v "//.*${strGrepCheckNew}"
+      FUNCexec -v egrep -na "${strGrepCheckNew}" "$strModPathTmp/$strFl" |egrep -va "//.*${strGrepCheckNew}"
     fi
   fi
 done
