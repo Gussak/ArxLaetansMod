@@ -132,8 +132,8 @@ fi
 
 FUNCexec mkdir -vp "$strModPathTmp"
 echo;read -p "hit Enter to proccess the above files."
-: ${strGrepCheckOld:="inventory.*add.*Potion_[a-zA-Z0-9_]*"} #help set this to count the old matches vs the count of new patches
-: ${strGrepCheckNew:="inventory.*add.*Hologram"} #help set this to check/validate the results: count old VS new matches
+: ${strGrepCheckOld:="inventory.*(add|addmulti).*Potion_[a-zA-Z0-9_]*"} #help set this to count the old matches vs the count of new patches
+: ${strGrepCheckNew:="inventory.*(add|addmulti).*Hologram"} #help set this to check/validate the results: count old VS new matches
 for strFl in "${astrFlList[@]}";do
   #if $bVerbose;then 
     ls -l "$strFl";
@@ -161,7 +161,7 @@ for strFl in "${astrFlList[@]}";do
   echo "=== grep '${strGrepCheckNew}' ==="
   FUNCexec unbuffer egrep --color=always "${strGrepCheckNew}" -i -B1 "$strModPathTmp/$strFl"
   : ${bManualPatch:=true} #help you can manually patch the final file if this autopatch fails, and report the problem so I can fix it, or drop a pull request thx!
-  if ! egrep -q "${strGrepCheckNew}" "$strModPathTmp/$strFl";then
+  if ! egrep -qi "${strGrepCheckNew}" "$strModPathTmp/$strFl";then
     FUNCecho "WARN: failed to patch, no '${strGrepCheckNew}' patch found at final patch file."
     if ! $bManualPatch;then exit 1;fi
     FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
@@ -173,9 +173,30 @@ for strFl in "${astrFlList[@]}";do
     FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
   fi
   
-  if egrep ".*timer.*${strGrepCheckNew}" "$strModPathTmp/$strFl";then
+  if egrep ".*timer.*${strGrepCheckNew}" -i "$strModPathTmp/$strFl";then
     if FUNCask "there are timer(s), and it require manually patching. They are commented for now. Edit them?";then
       FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
+    fi
+  fi
+  
+  : ${bMinimumPatch:=false} #help this will keep only the first match, so if adding an item to inventory, it will only keep the first command doing that. If it is too simple, you will be asked to edit manually too for each file where it may be required.
+  if $bMinimumPatch && (($(egrep "${strGrepCheckNew}" -i "$strModPathTmp/$strFl" |egrep -vi "//.*${strGrepCheckNew}" |wc -l)>1));then
+    FUNCecho "bMinimumPatch=$bMinimumPatch: More than one non commented line with the patch found. Keeping only the first one."
+    bManuallyPatched=false
+    if FUNCask "To do this, all commented new patched lines must be removed, edit it manually first?";then
+      FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
+      bManuallyPatched=true
+    fi
+    if ! $bManuallyPatched || FUNCask "After patching manually, you still want to keep only the first match?";then
+      FUNCexec -v sed -i.bkp -r -e "/\/\/.*${strGrepCheckNew}/Id" "$strModPathTmp/$strFl"
+      FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
+      
+      nLnFirst="$(egrep "${strGrepCheckNew}" -n "$strModPathTmp/$strFl" |head -n 1 |cut -d: -f1)"
+      nLnFrom=$((nLnFirst+1))&&:
+      FUNCexec -v sed -i.bkp -r -e "${nLnFrom},"'$'" s@.*${strGrepCheckNew}.*@//&@i" "$strModPathTmp/$strFl"
+      FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
+      
+      FUNCexec -v egrep -n "${strGrepCheckNew}" "$strModPathTmp/$strFl" |egrep -v "//.*${strGrepCheckNew}"
     fi
   fi
 done
