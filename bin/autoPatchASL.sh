@@ -37,10 +37,16 @@ function FUNCecho() {
 }
 
 function FUNCask() {
+  while read -t.1 -n 1 strCleanBuffer;do echo -n .;done #to wait user read the question
   echo
-  read -n 1 -p " <?> QUESTION: $@ (y/...)" strResp;
-  if [[ "${strResp}" =~ [yY] ]];then return 0;fi
-  return 1
+  if $bDoPrompt;then
+    read -n 1 -p " <?> QUESTION: $@ (y/...)" strResp;
+    if [[ "${strResp}" =~ [yY] ]];then return 0;fi
+    return 1
+  else
+    echo " <?> QUESTION: $@ (y/...) ...NO"
+    return 1
+  fi
 }
 
 function FUNCexec() {
@@ -60,7 +66,15 @@ function FUNCexec() {
 
 function FUNCdep() { if ! which "$1" >/dev/null;then FUNCecho "ERROR: missing dependency '$1'";exit 1;fi; }
 
-egrep "[#]help" "$0"
+echo "HELP:"
+egrep "^[#]help" "$0" |sed -r -e 's@[#]help@@' #general help
+echo
+echo "ENVIRONMENT VARIABLES (options):"
+egrep ":.*[#]help" "$0" |sed -r -e 's@[ \t]*(:.*)@  \1@' |sort #env vars
+echo
+echo "OPTIONAL PARAMS:"
+egrep "[#]help" "$0" |egrep -v "^#|[ \t]*:" |sed -r -e 's@.*@  &@' |sort #optional params
+echo
 
 ################### VALIDATIONS
 
@@ -75,6 +89,18 @@ FUNCdep chmod
 FUNCdep sed
 FUNCdep egrep
 FUNCdep pwd
+
+: ${bDoPrompt:=true} #help set to false to accept all defaults, no questions, no waits
+if [[ "${1-}" == -P ]];then #help set bDoPrompt=false
+  bDoPrompt=false
+fi
+
+: ${bMinimumPatch:=false} #help this will keep only the first match, so if adding an item to inventory, it will only keep the first command doing that. If this auto patch is too simple, you will be asked to edit manually too for each file where it may be required.
+if ! $bMinimumPatch;then
+  if FUNCask "Use minimum patch? (see help for bMinimumPatch)";then
+    bMinimumPatch=true
+  fi
+fi
 
 : ${strArxLibertatisFolder:="${1-}"} #help you can set this var or pass it as param
 declare -p strArxLibertatisFolder
@@ -131,7 +157,7 @@ if [[ -z "${astrFlList[@]}" ]];then
 fi
 
 FUNCexec mkdir -vp "$strModPathTmp"
-echo;read -p "hit Enter to proccess the above files."
+echo;if $bDoPrompt;then read -p "hit Enter to proccess the above files.";fi
 : ${strGrepCheckOld:="inventory.*(add|addmulti).*Potion_[a-zA-Z0-9_]*"} #help set this to count the old matches vs the count of new patches
 : ${strGrepCheckNew:="inventory.*(add|addmulti).*Hologram"} #help set this to check/validate the results: count old VS new matches
 for strFl in "${astrFlList[@]}";do
@@ -179,19 +205,19 @@ for strFl in "${astrFlList[@]}";do
     fi
   fi
   
-  : ${bMinimumPatch:=false} #help this will keep only the first match, so if adding an item to inventory, it will only keep the first command doing that. If it is too simple, you will be asked to edit manually too for each file where it may be required.
   if $bMinimumPatch && (($(egrep "${strGrepCheckNew}" -ia "$strModPathTmp/$strFl" |egrep -via "//.*${strGrepCheckNew}" |wc -l)>1));then
     FUNCecho "bMinimumPatch=$bMinimumPatch: More than one non commented line with the patch found. Keeping only the first one."
     bManuallyPatched=false
-    if FUNCask "To do this, all commented new patched lines must be removed, edit it manually first?";then
+    #if FUNCask "To do this, all commented new patched lines must be removed, edit it manually first?";then
+    if FUNCask "All commented new patched lines must be removed least the one you prefer to keep, edit it manually first? (otherwise the first matching line will be kept)";then
       FUNCexec -v "${strMergeTool}" "$strFl" "$strModPathTmp/$strFl"
       bManuallyPatched=true
     fi
     if ! $bManuallyPatched || FUNCask "After patching manually, you still want to keep only the first match?";then
-      FUNCexec -v sed -i.bkp -r -e "/\/\/.*${strGrepCheckNew}/Id" "$strModPathTmp/$strFl"
-      FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
+      #FUNCexec -v sed -i.bkp -r -e "/\/\/.*${strGrepCheckNew}/Id" "$strModPathTmp/$strFl"
+      #FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
       
-      nLnFirst="$(egrep "${strGrepCheckNew}" -na "$strModPathTmp/$strFl" |head -n 1 |cut -d: -f1)"
+      nLnFirst="$(egrep "${strGrepCheckNew}" -na "$strModPathTmp/$strFl" |egrep -v "//.*${strGrepCheckNew}" |head -n 1 |cut -d: -f1)"
       nLnFrom=$((nLnFirst+1))&&:
       FUNCexec -v sed -i.bkp -r -e "${nLnFrom},"'$'" s@.*${strGrepCheckNew}.*@//&@i" "$strModPathTmp/$strFl"
       FUNCexec -v unbuffer colordiff --ignore-all-space "$strModPathTmp/${strFl}.bkp" "$strModPathTmp/$strFl" &&: # |sed -r 's@^$@@'&&:
