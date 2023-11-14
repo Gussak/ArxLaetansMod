@@ -1,0 +1,33 @@
+// tests, tips, help, etc, self notes.. (you may ignore this)
+
+addxp 100 //to help on testing things
+rune all
+
+setangular <enable> //shading test
+
+attractor <entity> <power*> <radius*>
+attractor SELF 10 300 //hologram blackhole test
+
+mul <variable> <value*> //multiply var
+
+// this may help on hologram visualization
+worldfade out <duration*> <r*> <g*> <b*>
+worldfade in <duration*>
+
+when trap begins:
+  settrap <technical*> //technical is the skill used to detect trap above that value
+  settrap 10
+
+timer GoTo FUNCaimPlayerCastLightning //test
+>>>FUNCaimPlayerCastLightning
+  ifvisible <entity>
+  ifvisible PLAYER { //use for fireball too?
+    // set auto rotate angle speed to 0 after bkp it
+    forceangle <yaw*>
+    ^angleto_<entity>
+    forceangle ^angleto_PLAYER
+    cast lightning
+    // retore auto rotate angle speed
+  }
+ACCEPT
+
