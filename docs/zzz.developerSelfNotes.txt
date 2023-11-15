@@ -1,4 +1,17 @@
-// tests, tips, help, etc, self notes.. (you may ignore this)
+// tests, tips, help, ideas, todos, etc, self notes.. (you may ignore this)
+
+collision <enable> //for chairs other things that could be used to step over?
+collision true
+
+// search the src for clues of what set the player as enemy to let it happen when activating the hologram (to happen from the hologram onInventoryUse event)
+
+// thrown items could have these? until they hit once, then disable collision. Glass items could break also and apply the contents effects?
+collision true
+damager -e 5 
+ -e: Metal damage
+ -w: Wood damage
+ -s: Stone damage
+ -u: Push the entity
 
 addxp 100 //to help on testing things
 rune all
