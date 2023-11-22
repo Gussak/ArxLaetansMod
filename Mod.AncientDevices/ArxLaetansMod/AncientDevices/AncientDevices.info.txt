@@ -1,9 +1,11 @@
-These AncientDevices were discovered in bunkers that collapsed long ago.  
+The Ancient Devices were discovered in bunkers that collapsed long ago.  
 They are of an ancient civilization that disappeared.  
-They are easy to use but are defective, insisting on using it before it is ready will just damage it more, so be careful.  
+They are easy to use but are defective, insisting on using before it is ready will just damage it more, so be careful.  
 
 To be able to properly use it you need to first identify it.  
 The information shown for it depends on your AncientTech skill based on these combined skills: technological, object knowledge and intuition.  
 There are these information details levels that will appear the more you get skilled in AncientTech: quality, condition and detailed condition (uses).  
 The more skilled you get in AncientTech skill, the easier will be to prepare AncientTech items.  
 High quality AncientTech items in perfect condition will grant 100% success chance to prepare and use new AncientTech items.  
+
+PS.: please convert the small .mp3 file to .wav by running `ArxLaetansMod/AncientDevices/Sounds/Hologram.skybox.index0.wav.ConvertMp3ToWav.sh` there.
