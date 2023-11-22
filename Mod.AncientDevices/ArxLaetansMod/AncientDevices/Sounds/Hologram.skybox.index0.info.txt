@@ -1,0 +1,10 @@
+This work "Forest Sound Effects" just creates a loop ambient sound by:
+- converting from the video (https://www.youtube.com/watch?v=s7asACRn27g) to wav
+- removing the begin and end noises of the audio
+- cleaning the background noise
+- adding fade in and fade out to begin and end of the audio
+- normalizing the audio
+- bass amplify a bit
+Adjustments made using audacity in linux.
+
+TODO: add sound of soft wind, leaves and may be some far away water
