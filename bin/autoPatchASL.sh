@@ -245,6 +245,6 @@ fi
   #FUNCecho "INFO: you can check each file below too using ${strMergeTool}:"
   #FUNCexec pwd
   #FUNCexec find -iname "*.asl" -exec echo "${strMergeTool}" "'${strArxLibertatisFolder}/{}'" "`pwd`'{}'" \;
-#)
+#) 
 
 FUNCecho "INFO: if all went well, you can install this patch from '$strModPath'"

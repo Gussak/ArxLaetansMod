@@ -36,6 +36,30 @@
 !tools/interim/convertOBJtoFTL.sh.WIP
 !tools/interim/HowTo.interim.ImportExportFtl.txt
 
+# find Mod.AncientDevices -type d |sed -r 's@^(.*)@!\1\n!\1/*@'
+!Mod.AncientDevices
+!Mod.AncientDevices/*
+!Mod.AncientDevices/ArxLaetansMod
+!Mod.AncientDevices/ArxLaetansMod/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons/*
+
 # mod files (3D models etc)
 !ArxLaetansMod.MagicPotions.7z
 !ArxLaetansMod.RestorationPotions.7z

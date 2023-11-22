@@ -1,4 +1,7 @@
 // tests, tips, help, ideas, todos, etc, self notes.. (you may ignore this)
+rune all
+addxp 70000 //to help on dev testing things lvl 8
+// easy grep ex.: clear;LC_ALL=C egrep 'torch' --include="*.asl" --include="*.ASL" -iRnIa *
 
 collision <enable> //for chairs other things that could be used to step over?
 collision true
@@ -13,23 +16,16 @@ damager -e 5
  -s: Stone damage
  -u: Push the entity
 
-addxp 100 //to help on testing things
-rune all
-
 setangular <enable> //shading test
 
-attractor <entity> <power*> <radius*>
-attractor SELF 10 300 //hologram blackhole test
-
 mul <variable> <value*> //multiply var
-
-// this may help on hologram visualization
-worldfade out <duration*> <r*> <g*> <b*>
-worldfade in <duration*>
 
 when trap begins:
   settrap <technical*> //technical is the skill used to detect trap above that value
   settrap 10
+
+
+================================ DONE TESTING
 
 timer GoTo FUNCaimPlayerCastLightning //test
 >>>FUNCaimPlayerCastLightning
@@ -44,3 +40,9 @@ timer GoTo FUNCaimPlayerCastLightning //test
   }
 ACCEPT
 
+// this may help on hologram visualization. NO it has no alpha..
+worldfade out <duration*> <r*> <g*> <b*> //milis 0.0-1.0
+worldfade in <duration*>
+
+attractor <entity> <power*> <radius*>
+attractor SELF 10 300 //hologram blackhole test
