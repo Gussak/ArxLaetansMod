@@ -1,0 +1,6 @@
+translated using google translator:
+1) create the paragraph in english.
+2) translate to latin
+3) swap the translation (so it translates from latin to english)
+4) confirm the translation back into english have +- the original meaning
+5) keep adjusting the english text until it looks good enough
