@@ -64,7 +64,11 @@ Suggestion: Instead of overwriting exiting files with mods' ones, I use mergerfs
 ```
 "mergerfs" "-o" "defaults,allow_other,use_ino,category.action=ff,category.create=ff,category.search=ff" \
   "ArxLibertatis.0.WriteLayer\
+:./ArxLibertatis.layer9900._DevTests\
+:./ArxLibertatis.layer9055.Gameplay-HologramInventoriesAutoPatch\
+:./ArxLibertatis.layer9050.Gameplay-Hologram\
 :./ArxLibertatis.layer9000.GFX-ArxLaetansMod\
+:./ArxLibertatis.layer8900._FixesMixingPreviousLayerPriorityMods\
 :./ArxLibertatis.layer8060.Gameplay-Stacks Maps and Tweaks-6-1-0-1635347154\
 :./ArxLibertatis.layer8030.GamePlay-arx-mod-rune-randomizer-v1.0.0\
 :./ArxLibertatis.layer8020.GamePlay-arx-mod-potion-guard-v1.0.0\
@@ -80,7 +84,7 @@ Suggestion: Instead of overwriting exiting files with mods' ones, I use mergerfs
 :./ArxLibertatis.layer2580.GFX+Gameplay-Arx_Second_Life_v1.2.1\
 :./ArxLibertatis.layer2500.Gameplay-Enchant_and_Balance_Mod_V1\
 :./ArxLibertatis.layer1110.Gameplay-portable_containers_v1\
-:./ArxLibertatis.layer1100.Gameplay-Arx_Fatalis_Lockipick_Mod (lockpicks durability)"
+:./ArxLibertatis.layer1100.Gameplay-Arx_Fatalis_Lockipick_Mod (lockpicks durability)"\
   "ArxLibertatis"
 ```
 Obs.: this is not a recommended layer sort order, this is just an example as I have not fully tested if all are working as intended.  
