@@ -40,6 +40,7 @@
 //////////PRIORITY:MEDIUM
 //TODO box icon grey if unidentified. cyan when identified.
 //TODO grenade icon and texture dark when inactive, red (current) when activated.
+//TODO create a signal repeater item that can be placed in a high signal stregth place and repeats that signal str to 1000to3000 dist from it (depending on player ancientdev skill that will set it's initial quality). code at FUNCcalcSignalStrength
 //////////PRIORITY:LOW
 //TODO teleportArrow stack 10
 //TODO grenade+hologram=teleportArrow (insta-kill any foe and teleport the player there)
@@ -96,11 +97,20 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
       
       showlocals
     }
+  } else {
+    Set £ScriptDebugLog ""
+    if (^#timer2 == 0) starttimer timer2
+    if (^#timer2 > 333) { //TOKEN_MOD_CFG
+      GoSub FUNCupdateUses
+      GoSub FUNCnameUpdate
+      starttimer timer2
+    }
   }
   ACCEPT
 }
 
 ON INVENTORYUSE {
+  GoSub FUNCtests
   Set £ScriptDebugLog "~£ScriptDebugLog~;OnInventoryUse"
   ++ §OnInventoryUseCount //total activations just for debug
   
@@ -159,7 +169,7 @@ ON INVENTORYUSE {
   
   //////////////// DENY ACTIVATION SECTION ///////////////////////
   
-  Set £ScriptDebugLog "DebugLog:10;~^spelllevel~" //init script pseudo debug log
+  Set £ScriptDebugLog "DebugLog:10;" //init script pseudo debug log
   //Set £ScriptDebugLog "~£ScriptDebugLog~;20"
   if (^inPlayerInventory == 1) {
     PLAY "POWER_DOWN"
@@ -317,7 +327,7 @@ ON INVENTORYUSE {
     GoSub FUNCskillCheckAncientTech
     RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
       //PLAY "potion_mana"
-      Set @IncMana ^spelllevel
+      Set @IncMana @SignalStr
       Inc @IncMana @FUNCskillCheckAncientTech_addBonus_OUTPUT
       if ( §Identified > 0 ) Mul @IncMana 1.5
       SpecialFX MANA @IncMana
@@ -328,8 +338,8 @@ ON INVENTORYUSE {
     
     GoSub FUNCskillCheckAncientTech
     RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
-      //SpecialFX HEAL ^spelllevel
-      Set @IncHP ^spelllevel
+      //SpecialFX HEAL @SignalStr
+      Set @IncHP @SignalStr
       Inc @IncHP @FUNCskillCheckAncientTech_addBonus_OUTPUT
       if ( §Identified > 0 ) Mul @IncHP 1.5
       SPELLCAST -msf @IncHP HEAL PLAYER
@@ -341,7 +351,7 @@ ON INVENTORYUSE {
     GoSub FUNCChangeSkyBox
   }
   
-  Set £ScriptDebugLog "~£ScriptDebugLog~;100;player^spelllevel=~^spelllevel~"
+  Set £ScriptDebugLog "~£ScriptDebugLog~;100;"
   if (§UseCount >= §UseMax) { /////////////////// DESTROY ///////////////////
     Set §DestructionStarted 1
     PLAY "TRAP"
@@ -374,21 +384,6 @@ ON INVENTORYUSE {
     //timerCrazySpin10  -m 0 10 Rotate §tmp §TEMPORARY §TEMPORARY2
     timerCrazySpin10  -m 0 10 Rotate 0 §RotateY 0 //the model doesnt spin from it's mass or geometric center but from it's origin that is on the bottom and using other than Y will just look bad..
     //timerCrazySpin20 -m 0   10 Rotate ^rnd_360 ^rnd_360 ^rnd_360
-    //KEEP_COMMENT: when the object is rotating and moving, lightning seems to almost always miss making it unreliable. keeping these as visual effects mainly.
-    //timerAttack10 -m  1 1000 SPELLCAST -smf ^spelllevel lightning_strike PLAYER //these dont do damage? even if using higher level like 3? it seems that as it is spinning, the aim misses the player? ends up just being a nice effect tho...
-    //timerAttack10 -m  1 1000 GoSub FUNCaimPlayerCastLightning
-    //timerAttack20 -m  1 2000 SPELLCAST -smf ^spelllevel lightning_strike PLAYER
-    //timerAttack10 -m  1 2000 GoSub FUNCaimPlayerCastLightning
-    //timerAttack30 -m  1 3000 SPELLCAST -smf ^spelllevel lightning_strike PLAYER
-    //timerAttack10 -m  1 3000 GoSub FUNCaimPlayerCastLightning
-    //RANDOM 25 { //to prevent player using as granted weapon against NPCs
-      //timerAttack35 -m  1 3000 SPELLCAST -smf ^spelllevel EXPLOSION SELF
-    //}
-    //timerAttack40 -m  1 4000 SPELLCAST -smf ^spelllevel lightning_strike PLAYER
-    //timerAttack10 -m  1 4000 GoSub FUNCaimPlayerCastLightning
-    //TODO timerDemon45 -m  1 4500 show demon portal and tentacle and play its laugh, is also a reasoning for the fireball!
-    //timerAttack50 -m  1 5000 SPELLCAST -smf ^spelllevel lightning_strike PLAYER
-    //timerAttack10 -m  1 5000 GoSub FUNCaimPlayerCastLightning
     RANDOM 15 { //to prevent player using as granted weapon against NPCs
       //timerAttack55 -m  1 4950 SETTARGET PLAYER //for fireball
       //timerAttack56 -m  1 5000 SPAWN FIREBALL //the origin to fire from must be above floor
@@ -397,7 +392,6 @@ ON INVENTORYUSE {
       GoSub FUNCtrapAttack
     }
     RANDOM 25 { //to prevent player using as granted weapon against NPCs
-      //timerAttack57 -m  1 5000 SPELLCAST -smf ^spelllevel EXPLOSION SELF
       Set §FUNCtrapAttack_TrapTimeSec 5
       timerTrapVanish 1 §FUNCtrapAttack_TrapTimeSec GoSub FUNChideHologramPartsPermanently
       GoSub FUNCtrapAttack
@@ -442,7 +436,8 @@ ON INVENTORYUSE {
 
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
   //Set £ScriptDebugLog "~£ScriptDebugLog~;OnMain"
-  //starttimer timer2 //^#timer2
+  //starttimer timer1 //^#timer1 used ON MAIN
+  //starttimer timer2 //^#timer2 used ON IDENTIFY
   //starttimer timer3 //^#timer3
   //starttimer timer4 //^#timer4
   //stoptimer timer1
@@ -634,19 +629,7 @@ ON InventoryOut {
     //forceangle <yaw*> //unnecessary?
     //^angleto_<entity> //unnecessary?
     //forceangle ^angleto_PLAYER //unnecessary?
-    //SPELLCAST -smf ^spelllevel lightning_strike PLAYER //this is mainly like a visual effect as it seems to almost always miss the player..
     GoSub FUNCshockPlayer
-    //Set £ScriptDebugLog "~£ScriptDebugLog~;OnMain:Lightning"
-    //Set §RotateYBkp §RotateY //bkp auto rotate angle speed
-    //Set £ScriptDebugLog "~£ScriptDebugLog~;§RotateY=~§RotateY~"
-    //Set §RotateY 0 //this stops the rotation
-    ////forceangle <yaw*> //unnecessary?
-    ////^angleto_<entity> //unnecessary?
-    //forceangle ^angleto_PLAYER
-    //Set £ScriptDebugLog "~£ScriptDebugLog~;^angleto_PLAYER=~^angleto_PLAYER~"
-    //if ( ^#PLAYERDIST <= 500 ) { //this is only to let the player be able to flee as `ifVisible PLAYER` doesnt seem to work from objects (is always not visible right?)
-      //DoDamage -lu player ^spelllevel //-u push, extra dmg with push //TODO when the object is rotating and moving, lightning seems to almost always miss making it unreliable even after trying to stop rotation above. So this is a workaround to the lightnings that miss the player, when they start working remove this.
-    //}
     timerRestoreRotationSpeed -m 1 100 Set §RotateY §RotateYBkp // restore auto rotate speed after the shock has time to be cast
   //}
   //showlocals
@@ -701,7 +684,7 @@ ON InventoryOut {
 
 >>FUNCinitDefaults {
   if(§iFUNCMakeNPCsHostile_rangeDefault == 0) {
-    Set §iFUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range
+    Set §iFUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range //SED_TOKEN_MOD_CFG
     Set §iFUNCMakeNPCsHostile_range §iFUNCMakeNPCsHostile_rangeDefault
   }
   
@@ -709,12 +692,16 @@ ON InventoryOut {
   TWEAK SKIN "Hologram.tiny.index4000.grenade"         "Hologram.tiny.index4000.grenade.Clear"
   TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"     "Hologram.tiny.index4000.grenadeGlow.Clear"
   
+  Set §SignalDistBase 500 //SED_TOKEN_MOD_CFG
+  Set §SignalDistHalf §SignalDistBase
+  Div §SignalDistHalf 2
+  
   //Set §IdentifyObjectKnowledgeRequirement 35
   Set §UseCount 0
-  Set §DefaultTrapTimoutSec 5
+  Set §DefaultTrapTimoutSec 5 //SED_TOKEN_MOD_CFG
   
-  Collision ON //nothing happens?
-  Damager -eu 3 //doesnt damage NPCs?
+  Collision ON //nothing happens when thrown?
+  Damager -eu 3 //doesnt damage NPCs when thrown?
   
   Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCinitDefaults"
   showlocals
@@ -745,9 +732,9 @@ ON InventoryOut {
     dodamage -l player 1
   } else {
     ForceAngle ^angleto_PLAYER
-    SPELLCAST -smf ^spelllevel LIGHTNING_STRIKE PLAYER //TODO this causes damage? or is just the visual effect?
+    SPELLCAST -smf @SignalStr LIGHTNING_STRIKE PLAYER //TODO this causes damage? or is just the visual effect?
     Random 25 {
-      SPELLCAST -fmsd 250 ^spelllevel PARALYSE PLAYER
+      SPELLCAST -fmsd 250 @SignalStr PARALYSE PLAYER
     }
     
     //Set §iFUNCMakeNPCsHostile_range 350  //reason: they know it is dangerous to them too.
@@ -795,11 +782,13 @@ ON InventoryOut {
   //OUTPUT: £FUNCnameUpdate_NameFinal_OUTPUT
   if ( §Identified == 0 ) ACCEPT //the player is still not sure about what is going on
   
-  GoSub FUNCcalcAncientTechSkill
-  
   Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameBase~."
   
   if ( §bHologramInitialized == 1 ) {
+    GoSub FUNCcalcAncientTechSkill
+    
+    GoSub FUNCcalcSignalStrength
+    
     // condition from 0.00 to 1.00
     //DO NOT CALL BECOMES ENDLESS RECURSIVE LOOP: GoSub FUNCupdateUses
     //Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCnameUpdate"
@@ -807,7 +796,6 @@ ON InventoryOut {
     //Set £ScriptDebugLog "~£ScriptDebugLog~;~@ItemCondition~=~§UseRemain~"
     Div @ItemCondition §UseMax
     //Set £ScriptDebugLog "~£ScriptDebugLog~;/~§UseMax~=~@ItemCondition~"
-    
     //TODO why the below wont work? it is always bad or critical...
     //if      ( @ItemCondition >= 0.80 ) { Set £ItemConditionDesc "excellent" }
     //else if ( @ItemCondition >= 0.60 ) { Set £ItemConditionDesc "good"      }
@@ -824,6 +812,17 @@ ON InventoryOut {
     if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "average"
     if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
     if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
+    
+    Set §SignalStrSure §SignalStrengthPerc
+    Div §SignalStrSure 33
+    Inc §SignalStrSure 1
+    if(§SignalStrengthPerc == 0) Set §SignalStrSure 0
+    if(§SignalStrengthPerc >= 95) Set §SignalStrSure 4
+    if(§SignalStrSure == 0) Set £SignalStrInfo "none"
+    if(§SignalStrSure == 1) Set £SignalStrInfo "bad"
+    if(§SignalStrSure == 2) Set £SignalStrInfo "good"
+    if(§SignalStrSure == 3) Set £SignalStrInfo "strong"
+    if(§SignalStrSure == 4) Set £SignalStrInfo "excellent"
     
     // perc
     Set @ItemConditionTmp @ItemCondition
@@ -852,9 +851,15 @@ ON InventoryOut {
     if(§Quality == 1) Set £ItemQuality "inferior"
     if(§Quality == 0) Set £ItemQuality "dreadful"
     
-    if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~£ItemQuality~." //useful to chose wich one to keep
-    if(@AncientTechSkill >= 35) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~." //useful to hold your hand avoiding destroy it
-    if(@AncientTechSkill >= 50) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;)
+    if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
+      Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthPerc~%)"
+      Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~)"
+      Set £ItemQuality "~£ItemQuality~(~§UseMax~)"
+    }
+    if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." //useful to position yourself
+    if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~£ItemQuality~." //useful to chose wich one to keep
+    if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~." //useful to hold your hand avoiding destroy it
+    //if(@AncientTechSkill >= 50) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~§SignalStrengthPerc~, ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;) 
   } else {
     Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
   }
@@ -927,6 +932,8 @@ ON InventoryOut {
   
   GoSub FUNCMakeNPCsHostile
   
+  GoSub FUNCcalcSignalStrength
+  
   // random trap
   Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec //must be seconds (not milis) to easify things below like timer count and text
   timerTrapTime     §FUNCtrapAttack_TrapTimeSec 1 Dec §FUNCtrapAttack_TrapTimeSec 1
@@ -936,12 +943,12 @@ ON InventoryOut {
   Set §TrapEffectTime 0
   if (§FUNCtrapAttack_TrapMode == 0) { //explosion around self
     Set §TmpTrapKind ^rnd_5
-    if (§TmpTrapKind == 0) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf ^spelllevel explosion  SELF
-    if (§TmpTrapKind == 1) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf ^spelllevel fire_field SELF
-    if (§TmpTrapKind == 2) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf ^spelllevel harm       SELF
-    if (§TmpTrapKind == 3) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf ^spelllevel ice_field  SELF
-    if (§TmpTrapKind == 4) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf ^spelllevel life_drain SELF
-    //this cause no damage? //if (§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf ^spelllevel mass_incinerate SELF
+    if (§TmpTrapKind == 0) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStr explosion  SELF
+    if (§TmpTrapKind == 1) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStr fire_field SELF
+    if (§TmpTrapKind == 2) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStr harm       SELF
+    if (§TmpTrapKind == 3) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStr ice_field  SELF
+    if (§TmpTrapKind == 4) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStr life_drain SELF
+    //this cause no damage? //if (§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf @SignalStr mass_incinerate SELF
     Unset §TmpTrapKind
     Set §TrapEffectTime 2 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
   }
@@ -967,6 +974,20 @@ ON InventoryOut {
   RETURN
 }
 
+>>FUNCchkAndAttackProjectile {
+  if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
+  Set §TmpTrapKind ^rnd_6
+  if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStr FIREBALL              PLAYER
+  if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStr FIRE_PROJECTILE       PLAYER
+  if (§TmpTrapKind == 2) SPELLCAST -smf @SignalStr ICE_PROJECTILE        PLAYER
+  if (§TmpTrapKind == 3) SPELLCAST -smf @SignalStr MAGIC_MISSILE         PLAYER
+  if (§TmpTrapKind == 4) SPELLCAST -smf @SignalStr MASS_LIGHTNING_STRIKE PLAYER
+  if (§TmpTrapKind == 5) SPELLCAST -smf @SignalStr POISON_PROJECTILE     PLAYER
+  //if (§TrapKind == 0) SPELLCAST -smf @SignalStr LIGHTNING_STRIKE PLAYER //too weak
+  Unset §TmpTrapKind
+  RETURN
+}
+
 >>FUNChideHologramPartsPermanently {
   // clean unnecessary skins from this item only:
   //TODO? just replace by a HoloGrenade.ftl, will also help lower this script size and Hologram.ftl overlapping things in blender (not a big deal tho..)
@@ -984,25 +1005,11 @@ ON InventoryOut {
   RETURN
 }
 
->>FUNCchkAndAttackProjectile {
-  if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
-  Set §TmpTrapKind ^rnd_6
-  if (§TmpTrapKind == 0) SPELLCAST -smf ^spelllevel FIREBALL              PLAYER
-  if (§TmpTrapKind == 1) SPELLCAST -smf ^spelllevel FIRE_PROJECTILE       PLAYER
-  if (§TmpTrapKind == 2) SPELLCAST -smf ^spelllevel ICE_PROJECTILE        PLAYER
-  if (§TmpTrapKind == 3) SPELLCAST -smf ^spelllevel MAGIC_MISSILE         PLAYER
-  if (§TmpTrapKind == 4) SPELLCAST -smf ^spelllevel MASS_LIGHTNING_STRIKE PLAYER
-  if (§TmpTrapKind == 5) SPELLCAST -smf ^spelllevel POISON_PROJECTILE     PLAYER
-  //if (§TrapKind == 0) SPELLCAST -smf ^spelllevel LIGHTNING_STRIKE PLAYER //too weak
-  Unset §TmpTrapKind
-  RETURN
-}
-
 >>FUNCparalyseIfPlayerNearby { //TODOA is this working?
   if ( ^#PLAYERDIST < 500 ) {
     Set §TmpParalyseMilis 3000
     Inc §TmpParalyseMilis ^rnd_6000
-    SPELLCAST -fmsd §TmpParalyseMilis ^spelllevel PARALYSE PLAYER
+    SPELLCAST -fmsd §TmpParalyseMilis @SignalStr PARALYSE PLAYER
   }
   RETURN
 }
@@ -1010,5 +1017,52 @@ ON InventoryOut {
 >>FUNCDestroySelfSafely {
   PLAY -s //stops sounds started with -i flag
   DESTROY SELF
+  RETURN
+}
+
+>>FUNCcalcSignalStrength { //this is meant to be independent from magic skills so instead of ^spelllevel to cast spells, use @SignalStr
+  //this is like cubic areas of signal strength
+  //if (^inPlayerInventory == 0) {
+  //Set §DbgDistToPlayer ^dist_player
+  //Set §DbgSigStrDbgSelfX ^locationx_self
+  //Set §DbgSigStrDbgSelfY ^locationy_self
+  //Set §DbgSigStrDbgSelfZ ^locationz_self
+  //Set §DbgSigStrDbgPlyrX ^locationx_player
+  //Set §DbgSigStrDbgPlyrY ^locationy_player
+  //Set §DbgSigStrDbgPlyrZ ^locationz_player
+  
+  //if(^dist_player <= §SignalDistBase){ //TODO use signal repeater instead
+    //Set @SignalStrength ^locationx_player
+    //Inc @SignalStrength ^locationy_player
+    //Inc @SignalStrength ^locationz_player
+  //} else {
+    Set @SignalStrength ^locationx_self
+    Inc @SignalStrength ^locationy_self
+    if (^inPlayerInventory == 1) Inc @SignalStrength 90 //if at player inventory, items are 90 dist from ground (based on tests above). Could just use the player locationY tho.
+    Inc @SignalStrength ^locationz_self
+  //}
+  Mod @SignalStrength §SignalDistBase //remainder
+  if (@SignalStrength > §SignalDistHalf) { //means from 0 to 100 then from 100 to 0 as the player moves around
+    Dec @SignalStrength §SignalDistHalf
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;d:SS~@SignalStrength~"
+    Mul @SignalStrength -1
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;e:SS~@SignalStrength~"
+    Inc @SignalStrength §SignalDistHalf
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;f:SS~@SignalStrength~"
+  }
+  Div @SignalStrength §SignalDistHalf //percent
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;g:SS~@SignalStrength~"
+  Set @SignalStr @SignalStrength
+  Mul @SignalStr 100
+  Set §SignalStrengthPerc @SignalStr //trunc
+  Div @SignalStr 10 //0-10 like spell cast level would be
+  RETURN
+}
+
+>>FUNCtests {
+  //fail teleport -pi //tele the player to its starting spawn point
+  //Set @TstDistToSomeFixedPoint ^RealDist_PRESSUREPAD_GOB_0022 //this gives a wrong(?) huge value..
+  //Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
+  //Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
   RETURN
 }
