@@ -10,6 +10,7 @@ __INSTALLING:__
 
 Extract each compressed package you want (and the respective setup package from https://github.com/Gussak/ArxLaetansModSetup) at the game folder.  
 The setup package is important to create compatibility with Arx Fatalis/Libertatis and to keep the models work independent. As they are CC-BY they can be re-used and adapted to work elsewhere too if you want.  
+The new mods' scripts found here will probably not fully work unless you merge/compile this branch: https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod  
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.
 
