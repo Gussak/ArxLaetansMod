@@ -1067,6 +1067,9 @@ ON InventoryOut {
   //Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
   //Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
   
+  Set @test100 77.123
+  Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:~%05.2f,@test100~" //printf format
+  
   Set @test1 1.0
   Set @test2 10.0
   Set £name "foo"
@@ -1078,5 +1081,6 @@ ON InventoryOut {
     showlocals
   }
 
+  showlocals
   RETURN
 }
