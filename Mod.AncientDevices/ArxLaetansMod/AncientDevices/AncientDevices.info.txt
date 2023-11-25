@@ -1,11 +1,20 @@
-The Ancient Devices were discovered in bunkers that collapsed long ago.  
-They are of an ancient civilization that disappeared.  
-They are easy to use but are defective, insisting on using before it is ready will just damage it more, so be careful.  
+Lore:  
+
+These Ancient Devices were discovered in bunkers that collapsed long ago.  
+They are of an ancient civilization that disappeared thousands of years ago.  
+They are so light weight that they do not seem to have an energy source inside of them. It looks like they receive energy from a remote energy source transmitter. That could explain why they wont work in some locations.  
+They seem to work like a beacon after they get configured and activated.  
+  
+Usage:  
+
+They are easy to use but they are defective, insisting on using before it is ready will just damage it more, so be careful.  
 
 To be able to properly use it you need to first identify it.  
 The information shown for it depends on your AncientTech skill based on these combined skills: technological, object knowledge and intuition.  
-There are these information details levels that will appear the more you get skilled in AncientTech: quality, condition and detailed condition (uses).  
-The more skilled you get in AncientTech skill, the easier will be to prepare AncientTech items.  
-High quality AncientTech items in perfect condition will grant 100% success chance to prepare and use new AncientTech items.  
+There are these information details levels that will appear the more you get skilled in AncientTech: quality, condition and detailed condition (shows numeric values for nerds).  
+The more skilled you get in AncientTech skill, the easier will be to prepare and use this Ancient Tech.  
+High quality AncientTech items, that are also in perfect condition, will grant success on modifying and using them.  
+
+As these devices are defective, they are dangerous to use, and everyone is aware of that. So, using Ancient devices near them will get you in trouble.  
 
 PS.: please convert the small .mp3 file to .wav by running `ArxLaetansMod/AncientDevices/Sounds/Hologram.skybox.index0.wav.ConvertMp3ToWav.sh` there.
