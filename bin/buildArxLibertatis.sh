@@ -23,7 +23,26 @@ pwd
 mkdir -vp build && cd build
 pwd
 #  -DARX_DEBUG=1
-cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DARX_DEBUG_SHADOWBLOB " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+#cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DARX_DEBUG_SHADOWBLOB " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+#FAIL: export CMAKE_CXX_STANDARD=20 #this works like -std=c++20 ?
+#FAIL: cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DCMAKE_CXX_STANDARD=20 " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+if ! lsb_release -r -c |grep "22.04";then
+  if ! echoc -q "this script is ready to make it work with ubuntu 22.04, continue anyway?";then
+    exit 1
+  fi
+fi  
+
+if dpkg -s qtbase5-dev >/dev/null;then
+  echoc -p "
+  Trying to let -std=c++20 be accepted so some implementations will not cause warn messages.
+  But at CMakeLists.txt, Qt_VERSION is not being set (it is empty), and that downgrades from 20 to 17.
+  To let it work, cmake must end up finding qt5 dev.
+  For that the package 'qtbase5-dev' (>= 5.4 right?) is required.
+  "
+  exit 1;
+fi
+
+cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 set +x 
 
