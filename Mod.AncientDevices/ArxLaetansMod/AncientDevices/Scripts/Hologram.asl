@@ -1066,5 +1066,17 @@ ON InventoryOut {
   //Set @TstDistToSomeFixedPoint ^RealDist_PRESSUREPAD_GOB_0022 //this gives a wrong(?) huge value..
   //Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
   //Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
+  
+  Set @test1 1.0
+  Set @test2 10.0
+  Set £name "foo"
+  if(and(
+          @test1 == 1.0 &&
+          or(£name != "dummy" || @test2 > 10.0)
+  ){
+    Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:A"
+    showlocals
+  }
+
   RETURN
 }
