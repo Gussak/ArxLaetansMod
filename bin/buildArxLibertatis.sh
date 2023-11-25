@@ -32,7 +32,7 @@ if ! lsb_release -r -c |grep "22.04";then
   fi
 fi  
 
-if dpkg -s qtbase5-dev >/dev/null;then
+if ! dpkg -s qtbase5-dev >/dev/null;then
   echoc -p "
   Trying to let -std=c++20 be accepted so some implementations will not cause warn messages.
   But at CMakeLists.txt, Qt_VERSION is not being set (it is empty), and that downgrades from 20 to 17.
