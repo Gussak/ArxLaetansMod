@@ -3,7 +3,7 @@
 ///////////////////////////////////////////
 
 ////////////////////////////////////
-// Obs.: If you just downloaded it from github, this file may need to have all 'Â' chars removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
+// Obs.: If you just downloaded it from github, this file may need to have all 'Â' 0xC2 chars removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
 
 ///////////////// DEV HELP: //////////////
 // easy grep ex.: clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
