@@ -3,7 +3,7 @@
 ///////////////////////////////////////////
 
 ////////////////////////////////////
-// Obs.: If you just downloaded it from github, this file may need to have all 'Â' 0xC2 chars removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
+// Obs.: If you just downloaded it from github, this file may need to have all 'Ã' 0xC2 chars removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
 
 ///////////////// DEV HELP: //////////////
 // easy grep ex.: clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
@@ -507,7 +507,7 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
       }
     }
   } else if ( £AncientDeviceMode == "SignalRepeater" ) {
-    SENDEVENT -ir CUSTOM 3000 "CustomCmdSignalRepeater ^me ~@SignalStrength~"
+    SENDEVENT -ir CUSTOM 3000 "CustomCmdSignalRepeater ~^me~ ~@SignalStrength~"
   } else if ( £AncientDeviceMode == "Grenade" ) {
   } else if ( £AncientDeviceMode == "LandMine" ) {
   } else if ( £AncientDeviceMode == "TeleportKill" ) {
@@ -739,6 +739,9 @@ ON InventoryOut {
     Set §iFUNCMakeNPCsHostile_range §iFUNCMakeNPCsHostile_rangeDefault
   }
   
+  Set £SignalMode "Working"
+  Set #SignalModeChangeTime 0
+  
   Set §SignalDistBase 1000 //SED_TOKEN_MOD_CFG
   
   Set §SignalDistHalf §SignalDistBase
@@ -903,8 +906,16 @@ ON InventoryOut {
     if(§Quality == 0) Set £ItemQuality "dreadful"
     
     if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
-      Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthTrunc~%)"
-      Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~ ~^gamehours~:~^gameminutes~:~^gameseconds~" // as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
+      Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+      Set §hours   ^gamehours
+      Mod §hours 24
+      Set §minutes ^gameminutes
+      Mod §minutes 60
+      Set §seconds ^gameseconds
+      Mod §seconds 60
+      // as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
+      Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
+      //Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
       Set £ItemQuality "~£ItemQuality~(~§UseMax~)"
     }
     if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." //useful to position yourself
@@ -1078,10 +1089,25 @@ ON InventoryOut {
   Set §SignalStrengthTrunc 0   //  0 to 100
   Set @SignalStrLvl 0           //0.0 to 10.0
   
-  // no signal at certain times: 3 minutes every 20min in realtime. This means the global ancient energy transmitter is failing.
-  Set §NoSignalTime ^gameminutes //this is about realtime
-  Mod §NoSignalTime 20
-  if(§NoSignalTime < 3){
+  // no signal for some short realtime. This means the global ancient energy transmitter is failing or getting interference.
+  Set §DEBUGgameseconds ^gameseconds
+  Set §SignalModeChangeDelay #SignalModeChangeTime
+  Dec §SignalModeChangeDelay ^gameseconds
+  if(£SignalMode == "Working"){
+    if(^gameseconds > #SignalModeChangeTime){
+      Set £SignalMode "None" //configures the no signal delay below
+      Set #SignalModeChangeTime  ^gameseconds
+      Inc #SignalModeChangeTime  ^rnd_300 //up to
+      RETURN
+    }
+  } else if(£SignalMode == "None"){
+    if(^gameseconds > #SignalModeChangeTime){
+      Set £SignalMode "Working" //configures the working signal delay below
+      Set #SignalModeChangeTime  ^gameseconds
+      Inc #SignalModeChangeTime  900 //from
+      Inc #SignalModeChangeTime  ^rnd_900 //up to
+      RETURN
+    }
     RETURN
   }
   
