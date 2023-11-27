@@ -43,7 +43,12 @@ if ! dpkg -s qtbase5-dev >/dev/null;then
 fi
 
 cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-make -j "`grep "core id" /proc/cpuinfo |wc -l`"
+#make -j "`grep "core id" /proc/cpuinfo |wc -l`"
+astrMakeCmd=(make -j "`grep "core id" /proc/cpuinfo |wc -l`")
+if echoc -t 3 -q "do not remake it all, just touch the files? (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
+  astrMakeCmd+=(--touch)
+fi
+"${astrMakeCmd[@]}"
 set +x 
 
 : ${bAutoDeploy:=true} #help
