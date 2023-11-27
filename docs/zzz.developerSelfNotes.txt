@@ -28,6 +28,28 @@ when trap begins:
   settrap <technical*> //technical is the skill used to detect trap above that value
   settrap 10
 
+================================ CPP quick helpers
+
+#define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
+MYDBG(anyVar<<","<<anything<<anythinElse);
+
+================================ PR_... comments
+
+PR_Interpolate
+Interpolate an entity near a target by percent or absolute distance
+
+PR_DistanceVar?
+Distance variable now can use an absolute location as target
+ex.: ^dist_"8000.25,7800.44,8500.32"
+
+PR_LogicalOperators
+Implemented Logical Operators for "if" command
+WIP Not tested, this is a backup commit
+
+PR_FormatSyntax?
+Format expanded variables thru printf syntax
+WIP this was not tested yet! this is a backup commit only.
+
 
 ================================ DONE TESTING
 
