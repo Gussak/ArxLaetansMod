@@ -3,7 +3,7 @@
 ///////////////////////////////////////////
 
 ////////////////////////////////////
-// Obs.: If you just downloaded it from github, this file may need to have all 'Ã' 0xC2 chars removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
+// Obs.: If you just downloaded it from github, this file may need to have all 'Ã' 0xC2 chars removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
 
 ///////////////// DEV HELP: //////////////
 // easy grep ex.: clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
@@ -447,63 +447,63 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
   //stoptimer timer1
   
   if ( £AncientDeviceMode == "Hologram" ) {
-    if (§bHologramInitialized == 1) {
-      if (§DestructionStarted == 1) {
-        //attractor SELF 1 3000
-        GoSub FUNCaimPlayerCastLightning
-        GoSub FUNCMakeNPCsHostile // as NPC may be in-between
-        Set £ScriptDebugProblemTmp "MAIN:BeingDestroyed;" showlocals
-        PLAY -s //stops sounds started with -i flag
-      } else {
-        //////////////// auto repairs the hologram device
-        if (^#timer1 == 0) starttimer timer1
-        if (^#timer1 > 60000) { //once per minute. if the player waits, it will self fix after a long time.
-          if (§UseCount != 0) {
-            Set §UseRegen §UseMax
-            Div §UseRegen 10 //minutes
-            Dec §UseCount §UseRegen
-            if (§UseCount < 0) Set §UseCount 0
-            GoSub FUNCupdateUses
-            GoSub FUNCnameUpdate
-            showlocals
-          }
-          starttimer timer1
+    if (§bHologramInitialized == 0) ACCEPT
+    
+    if (§DestructionStarted == 1) {
+      //attractor SELF 1 3000
+      GoSub FUNCaimPlayerCastLightning
+      GoSub FUNCMakeNPCsHostile // as NPC may be in-between
+      Set £ScriptDebugProblemTmp "MAIN:BeingDestroyed;" showlocals
+      PLAY -s //stops sounds started with -i flag
+    } else {
+      //////////////// auto repairs the hologram device
+      if (^#timer1 == 0) starttimer timer1
+      if (^#timer1 > 60000) { //once per minute. if the player waits, it will self fix after a long time.
+        if (§UseCount != 0) {
+          Set §UseRegen §UseMax
+          Div §UseRegen 10 //minutes
+          Dec §UseCount §UseRegen
+          if (§UseCount < 0) Set §UseCount 0
+          GoSub FUNCupdateUses
+          GoSub FUNCnameUpdate
+          showlocals
         }
-        
-        /////////////// slow the player fleeing
-        //if ( ^#PLAYERDIST < 250 ) { //this attract strengh is just annoying actually..
-          //attractor SELF 3 250
-        //} else {
-          //attractor SELF OFF
+        starttimer timer1
+      }
+      
+      /////////////// slow the player fleeing
+      //if ( ^#PLAYERDIST < 250 ) { //this attract strengh is just annoying actually..
+        //attractor SELF 3 250
+      //} else {
+        //attractor SELF OFF
+      //}
+      
+      //////////////// improve landscape visualization
+      ////ISSUE: worldfade just paints the whole screen with that color w/o alpha :(, wont help to make outside darker
+      if ( ^#PLAYERDIST <= 350 ) { //350 is good as the sound volume lowers :)
+        if (§SkyMode == 2) { //cubemap
+          if(§PlayingAmbientSoundForSkyMode != §SkyMode) {
+            PLAY -ilp "~£SkyBoxCurrent~.wav"
+            Set §PlayingAmbientSoundForSkyMode §SkyMode
+          }
+        } else { //uvsphere 1
+          if(§PlayingAmbientSoundForSkyMode != §SkyMode) {
+            PLAY -ilp "~£SkyBoxCurrentUVS~.wav"
+            Set §PlayingAmbientSoundForSkyMode §SkyMode
+          }
+        }
+        //if( £DoWorldFade != 1 ){
+          //worldfade out 1000 0.25 0.25 0.25
+          //Set £ScriptDebugLog "~£ScriptDebugLog~;OnMain:FadeOut"
+          //Set £DoWorldFade 1
         //}
-        
-        //////////////// improve landscape visualization
-        ////ISSUE: worldfade just paints the whole screen with that color w/o alpha :(, wont help to make outside darker
-        if ( ^#PLAYERDIST <= 350 ) { //350 is good as the sound volume lowers :)
-          if (§SkyMode == 2) { //cubemap
-            if(§PlayingAmbientSoundForSkyMode != §SkyMode) {
-              PLAY -ilp "~£SkyBoxCurrent~.wav"
-              Set §PlayingAmbientSoundForSkyMode §SkyMode
-            }
-          } else { //uvsphere 1
-            if(§PlayingAmbientSoundForSkyMode != §SkyMode) {
-              PLAY -ilp "~£SkyBoxCurrentUVS~.wav"
-              Set §PlayingAmbientSoundForSkyMode §SkyMode
-            }
-          }
-          //if( £DoWorldFade != 1 ){
-            //worldfade out 1000 0.25 0.25 0.25
-            //Set £ScriptDebugLog "~£ScriptDebugLog~;OnMain:FadeOut"
-            //Set £DoWorldFade 1
-          //}
-        } else {
-          PLAY -s //stops sounds started with -i flag
-          Set §PlayingAmbientSoundForSkyMode 0 //reset 
-          //if( £DoWorldFade != 2 ){
-            //worldfade in 1000
-            //Set £DoWorldFade 2
-          //}
-        }
+      } else {
+        PLAY -s //stops sounds started with -i flag
+        Set §PlayingAmbientSoundForSkyMode 0 //reset 
+        //if( £DoWorldFade != 2 ){
+          //worldfade in 1000
+          //Set £DoWorldFade 2
+        //}
       }
     }
   } else if ( £AncientDeviceMode == "SignalRepeater" ) {
@@ -1187,52 +1187,56 @@ ON InventoryOut {
   Set §testInt 513
   Set £testString "foo"
   //some simple printf formats
-  Set £ScriptDebugLog "~£ScriptDebugLog~;float:~%020.6f,@testFloat~"
-  Set £ScriptDebugLog "~£ScriptDebugLog~;hexa:0x~%08X,§testInt~"
-  Set £ScriptDebugLog "~£ScriptDebugLog~;string:(~%10s,£testString~)"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;float:~%020.6f,@testFloat~"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;hexa:0x~%08X,§testInt~"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;decimalAlignRight:~%8d,§testInt~"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;string='~%10s,£testString~'"
   RETURN
 }
 >>FUNCtestLogicOperators {
-  Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests"
   Set @testFloat 1.5
   Set §testInt 7
   Set £testString "foo"
-  // OK means can appear on the £ScriptDebugLog. WRONG means it should not have appeared.
-  if(and(@testFloat == 1.5 && @testInt == 7 && £testString == "foo")){
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A1:OK"
+  
+  // OK means can appear on the £ScriptDebug________________Tests. WRONG means it should not have appeared.
+  
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A1:OK"
   }
-  if(and(@testFloat == 1.5 && @testInt == 7 && £testString == "foo1")){
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A2:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A2:WRONG"
   }
-  if(and(@testFloat == 1.5 && @testInt == 8 && £testString == "foo")){
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A3:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A3:WRONG"
   }
-  if(and(@testFloat == 1.6 && @testInt == 7 && £testString == "foo")){
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A4:WRONG"
+  if(and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A4:WRONG"
   }
-  if(and(@testFloat == 1.5 && @testInt == 7 && £testString == "foo"))
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A11:OK"
-  if(and(@testFloat == 1.5 && @testInt == 7 && £testString == "foo1"))
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A12:WRONG"
-  if(and(@testFloat == 1.5 && @testInt == 8 && £testString == "foo"))
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A13:WRONG"
-  if(and(@testFloat == 1.6 && @testInt == 7 && £testString == "foo"))
-    Set £ScriptDebugLog "~£ScriptDebugLog~;A14:WRONG"
+  // test without block delimiters { }
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A11:OK"
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A12:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A13:WRONG"
+  if(and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14:WRONG"
   
   //Set @test1 1.0
   //Set @test2 11.0
   //Set £name "foo"
   //if(and(@test1 == 1.0 && or(£name != "dummy" || @test2 > 10.0)){
-    //Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:A"
+    //Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:A"
   //}
   //if(and(@test1 == 2.0 && or(£name != "dummy" || @test2 > 10.0)){ //TODO this is failing
-    //Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:B"
+    //Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:B"
   //}
   //if(and(@test1 == 1.0 && or(£name == "dummy" || @test2 > 10.0)){
-    //Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:C"
+    //Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:C"
   //}
-  //if(or(@test1 == 2.0 || £name == "dummy" || @test2 <= 10.0)) Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:D"
-  //if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests:E"
+  //if(or(@test1 == 2.0 || £name == "dummy" || @test2 <= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:D"
+  //if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:E"
   
   RETURN
 }
@@ -1243,7 +1247,7 @@ ON InventoryOut {
   //Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
   //Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
   
-  Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests" //printf format
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests" //printf format
   GoSub FUNCtestPrintfFormats
   GoSub FUNCtestLogicOperators
   
