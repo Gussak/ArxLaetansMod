@@ -14,7 +14,10 @@ Obs.: The setup package is important to create compatibility with Arx Fatalis/Li
 
 My new mods' scripts found here will probably not fully work unless you merge/compile this branch: https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod.  
 
-Obs.: My PR_... branches at https://github.com/Gussak/ArxLibertatis are meant to create pull requests to main Arx Libertatis project. They are all merged into ForArxLaetansMod branch already. If you want you can improve and/or just create a pull request there too from these branches.  
+Obs.: My PR_... branches at https://github.com/Gussak/ArxLibertatis are meant to create pull requests to main Arx Libertatis project.  
+They may not be ready yet (main contain backup untested commits).  
+They will all merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
+If you want you can improve and/or just create a pull request there too from these branches.  
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
 
