@@ -5,16 +5,23 @@
 while true;do 
 	nWPid="$(xdotool getwindowpid $(xdotool getactivewindow))";
 	nPid="$(pgrep -f "^[.]/arx ")";
-	declare -p nWPid nPid&&:
 	ps -o pid,cputimes,stat,cmd -p $nWPid $nPid&&:
 	
-	if [[ -n "$nWPid" ]] && [[ -n "$nPid" ]];then
+	if [[ -z "$nWPid" ]];then nWPid=-1;fi
+	declare -p nWPid nPid&&:
+	
+	#if [[ -n "$nWPid" ]] && [[ -n "$nPid" ]];then
+	if [[ -n "$nPid" ]];then
 		nCpuTime=$(ps --no-headers -o cputimes -p $nPid |tr -d ' ') 
-		if((nPid==nWPid || nCpuTime<nMinCpuTime));then #nCpuTime is to let the window open
-			kill -SIGCONT $nPid;
+		if((nCpuTime<nMinCpuTime));then #nCpuTime is to let the window open
+			set -x;kill -SIGCONT $nPid;set +x
 		else
-			if((nCpuTime >= nMinCpuTime));then
-				kill -SIGSTOP $nPid;
+			#if((nPid==nWPid));then #nCpuTime is to let the window open
+			if [[ "$nPid" == "$nWPid" ]];then #nCpuTime is to let the window open
+				set -x;kill -SIGCONT $nPid;set +x
+			#elif((nCpuTime >= nMinCpuTime));then
+			else
+				set -x;kill -SIGSTOP $nPid;set +x
 			fi
 		fi;
 	fi
