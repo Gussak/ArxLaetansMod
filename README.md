@@ -12,15 +12,31 @@ Extract each compressed package you want (and the respective setup package from 
 
 Obs.: The setup package is important to create compatibility with Arx Fatalis/Libertatis and to keep the models work independent. As they are CC-BY they can be re-used and adapted to work elsewhere too if you want.  
 
-My new mods' scripts found here will probably not fully work unless you merge/compile this branch: https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod.  
+My new mods' scripts found here will probably not fully work unless you merge/compile this branch: https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod
+or with the newest (possibly unstable) with tests:
+https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST
 
-Obs.: About PR_... branches at https://github.com/Gussak/ArxLibertatis:  
+TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
+
+___
+
+# __PULL request branches:__  
+
+About 'PR_.*' branches at https://github.com/Gussak/ArxLibertatis:  
 These branches are meant to create pull requests to main Arx Libertatis project.  
 They may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments.  
 They will all be merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
 If you want you can improve them, and then also create a pull request at Arx Libertatis from these branches instead of me.  
 
-TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
+READY BRANCHES (and commit message):  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
+src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
+High poly dropped items' models create a very dark ugly shadow.  
+This patch limits the amount of shadows for them still using strided().  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
+Added Remainder arithmetic operation  
 
 ___
 

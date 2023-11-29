@@ -55,6 +55,7 @@ while true;do
   #./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
   echoc --info "EXEC: ${acmd[@]}"
   ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest
+  (xterm -e bash -c "tail -F '$strFlLog'"&disown)
   unbuffer "${acmd[@]}" 2>&1 |tee "$strFlLog"
   
   echoc -w "re-run"
