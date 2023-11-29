@@ -28,8 +28,54 @@ when trap begins:
   settrap <technical*> //technical is the skill used to detect trap above that value
   settrap 10
 
-================================ CPP quick helpers
+rune all
 
+//to help on dev testing things lvl 8
+addxp 70000
+inventory playeraddmulti magic/hologram/hologram 50
+inventory playeraddmulti weapons/bone_weap/bone_weap 50
+
+inventory playeradd magic/hologram/hologram
+
+inventory playeraddmulti provisions/torch/torch 20
+inventory playeradd movable/skull/skull
+inventory playeradd weapons/bone_weap/bone_weap
+inventory playeraddmulti weapons/bone_weap/bone_weap 50
+
+inventory playeradd quest_item/blood/blood
+inventory playeradd quest_item/sedative_dose/sedative_dose
+
+#potion2begreen potion2beorange potion2beblue potion2bepurple potion2bewhite
+inventory playeradd magic/potion2begreen/potion2begreen
+inventory playeradd magic/potion2beorange/potion2beorange
+inventory playeradd magic/potion2beblue/potion2beblue
+inventory playeradd magic/potion2bepurple/potion2bepurple
+inventory playeradd magic/potion2bewhite/potion2bewhite
+
+inventory playeradd magic/potion2berealcure/potion2berealcure
+inventory playeradd magic/potion2berealcurefull/potion2berealcurefull
+
+inventory playeradd provisions/bottle_water/bottle_water
+inventory playeradd provisions/bottle_wine/bottle_wine
+
+inventory playeradd provisions/bottle_blood/bottle_blood
+inventory playeradd magic/potion_green/potion_green
+
+inventory playeradd magic/potion_mana/potion_mana
+inventory playeradd magic/potion_invisible/potion_invisible
+
+inventory playeradd magic/potion_life/potion_life
+inventory playeradd magic/potion_purple/potion_purple
+
+inventory playeradd provisions/backpack/backpack
+
+inventory playeradd movable/broken_bottle/broken_bottle
+
+spawn npc "goblin_base\\goblin_base" player
+
+================================ CPP quick helpers, delete before pull request
+
+#include <iostream>
 #define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
 MYDBG(anyVar<<","<<anything<<anythinElse);
 
@@ -72,3 +118,6 @@ worldfade in <duration*>
 
 attractor <entity> <power*> <radius*>
 attractor SELF 10 300 //hologram blackhole test
+
+
+MYDBG("DEGREES:(name="<<name<<",xyz="<<xyz<<",deg="<<degrees<<",fixedDeg="<<(*fcontent)<<",pitch="<<entity->angle.getPitch()<<",yaw="<<entity->angle.getYaw()<<",roll="<<entity->angle.getRoll()<<",Ppitch="<<player.angle.getPitch()<<",Pyaw="<<player.angle.getYaw()<<",Proll="<<player.angle.getRoll()<<",Cpitch="<<context.getEntity()->angle.getPitch()<<",Cyaw="<<context.getEntity()->angle.getYaw()<<",Croll="<<context.getEntity()->angle.getRoll()<<")"); //<<",angle="<<entity->angle

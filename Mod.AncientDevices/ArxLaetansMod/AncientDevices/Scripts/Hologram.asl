@@ -2,12 +2,21 @@
 // by Gussak (https://github.com/Gussak) //
 ///////////////////////////////////////////
 
-////////////////////////////////////
-// Obs.: If you just downloaded it from github, this file may need to have all 0xC2 chars (from before Â£ Â§) removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
+//////////////////////////////////////
+// ON RELEASE: comment lines with //COMMENT_ON_RELEASE
 
-///////////////// DEV HELP: //////////////
-// easy grep ex.: clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
-// easy grep ex.: clear;LC_ALL=C egrep 'torch.*' --include="*.asl" --include="*.ASL" -iRIaho * |sort -u
+////////////////////////////////////
+// Obs.: If you just downloaded it from github, this file may need to have all 0xC2 chars (from before £ §) removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
+
+///////////////// DEV HELP: term cmds //////////////
+//clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
+//clear;LC_ALL=C egrep 'torch.*' --include="*.asl" --include="*.ASL" -iRIaho * |sort -u
+//clear;LC_ALL=C egrep 'angle' --include="*.h" --include="*.cpp" -iRnI *
+
+////////////////// CPP EASY HELP /////////////////////
+// #include <iostream>
+// #define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
+// MYDBG(anyVar<<","<<anything<<anythinElse);
 
 ///////////////// TIPS: /////////////////
 // ALWAYS use this: inventory add magic/hologram/hologram ; after any changes and ALWAYS work with a freshly instantiated item, othewise the log will show many things that are inconsistent.
@@ -30,13 +39,13 @@
 //on inventories init, this configures the generic scroll into specific spell and level:
 // INVENTORY ADD "magic\\scroll_generic\\scroll_generic"
 // SENDEVENT -ir TRANSMUTE 1 "8 SPEED" //the 1 distance means apparently items inside the container being ON INIT or ON INITEND
-// SENDEVENT -ir CUSTOM 1000 "SomeCustomString ~Â§SomeVar1~ ~Â§SomeVar2~ ~Â§SomeVar3~ ~Â§SomeVar4~ ~Â§SomeVar5~" // there is no limit for the number of parameters and types, so anything can be communicated between entities, nice! Just collect them with the correct type: ^$param<i> string, ^&param<i> number, ^#param<i> int
+// SENDEVENT -ir CUSTOM 1000 "SomeCustomString ~§SomeVar1~ ~§SomeVar2~ ~§SomeVar3~ ~§SomeVar4~ ~§SomeVar5~" // there is no limit for the number of parameters and types, so anything can be communicated between entities, nice! Just collect them with the correct type: ^$param<i> string, ^&param<i> number, ^#param<i> int
 
-//Set Â§TestInt2 @TestFloat2 //it will always trunc do 1.9999 will become 1
+//Set §TestInt2 @TestFloat2 //it will always trunc do 1.9999 will become 1
 
-//code IFs carefully with spaces: if ( Â§bHologramInitialized == 1 ) { //as this if(Â§bHologramInitialized==1){ will result in true even if Â§bHologramInitialized is not set...
+//code IFs carefully with spaces: if ( §bHologramInitialized == 1 ) { //as this if(§bHologramInitialized==1){ will result in true even if §bHologramInitialized is not set...
 
-//Do NOT unset vars used in timers! it will break them!!! ex.: timerTrapDestroy 1 Â§TmpTrapDestroyTime GoSub FUNCDestroySelfSafely  //do not UnSet Â§TmpTrapDestroyTime
+//Do NOT unset vars used in timers! it will break them!!! ex.: timerTrapDestroy 1 §TmpTrapDestroyTime GoSub FUNCDestroySelfSafely  //do not UnSet §TmpTrapDestroyTime
 
 //apparently items can only stack if they have the exact same name and/or icon?
 
@@ -55,17 +64,17 @@
 //TODO teleportArrow+hologram=mindControl (undetectable, and frenzy foe against his friends)
 //TODO some cleanup? there are some redundant "function" calls like to FUNCMakeNPCsHostile
 //TODO sometimes the avatar will speak "they are dead, all dead" when activating the hologram to change the landscape, but... it could be considered contextualized about the ancient civilization that vanished ;)
-//TODO `PLAY -ilp "~Â£SkyBoxCurrentUVS~.wav"` requires ".wav" as it removes any extension before re-adding the .wav so somename.index1 would become "somename.wav" and not "somename.index1.wav" and was failing. I think the src cpp code should only remove extension if it is ".wav" or other sound format, and not everything after the last dot "."
+//TODO `PLAY -ilp "~£SkyBoxCurrentUVS~.wav"` requires ".wav" as it removes any extension before re-adding the .wav so somename.index1 would become "somename.wav" and not "somename.index1.wav" and was failing. I think the src cpp code should only remove extension if it is ".wav" or other sound format, and not everything after the last dot "."
 
-ON INIT { Set Â£ScriptDebugLog "On_Init"
+ON INIT { Set £ScriptDebugLog "On_Init"
   SetName "Ancient Device (unidentified)"
   SET_MATERIAL METAL
   SetGroup "DeviceTechBasic"
   SET_PRICE 50
   PlayerStackSize 50 
   
-  Set Â§IdentifyObjectKnowledgeRequirement 35
-  SETEQUIP identify_value Â§IdentifyObjectKnowledgeRequirement //seems to enable On Identify event but the value seems to be ignored to call that event?
+  Set §IdentifyObjectKnowledgeRequirement 35
+  SETEQUIP identify_value §IdentifyObjectKnowledgeRequirement //seems to enable On Identify event but the value seems to be ignored to call that event?
   
   SET_STEAL 50
   SET_WEIGHT 0
@@ -78,27 +87,27 @@ ON INIT { Set Â£ScriptDebugLog "On_Init"
   ACCEPT
 }
 
-ON IDENTIFY { Set Â£ScriptDebugLog "On_Identify" //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
-  //Set Â£ScriptDebugProblemTmp "identified=~Â§Identified~;ObjKnow=~^PLAYER_SKILL_OBJECT_KNOWLEDGE~"
-  //if ( Â§Identified > 0 ) ACCEPT //w/o this was flooding the log, why?
-  //if ( Â§IdentifyObjectKnowledgeRequirement == 0 ) ACCEPT //useless?
-  if ( Â§Identified == 0 ) {
-    if ( ^PLAYER_SKILL_OBJECT_KNOWLEDGE >= Â§IdentifyObjectKnowledgeRequirement ) {
-      Set Â§Identified 1
+ON IDENTIFY { Set £ScriptDebugLog "On_Identify" //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
+  //Set £ScriptDebugProblemTmp "identified=~§Identified~;ObjKnow=~^PLAYER_SKILL_OBJECT_KNOWLEDGE~"
+  //if ( §Identified > 0 ) ACCEPT //w/o this was flooding the log, why?
+  //if ( §IdentifyObjectKnowledgeRequirement == 0 ) ACCEPT //useless?
+  if ( §Identified == 0 ) {
+    if ( ^PLAYER_SKILL_OBJECT_KNOWLEDGE >= §IdentifyObjectKnowledgeRequirement ) {
+      Set §Identified 1
       
-      if (Â§UseCount == 0) { //no uses will still be showing the doc so we know it is still to show the doc. this prevents changing if already showing a nice landscape
-        Set Â£SkyBoxCurrent "Hologram.skybox.index2000.DocIdentified"
-        Set Â£SkyBoxPrevious "~Â£SkyBoxCurrent~"
-        TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~Â£SkyBoxCurrent~"
+      if (§UseCount == 0) { //no uses will still be showing the doc so we know it is still to show the doc. this prevents changing if already showing a nice landscape
+        Set £SkyBoxCurrent "Hologram.skybox.index2000.DocIdentified"
+        Set £SkyBoxPrevious "~£SkyBoxCurrent~"
+        TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~£SkyBoxCurrent~"
       }
       
       SET_PRICE 100
       
-      Set Â£FUNCnameUpdate_NameBase "Holograms of the over world"
+      Set £FUNCnameUpdate_NameBase "Holograms of the over world"
       GoSub FUNCupdateUses
       GoSub FUNCnameUpdate
       
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;Identified_Now"
+      Set £ScriptDebugLog "~£ScriptDebugLog~;Identified_Now"
       
       showlocals
     }
@@ -113,37 +122,37 @@ ON IDENTIFY { Set Â£ScriptDebugLog "On_Identify" //this is called (apparently ev
   ACCEPT
 }
 
-ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
-  ++ Â§OnInventoryUseCount //total activations just for debug
-  GoSub FUNCtests
+ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
+  ++ §OnInventoryUseCount //total activations just for debug
+  GoSub FUNCtests //COMMENT_ON_RELEASE
   
   ///////////////// TRAP MODE SECTION ///////////////////
-  if ( Â§TrapInitStep > 0 ) {
-    if ( Â§TrapInitStep == 1 ) {
+  if ( §TrapInitStep > 0 ) {
+    if ( §TrapInitStep == 1 ) {
       if (^amount > 1) { //cannot activate a stack of items
         SPEAK -p [player_no] NOP
         ACCEPT
       }
       
       GoSub FUNCskillCheckAncientTech
-      Set Â§ActivateChance Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-      if ( Â§Quality >= 4 ) {
-        Set Â§ActivateChance 100
+      Set §ActivateChance §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+      if ( §Quality >= 4 ) {
+        Set §ActivateChance 100
       }
-      RANDOM Â§ActivateChance { //not granted to successfully activate it as it is a defective device
-        Set Â§FUNCtrapAttack_TrapTimeSec 5
+      RANDOM §ActivateChance { //not granted to successfully activate it as it is a defective device
+        Set §FUNCtrapAttack_TrapTimeSec 5
         
         TWEAK ICON "HologramGrenadeActive[icon]"
         
         TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
         TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
         //Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
-        timerTrapGlowBlinkOff -m Â§FUNCtrapAttack_TrapTimeSec  900 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+        timerTrapGlowBlinkOff -m §FUNCtrapAttack_TrapTimeSec  900 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
         //On  at 1000 2000 3000 4000 5000
-        timerTrapGlowBlinkOn  -m Â§FUNCtrapAttack_TrapTimeSec 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+        timerTrapGlowBlinkOn  -m §FUNCtrapAttack_TrapTimeSec 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
         
-        timerTrapVanish     1 Â§FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
-        timerTrapVanishGlow 1 Â§FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+        timerTrapVanish     1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
+        timerTrapVanishGlow 1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
         
         GoSub FUNCtrapAttack
       } else {
@@ -159,7 +168,7 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
       }
       //timerTrapDestroy -m 1 5100 GoSub FUNCDestroySelfSafely
       //timerTrapDestroy -m 1 7000 GoSub FUNCDestroySelfSafely //some effects have infinite time and then will last 2s (from 5000 to 7000)
-      Set Â§TrapInitStep 2
+      Set §TrapInitStep 2
     } else { // after trap being activated will only shock the player and who is in-between too
       GoSub FUNCshockPlayer
       if (^inPlayerInventory == 1) { //but if in inventory, will dissassemble the grenade recovering 2 holograms used to create it
@@ -172,43 +181,44 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
   
   //////////////// DENY ACTIVATION SECTION ///////////////////////
   
-  Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;DebugLog:10"
-  //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;20"
+  Set £ScriptDebugLog "~£ScriptDebugLog~;DebugLog:10"
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;20"
   if (^inPlayerInventory == 1) {
     PLAY "POWER_DOWN"
     showlocals
     ACCEPT //can only be activated if deployed
   }
   
-  if (Â§UseBlockedMili > 0) {
+  if (§UseBlockedMili > 0) {
     GoSub FUNCMalfunction
-    Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;Deny_A:Blocked=~Â§UseBlockedMili~"
+    Set £ScriptDebugLog "~£ScriptDebugLog~;Deny_A:Blocked=~§UseBlockedMili~"
     
-    ++ Â§UseCount 
+    ++ §UseCount 
     GoSub FUNCupdateUses //an attempt to use while blocked will damage it too, the player must wait the cooldown
     GoSub FUNCnameUpdate
     
     showlocals
     ACCEPT
-  } else if (Â§UseBlockedMili < 0) {
+  } 
+  else if (§UseBlockedMili < 0) {
     // log to help fix inconsistency if it ever happens
     timerBlocked off
-    Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;Fix_A:Blocked=~Â§UseBlockedMili~ IsNegative, fixing it to 0"
+    Set £ScriptDebugLog "~£ScriptDebugLog~;Fix_A:Blocked=~§UseBlockedMili~ IsNegative, fixing it to 0"
     //showlocals
-    Set Â§UseBlockedMili 0
+    Set §UseBlockedMili 0
   }
   
-  if (Â§bHologramInitialized == 1) {
+  if (§bHologramInitialized == 1) {
     if ( ^#PLAYERDIST > 200 ) { //after scale up. 185 was almost precise but annoying to use. 190 is good but may be annoying if there is things on the ground.
       GoSub FUNCMalfunction
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;Deny_C:PlayerDist=~^#PLAYERDIST~"
+      Set £ScriptDebugLog "~£ScriptDebugLog~;Deny_C:PlayerDist=~^#PLAYERDIST~"
       showlocals
       ACCEPT
     }
   }
   
   //////////// INITIALIZE: Turn On ///////////
-  if (Â§bHologramInitialized == 0) { //first use will just scale it up/initialize it
+  if (§bHologramInitialized == 0) { //first use will just scale it up/initialize it
     PLAY "POWER"
     
     //Collision ON
@@ -218,30 +228,30 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
     
     TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.box.Clear"
     
-    Set Â§UseMax ^rnd_115
+    Set §UseMax ^rnd_115
     //GoSub FUNCcalcAncientTechSkill
-    //Inc Â§UseMax @AncientTechSkill
-    Set Â§UseRemain Â§UseMax
-    Set Â§UseHologramDestructionStart Â§UseMax
-    Mul Â§UseHologramDestructionStart 0.95
+    //Inc §UseMax @AncientTechSkill
+    Set §UseRemain §UseMax
+    Set §UseHologramDestructionStart §UseMax
+    Mul §UseHologramDestructionStart 0.95
     
     SET_SHADOW OFF
-    Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;30"
+    Set £ScriptDebugLog "~£ScriptDebugLog~;30"
     
     // grow effect (timers begin imediatelly or after this event exits?)
     // total time
-    Set Â§UseBlockedMili 5000 //the time it will take to grow
-    //timerBlocked -m 100 50 Dec Â§UseBlockedMili 50 //to wait while it scales up
-    timerBlocked -m 0 50 Dec Â§UseBlockedMili 50 //will just decrement Â§UseBlockedMili until it reaches 0
+    Set §UseBlockedMili 5000 //the time it will take to grow
+    //timerBlocked -m 100 50 Dec §UseBlockedMili 50 //to wait while it scales up
+    timerBlocked -m 0 50 Dec §UseBlockedMili 50 //will just decrement §UseBlockedMili until it reaches 0
     // interactivity blocked
     SET_INTERACTIVITY NONE
-    timerInteractivity -m 1 Â§UseBlockedMili SET_INTERACTIVITY YES
+    timerInteractivity -m 1 §UseBlockedMili SET_INTERACTIVITY YES
     // scale up effect (each timer must have it's own unique id)
-    Set Â§Scale 100 //default. target is 1000%
-    timerGrowInc  -m 100 50 Inc Â§Scale 9 //1000-100=900; 900/100=9 per step
-    timerGrowInc2 -m 100 50 SetScale Â§Scale
+    Set §Scale 100 //default. target is 1000%
+    timerGrowInc  -m 100 50 Inc §Scale 9 //1000-100=900; 900/100=9 per step
+    timerGrowInc2 -m 100 50 SetScale §Scale
     
-    Set Â§bHologramInitialized 1
+    Set §bHologramInitialized 1
     
     TWEAK ICON "HologramInitialized[icon]"
     
@@ -254,32 +264,32 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
   }
   
   //////////////// WORK on landscapes etc /////////////////////////
-  ++ Â§UseCount
+  ++ §UseCount
   
-  if (Â§UseCount == 1) { //init skyboxes
-    Set Â§SkyMode 2 //cubemap
-    Set Â§SkyBoxIndex 0 //initializes the landscapes
-    Set Â£SkyBoxCurrent "Hologram.skybox.index~Â§SkyBoxIndex~"
-    TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"   "~Â£SkyBoxCurrent~" //no problem if unidentified
-    TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~Â£SkyBoxCurrent~"
-    //Set Â£SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index3000.Clear" //sync this with what is in blender
-    Set Â£SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index2000.DocBackground" //sync this with what is in  blender
+  if (§UseCount == 1) { //init skyboxes
+    Set §SkyMode 2 //cubemap
+    Set §SkyBoxIndex 0 //initializes the landscapes
+    Set £SkyBoxCurrent "Hologram.skybox.index~§SkyBoxIndex~"
+    TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"   "~£SkyBoxCurrent~" //no problem if unidentified
+    TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~£SkyBoxCurrent~"
+    //Set £SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index3000.Clear" //sync this with what is in blender
+    Set £SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index2000.DocBackground" //sync this with what is in  blender
     GoSub FUNCChangeSkyBox
   }
   
   // means the device is malfunctioning and shocks the player, was 25%
-  Set Â§Malfunction 0
+  Set §Malfunction 0
   GoSub FUNCskillCheckAncientTech
-  Set Â§ChkMalfunction Â§FUNCskillCheckAncientTech_chanceFailure_OUTPUT
-  Div Â§ChkMalfunction 2
-  RANDOM Â§ChkMalfunction {
+  Set §ChkMalfunction §FUNCskillCheckAncientTech_chanceFailure_OUTPUT
+  Div §ChkMalfunction 2
+  RANDOM §ChkMalfunction {
     GoSub FUNCshockPlayer
     //dodamage -lu player 3 //-u push, extra dmg with push. this grants some damage if lightning above fails
-    INC Â§UseCount 10  //damage
-    INC Â§UseCount ^rnd_10
-    Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;60.damagePlayer"
-    Set Â§Malfunction 1
-    Inc Â§UseBlockedMili ^rnd_10000
+    INC §UseCount 10  //damage
+    INC §UseCount ^rnd_10
+    Set £ScriptDebugLog "~£ScriptDebugLog~;60.damagePlayer"
+    Set §Malfunction 1
+    Inc §UseBlockedMili ^rnd_10000
   }
   
   //it called the attention of some hostile creature, not related to player skill. no need to use any hiding/shadow value as the hologram emits light and will call attention anyway. Only would make sense in some closed room, but rats may find their way there too.
@@ -287,76 +297,76 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
     PLAY "sfx_lightning_loop"
     //RANDOM 75 { 
       spawn npc "rat_base\\rat_base" SELF //player
-      INC Â§UseCount 20 //damage
-      INC Â§UseCount ^rnd_20
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;70.spawn rat"
-      Inc Â§UseBlockedMili ^rnd_15000
-      Set Â§Malfunction 1
+      INC §UseCount 20 //damage
+      INC §UseCount ^rnd_20
+      Set £ScriptDebugLog "~£ScriptDebugLog~;70.spawn rat"
+      Inc §UseBlockedMili ^rnd_15000
+      Set §Malfunction 1
     //} else { //TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)!
       ////RANDOM 75 {
         //spawn npc "dog\\dog" player //these dogs are friendly...
-        //Inc Â§UseBlockedMili 30000
-        //Set Â§Malfunction 1
-        //INC Â§UseCount 5 //durability
-        //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;70.spawn dog"
+        //Inc §UseBlockedMili 30000
+        //Set §Malfunction 1
+        //INC §UseCount 5 //durability
+        //Set £ScriptDebugLog "~£ScriptDebugLog~;70.spawn dog"
         ////spawn npc "bat\\bat" player //no, kills rats
       ////} else {
         ////spawn npc "goblin_base\\goblin_base" player //doesnt attack player
         ////spawn npc "goblin_test\\goblin_test" player //doesnt attack the player
-        //Inc Â§UseBlockedMili 60000
-        //Set Â§Malfunction 1
+        //Inc §UseBlockedMili 60000
+        //Set §Malfunction 1
       ////}
     //}
   }
   
   // warning to help the player wakeup 
-  if (Â§UseCount >= Â§UseHologramDestructionStart) { //this may happen a few times or just once, depending on the player bad luck ;)
+  if (§UseCount >= §UseHologramDestructionStart) { //this may happen a few times or just once, depending on the player bad luck ;)
     RANDOM 25 {
       PLAY "sfx_lightning_loop"
     }
     PLAY "TRAP"
     SETLIGHT 1 //TODO??
-    Set Â§Malfunction 1
-    Set Â§UseBlockedMili 100 //to prevent any other delay and let the player quickly reach the destruction event
+    Set §Malfunction 1
+    Set §UseBlockedMili 100 //to prevent any other delay and let the player quickly reach the destruction event
     TWEAK SKIN "Hologram.skybox.index1000.Status.Good" "Hologram.skybox.index1000.Status.Bad"
     GoSub FUNCshockPlayer
   }
 
-  if (Â§Malfunction > 0) {
+  if (§Malfunction > 0) {
     GoSub FUNCMalfunction
     //DoDamage -u player 0 //-u push
   } else {
     /////////// HEALING EFFECTS
     GoSub FUNCskillCheckAncientTech
-    RANDOM Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
+    RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
       //PLAY "potion_mana"
       Set @IncMana @SignalStrLvl
       Inc @IncMana @FUNCskillCheckAncientTech_addBonus_OUTPUT
-      if ( Â§Identified > 0 ) Mul @IncMana 1.5
+      if ( §Identified > 0 ) Mul @IncMana 1.5
       SpecialFX MANA @IncMana
       //TODO play some sound that is not drinking or some visual effect like happens with healing
       SPEAK -p [player_yes] NOP //TODO good?
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;MANA"
+      Set £ScriptDebugLog "~£ScriptDebugLog~;MANA"
     }
     
     GoSub FUNCskillCheckAncientTech
-    RANDOM Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
+    RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
       //SpecialFX HEAL @SignalStrLvl
       Set @IncHP @SignalStrLvl
       Inc @IncHP @FUNCskillCheckAncientTech_addBonus_OUTPUT
-      if ( Â§Identified > 0 ) Mul @IncHP 1.5
+      if ( §Identified > 0 ) Mul @IncHP 1.5
       SPELLCAST -msf @IncHP HEAL PLAYER
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;HEAL"
-      //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;43"
+      Set £ScriptDebugLog "~£ScriptDebugLog~;HEAL"
+      //Set £ScriptDebugLog "~£ScriptDebugLog~;43"
     }
     
     ///////////////// SKYBOXES
     GoSub FUNCChangeSkyBox
   }
   
-  Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;100;"
-  if (Â§UseCount >= Â§UseMax) { /////////////////// DESTROY ///////////////////
-    Set Â§DestructionStarted 1
+  Set £ScriptDebugLog "~£ScriptDebugLog~;100;"
+  if (§UseCount >= §UseMax) { /////////////////// DESTROY ///////////////////
+    Set §DestructionStarted 1
     PLAY "TRAP"
     PLAY "POWER"
     SET_INTERACTIVITY NONE
@@ -368,41 +378,41 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
     GoSub FUNCMakeNPCsHostile
     
     ///////////// ANIMATION ////////////////
-    //Set Â§UseBlockedMili 999999 //any huge value beyond destroy limit
+    //Set §UseBlockedMili 999999 //any huge value beyond destroy limit
     //             times delay
-    //timerShrink1 -m 100   30 Dec Â§Scale 10 //from 1000 to 0 in 3s with a shrink of 10% each step
-    //timerShrink2 -m 100   30 SetScale Â§Scale
+    //timerShrink1 -m 100   30 Dec §Scale 10 //from 1000 to 0 in 3s with a shrink of 10% each step
+    //timerShrink2 -m 100   30 SetScale §Scale
     // total time to finish the animation is 5000ms
-    //Set Â§SIZED 10 //controls shrink varying speed from faster to slower: 5000/x=10/1; x=5000/10; 500ms
-    //timerShrink0 -m 100  500 Dec Â§SIZED 1 //this is the speed somehow
-    //timerShrink1 -m 100   50 Dec Â§Scale Â§SIZED
-    timerShrink1 -m 100   50 Dec Â§Scale 10
-    timerShrink2 -m 100   50 SetScale Â§Scale
-    //timerLevitateX -m  0 150 Inc Â§TEMPORARY ^rnd_2
-    //timerLevitateZ -m  0 200 Inc Â§TEMPORARY2 3
+    //Set §SIZED 10 //controls shrink varying speed from faster to slower: 5000/x=10/1; x=5000/10; 500ms
+    //timerShrink0 -m 100  500 Dec §SIZED 1 //this is the speed somehow
+    //timerShrink1 -m 100   50 Dec §Scale §SIZED
+    timerShrink1 -m 100   50 Dec §Scale 10
+    timerShrink2 -m 100   50 SetScale §Scale
+    //timerLevitateX -m  0 150 Inc §TEMPORARY ^rnd_2
+    //timerLevitateZ -m  0 200 Inc §TEMPORARY2 3
     timerLevitate  -m 10 100 Move 0 -10 0 // Y negative is upwards //this doesnt seem to work well everytime //TODO use animation, but how?
-    timerCrazySpin10p -m 0 75 Inc Â§RotateY 1
-    //timerCrazySpin10y -m 0 150 Inc Â§TEMPORARY 2
-    //timerCrazySpin10r -m 0 200 Inc Â§TEMPORARY2 3
-    //timerCrazySpin10  -m 0 10 Rotate Â§tmp Â§TEMPORARY Â§TEMPORARY2
-    timerCrazySpin10  -m 0 10 Rotate 0 Â§RotateY 0 //the model doesnt spin from it's mass or geometric center but from it's origin that is on the bottom and using other than Y will just look bad..
+    timerCrazySpin10p -m 0 75 Inc §RotateY 1
+    //timerCrazySpin10y -m 0 150 Inc §TEMPORARY 2
+    //timerCrazySpin10r -m 0 200 Inc §TEMPORARY2 3
+    //timerCrazySpin10  -m 0 10 Rotate §tmp §TEMPORARY §TEMPORARY2
+    timerCrazySpin10  -m 0 10 Rotate 0 §RotateY 0 //the model doesnt spin from it's mass or geometric center but from it's origin that is on the bottom and using other than Y will just look bad..
     //timerCrazySpin20 -m 0   10 Rotate ^rnd_360 ^rnd_360 ^rnd_360
     RANDOM 15 { //to prevent player using as granted weapon against NPCs
       //timerAttack55 -m  1 4950 SETTARGET PLAYER //for fireball
       //timerAttack56 -m  1 5000 SPAWN FIREBALL //the origin to fire from must be above floor
-      Set Â§FUNCtrapAttack_TrapMode 1 //projectile at player
-      Set Â§FUNCtrapAttack_TrapTimeSec 5
+      Set §FUNCtrapAttack_TrapMode 1 //projectile at player
+      Set §FUNCtrapAttack_TrapTimeSec 5
       GoSub FUNCtrapAttack
     }
     RANDOM 25 { //to prevent player using as granted weapon against NPCs
-      Set Â§FUNCtrapAttack_TrapTimeSec 5
-      timerTrapVanish 1 Â§FUNCtrapAttack_TrapTimeSec GoSub FUNChideHologramPartsPermanently
+      Set §FUNCtrapAttack_TrapTimeSec 5
+      timerTrapVanish 1 §FUNCtrapAttack_TrapTimeSec GoSub FUNChideHologramPartsPermanently
       GoSub FUNCtrapAttack
       //timerDestroy -m   1 5100 GoSub FUNCDestroySelfSafely
     }
     
-    if (Â§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 0) {
-      timerGrantDestroySelf 1 Â§DefaultTrapTimoutSec GoSub FUNCDestroySelfSafely
+    if (§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 0) {
+      timerGrantDestroySelf 1 §DefaultTrapTimoutSec GoSub FUNCDestroySelfSafely
     }
     
     GoSub FUNCupdateUses
@@ -413,22 +423,22 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
     ACCEPT
   }
   
-  if (Â§UseBlockedMili <= 0) {
-    Inc Â§UseBlockedMili ^rnd_5000 //normal activation minimum random delay
+  if (§UseBlockedMili <= 0) {
+    Inc §UseBlockedMili ^rnd_5000 //normal activation minimum random delay
   }
   
-  if (Â§UseCount < Â§UseHologramDestructionStart) { 
-    //this must be after all changes to Â§UseBlockedMili !
+  if (§UseCount < §UseHologramDestructionStart) { 
+    //this must be after all changes to §UseBlockedMili !
     //trap start used the status bad override, so it can be ignored as wont change
     TWEAK SKIN "Hologram.skybox.index1000.Status.Good" "Hologram.skybox.index1000.Status.Warn"
     //// after the timeout will always be GOOD
-    //Set Â£StatusSkinCurrent "Hologram.skybox.index1000.Status.Good"
-    //Set Â£StatusSkinPrevious "~Â£StatusSkinCurrent~"
+    //Set £StatusSkinCurrent "Hologram.skybox.index1000.Status.Good"
+    //Set £StatusSkinPrevious "~£StatusSkinCurrent~"
     //// reaching this point is always WARN: the player must wait the cooldown
-    timerSkinGood -m 1 Â§UseBlockedMili TWEAK SKIN "Hologram.skybox.index1000.Status.Warn" "Hologram.skybox.index1000.Status.Good"
+    timerSkinGood -m 1 §UseBlockedMili TWEAK SKIN "Hologram.skybox.index1000.Status.Warn" "Hologram.skybox.index1000.Status.Good"
   }
   
-  timerBlocked -m 0 50 Dec Â§UseBlockedMili 50 //will just decrement Â§UseBlockedMili (should use -i too to only work when player is nearby?)
+  timerBlocked -m 0 50 Dec §UseBlockedMili 50 //will just decrement §UseBlockedMili (should use -i too to only work when player is nearby?)
   
   GoSub FUNCupdateUses
   GoSub FUNCnameUpdate
@@ -437,31 +447,33 @@ ON INVENTORYUSE { Set Â£ScriptDebugLog "On_InventoryUse"
   ACCEPT
 }
 
-On Main { Set Â£ScriptDebugLog "On_Main" //HeartBeat happens once per second apparently (but may be less often?)
+On Main { Set £ScriptDebugLog "On_Main" //HeartBeat happens once per second apparently (but may be less often?)
   //starttimer timer1 //^#timer1 used ON MAIN
   //starttimer timer2 //^#timer2 used ON IDENTIFY
   //starttimer timer3 //^#timer3
   //starttimer timer4 //^#timer4
   //stoptimer timer1
   
-  if ( Â£AncientDeviceMode == "Hologram" ) {
-    if (Â§bHologramInitialized == 0) ACCEPT
+  GoSub FUNChoverInfo
+  
+  if ( £AncientDeviceMode == "Hologram" ) {
+    if (§bHologramInitialized == 0) ACCEPT
     
-    if (Â§DestructionStarted == 1) {
+    if (§DestructionStarted == 1) {
       //attractor SELF 1 3000
       GoSub FUNCaimPlayerCastLightning
       GoSub FUNCMakeNPCsHostile // as NPC may be in-between
-      Set Â£ScriptDebugProblemTmp "MAIN:BeingDestroyed;" showlocals
+      Set £ScriptDebugProblemTmp "MAIN:BeingDestroyed;" showlocals
       PLAY -s //stops sounds started with -i flag
     } else {
       //////////////// auto repairs the hologram device
       if (^#timer1 == 0) starttimer timer1
       if (^#timer1 > 60000) { //once per minute. if the player waits, it will self fix after a long time.
-        if (Â§UseCount != 0) {
-          Set Â§UseRegen Â§UseMax
-          Div Â§UseRegen 10 //minutes
-          Dec Â§UseCount Â§UseRegen
-          if (Â§UseCount < 0) Set Â§UseCount 0
+        if (§UseCount != 0) {
+          Set §UseRegen §UseMax
+          Div §UseRegen 10 //minutes
+          Dec §UseCount §UseRegen
+          if (§UseCount < 0) Set §UseCount 0
           GoSub FUNCupdateUses
           GoSub FUNCnameUpdate
           showlocals
@@ -479,45 +491,52 @@ On Main { Set Â£ScriptDebugLog "On_Main" //HeartBeat happens once per second app
       //////////////// improve landscape visualization
       ////ISSUE: worldfade just paints the whole screen with that color w/o alpha :(, wont help to make outside darker
       if ( ^#PLAYERDIST <= 350 ) { //350 is good as the sound volume lowers :)
-        if (Â§SkyMode == 2) { //cubemap
-          if(Â§PlayingAmbientSoundForSkyMode != Â§SkyMode) {
-            PLAY -ilp "~Â£SkyBoxCurrent~.wav"
-            Set Â§PlayingAmbientSoundForSkyMode Â§SkyMode
+        if (§SkyMode == 2) { //cubemap
+          if(§PlayingAmbientSoundForSkyMode != §SkyMode) {
+            PLAY -ilp "~£SkyBoxCurrent~.wav"
+            Set §PlayingAmbientSoundForSkyMode §SkyMode
           }
         } else { //uvsphere 1
-          if(Â§PlayingAmbientSoundForSkyMode != Â§SkyMode) {
-            PLAY -ilp "~Â£SkyBoxCurrentUVS~.wav"
-            Set Â§PlayingAmbientSoundForSkyMode Â§SkyMode
+          if(§PlayingAmbientSoundForSkyMode != §SkyMode) {
+            PLAY -ilp "~£SkyBoxCurrentUVS~.wav"
+            Set §PlayingAmbientSoundForSkyMode §SkyMode
           }
         }
-        //if( Â£DoWorldFade != 1 ){
+        //if( £DoWorldFade != 1 ){
           //worldfade out 1000 0.25 0.25 0.25
-          //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;OnMain:FadeOut"
-          //Set Â£DoWorldFade 1
+          //Set £ScriptDebugLog "~£ScriptDebugLog~;OnMain:FadeOut"
+          //Set £DoWorldFade 1
         //}
       } else {
         PLAY -s //stops sounds started with -i flag
-        Set Â§PlayingAmbientSoundForSkyMode 0 //reset 
-        //if( Â£DoWorldFade != 2 ){
+        Set §PlayingAmbientSoundForSkyMode 0 //reset 
+        //if( £DoWorldFade != 2 ){
           //worldfade in 1000
-          //Set Â£DoWorldFade 2
+          //Set £DoWorldFade 2
         //}
       }
     }
-  } else if ( Â£AncientDeviceMode == "SignalRepeater" ) {
+  } 
+  else if ( £AncientDeviceMode == "SignalRepeater" ) {
     SENDEVENT -ir CUSTOM 3000 "CustomCmdSignalRepeater ~^me~ ~@SignalStrength~"
-  } else if ( Â£AncientDeviceMode == "Grenade" ) {
-    //TODO
-  } else if ( Â£AncientDeviceMode == "LandMine" ) {
-    //TODO
-  } else if ( Â£AncientDeviceMode == "TeleportKill" ) {
-    //TODO
-  } else if ( Â£AncientDeviceMode == "MindControlBats" ) {
-    //TODO
+  }
+  else if ( £AncientDeviceMode == "Grenade" ) {
+		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO
+  }
+  else if ( £AncientDeviceMode == "LandMine" ) {
+		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO
+  }
+  else if ( £AncientDeviceMode == "TeleportKill" ) {
+		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO
+  }
+  else if ( £AncientDeviceMode == "MindControlBats" ) {
+		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO
   }
   
   // any item that is going to explode will benefit from this
-  if (Â§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 1) {
+	Set £ScriptDebugLog "~£ScriptDebugLog~;Chk:TrapCanKillMode"
+  if (§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 1) {
+		Set £ScriptDebugLog "~£ScriptDebugLog~;TrapCanKillMode"
     //attractor SELF 1 1000
     GoSub FUNCMakeNPCsHostile //this is good as while the item is flying after being thrown, NPCs will wake up near it!
   }
@@ -525,62 +544,62 @@ On Main { Set Â£ScriptDebugLog "On_Main" //HeartBeat happens once per second app
   ACCEPT
 }
 
-ON CUSTOM { Set Â£ScriptDebugLog "On_Custom" //this is the receiving end of the transmission
-  // ^$param<i> Â£string, ^&param<i> @number, ^#param<i> Â§int
-  Set Â£CustomCommand ^$param1
+ON CUSTOM { Set £ScriptDebugLog "On_Custom" //this is the receiving end of the transmission
+  // ^$param<i> £string, ^&param<i> @number, ^#param<i> §int
+  Set £CustomCommand ^$param1
   
   // RECEIVE SIGNAL FROM REPEATER
-  if(Â£CustomCommand == "CustomCmdSignalRepeater") { 
+  if(£CustomCommand == "CustomCmdSignalRepeater") { 
     //this can be sent by many sources
     //being sent from ON MAIN, this should happen once per second
-    Set Â£SignalRepeaterID          ^$param2
+    Set £SignalRepeaterID          ^$param2
     Set @RepeaterSignalStrengthTmp ^#param3
     if (@RepeaterSignalStrengthTmp > @RepeaterSignalStrength){
-      Set Â£RepeaterStrongestDeployedID Â£SignalRepeaterID
+      Set £RepeaterStrongestDeployedID £SignalRepeaterID
       Set @RepeaterSignalStrength @RepeaterSignalStrengthTmp
       // this will expectedly happen only after a new signal is received from ON MAIN sendevent that happens once per second //TODO right?
-      timerClearRepeaterSignalID  -m 1 3000 Set Â£RepeaterStrongestDeployedID ""
+      timerClearRepeaterSignalID  -m 1 3000 Set £RepeaterStrongestDeployedID ""
       timerClearRepeaterSignalStr -m 1 3000 Set @RepeaterSignalStrength 0
     }
   }
   ACCEPT
 }
 
-ON COMBINE { Set Â£ScriptDebugLog "On_Combine"
-  UnSet Â£ScriptDebugCombineFailReason
+ON COMBINE { Set £ScriptDebugLog "On_Combine"
+  UnSet £ScriptDebugCombineFailReason
   showlocals //this is excellent here as any attempt will help showing the log!
   
   // check other (the one that you double click)
   if (^$param1 ISCLASS "Hologram") else ACCEPT //only combine with these
   if (^$param1 !isgroup "DeviceTechBasic") {
     SPEAK -p [player_no] NOP
-    Set Â£ScriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic"
+    Set £ScriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic"
     showlocals
     ACCEPT
   }
   
   //check self (the target of the combination request)
-  //if (Â§bHologramInitialized == 0){
+  //if (§bHologramInitialized == 0){
     //SPEAK -p [player_no] NOP
-    //Set Â£ScriptDebugCombineFailReason "Self:NotInitialized"
+    //Set £ScriptDebugCombineFailReason "Self:NotInitialized"
     //showlocals
     //ACCEPT
   //}
   if (^amount > 1) { //this must not be a stack of items
     SPEAK -p [player_no] NOP
-    Set Â£ScriptDebugCombineFailReason "Self:IsStack"
+    Set £ScriptDebugCombineFailReason "Self:IsStack"
     showlocals
     ACCEPT
   }
-  if (Â§Identified == 0) {
+  if (§Identified == 0) {
     SPEAK -p [player_not_skilled_enough] NOP
-    Set Â£ScriptDebugCombineFailReason "Self:NotIdentified"
+    Set £ScriptDebugCombineFailReason "Self:NotIdentified"
     showlocals
     ACCEPT
   }
-  if (Â§TrapInitStep > 0) {
+  if (§TrapInitStep > 0) {
     SPEAK -p [player_no] NOP
-    Set Â£ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
+    Set £ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
     showlocals
     ACCEPT
   }
@@ -590,23 +609,23 @@ ON COMBINE { Set Â£ScriptDebugLog "On_Combine"
   PLAY -s //stops sounds started with -i flag
   
   GoSub FUNCskillCheckAncientTech
-  Set Â§CreateChance Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-  //if (And(Â§Quality >= 4 && Â§ItemConditionSure == 5)) {
-  if (Â§Quality >= 4){
-    if(Â§ItemConditionSure == 5) {
-    Set Â§CreateChance 100
+  Set §CreateChance §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+  //if (And(§Quality >= 4 && §ItemConditionSure == 5)) {
+  if (§Quality >= 4){
+    if(§ItemConditionSure == 5) {
+    Set §CreateChance 100
     }
   }
-  RANDOM Â§CreateChance {
-    if ( Â£AncientDeviceMode == "Hologram" ) { Set Â£AncientDeviceMode "Grenade"
-      Set Â§PristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-      Div Â§PristineChance 10
-      If (Â§PristineChance < 5) Set Â§PristineChance 5
-      RANDOM Â§PristineChance { // grants a minimal chance based on skill in case the player do not initialize it
-        Set Â§Quality 5 
+  RANDOM §CreateChance {
+    if ( £AncientDeviceMode == "Hologram" ) { Set £AncientDeviceMode "Grenade"
+      Set §PristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+      Div §PristineChance 10
+      If (§PristineChance < 5) Set §PristineChance 5
+      RANDOM §PristineChance { // grants a minimal chance based on skill in case the player do not initialize it
+        Set §Quality 5 
       }
       
-      if ( Â§Quality >= 4 ) {
+      if ( §Quality >= 4 ) {
         SetName "HoloGrenade+"
         TWEAK ICON "HologramGrenadeMK2[icon]"
       } else {
@@ -621,18 +640,21 @@ ON COMBINE { Set Â£ScriptDebugLog "On_Combine"
       
       GoSub FUNChideHologramPartsPermanently
       
-      Set Â§Scale 100 //just in case it is combined with the big hologram on the floor
-      SetScale Â§Scale
+      Set §Scale 100 //just in case it is combined with the big hologram on the floor
+      SetScale §Scale
       
-      Set Â§TrapInitStep 1
+      Set §TrapInitStep 1
       PlayerStackSize 5
       SetGroup -r "DeviceTechBasic"
       SetGroup "Explosive"
-    } else  if ( Â£AncientDeviceMode == "Grenade" ) { Set Â£AncientDeviceMode "LandMine"
+    } 
+    else if ( £AncientDeviceMode == "Grenade" ) { Set £AncientDeviceMode "LandMine"
       //TODO
-    } else  if ( Â£AncientDeviceMode == "LandMine" ) { Set Â£AncientDeviceMode "TeleportKill"
+    } 
+    else if ( £AncientDeviceMode == "LandMine" ) { Set £AncientDeviceMode "TeleportKill"
       //TODO
-    } else  if ( Â£AncientDeviceMode == "TeleportKill" ) { Set Â£AncientDeviceMode "MindControlBats"
+    } 
+    else if ( £AncientDeviceMode == "TeleportKill" ) { Set £AncientDeviceMode "MindControlBats"
       // why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
       // why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
       //TODO
@@ -647,162 +669,162 @@ ON COMBINE { Set Â£ScriptDebugLog "On_Combine"
   ACCEPT
 }
 
-ON InventoryIn { Set Â£ScriptDebugLog "On_InventoryIn"
+ON InventoryIn { Set £ScriptDebugLog "On_InventoryIn"
   PLAY -s //stops sounds started with -i flag
   ACCEPT
 }
 
-ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
+ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
   PLAY -s //stops sounds started with -i flag
   ACCEPT
 }
 
 //On Hit { //nothing happens
-  //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;OnHit:~^durability~/~^maxdurability~"
-  //INC Â§UseCount 30
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;OnHit:~^durability~/~^maxdurability~"
+  //INC §UseCount 30
   //ACCEPT
 //}
 //on collide_npc { //nothing happens
-  //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;collide_npc"
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;collide_npc"
   //ACCEPT
 //}
 //on collision_error { //nothing happens
-  //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;collision_error"
+  //Set £ScriptDebugLog "~£ScriptDebugLog~;collision_error"
   //ACCEPT
 //}
 
->>>FUNCaimPlayerCastLightning { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCaimPlayerCastLightning" //this doesnt work well when called from a timer...
+>>>FUNCaimPlayerCastLightning { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCaimPlayerCastLightning" //this doesnt work well when called from a timer...
   //ifVisible PLAYER { //use for fireball too? //this doesnt work for objects?
-    Set Â§RotateYBkp Â§RotateY //bkp auto rotate angle speed
-    Set Â§RotateY 0 //this stops the rotation (but may not stop for enough time tho to let the lightning work properly)
+    Set §RotateYBkp §RotateY //bkp auto rotate angle speed
+    Set §RotateY 0 //this stops the rotation (but may not stop for enough time tho to let the lightning work properly)
     //forceangle <yaw*> //unnecessary?
     //^angleto_<entity> //unnecessary?
     //forceangle ^angleto_PLAYER //unnecessary?
     GoSub FUNCshockPlayer
-    timerRestoreRotationSpeed -m 1 100 Set Â§RotateY Â§RotateYBkp // restore auto rotate speed after the shock has time to be cast
+    timerRestoreRotationSpeed -m 1 100 Set §RotateY §RotateYBkp // restore auto rotate speed after the shock has time to be cast
   //}
   //showlocals
   RETURN //to return to wherever it needs?
 }
 
->>FUNCMalfunction { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCMalfunction"
-  Set Â§SfxRnd ^rnd_3
-  if (Â§SfxRnd == 0) play "SFX_electric"
-  if (Â§SfxRnd == 1) play "sfx_spark"
-  if (Â§SfxRnd == 2) GoSub FUNCshockPlayer
+>>FUNCMalfunction { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMalfunction"
+  Set §SfxRnd ^rnd_3
+  if (§SfxRnd == 0) play "SFX_electric"
+  if (§SfxRnd == 1) play "sfx_spark"
+  if (§SfxRnd == 2) GoSub FUNCshockPlayer
   RETURN
 }
 
->>FUNCChangeSkyBox { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCChangeSkyBox" //these '{}' are not necessary but help on code editors
+>>FUNCChangeSkyBox { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCChangeSkyBox" //these '{}' are not necessary but help on code editors
   RANDOM 50 { // skybox cubemap mode
-    if (Â§SkyMode == 1) { //was UVSphere, so hide it
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;From UVSphere to CubeMap"
-      Set Â£SkyBoxPreviousUVS "~Â£SkyBoxCurrentUVS~"
-      Set Â£SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index3000.Clear"
-      TWEAK SKIN "~Â£SkyBoxPreviousUVS~" "~Â£SkyBoxCurrentUVS~"
+    if (§SkyMode == 1) { //was UVSphere, so hide it
+      Set £ScriptDebugLog "~£ScriptDebugLog~;From UVSphere to CubeMap"
+      Set £SkyBoxPreviousUVS "~£SkyBoxCurrentUVS~"
+      Set £SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index3000.Clear"
+      TWEAK SKIN "~£SkyBoxPreviousUVS~" "~£SkyBoxCurrentUVS~"
     }
-    Set Â£SkyBoxPrevious "~Â£SkyBoxCurrent~" //store current to know what needs to be replaced
-    Set Â§SkyBoxIndex ^rnd_2 //SED_TOKEN_TOTAL_SKYBOXES_CUBEMAP: to be easy to auto patch, sync with the skyboxes bash script. if rnd_3 will result in 0 1 2
-    Set Â£SkyBoxCurrent "Hologram.skybox.index~Â§SkyBoxIndex~" //update current
-    if (Â£SkyBoxCurrent == "~Â£SkyBoxPrevious~") {
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;SBI=~Â§SkyBoxIndex~"
-      GoTo FUNCChangeSkyBox //this looks safe but needs at least 2 skyboxes
+    Set £SkyBoxPrevious "~£SkyBoxCurrent~" //store current to know what needs to be replaced
+    Set §SkyBoxIndex ^rnd_2 //SED_TOKEN_TOTAL_SKYBOXES_CUBEMAP: to be easy to auto patch, sync with the skyboxes bash script. if rnd_3 will result in 0 1 2
+    Set £SkyBoxCurrent "Hologram.skybox.index~§SkyBoxIndex~" //update current
+    if (£SkyBoxCurrent == "~£SkyBoxPrevious~") {
+      Set £ScriptDebugLog "~£ScriptDebugLog~;SBI=~§SkyBoxIndex~"
+      GoTo FUNCChangeSkyBox //LOOP this looks safe but needs at least 2 skyboxes
     }
-    TWEAK SKIN "~Â£SkyBoxPrevious~" "~Â£SkyBoxCurrent~"
-    Set Â§SkyMode 2
+    TWEAK SKIN "~£SkyBoxPrevious~" "~£SkyBoxCurrent~"
+    Set §SkyMode 2
   } else { //skybox UVSphere mode 1
-    if (Â§SkyMode == 2) { //was CubeMap, so hide it
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;From CubeMap to UVSphere"
-      Set Â£SkyBoxPrevious "~Â£SkyBoxCurrent~"
-      Set Â£SkyBoxCurrent "Hologram.skybox.index3000.Clear"
-      TWEAK SKIN "~Â£SkyBoxPrevious~" "~Â£SkyBoxCurrent~"
+    if (§SkyMode == 2) { //was CubeMap, so hide it
+      Set £ScriptDebugLog "~£ScriptDebugLog~;From CubeMap to UVSphere"
+      Set £SkyBoxPrevious "~£SkyBoxCurrent~"
+      Set £SkyBoxCurrent "Hologram.skybox.index3000.Clear"
+      TWEAK SKIN "~£SkyBoxPrevious~" "~£SkyBoxCurrent~"
     }
-    Set Â£SkyBoxPreviousUVS "~Â£SkyBoxCurrentUVS~" //store current to know what needs to be replaced
-    Set Â§SkyBoxIndex ^rnd_9 //SED_TOKEN_TOTAL_SKYBOXES_UVSPHERE: to be easy to auto patch, sync with the skyboxes bash script. if rnd_3 will result in 0 1 2
-    Set Â£SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index~Â§SkyBoxIndex~" //update current
-    if (Â£SkyBoxCurrentUVS == "~Â£SkyBoxPreviousUVS~") {
-      Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;SBI(UVS)=~Â§SkyBoxIndex~"
-      GoTo FUNCChangeSkyBox //this looks safe but needs at least 2 skyboxes
+    Set £SkyBoxPreviousUVS "~£SkyBoxCurrentUVS~" //store current to know what needs to be replaced
+    Set §SkyBoxIndex ^rnd_9 //SED_TOKEN_TOTAL_SKYBOXES_UVSPHERE: to be easy to auto patch, sync with the skyboxes bash script. if rnd_3 will result in 0 1 2
+    Set £SkyBoxCurrentUVS "Hologram.skybox.UVSphere.index~§SkyBoxIndex~" //update current
+    if (£SkyBoxCurrentUVS == "~£SkyBoxPreviousUVS~") {
+      Set £ScriptDebugLog "~£ScriptDebugLog~;SBI(UVS)=~§SkyBoxIndex~"
+      GoTo FUNCChangeSkyBox //LOOP this looks safe but needs at least 2 skyboxes
     }
-    TWEAK SKIN "~Â£SkyBoxPreviousUVS~" "~Â£SkyBoxCurrentUVS~"
-    Set Â§SkyMode 1
+    TWEAK SKIN "~£SkyBoxPreviousUVS~" "~£SkyBoxCurrentUVS~"
+    Set §SkyMode 1
   }
   //showlocals
   RETURN
 }
 
->>FUNCinitDefaults { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCinitDefaults"
-  Set Â£AncientDeviceMode "Hologram"
+>>FUNCinitDefaults { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCinitDefaults"
+  Set £AncientDeviceMode "Hologram"
   
   TWEAK SKIN "Hologram.skybox.index2000.DocIdentified" "Hologram.skybox.index2000.DocUnidentified"
   TWEAK SKIN "Hologram.tiny.index4000.grenade"         "Hologram.tiny.index4000.grenade.Clear"
   TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"     "Hologram.tiny.index4000.grenadeGlow.Clear"
   
-  if(Â§iFUNCMakeNPCsHostile_rangeDefault == 0) {
-    Set Â§iFUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range //SED_TOKEN_MOD_CFG
-    Set Â§iFUNCMakeNPCsHostile_range Â§iFUNCMakeNPCsHostile_rangeDefault
+  if(§iFUNCMakeNPCsHostile_rangeDefault == 0) {
+    Set §iFUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range //SED_TOKEN_MOD_CFG
+    Set §iFUNCMakeNPCsHostile_range §iFUNCMakeNPCsHostile_rangeDefault
   }
   
-  Set Â£SignalMode "Working"
+  Set £SignalMode "Working"
   Set #SignalModeChangeTime 0
   
-  Set Â§SignalDistBase 1000 //SED_TOKEN_MOD_CFG
+  Set §SignalDistBase 1000 //SED_TOKEN_MOD_CFG
   
-  Set Â§SignalDistHalf Â§SignalDistBase
-  Div Â§SignalDistHalf 2
+  Set §SignalDistHalf §SignalDistBase
+  Div §SignalDistHalf 2
   
-  Set Â§SignalDistMin Â§SignalDistBase
-  Mul Â§SignalDistMin 0.25
+  Set §SignalDistMin §SignalDistBase
+  Mul §SignalDistMin 0.25
   
-  //Set Â§IdentifyObjectKnowledgeRequirement 35
-  Set Â§UseCount 0
-  Set Â§DefaultTrapTimoutSec 5 //SED_TOKEN_MOD_CFG
+  //Set §IdentifyObjectKnowledgeRequirement 35
+  Set §UseCount 0
+  Set §DefaultTrapTimoutSec 5 //SED_TOKEN_MOD_CFG
   
   Collision ON //nothing happens when thrown?
   Damager -eu 3 //doesnt damage NPCs when thrown?
   
-  Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCinitDefaults"
+  Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCinitDefaults"
   showlocals
   
   RETURN
 }
 
->>FUNCMakeNPCsHostile { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCMakeNPCsHostile" //params: Â§iFUNCMakeNPCsHostile_range
-  //FAIL: Set ^sender PLAYER ; SendEvent -nr Hit Â§iFUNCMakeNPCsHostile_range "0.01 summoned" //hits every NPC (-n is default) in 3000 range for 0.01 damage and tells it was the player (summoned sets ^sender to player)
-  //FAIL: SendEvent -nr AGGRESSION Â§iFUNCMakeNPCsHostile_range "" //what params to use here??? // this just make them shake but wont become hostile
-  //MakesNoSenseHere: SendEvent -nr STEAL Â§iFUNCMakeNPCsHostile_range "ON" //works!!!
-  //TooMuchHere: SendEvent -nr ATTACK_PLAYER Â§iFUNCMakeNPCsHostile_range ""
+>>FUNCMakeNPCsHostile { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMakeNPCsHostile" //params: §iFUNCMakeNPCsHostile_range
+  //FAIL: Set ^sender PLAYER ; SendEvent -nr Hit §iFUNCMakeNPCsHostile_range "0.01 summoned" //hits every NPC (-n is default) in 3000 range for 0.01 damage and tells it was the player (summoned sets ^sender to player)
+  //FAIL: SendEvent -nr AGGRESSION §iFUNCMakeNPCsHostile_range "" //what params to use here??? // this just make them shake but wont become hostile
+  //MakesNoSenseHere: SendEvent -nr STEAL §iFUNCMakeNPCsHostile_range "ON" //works!!!
+  //TooMuchHere: SendEvent -nr ATTACK_PLAYER §iFUNCMakeNPCsHostile_range ""
   
   ///////////// GOOD! /////////////
-  //SendEvent -nr PLAYER_ENEMY Â§iFUNCMakeNPCsHostile_range "" //(for goblin at least) this is good, if player is too near it attacks, otherwise only if player is visible
-  SendEvent -nr CALL_HELP Â§iFUNCMakeNPCsHostile_range "" //(for goblin at least) this is good, if player is too near it attacks, otherwise only if player is visible. this also checks if npc is sleeping (therefore wont hear the trap sound)
+  //SendEvent -nr PLAYER_ENEMY §iFUNCMakeNPCsHostile_range "" //(for goblin at least) this is good, if player is too near it attacks, otherwise only if player is visible
+  SendEvent -nr CALL_HELP §iFUNCMakeNPCsHostile_range "" //(for goblin at least) this is good, if player is too near it attacks, otherwise only if player is visible. this also checks if npc is sleeping (therefore wont hear the trap sound)
   //TODO if they hear the trap being armed properly, they should flee instead
   
   //restore defaults for next call "w/o params"
-  Set Â§iFUNCMakeNPCsHostile_range Â§iFUNCMakeNPCsHostile_rangeDefault 
+  Set §iFUNCMakeNPCsHostile_range §iFUNCMakeNPCsHostile_rangeDefault 
   RETURN
 }
 
->>FUNCshockPlayer { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCshockPlayer"
+>>FUNCshockPlayer { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCshockPlayer"
   if (^inPlayerInventory == 1) { 
     //TODO is there some way to auto drop the item? if so, this would be unnecessary...
     PLAY "sfx_lightning_loop"
     dodamage -l player 1
   } else {
-    ForceAngle ^angleto_PLAYER
+    ForceAngle ^degreesyto_PLAYER
     SPELLCAST -smf @SignalStrLvl LIGHTNING_STRIKE PLAYER //TODO this causes damage? or is just the visual effect?
     Random 25 {
       SPELLCAST -fmsd 250 @SignalStrLvl PARALYSE PLAYER
     }
     
-    //Set Â§iFUNCMakeNPCsHostile_range 350  //reason: they know it is dangerous to them too.
+    //Set §iFUNCMakeNPCsHostile_range 350  //reason: they know it is dangerous to them too.
     GoSub FUNCMakeNPCsHostile
   }
   
   RETURN
 }
 
->>FUNCbreakDevice { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCbreakDevice"
+>>FUNCbreakDevice { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCbreakDevice"
   SetGroup "DeviceTechBroken"
   GoSub FUNCshockPlayer
   if (^inPlayerInventory == 1) {
@@ -810,7 +832,7 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
     DoDamage -lu PLAYER 3
     GoSub FUNCDestroySelfSafely
   } else {
-    Set Â£FUNCnameUpdate_NameBase "Broken Hologram Device" 
+    Set £FUNCnameUpdate_NameBase "Broken Hologram Device" 
     GoSub FUNCupdateUses
     GoSub FUNCnameUpdate
     
@@ -818,134 +840,134 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
     SpecialFX FIERY
     SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
     //SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
-    Set Â§TmpBreakDestroyMilis Â§DefaultTrapTimoutSec
-    Mul Â§TmpBreakDestroyMilis 1000
-    timerTrapBreakDestroy -m 1 Â§TmpBreakDestroyMilis GoSub FUNCparalyseIfPlayerNearby //the trap tried to capture the player xD //TODOA not working?
-    Inc Â§TmpBreakDestroyMilis ^rnd_15000
-    timerTrapBreakDestroy -m 1 Â§TmpBreakDestroyMilis GoSub FUNCDestroySelfSafely //to give time to let the player examine it a bit
+    Set §TmpBreakDestroyMilis §DefaultTrapTimoutSec
+    Mul §TmpBreakDestroyMilis 1000
+    timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoSub FUNCparalyseIfPlayerNearby //the trap tried to capture the player xD //TODOA not working?
+    Inc §TmpBreakDestroyMilis ^rnd_15000
+    timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoSub FUNCDestroySelfSafely //to give time to let the player examine it a bit
   }
   showlocals
   RETURN
 }
 
->>FUNCupdateUses { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCupdateUses"
-  Set Â§UseRemain Â§UseMax
-  Dec Â§UseRemain Â§UseCount
+>>FUNCupdateUses { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCupdateUses"
+  Set §UseRemain §UseMax
+  Dec §UseRemain §UseCount
   //DO NOT CALL: GoSub FUNCnameUpdate
-  if (Â§UseCount >= Â§UseHologramDestructionStart) Set Â§UseBlockedMili 0 //quickly lets the player finish/destroy it
+  if (§UseCount >= §UseHologramDestructionStart) Set §UseBlockedMili 0 //quickly lets the player finish/destroy it
   RETURN
 }
 
->>FUNCnameUpdate { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCnameUpdate"
-  //OUTPUT: Â£FUNCnameUpdate_NameFinal_OUTPUT
-  if ( Â§Identified == 0 ) ACCEPT //the player is still not sure about what is going on
+>>FUNCnameUpdate { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCnameUpdate"
+  //OUTPUT: £FUNCnameUpdate_NameFinal_OUTPUT
+  if ( §Identified == 0 ) ACCEPT //the player is still not sure about what is going on
   
-  Set Â£FUNCnameUpdate_NameFinal_OUTPUT "~Â£FUNCnameUpdate_NameBase~."
+  Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameBase~."
   
-  if ( Â§bHologramInitialized == 1 ) {
+  if ( §bHologramInitialized == 1 ) {
     GoSub FUNCcalcAncientTechSkill
     
     GoSub FUNCcalcSignalStrength
     
     // condition from 0.00 to 1.00
     //DO NOT CALL BECOMES ENDLESS RECURSIVE LOOP: GoSub FUNCupdateUses
-    //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCnameUpdate"
-    Set @ItemCondition Â§UseRemain
-    //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;~@ItemCondition~=~Â§UseRemain~"
-    Div @ItemCondition Â§UseMax
-    //Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;/~Â§UseMax~=~@ItemCondition~"
+    //Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCnameUpdate"
+    Set @ItemCondition §UseRemain
+    //Set £ScriptDebugLog "~£ScriptDebugLog~;~@ItemCondition~=~§UseRemain~"
+    Div @ItemCondition §UseMax
+    //Set £ScriptDebugLog "~£ScriptDebugLog~;/~§UseMax~=~@ItemCondition~"
     //TODO why the below wont work? it is always bad or critical...
-    //if      ( @ItemCondition >= 0.80 ) { Set Â£ItemConditionDesc "excellent" }
-    //else if ( @ItemCondition >= 0.60 ) { Set Â£ItemConditionDesc "good"      }
-    //else if ( @ItemCondition >= 0.40 ) { Set Â£ItemConditionDesc "average"   }
-    //else if ( @ItemCondition >= 0.20 ) { Set Â£ItemConditionDesc "bad"       }
-    //else {                               Set Â£ItemConditionDesc "critical"  }
+    //if      ( @ItemCondition >= 0.80 ) { Set £ItemConditionDesc "excellent" }
+    //else if ( @ItemCondition >= 0.60 ) { Set £ItemConditionDesc "good"      }
+    //else if ( @ItemCondition >= 0.40 ) { Set £ItemConditionDesc "average"   }
+    //else if ( @ItemCondition >= 0.20 ) { Set £ItemConditionDesc "bad"       }
+    //else {                               Set £ItemConditionDesc "critical"  }
     Set @ItemConditionSureTmp @ItemCondition
     Mul @ItemConditionSureTmp 10 //0-10
     Div @ItemConditionSureTmp  2 //0-5
-    Set Â§ItemConditionSure @ItemConditionSureTmp //trunc
-    if ( Â§ItemConditionSure == 5 ) Set Â£ItemConditionDesc "perfect"
-    if ( Â§ItemConditionSure == 4 ) Set Â£ItemConditionDesc "excellent"
-    if ( Â§ItemConditionSure == 3 ) Set Â£ItemConditionDesc "good"
-    if ( Â§ItemConditionSure == 2 ) Set Â£ItemConditionDesc "average"
-    if ( Â§ItemConditionSure == 1 ) Set Â£ItemConditionDesc "bad"
-    if ( Â§ItemConditionSure == 0 ) Set Â£ItemConditionDesc "critical"
+    Set §ItemConditionSure @ItemConditionSureTmp //trunc
+    if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "perfect"
+    if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "excellent"
+    if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "good"
+    if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "average"
+    if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
+    if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
     
-    Set Â§SignalStrSure Â§SignalStrengthTrunc
-    Div Â§SignalStrSure 33
-    Inc Â§SignalStrSure 1
-    if(Â§SignalStrengthTrunc == 0) Set Â§SignalStrSure 0
-    if(Â§SignalStrengthTrunc >= 95) Set Â§SignalStrSure 4
-    if(Â§SignalStrSure == 0) Set Â£SignalStrInfo "none"
-    if(Â§SignalStrSure == 1) Set Â£SignalStrInfo "bad"
-    if(Â§SignalStrSure == 2) Set Â£SignalStrInfo "good"
-    if(Â§SignalStrSure == 3) Set Â£SignalStrInfo "strong"
-    if(Â§SignalStrSure == 4) Set Â£SignalStrInfo "excellent"
+    Set §SignalStrSure §SignalStrengthTrunc
+    Div §SignalStrSure 33
+    Inc §SignalStrSure 1
+    if(§SignalStrengthTrunc == 0) Set §SignalStrSure 0
+    if(§SignalStrengthTrunc >= 95) Set §SignalStrSure 4
+    if(§SignalStrSure == 0) Set £SignalStrInfo "none"
+    if(§SignalStrSure == 1) Set £SignalStrInfo "bad"
+    if(§SignalStrSure == 2) Set £SignalStrInfo "good"
+    if(§SignalStrSure == 3) Set £SignalStrInfo "strong"
+    if(§SignalStrSure == 4) Set £SignalStrInfo "excellent"
     
     // perc
     Set @ItemConditionTmp @ItemCondition
     Mul @ItemConditionTmp 100
-    Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;*100=~@ItemCondition~"
-    Set Â§ItemConditionPercent @ItemConditionTmp //trunc
+    Set £ScriptDebugLog "~£ScriptDebugLog~;*100=~@ItemCondition~"
+    Set §ItemConditionPercent @ItemConditionTmp //trunc
     
     //TODO this always fails too, is always dreadful...
-    //if(Â§UseMax >  105) Set Â£ItemQuality "pristine" else //105 (and not 100) means a more perceptible superiority
-    //if(Â§UseMax >=  80) Set Â£ItemQuality "superior" else
-    //if(Â§UseMax >=  60) Set Â£ItemQuality "decent"   else
-    //if(Â§UseMax >=  40) Set Â£ItemQuality "mediocre" else
-    //if(Â§UseMax >=  20) Set Â£ItemQuality "inferior" else
-    //{                  Set Â£ItemQuality "dreadful" }
-    if (Â§UseMax >= 95) {
-      Set Â§Quality 5
+    //if(§UseMax >  105) Set £ItemQuality "pristine" else //105 (and not 100) means a more perceptible superiority
+    //if(§UseMax >=  80) Set £ItemQuality "superior" else
+    //if(§UseMax >=  60) Set £ItemQuality "decent"   else
+    //if(§UseMax >=  40) Set £ItemQuality "mediocre" else
+    //if(§UseMax >=  20) Set £ItemQuality "inferior" else
+    //{                  Set £ItemQuality "dreadful" }
+    if (§UseMax >= 95) {
+      Set §Quality 5
     } else {
-      Set Â§Quality Â§UseMax
-      Div Â§Quality 10
-      Div Â§Quality  2
+      Set §Quality §UseMax
+      Div §Quality 10
+      Div §Quality  2
     }
-    if(Â§Quality >= 5) Set Â£ItemQuality "pristine+"
-    if(Â§Quality == 4) Set Â£ItemQuality "superior+"
-    if(Â§Quality == 3) Set Â£ItemQuality "decent"
-    if(Â§Quality == 2) Set Â£ItemQuality "mediocre"
-    if(Â§Quality == 1) Set Â£ItemQuality "inferior"
-    if(Â§Quality == 0) Set Â£ItemQuality "dreadful"
+    if(§Quality >= 5) Set £ItemQuality "pristine+"
+    if(§Quality == 4) Set £ItemQuality "superior+"
+    if(§Quality == 3) Set £ItemQuality "decent"
+    if(§Quality == 2) Set £ItemQuality "mediocre"
+    if(§Quality == 1) Set £ItemQuality "inferior"
+    if(§Quality == 0) Set £ItemQuality "dreadful"
     
     if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
-      Set Â£SignalStrInfo "~Â£SignalStrInfo~(~Â§SignalStrengthTrunc~% for ~Â§SignalModeChangeDelay~s)" //it is none or working for N seconds
-      Set Â§hours   ^gamehours
-      Mod Â§hours 24
-      Set Â§minutes ^gameminutes
-      Mod Â§minutes 60
-      Set Â§seconds ^gameseconds
-      Mod Â§seconds 60
+      Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+      Set §hours   ^gamehours
+      Mod §hours 24
+      Set §minutes ^gameminutes
+      Mod §minutes 60
+      Set §seconds ^gameseconds
+      Mod §seconds 60
       // as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
-      Set Â£ItemConditionDesc "~Â£ItemConditionDesc~(~Â§ItemConditionPercent~% ~Â§UseCount~/~Â§UseMax~ Remaining ~Â§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
-      //Set Â£ItemConditionDesc "~Â£ItemConditionDesc~(~Â§ItemConditionPercent~% ~Â§UseCount~/~Â§UseMax~ Remaining ~Â§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
-      Set Â£ItemQuality "~Â£ItemQuality~(~Â§UseMax~)"
+      Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
+      //Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
+      Set £ItemQuality "~£ItemQuality~(~§UseMax~)"
     }
-    if(@AncientTechSkill >= 20) Set Â£FUNCnameUpdate_NameFinal_OUTPUT "~Â£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~Â£SignalStrInfo~." //useful to position yourself
-    if(@AncientTechSkill >= 30) Set Â£FUNCnameUpdate_NameFinal_OUTPUT "~Â£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~Â£ItemQuality~." //useful to chose wich one to keep
-    if(@AncientTechSkill >= 40) Set Â£FUNCnameUpdate_NameFinal_OUTPUT "~Â£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~Â£ItemConditionDesc~." //useful to hold your hand avoiding destroy it
-    //if(@AncientTechSkill >= 50) Set Â£FUNCnameUpdate_NameFinal_OUTPUT "~Â£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~Â§SignalStrengthTrunc~, ~Â§ItemConditionPercent~% ~Â§UseCount~/~Â§UseMax~ Remaining ~Â§UseRemain~." //detailed condition for nerds ;) 
+    if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." //useful to position yourself
+    if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~£ItemQuality~." //useful to chose wich one to keep
+    if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~." //useful to hold your hand avoiding destroy it
+    //if(@AncientTechSkill >= 50) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~§SignalStrengthTrunc~, ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;) 
   } else {
-    Set Â£FUNCnameUpdate_NameFinal_OUTPUT "~Â£FUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
+    Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
   }
   
-  //SetName "~Â£FUNCnameUpdate_NameBase~. Quality:~Â£ItemQuality~, Condition:~Â£ItemConditionDesc~(~Â§ItemConditionPercent~%), Uses:Count=~Â§UseCount,Remain=~Â§UseRemain~,Max=~Â§UseMax~"
-  SetName "~Â£FUNCnameUpdate_NameFinal_OUTPUT~"
+  //SetName "~£FUNCnameUpdate_NameBase~. Quality:~£ItemQuality~, Condition:~£ItemConditionDesc~(~§ItemConditionPercent~%), Uses:Count=~§UseCount,Remain=~§UseRemain~,Max=~§UseMax~"
+  SetName "~£FUNCnameUpdate_NameFinal_OUTPUT~"
   //Set @TestFloat 0.1
   //Set @TestFloat2 0.999999
-  //Set Â§TestInt2 @TestFloat2
+  //Set §TestInt2 @TestFloat2
   //Set @TestFloat3 0.3
   //Mul @TestFloat3 0.5 //0.15
   //Set @TestFloat4 0.8
   //Div @TestFloat4 2 //0.4
   //Set @TestFloat5 0.3
   //Mul @TestFloat5 100 //30
-  //Set Â§TestInt5 @TestFloat5
+  //Set §TestInt5 @TestFloat5
   showlocals
 }
 
->>FUNCcalcAncientTechSkill { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCcalcAncientTechSkill"
+>>FUNCcalcAncientTechSkill { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCcalcAncientTechSkill"
   Set @AncientTechSkill ^PLAYER_SKILL_MECANISM
   Inc @AncientTechSkill ^PLAYER_SKILL_OBJECT_KNOWLEDGE
   Inc @AncientTechSkill ^PLAYER_SKILL_INTUITION
@@ -953,21 +975,21 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   RETURN
 }
 
->>FUNCskillCheckAncientTech { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCskillCheckAncientTech" //checks the technical skill like in a percent base. 
+>>FUNCskillCheckAncientTech { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCskillCheckAncientTech" //checks the technical skill like in a percent base. 
   //INPUTS:
   //OUTPUTS:
-  //  Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-  //  Â§FUNCskillCheckAncientTech_chanceFailure_OUTPUT
-  //  Â§FUNCskillCheckAncientTech_bonus_OUTPUT
+  //  §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+  //  §FUNCskillCheckAncientTech_chanceFailure_OUTPUT
+  //  §FUNCskillCheckAncientTech_bonus_OUTPUT
   
   GoSub FUNCcalcAncientTechSkill
   
-  Set Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT @AncientTechSkill
-  if (Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT <  5) Set Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT  5 //minimal success chance
-  if (Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT > 95) Set Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT 95 //minimal fail chance
+  Set §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT @AncientTechSkill
+  if (§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT <  5) Set §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT  5 //minimal success chance
+  if (§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT > 95) Set §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT 95 //minimal fail chance
   
-  Set Â§FUNCskillCheckAncientTech_chanceFailure_OUTPUT 100
-  Dec Â§FUNCskillCheckAncientTech_chanceFailure_OUTPUT Â§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+  Set §FUNCskillCheckAncientTech_chanceFailure_OUTPUT 100
+  Dec §FUNCskillCheckAncientTech_chanceFailure_OUTPUT §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
   
   Set @FUNCskillCheckAncientTech_addBonus_OUTPUT @AncientTechSkill
   Set @TmpRandomBonus 10
@@ -981,9 +1003,9 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   RETURN
 }
 
->>FUNCtrapAttack { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCtrapAttack" 
-  //INPUT: Â§FUNCtrapAttack_TrapMode 0=explosion 1=projectile/targetPlayer
-  //INPUT: Â§FUNCtrapAttack_TrapTimeSec in seconds (not milis)
+>>FUNCtrapAttack { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtrapAttack" 
+  //INPUT: §FUNCtrapAttack_TrapMode 0=explosion 1=projectile/targetPlayer
+  //INPUT: §FUNCtrapAttack_TrapTimeSec in seconds (not milis)
   SendEvent GLOW SELF "" //TODO this also makes it glow or just calls the ON GLOW event that needs to be implemented here?
   
   SetGroup "DeviceTechExplosionActivated"
@@ -992,7 +1014,7 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   PLAY "TRAP"
   PLAY "POWER"
   
-  Set Â§FUNCtrapAttack_TrapCanKillMode_OUTPUT 1 //this calls FUNCMakeNPCsHostile at main() heartbeat
+  Set §FUNCtrapAttack_TrapCanKillMode_OUTPUT 1 //this calls FUNCMakeNPCsHostile at main() heartbeat
   
   //attractor SELF 1 1000 //makes it a bit difficult for the player to run away
   
@@ -1001,61 +1023,61 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   GoSub FUNCcalcSignalStrength
   
   // random trap
-  Set Â§FUNCtrapAttack_TrapTimeSec Â§DefaultTrapTimoutSec //must be seconds (not milis) to easify things below like timer count and text
-  timerTrapTime     Â§FUNCtrapAttack_TrapTimeSec 1 Dec Â§FUNCtrapAttack_TrapTimeSec 1
-  timerTrapTimeName Â§FUNCtrapAttack_TrapTimeSec 1 SetName "Holo-Grenade Activated (~Â§FUNCtrapAttack_TrapTimeSec~s)"
+  Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec //must be seconds (not milis) to easify things below like timer count and text
+  timerTrapTime     §FUNCtrapAttack_TrapTimeSec 1 Dec §FUNCtrapAttack_TrapTimeSec 1
+  timerTrapTimeName §FUNCtrapAttack_TrapTimeSec 1 SetName "Holo-Grenade Activated (~§FUNCtrapAttack_TrapTimeSec~s)"
   //timerTrapAttack  -m 0  100 GoSub FUNCMakeNPCsHostile //doesnt work
   
-  Set Â§TrapEffectTime 0
-  if (Â§FUNCtrapAttack_TrapMode == 0) { //explosion around self
-    Set Â§TmpTrapKind ^rnd_5
-    if (Â§TmpTrapKind == 0) timerTrapAttack 1 Â§FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl explosion  SELF
-    if (Â§TmpTrapKind == 1) timerTrapAttack 1 Â§FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl fire_field SELF
-    if (Â§TmpTrapKind == 2) timerTrapAttack 1 Â§FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl harm       SELF
-    if (Â§TmpTrapKind == 3) timerTrapAttack 1 Â§FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl ice_field  SELF
-    if (Â§TmpTrapKind == 4) timerTrapAttack 1 Â§FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl life_drain SELF
-    //this cause no damage? //if (Â§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf @SignalStrLvl mass_incinerate SELF
-    Unset Â§TmpTrapKind
-    Set Â§TrapEffectTime 2 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
+  Set §TrapEffectTime 0
+  if (§FUNCtrapAttack_TrapMode == 0) { //explosion around self
+    Set §TmpTrapKind ^rnd_5
+    if (§TmpTrapKind == 0) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl explosion  SELF
+    if (§TmpTrapKind == 1) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl fire_field SELF
+    if (§TmpTrapKind == 2) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl harm       SELF
+    if (§TmpTrapKind == 3) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl ice_field  SELF
+    if (§TmpTrapKind == 4) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl life_drain SELF
+    //this cause no damage? //if (§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf @SignalStrLvl mass_incinerate SELF
+    Unset §TmpTrapKind
+    Set §TrapEffectTime 2 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
   }
-  if (Â§FUNCtrapAttack_TrapMode == 1) { //projectile at player
-    timerTrapAttack 1 Â§FUNCtrapAttack_TrapTimeSec GoSub FUNCchkAndAttackProjectile
+  if (§FUNCtrapAttack_TrapMode == 1) { //projectile at player
+    timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec GoSub FUNCchkAndAttackProjectile
   }  
   
-  timerTrapVanish       1 Â§FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade" "alpha"
-  timerTrapVanishActive 1 Â§FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
-  timerTrapVanishGlow   1 Â§FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "alpha"
+  timerTrapVanish       1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade" "alpha"
+  timerTrapVanishActive 1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
+  timerTrapVanishGlow   1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "alpha"
   
   // trap effect time
-  Set Â§TmpTrapDestroyTime Â§FUNCtrapAttack_TrapTimeSec
-  Inc Â§TmpTrapDestroyTime Â§TrapEffectTime
-  timerTrapDestroy 1 Â§TmpTrapDestroyTime GoSub FUNCDestroySelfSafely 
+  Set §TmpTrapDestroyTime §FUNCtrapAttack_TrapTimeSec
+  Inc §TmpTrapDestroyTime §TrapEffectTime
+  timerTrapDestroy 1 §TmpTrapDestroyTime GoSub FUNCDestroySelfSafely 
   
   showlocals
   // unset after log
-  //Unset Â§TmpTrapDestroyTime //DO NOT UNSET OR IT WILL BREAK THE TIMER!!!
+  //Unset §TmpTrapDestroyTime //DO NOT UNSET OR IT WILL BREAK THE TIMER!!!
   
   //restore defaults for next call "w/o params"
-  Set Â§FUNCtrapAttack_TrapMode 0
+  Set §FUNCtrapAttack_TrapMode 0
   RETURN
 }
 
->>FUNCchkAndAttackProjectile { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCchkAndAttackProjectile" 
-  if ( ^#PLAYERDIST > Â§iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
-  Set Â§TmpTrapKind ^rnd_6
-  if (Â§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl FIREBALL              PLAYER
-  if (Â§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl FIRE_PROJECTILE       PLAYER
-  if (Â§TmpTrapKind == 2) SPELLCAST -smf @SignalStrLvl ICE_PROJECTILE        PLAYER
-  if (Â§TmpTrapKind == 3) SPELLCAST -smf @SignalStrLvl MAGIC_MISSILE         PLAYER
-  if (Â§TmpTrapKind == 4) SPELLCAST -smf @SignalStrLvl MASS_LIGHTNING_STRIKE PLAYER
-  if (Â§TmpTrapKind == 5) SPELLCAST -smf @SignalStrLvl POISON_PROJECTILE     PLAYER
+>>FUNCchkAndAttackProjectile { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCchkAndAttackProjectile" 
+  if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
+  Set §TmpTrapKind ^rnd_6
+  if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl FIREBALL              PLAYER
+  if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl FIRE_PROJECTILE       PLAYER
+  if (§TmpTrapKind == 2) SPELLCAST -smf @SignalStrLvl ICE_PROJECTILE        PLAYER
+  if (§TmpTrapKind == 3) SPELLCAST -smf @SignalStrLvl MAGIC_MISSILE         PLAYER
+  if (§TmpTrapKind == 4) SPELLCAST -smf @SignalStrLvl MASS_LIGHTNING_STRIKE PLAYER
+  if (§TmpTrapKind == 5) SPELLCAST -smf @SignalStrLvl POISON_PROJECTILE     PLAYER
   //TODO semi-paralize, every 1-3s shocks NPC and slowly pull it back to grenade or mine location thru interpolate and paralize it there for 0-1s
-  //if (Â§TrapKind == 0) SPELLCAST -smf @SignalStrLvl LIGHTNING_STRIKE PLAYER //too weak
-  Unset Â§TmpTrapKind
+  //if (§TrapKind == 0) SPELLCAST -smf @SignalStrLvl LIGHTNING_STRIKE PLAYER //too weak
+  Unset §TmpTrapKind
   RETURN
 }
 
->>FUNChideHologramPartsPermanently { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNChideHologramPartsPermanently" 
+>>FUNChideHologramPartsPermanently { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNChideHologramPartsPermanently" 
   // clean unnecessary skins from this item only:
   //TODO? just replace by a HoloGrenade.ftl, will also help lower this script size and Hologram.ftl overlapping things in blender (not a big deal tho..)
   TWEAK SKIN "Hologram.ousidenoise" "alpha"
@@ -1067,47 +1089,48 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   TWEAK SKIN "Hologram.skybox.index2000.DocIdentified" "alpha"
   TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "alpha"
   TWEAK SKIN "Hologram.skybox.UVSphere.index2000.DocBackground" "alpha"
-  TWEAK SKIN "Â£SkyBoxCurrent" "alpha"
-  TWEAK SKIN "Â£SkyBoxCurrentUVS" "alpha"
+  TWEAK SKIN "£SkyBoxCurrent" "alpha"
+  TWEAK SKIN "£SkyBoxCurrentUVS" "alpha"
   RETURN
 }
 
->>FUNCparalyseIfPlayerNearby { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCparalyseIfPlayerNearby"  //TODOA is this working?
+>>FUNCparalyseIfPlayerNearby { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCparalyseIfPlayerNearby"  //TODOA is this working?
   if ( ^#PLAYERDIST < 500 ) {
-    Set Â§TmpParalyseMilis 3000
-    Inc Â§TmpParalyseMilis ^rnd_6000
-    SPELLCAST -fmsd Â§TmpParalyseMilis @SignalStrLvl PARALYSE PLAYER
+    Set §TmpParalyseMilis 3000
+    Inc §TmpParalyseMilis ^rnd_6000
+    SPELLCAST -fmsd §TmpParalyseMilis @SignalStrLvl PARALYSE PLAYER
   }
   RETURN
 }
 
->>FUNCDestroySelfSafely { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCDestroySelfSafely" 
+>>FUNCDestroySelfSafely { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCDestroySelfSafely" 
   PLAY -s //stops sounds started with -i flag
   DESTROY SELF
   RETURN
 }
 
->>FUNCcalcSignalStrength { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCcalcSignalStrength"  //this is meant to be independent from magic skills so instead of ^spelllevel to cast spells, use @SignalStrLvl
+>>FUNCcalcSignalStrength { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCcalcSignalStrength"  //this is meant to be independent from magic skills so instead of ^spelllevel to cast spells, use @SignalStrLvl
   // reset to recalc
   Set @RepeaterSignalStrength 0 //0.0 to 100.0
   Set @SignalStrength 0         //0.0 to 100.0
-  Set Â§SignalStrengthTrunc 0   //  0 to 100
+  Set §SignalStrengthTrunc 0   //  0 to 100
   Set @SignalStrLvl 0           //0.0 to 10.0
   
   // no signal for some short realtime. This means the global ancient energy transmitter is failing or getting interference.
-  Set Â§DEBUGgameseconds ^gameseconds
-  Set Â§SignalModeChangeDelay #SignalModeChangeTime
-  Dec Â§SignalModeChangeDelay ^gameseconds
-  if(Â£SignalMode == "Working"){
+  Set §DEBUGgameseconds ^gameseconds
+  Set §SignalModeChangeDelay #SignalModeChangeTime
+  Dec §SignalModeChangeDelay ^gameseconds
+  if(£SignalMode == "Working"){
     if(^gameseconds > #SignalModeChangeTime){
-      Set Â£SignalMode "None" //configures the no signal delay below
+      Set £SignalMode "None" //configures the no signal delay below
       Set #SignalModeChangeTime  ^gameseconds
       Inc #SignalModeChangeTime  ^rnd_300 //up to
       RETURN
     }
-  } else if(Â£SignalMode == "None"){
+  } 
+  else if(£SignalMode == "None"){
     if(^gameseconds > #SignalModeChangeTime){
-      Set Â£SignalMode "Working" //configures the working signal delay below
+      Set £SignalMode "Working" //configures the working signal delay below
       Set #SignalModeChangeTime  ^gameseconds
       Inc #SignalModeChangeTime  900 //from
       Inc #SignalModeChangeTime  ^rnd_900 //up to
@@ -1116,40 +1139,41 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
     RETURN
   }
   
-  if(Â£RepeaterStrongestDeployedID != "") { //TODO implement signal repeaters
-    ////if(and(Â§SignalRepeater == 1 && ^dist_player <= 3000)) { // 1: there is a signal repeater at player inventory (good as forces player to want to not move) 
-    ////if(and(Â§SignalRepeater == 1 && ^dist_player <= 3000)) { // 1: there is a signal repeater at player inventory (good as forces player to want to not move) 
+  if(£RepeaterStrongestDeployedID != "") { //TODO implement signal repeaters
+    ////if(and(§SignalRepeater == 1 && ^dist_player <= 3000)) { // 1: there is a signal repeater at player inventory (good as forces player to want to not move) 
+    ////if(and(§SignalRepeater == 1 && ^dist_player <= 3000)) { // 1: there is a signal repeater at player inventory (good as forces player to want to not move) 
     //if(^dist_player <= 3000) { // there is a signal repeater at player inventory (good as forces player to want to not move) 
       //// at some locations there is no signal at all.
-      //Set Â§NoSignalRegion ^locationx_player
-      //Inc Â§NoSignalRegion ^locationz_player
-      //Mod Â§NoSignalRegion Â§SignalDistBase
-      //if(Â§NoSignalRegion >= Â§SignalDistMin) {
+      //Set §NoSignalRegion ^locationx_player
+      //Inc §NoSignalRegion ^locationz_player
+      //Mod §NoSignalRegion §SignalDistBase
+      //if(§NoSignalRegion >= §SignalDistMin) {
         //Set @RepeaterSignalStrength ^locationx_player
         //Inc @RepeaterSignalStrength ^locationy_player
         //Inc @RepeaterSignalStrength ^locationz_player
       //}
-    ////} else if(Â§SignalRepeater == 2) { // 2: there is a deployed repeater nearby
+    ////} 
+    ////else if(§SignalRepeater == 2) { // 2: there is a deployed repeater nearby
     //} else {
-      ////todoa Â£SignalRepeaterID
-      //Set @RepeaterSignalDist ^dist_~Â£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
+      ////todoa £SignalRepeaterID
+      //Set @RepeaterSignalDist ^dist_~£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
     //}
-    Set @RepeaterSignalDist ^dist_~Â£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
+    Set @RepeaterSignalDist ^dist_~£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
   } else {
-    Set @AncientGlobalTransmitterSignalDist ^dist_0,0,0 //could be anywhere, if  I create a bunker map with it, then it will have a proper location 
+    Set @AncientGlobalTransmitterSignalDist ^dist_{0,0,0} //could be anywhere, if  I create a bunker map with it, then it will have a proper location 
   }
   
   // signal strength based on deterministic but difficultly previsible cubic regions
-  Set Â§NoSignalRegion ^locationx_player
-  Inc Â§NoSignalRegion ^locationz_player
-  Mod Â§NoSignalRegion Â§SignalDistBase
-  if(Â§NoSignalRegion >= Â§SignalDistMin) {
+  Set §NoSignalRegion ^locationx_player
+  Inc §NoSignalRegion ^locationz_player
+  Mod §NoSignalRegion §SignalDistBase
+  if(§NoSignalRegion >= §SignalDistMin) {
     Set @SignalStrength ^locationx_self 
     Inc @SignalStrength ^locationy_self
     if (^inPlayerInventory == 1) Inc @SignalStrength 90 //if at player inventory, items are 90 dist from ground (based on tests above). Could just use ^locationy_player tho.
     Inc @SignalStrength ^locationz_self
     
-    if(Â§SignalRepeater == 0) {
+    if(§SignalRepeater == 0) {
       // less cubic/less previsible (this alone would be like spheric regions btw)
       Inc @SignalStrength @AncientGlobalTransmitterSignalDist
     }
@@ -1158,14 +1182,14 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   // stronger signal wins
   if(@RepeaterSignalStrength > @SignalStrength) Set @SignalStrength @RepeaterSignalStrength
   
-  if(Â§SignalRepeater == 0) {
+  if(§SignalRepeater == 0) {
     // see comments about cubic and spheric regions above
-    // means from 0 to Â§SignalDistHalf then from Â§SignalDistHalf to 0 as the player moves around. Ex.: if max dist is 1000, it will be from 0 to 500 and from 500 to 0, then from 0 to 500 again...
-    Mod @SignalStrength Â§SignalDistBase //remainder
-    if (@SignalStrength > Â§SignalDistHalf) {
-      Dec @SignalStrength Â§SignalDistHalf
+    // means from 0 to §SignalDistHalf then from §SignalDistHalf to 0 as the player moves around. Ex.: if max dist is 1000, it will be from 0 to 500 and from 500 to 0, then from 0 to 500 again...
+    Mod @SignalStrength §SignalDistBase //remainder
+    if (@SignalStrength > §SignalDistHalf) {
+      Dec @SignalStrength §SignalDistHalf
       Mul @SignalStrength -1
-      Inc @SignalStrength Â§SignalDistHalf
+      Inc @SignalStrength §SignalDistHalf
     }
   } else {
     Set @RepeaterSignalHere @SignalStrength //100% reference
@@ -1180,9 +1204,9 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
   }
   
   // percent and signal level
-  Div @SignalStrength Â§SignalDistHalf //converts to a percent from 0.0 to 1.0
+  Div @SignalStrength §SignalDistHalf //converts to a percent from 0.0 to 1.0
   Mul @SignalStrength 100 //0.0 to 100.0
-  Set Â§SignalStrengthTrunc @SignalStrength //trunc 0 to 100
+  Set §SignalStrengthTrunc @SignalStrength //trunc 0 to 100
   // to use instead of ^spelllevel
   Set @SignalStrLvl @SignalStrength
   Div @SignalStrLvl 10 //0-10 like spell cast level would be
@@ -1191,106 +1215,152 @@ ON InventoryOut { Set Â£ScriptDebugLog "On_InventoryOut"
 }
 
 //////////////////////////// TESTS /////////////////////////////
->>FUNCtestPrintfFormats { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCtestPrintfFormats" 
+>>FUNChoverInfo { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNChoverInfo" 
+	if(~^hover~ != "") {
+		Set £HoverEnt "~^hover~"
+		Set @testDegreesXh ^degreesx_~^hover~
+		Set @testDegreesYh ^degreesy_~^hover~
+		Set @testDegreesZh ^degreesz_~^hover~ //some potions are inclined a bit
+		Set @testDegreesYtoh ^degreesyto_~^hover~
+		showlocals
+	}
+	RETURN
+}
+
+>>FUNCtestPrintfFormats { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtestPrintfFormats" 
   Set @testFloat 78.12345
-  Set Â§testInt 513
-  Set Â£testString "foo"
+  Set §testInt 513
+  Set £testString "foo"
   //some simple printf formats
-  Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;float:~%020.6f,@testFloat~"
-  Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;hexa:0x~%08X,Â§testInt~"
-  Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;decimalAlignRight:~%8d,Â§testInt~"
-  Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;string='~%10s,Â£testString~'"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;float:~%020.6f,@testFloat~"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;hexa:0x~%08X,§testInt~"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;decimalAlignRight:~%8d,§testInt~"
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;string='~%10s,£testString~'"
+  ++ §testsPerformed
   RETURN
 }
->>FUNCtestLogicOperators { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCtestLogicOperators" 
-  Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests"
+>>FUNCtestLogicOperators { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtestLogicOperators" 
+  Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests"
   Set @testFloat 1.5
-  Set Â§testInt 7
-  Set Â£testString "foo"
+  Set §testInt 7
+  Set £testString "foo"
   
-  // OK means can appear on the Â£ScriptDebug________________Tests. WRONG means it should not have appeared.
+  // OK means can appear on the £ScriptDebug________________Tests. WRONG means it should not have appeared.
   
-  if(and(@testFloat == 1.5 && Â§testInt == 7 && Â£testString == "foo")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A1:OK"
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A1:OK"
   }
-  if(and(@testFloat == 1.5 && Â§testInt == 7 && Â£testString == "foo1")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A2:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A2:WRONG"
   }
-  if(and(@testFloat == 1.5 && Â§testInt == 8 && Â£testString == "foo")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A3:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A3:WRONG"
   }
-  if(and(@testFloat == 1.6 && Â§testInt == 7 && Â£testString == "foo")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A4:WRONG"
+  if(and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A4:WRONG"
   }
   // test without block delimiters { }
-  if(and(@testFloat == 1.5 && Â§testInt == 7 && Â£testString == "foo"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A11:OK"
-  if(and(@testFloat == 1.5 && Â§testInt == 7 && Â£testString == "foo1"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A12:WRONG"
-  if(and(@testFloat == 1.5 && Â§testInt == 8 && Â£testString == "foo"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A13:WRONG"
-  if(and(@testFloat == 1.6 && Â§testInt == 7 && Â£testString == "foo"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;A14:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A11:OK"
+  if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A12:WRONG"
+  if(and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A13:WRONG"
+  if(and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14:WRONG"
   
   // not(!)
-  if(!and(@testFloat == 1.5 && Â§testInt == 7 && Â£testString == "foo"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;b11:wrong"
-  if(!and(@testFloat == 1.5 && Â§testInt == 7 && Â£testString == "foo1"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;b12:ok"
-  if(!and(@testFloat == 1.5 && Â§testInt == 8 && Â£testString == "foo"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;b13:ok"
-  if(!and(@testFloat == 1.6 && Â§testInt == 7 && Â£testString == "foo"))
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;b14:ok"
+  if(!and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11:wrong"
+  if(!and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12:ok"
+  if(!and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13:ok"
+  if(!and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo"))
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14:ok"
   
   // or !or
-  if(or(@testFloat == 1.5 , Â§testInt == 7 , Â£testString == "foo")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;c1:OK"
+  if(or(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c1:OK"
   }
-  if(!or(@testFloat == 1.5 || Â§testInt != 7 || Â£testString == "foo1")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;c2:WRONG"
+  if(!or(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c2:WRONG"
   }
-  if(!or(@testFloat != 1.5 || Â§testInt != 8 || Â£testString == "foo")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;c3:WRONG"
+  if(!or(@testFloat != 1.5 || §testInt != 8 || £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3:WRONG"
   }
-  if(or(@testFloat == 1.6 || Â§testInt != 7 || Â£testString == "foo")){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;c4:ok"
+  if(or(@testFloat == 1.6 || §testInt != 7 || £testString == "foo")){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c4:ok"
   }
   
   // nesting and multiline
-  if(or(      @testFloat == 1.6 ||       Â§testInt != 7    ||       and(        Â£testString == "foo"         &&         Â§testInt != 7       ) ||      !or(@testFloat != 1.5 || Â§testInt == 8 || Â£testString == "foo") ||      !and(@testFloat == 1.5 , Â§testInt == 8 , Â£testString == "foo")     )  ){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;d1:ok"
+  if(or(      @testFloat == 1.6 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt == 8 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt == 8 , £testString == "foo")     )  ){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1:ok"
   }
-  if(or(      @testFloat == 1.6 ||       Â§testInt != 7    ||       and(        Â£testString == "foo"         &&         Â§testInt != 7       ) ||      !or(@testFloat != 1.5 || Â§testInt == 8 || Â£testString == "foo") ||      !and(@testFloat == 1.5 , Â§testInt != 8 , Â£testString == "foo")     )  ){
-    Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;d2:wrong"
+  if(or(      @testFloat == 1.6 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt == 8 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt != 8 , £testString == "foo")     )  ){
+    Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2:wrong"
   }
   
   //Set @test1 1.0
   //Set @test2 11.0
-  //Set Â£name "foo"
-  //if(and(@test1 == 1.0 && or(Â£name != "dummy" || @test2 > 10.0)){
-    //Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests:A"
+  //Set £name "foo"
+  //if(and(@test1 == 1.0 && or(£name != "dummy" || @test2 > 10.0)){
+    //Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:A"
   //}
-  //if(and(@test1 == 2.0 && or(Â£name != "dummy" || @test2 > 10.0)){ //TODO this is failing
-    //Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests:B"
+  //if(and(@test1 == 2.0 && or(£name != "dummy" || @test2 > 10.0)){ //TODO this is failing
+    //Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:B"
   //}
-  //if(and(@test1 == 1.0 && or(Â£name == "dummy" || @test2 > 10.0)){
-    //Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests:C"
+  //if(and(@test1 == 1.0 && or(£name == "dummy" || @test2 > 10.0)){
+    //Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:C"
   //}
-  //if(or(@test1 == 2.0 || Â£name == "dummy" || @test2 <= 10.0)) Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests:D"
-  //if(or(@test1 == 2.0 || Â£name == "dummy" || @test2 >= 10.0)) Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests:E"
+  //if(or(@test1 == 2.0 || £name == "dummy" || @test2 <= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:D"
+  //if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:E"
   
+  ++ §testsPerformed
   RETURN
 }
->>FUNCtests { Set Â£ScriptDebugLog "~Â£ScriptDebugLog~;FUNCtests" 
+>>FUNCdistAbsPos {
+  // distance to absolute locations
+  Set §testDistAbsolute ^dist_{0,0,0}
+  Set @testDistAbsolute2 ^dist_{1000.123,2000.56,3000}
+  Set §testAbs 5000
+  Set @testAbs2 500.45
+  Set @testDistAbsolute3 ^dist_{~§testAbs~,~@testAbs2~,~§testAbs~}
+  Set §testDistAbsolute4 ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
+  Set @testDistAbsolute4b ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
+  Set @testDistAbsolute4b ^dist_"{~^locationx_player~,~^locationy_player~,~^locationz_player~}" //rm tests the warn msg with line and column
+  ++ §testsPerformed
+	RETURN
+}
+>>FUNCtests { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests" 
   // other tmp tests
-  //fail teleport -pi //tele the player to its starting spawn point
-  //Set @TstDistToSomeFixedPoint ^RealDist_PRESSUREPAD_GOB_0022 //this gives a wrong(?) huge value..
-  //Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
-  //Set Â§TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
   
-  Set Â£ScriptDebug________________Tests "~Â£ScriptDebug________________Tests~;FUNCtests" //printf format
-  GoSub FUNCtestPrintfFormats
-  GoSub FUNCtestLogicOperators
+  Set @testDegreesXp ^degreesx_player
+  Set @testDegreesYp ^degreesy_player
+  Set @testDegreesZp ^degreesz_player //usually always 0 to player I think
+  Set @testDegreesYtoPlayer ^degreesyto_player
+  Set @testDegreesYtoPlayer2 ^degreesto_player
+  
+  Set @testDegreesXme ^degreesx_~^me~
+  Set @testDegreesYme ^degreesy_~^me~
+  Set @testDegreesZme ^degreesz_~^me~ //some potions are inclined a bit
+
+  Set @testDegreesYme2 ^degrees
+  Set @testDegreesYme3 ^degrees_~^me~
+  Set @testDegreesYp2  ^degrees_player
+  
+  //if(^degreesx_player == 301) { //maximum Degrees player can look up is that
+  if(^degreesx_player == 74.9) { //minimum Degrees player can look down is that
+		//fail teleport -pi //tele the player to its starting spawn point
+		//Set @TstDistToSomeFixedPoint ^RealDist_PRESSUREPAD_GOB_0022 //this gives a wrong(?) huge value..
+		//Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
+		//Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
+		
+		Set £ScriptDebug________________Tests "FUNCtests"
+		GoSub FUNCdistAbsPos
+		GoSub FUNCtestPrintfFormats
+		GoSub FUNCtestLogicOperators
+	}
   
   showlocals
   RETURN
