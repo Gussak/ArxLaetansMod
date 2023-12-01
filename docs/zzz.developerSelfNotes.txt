@@ -93,13 +93,17 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2
 Distance variable now can use an absolute location as target
 ex.: ^dist_{8000.25,7800.44,8500.32}
 
-PR_LogicalOperators
-Implemented Logical Operators for "if" command
-WIP Not tested, this is a backup commit
+https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
+Logical Operators for "if" command  
+and(... && ... && ...) //only accepts '&&' or ','  
+or(... || ... || ...) //only accepts '||' or ','  
+!and(... && ... && ...)  
+!or(... || ... || ...)  
+and nesting: if(and(... && !or(... || ... || and(... , ... , ...)) && ...))  
+where '...' are the existing comparisons that use == != >= <= > <  
 
-PR_FormatSyntax?
+https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3
 Format expanded variables thru printf syntax
-WIP this was not tested yet! this is a backup commit only.
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2
 Added ^degrees... variables

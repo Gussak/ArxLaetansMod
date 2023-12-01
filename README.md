@@ -30,7 +30,19 @@ If you want you can improve them and/or also create a pull request at Arx Libert
 Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
 Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
 
-_READY BRANCHES_ (and commit message):  
+_READY (possibly) PR_.* BRANCHES_ (and commit messages):  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
+Logical Operators for "if" command  
+and(... && ... && ...) //only accepts '&&' or ','  
+or(... || ... || ...) //only accepts '||' or ','  
+!and(... && ... && ...)  
+!or(... || ... || ...)  
+and nesting: if(and(... && !or(... || ... || and(... , ... , ...)) && ...))  
+where '...' are the existing comparisons that use == != >= <= > <  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
+Format expanded variables thru printf syntax  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2  
 ^dist_ variable now can use an absolute location as target  
