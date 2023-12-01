@@ -35,6 +35,12 @@
 | align="center" | {{Y}}
 
 |-
+| <code>^dist_<code>{</code>x,y,z<code>}</code></code>
+| {{number}}
+| distance between the caller and an absolute location, 99999999999.0 on error
+| align="center" | {{Y}}
+
+|-
 | <code>^locationx_{{Highlight|entity|&lt;entity&gt;}}</code>
 | {{number}}
 | absolute X position of the given entity, 99999999999.0 on error
