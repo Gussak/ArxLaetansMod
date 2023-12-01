@@ -88,6 +88,8 @@ ON INIT { Set ΠcriptDebugLog "On_Init"
 }
 
 ON IDENTIFY { Set ΠcriptDebugLog "On_Identify" //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
+	if (^amount > 1) ACCEPT //this must not be a stack of items
+
 	//Set ΠcriptDebugProblemTmp "identified=~兌dentified~;ObjKnow=~^PLAYER_SKILL_OBJECT_KNOWLEDGE~"
 	//if ( 兌dentified > 0 ) ACCEPT //w/o this was flooding the log, why?
 	//if ( 兌dentifyObjectKnowledgeRequirement == 0 ) ACCEPT //useless?
@@ -123,11 +125,13 @@ ON IDENTIFY { Set ΠcriptDebugLog "On_Identify" //this is called (apparently eve
 }
 
 ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
+	if (^amount > 1) ACCEPT //this must not be a stack of items
+
 	++ 別nInventoryUseCount //total activations just for debug
 	GoSub FUNCtests //COMMENT_ON_RELEASE
 	
 	///////////////// TRAP MODE SECTION ///////////////////
-	if ( ｘncientDeviceMode == "Grenade" ) {
+	if ( ｘncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off
 		if ( 你ncientDeviceTriggerStep == 1 ) {
 			if (^amount > 1) { //cannot activate a stack of items
 				SPEAK -p [player_no] NOP
@@ -180,22 +184,22 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 	} else {
 	if ( ｘncientDeviceMode == "LandMine" ) {
 		if ( 你ncientDeviceTriggerStep == 1 ) {
-			Set 你ncientDeviceTriggerStep 2 //seek ^hover
-			timerTeleportDetectHoverNPC -m 333 0 GoSub FUNCteleportToAndKillNPC
+			Set 你ncientDeviceTriggerStep 2 //activate
+			timerLandMineDetectNearbyNPC -m 0 333 GoSub FUNCLandMine
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
-			timerTeleportDetectHoverNPC off
-			你ncientDeviceTriggerStep == 1 //stop seek
+			timerLandMineDetectNearbyNPC off 
+			Set 你ncientDeviceTriggerStep = 1  //stop
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
 	if ( ｘncientDeviceMode == "Teleport" ) {
 		if ( 你ncientDeviceTriggerStep == 1 ) {
-			Set 你ncientDeviceTriggerStep 2 //seek ^hover
-			timerTeleportDetectHoverNPC -m 333 0 GoSub FUNCteleportToAndKillNPC
+			Set 你ncientDeviceTriggerStep 2 // activate
+			timerTeleportDetectHoverNPC -m 0 333 GoSub FUNCteleportToAndKillNPC
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
 			timerTeleportDetectHoverNPC off
-			你ncientDeviceTriggerStep == 1 //stop seek
+			Set 你ncientDeviceTriggerStep = 1  //stop
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -203,22 +207,36 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 	if ( ｘncientDeviceMode == "MindControl" ) {
 		if ( 你ncientDeviceTriggerStep == 1 ) {
 			Set 你ncientDeviceTriggerStep 2 //seek ^hover
-			timerTeleportDetectHoverNPC -m 333 0 GoSub FUNCteleportToAndKillNPC
+			timerMindControlDetectHoverNPC -m 0 333 GoSub FUNCMindControl
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
-			timerTeleportDetectHoverNPC off
-			你ncientDeviceTriggerStep == 1 //stop seek
+			timerMindControlDetectHoverNPC off
+			Set 你ncientDeviceTriggerStep = 1  //stop
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} } } }
+	
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////  !!! HOLOGRAM ONLY BELOW HERE !!!  /////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(ｘncientDeviceMode != "Hologram") {
+		Set ΠcriptDebugLog "~ΠcriptDebugLog~;Unrecognized:ｘncientDeviceMode='~ｘncientDeviceMode~'"
+		SPEAK -p [player_no] NOP
+		showlocals
+		ACCEPT
+	}
 	
 	//////////////// DENY ACTIVATION SECTION ///////////////////////
 	
 	Set ΠcriptDebugLog "~ΠcriptDebugLog~;DebugLog:10"
 	//Set ΠcriptDebugLog "~ΠcriptDebugLog~;20"
 	if (^inPlayerInventory == 1) {
-		PLAY "POWER_DOWN"
-		showlocals
+		if(and(ｘncientDeviceMode == "Hologram" && 呆HologramInitialized == 0)) Set ｘncientDeviceMode "_BecomeSignalRepeater_"
+		GoSub FUNCmorph
+		//PLAY "POWER_DOWN"
+		//showlocals
 		ACCEPT //can only be activated if deployed
 	}
 	
@@ -260,10 +278,11 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 		
 		TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.box.Clear"
 		
-		Set 助seMax ^rnd_115
+		//Set 助seMax 5
+		//Inc 助seMax ^rnd_110
 		//GoSub FUNCcalcAncientTechSkill
 		//Inc 助seMax @AncientTechSkill
-		Set 助seRemain 助seMax
+		//Set 助seRemain 助seMax
 		Set 助seHologramDestructionStart 助seMax
 		Mul 助seHologramDestructionStart 0.95
 		
@@ -272,16 +291,16 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 		
 		// grow effect (timers begin imediatelly or after this event exits?)
 		// total time
-		Set 助seBlockedMili 5000 //the time it will take to grow
+		Set 助seBlockedMili 2000 //the time it will take to grow
 		//timerBlocked -m 100 50 Dec 助seBlockedMili 50 //to wait while it scales up
-		timerBlocked -m 0 50 Dec 助seBlockedMili 50 //will just decrement 助seBlockedMili until it reaches 0
+		timerBlocked -m 0 50 Dec 助seBlockedMili 50 //will just decrement 助seBlockedMili
 		// interactivity blocked
 		SET_INTERACTIVITY NONE
 		timerInteractivity -m 1 助seBlockedMili SET_INTERACTIVITY YES
 		// scale up effect (each timer must have it's own unique id)
 		Set 刨cale 100 //default. target is 1000%
-		timerGrowInc  -m 100 50 Inc 刨cale 9 //1000-100=900; 900/100=9 per step
-		timerGrowInc2 -m 100 50 SetScale 刨cale
+		timerGrowInc  -m 100 20 Inc 刨cale 9 //1000-100=900; 900/100=9 per step
+		timerGrowInc2 -m 100 20 SetScale 刨cale
 		
 		Set 呆HologramInitialized 1
 		
@@ -480,6 +499,8 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 }
 
 On Main { Set ΠcriptDebugLog "On_Main" //HeartBeat happens once per second apparently (but may be less often?)
+	if (^amount > 1) ACCEPT //this must not be a stack of items
+	
 	//starttimer timer1 //^#timer1 used ON MAIN
 	//starttimer timer2 //^#timer2 used ON IDENTIFY
 	//starttimer timer3 //^#timer3
@@ -556,7 +577,7 @@ On Main { Set ΠcriptDebugLog "On_Main" //HeartBeat happens once per second appa
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
 	} else { if ( ｘncientDeviceMode == "Teleport" ) {
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
-	} else { if ( ｘncientDeviceMode == "MindControlBats" ) {
+	} else { if ( ｘncientDeviceMode == "MindControl" ) {
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
 	} } } } } }
 	
@@ -572,6 +593,8 @@ On Main { Set ΠcriptDebugLog "On_Main" //HeartBeat happens once per second appa
 }
 
 ON CUSTOM { Set ΠcriptDebugLog "On_Custom" //this is the receiving end of the transmission
+	if (^amount > 1) ACCEPT //this must not be a stack of items
+	
 	// ^$param<i> ωtring, ^&param<i> @number, ^#param<i> 告nt
 	Set ｚustomCommand ^$param1
 	
@@ -592,15 +615,22 @@ ON CUSTOM { Set ΠcriptDebugLog "On_Custom" //this is the receiving end of the t
 	ACCEPT
 }
 
-ON COMBINE { Set ΠcriptDebugLog "On_Combine:~^$param1~"
+ON COMBINE { Set ΠcriptDebugLog "On_Combine:~^$PARAM1~"
 	UnSet ΠcriptDebugCombineFailReason
 	showlocals //this is excellent here as any attempt will help showing the log!
 	
-	// check other (the one that you double click)
-	if (^$param1 ISCLASS "Hologram") else ACCEPT //only combine with these
-	if (^$param1 !isgroup "DeviceTechBasic") {
+	// check other (^$PARAM1 is the one that you double click)
+	if (^$PARAM1 ISCLASS "Hologram") else ACCEPT //only combine with these
+	if (^$PARAM1 !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
-		Set ΠcriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic"
+		Set ΠcriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic:Aka_hologram"
+		showlocals
+		ACCEPT
+	}
+	
+	if(ｘncientDeviceMode == "MindControl") { //sync with last/max combine option
+		SPEAK -p [player_no] NOP
+		Set ΠcriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
 		showlocals
 		ACCEPT
 	}
@@ -635,90 +665,92 @@ ON COMBINE { Set ΠcriptDebugLog "On_Combine:~^$param1~"
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	Set 你ncientDeviceTriggerStep 0
-	
-	GoSub FUNCskillCheckAncientTech
-	Set 低reateChance 佝UNCskillCheckAncientTech_chanceSuccess_OUTPUT
-	//if (And(利uality >= 4 && 兌temConditionSure == 5)) {
-	if (利uality >= 4){
-		if(兌temConditionSure == 5) {
-		Set 低reateChance 100
-		}
-	}
-	RANDOM 低reateChance {
-		if ( ｘncientDeviceMode == "Hologram" ) { Set ｘncientDeviceMode "Grenade"
-			Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-			Div 判ristineChance 10
-			If (判ristineChance < 5) Set 判ristineChance 5
-			RANDOM 判ristineChance { // grants a minimal chance based on skill in case the player do not initialize it
-				Set 利uality 5 
-			}
+	GoSub FUNCmorph
+	//Set 你ncientDeviceTriggerStep 0
+	//GoSub FUNCskillCheckAncientTech
+	//Set 低reateChance 佝UNCskillCheckAncientTech_chanceSuccess_OUTPUT
+	//if (and(利uality >= 4 && 兌temConditionSure == 5)) Set 低reateChance 100
+	//RANDOM 低reateChance {
+		//if ( ｘncientDeviceMode == "Hologram" ) { Set ｘncientDeviceMode "Grenade"
+			//Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+			//Div 判ristineChance 10
+			//If (判ristineChance < 5) Set 判ristineChance 5
+			//RANDOM 判ristineChance { // grants a minimal chance based on skill in case the player do not initialize it
+				//Set 利uality 5 
+			//}
 			
-			Set ΓUNCnameUpdate_NameBase "HoloGrenade"
-			Set Ζcon "HologramGrenade"
+			//Set ΓUNCnameUpdate_NameBase "HoloGrenade"
+			//Set Ζcon "HologramGrenade"
 			
-			//PLAY "TRAP"
-			TWEAK SKIN "Hologram.tiny.index4000.box"               "Hologram.tiny.index4000.box.Clear"
-			TWEAK SKIN "Hologram.tiny.index4000.grenade.Clear"     "Hologram.tiny.index4000.grenade"
-			//TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+			////PLAY "TRAP"
+			//TWEAK SKIN "Hologram.tiny.index4000.box"               "Hologram.tiny.index4000.box.Clear"
+			//TWEAK SKIN "Hologram.tiny.index4000.grenade.Clear"     "Hologram.tiny.index4000.grenade"
+			////TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 			
-			GoSub FUNChideHologramPartsPermanently
+			//GoSub FUNChideHologramPartsPermanently
 			
-			Set 刨cale 100 //just in case it is combined with the big hologram on the floor
-			SetScale 刨cale
+			//Set 刨cale 100 //just in case it is combined with the big hologram on the floor
+			//SetScale 刨cale
 			
-			Set 你ncientDeviceTriggerStep 1
-			PlayerStackSize 5
-			SetGroup -r "DeviceTechBasic"
-			SetGroup "Explosive"
-		} else { if ( ｘncientDeviceMode == "Grenade" ) { Set ｘncientDeviceMode "LandMine"
-			TWEAK SKIN "Hologram.tiny.index4000.box.Clear" "Hologram.tiny.index4000.boxLandMine"
-			TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
-			Set ΓUNCnameUpdate_NameBase "LandMine"
-			Set Ζcon "HoloLandMine"
-			Set 你ncientDeviceTriggerStep 1
-		} else { if ( ｘncientDeviceMode == "LandMine" ) { Set ｘncientDeviceMode "Teleport"
-			TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
-			Set ΓUNCnameUpdate_NameBase "Teleport"
-			Set Ζcon "HoloTeleport"
-			Set 你ncientDeviceTriggerStep 1
-		} else { if ( ｘncientDeviceMode == "Teleport" ) { Set ｘncientDeviceMode "MindControlBats"
-			// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
-			// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
-			TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
-			Set ΓUNCnameUpdate_NameBase "MindControl"
-			Set Ζcon "HoloMindControl"
-			Set 你ncientDeviceTriggerStep 1
-		} } } }
+			//Set 你ncientDeviceTriggerStep 1
+			//PlayerStackSize 12
+			//SetGroup -r "DeviceTechBasic"
+			//SetGroup "Explosive"
+		//} else { if ( ｘncientDeviceMode == "Grenade" ) { Set ｘncientDeviceMode "LandMine"
+			//TWEAK SKIN "Hologram.tiny.index4000.box.Clear" "Hologram.tiny.index4000.boxLandMine"
+			//TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
+			//Set ΓUNCnameUpdate_NameBase "LandMine"
+			//Set Ζcon "HoloLandMine"
+			//Set 你ncientDeviceTriggerStep 1
+			//PLAYERSTACKSIZE 9
+		//} else { if ( ｘncientDeviceMode == "LandMine" ) { Set ｘncientDeviceMode "Teleport"
+			//TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
+			//Set ΓUNCnameUpdate_NameBase "Teleport"
+			//Set Ζcon "HoloTeleport"
+			//Set 你ncientDeviceTriggerStep 1
+			//PLAYERSTACKSIZE 6
+		//} else { if ( ｘncientDeviceMode == "Teleport" ) { Set ｘncientDeviceMode "MindControl"
+			//// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
+			//// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
+			//TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
+			//Set ΓUNCnameUpdate_NameBase "MindControl"
+			//Set Ζcon "HoloMindControl"
+			//Set 你ncientDeviceTriggerStep 1
+			//PLAYERSTACKSIZE 3
+		//} } } }
 		
-		if(你ncientDeviceTriggerStep == 1) {
-			if ( 利uality >= 4 ) {
-				Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameBase~+"
-				Set Ζcon "~Ζcon~MK2"
-			}
+		//if(你ncientDeviceTriggerStep == 1) {
+			//if ( 利uality >= 4 ) {
+				//Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameBase~ MK2+"
+				//Set Ζcon "~Ζcon~MK2"
+			//}
 			
-			GoSub FUNCupdateUses
-			GoSub FUNCnameUpdate
+			//GoSub FUNCupdateUses
+			//GoSub FUNCnameUpdate
 
-			Set Ζcon "~Ζcon~[icon]"
-			TWEAK ICON "~Ζcon~"
-		}
-	} else {
-		//SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
-		////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
-		GoSub FUNCbreakDevice
-		showlocals
-	}
+			//Set Ζcon "~Ζcon~[icon]"
+			//TWEAK ICON "~Ζcon~"
+			
+			//if( ｘncientDeviceMode != "Hologram" ) SET_SHADOW ON
+		//}
+	//} else {
+		////SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
+		//////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
+		//GoSub FUNCbreakDevice
+		//showlocals
+	//}
 	
 	ACCEPT
 }
 
 ON InventoryIn { Set ΠcriptDebugLog "On_InventoryIn"
+	//if (^amount > 1) ACCEPT //this must not be a stack of items
 	PLAY -s //stops sounds started with -i flag
 	ACCEPT
 }
 
 ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
+	//if (^amount > 1) ACCEPT //this must not be a stack of items
 	PLAY -s //stops sounds started with -i flag
 	ACCEPT
 }
@@ -808,6 +840,9 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 		Set 告FUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range //SED_TOKEN_MOD_CFG
 		Set 告FUNCMakeNPCsHostile_range 告FUNCMakeNPCsHostile_rangeDefault
 	}
+	
+	Set 助seMax 5
+	Inc 助seMax ^rnd_110
 	
 	Set ΠignalMode "Working"
 	Set #SignalModeChangeTime 0
@@ -908,7 +943,7 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	
 	Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameBase~."
 	
-	if ( 呆HologramInitialized == 1 ) {
+	//if ( 呆HologramInitialized == 1 ) {
 		GoSub FUNCcalcAncientTechSkill
 		
 		GoSub FUNCcalcSignalStrength
@@ -996,9 +1031,9 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 		if(@AncientTechSkill >= 30) Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameFinal_OUTPUT~ Quality:~ΖtemQuality~." //useful to chose wich one to keep
 		if(@AncientTechSkill >= 40) Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameFinal_OUTPUT~ Condition:~ΖtemConditionDesc~." //useful to hold your hand avoiding destroy it
 		//if(@AncientTechSkill >= 50) Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameFinal_OUTPUT~ Signal:~刨ignalStrengthTrunc~, ~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~." //detailed condition for nerds ;) 
-	} else {
-		Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
-	}
+	//} else {
+		//Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
+	//}
 	
 	//SetName "~ΓUNCnameUpdate_NameBase~. Quality:~ΖtemQuality~, Condition:~ΖtemConditionDesc~(~兌temConditionPercent~%), Uses:Count=~助seCount,Remain=~助seRemain~,Max=~助seMax~"
 	SetName "~ΓUNCnameUpdate_NameFinal_OUTPUT~"
@@ -1266,6 +1301,9 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	showlocals
 	if(^hover != "none") {
 		Set ΕoverEnt "~^hover~"
+		Set ΕoverClass ^class_~^hover~
+		Set 佚overLife  ^life_~^hover~
+		Set @HoverLife2 ^life_~ΕoverEnt~
 		Set @testDegreesXh   ^degreesx_~^hover~
 		Set @testDegreesYh   ^degreesy_~^hover~
 		Set @testDegreesZh   ^degreesz_~^hover~ //some potions are inclined a bit
@@ -1367,7 +1405,7 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	++ 含estsPerformed
 	RETURN
 }
->>FUNCdistAbsPos {
+>>FUNCdistAbsPos { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCdistAbsPos" 
 	// distance to absolute locations
 	Set 含estDistAbsolute ^dist_{0,0,0}
 	Set @testDistAbsolute2 ^dist_{1000.123,2000.56,3000}
@@ -1381,7 +1419,7 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	++ 含estsPerformed
 	RETURN
 }
->>FUNCtestElseIf {
+>>FUNCtestElseIf { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCtestElseIf" 
 	++ 含est
 	if ( 含est == 1 ) {
 		Set ㄈork "~ㄈork~;~含est~:ok1"
@@ -1429,12 +1467,141 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	showlocals
 	RETURN
 }
->>FUNCteleportToAndKillNPC {
-	Set ΕoverEnt "~^hover~"
-	if(ΕoverEnt != "none") {
-		timerTeleportKillNPC -m 333 1 DoDamage -l "~ΕoverEnt~" 99999
-		timerTeleportSelf    -m 666 1 teleport     ~ΕoverEnt~
-		timerTeleportPlayer  -m 999 1 teleport -p  ~ΕoverEnt~
+
+>>FUNCLandMine { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCLandMine" 
+	Set ΜnTopEnt "~^$objontop~"
+	Set 別nTopLife ^life_~ΜnTopEnt~
+	if(and(ΜnTopEnt != "none" && 別nTopLife > 0)) {
+		GoSub FUNCtrapAttack
+		showlocals
 	}
+	RETURN
+}
+>>FUNCteleportToAndKillNPC { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCteleportToAndKillNPC" 
+	Set ΕoverEnt "~^hover~"
+	Set 佚overLife ^life_~ΕoverEnt~
+	if(and(ΕoverEnt != "none" && 佚overLife > 0)) {
+		timerTeleportKillNPC -m 1 1333 DoDamage -l ~ΕoverEnt~ 99999
+		timerTeleportSelf    -m 1 2666 teleport    ~ΕoverEnt~
+		timerTeleportPlayer  -m 1 3999 teleport -p ~ΕoverEnt~
+		timerTeleportPlayer  -m 1 4999 GoSub FUNCbreakDevice
+		showlocals
+	}
+	RETURN
+}
+>>FUNCMindControl { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCMindControl" 
+	Set ΕoverEnt "~^hover~"
+	Set 佚overLife ^life_~ΕoverEnt~
+	if(and(ΕoverEnt != "none" && 佚overLife > 0)) {
+		timerTeleportSelf -m 1 50 teleport ~ΕoverEnt~
+		timerMindControlSpawnBat -m 1 100 spawn npc "bat\\bat" ~ΕoverEnt~
+		if(@AncientTechSkill >   20) timerMindControlSpawnBat -m 1 200 spawn npc "bat\\bat" ~ΕoverEnt~
+		if(@AncientTechSkill >   40) timerMindControlSpawnBat -m 1 400 spawn npc "bat\\bat" ~ΕoverEnt~
+		if(@AncientTechSkill >   60) timerMindControlSpawnBat -m 1 600 spawn npc "bat\\bat" ~ΕoverEnt~
+		if(@AncientTechSkill >   80) timerMindControlSpawnBat -m 1 800 spawn npc "bat\\bat" ~ΕoverEnt~
+		if(@AncientTechSkill >= 100) {
+			timerMindControlSpawnBat -m 1 1000 spawn npc "bat\\bat" ~ΕoverEnt~
+			timerMindControlSpawnBat -m 1 1100 spawn npc "bat\\bat" ~ΕoverEnt~
+		}
+		GoSub FUNCbreakDevice
+		showlocals
+	}
+	RETURN
+}
+
+>>FUNCmorph { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCmorph" 
+	Set 你ncientDeviceTriggerStep 0
+	GoSub FUNCskillCheckAncientTech
+	Set 低reateChance 佝UNCskillCheckAncientTech_chanceSuccess_OUTPUT
+	if (and(利uality >= 4 && 兌temConditionSure == 5)) Set 低reateChance 100
+	RANDOM 低reateChance {
+		if ( ｘncientDeviceMode == "SignalRepeater" ) { Set ｘncientDeviceMode "Hologram"
+			TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
+			GoSub FUNCcfgHologram
+			RETURN
+		} else {
+		if (ｘncientDeviceMode == "_BecomeSignalRepeater_") { Set ｘncientDeviceMode "SignalRepeater"
+			// this must be easy to become again a hologram, so do minimal changes!
+			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
+			Set ΓUNCnameUpdate_NameBase "Holo Signal Repeater"
+			Set Ζcon "HoloSignalRepeater"
+			//Set 你ncientDeviceTriggerStep 1
+			//PLAYERSTACKSIZE 1
+		} else { 
+		if (ｘncientDeviceMode == "Hologram") { Set ｘncientDeviceMode "Grenade"
+			Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+			Div 判ristineChance 10
+			If (判ristineChance < 5) Set 判ristineChance 5
+			RANDOM 判ristineChance { // grants a minimal chance based on skill in case the player do not initialize it
+				Set 利uality 5 
+			}
+			
+			Set ΓUNCnameUpdate_NameBase "Holo Grenade"
+			Set Ζcon "HologramGrenade"
+			
+			//PLAY "TRAP"
+			TWEAK SKIN "Hologram.tiny.index4000.box"               "Hologram.tiny.index4000.box.Clear"
+			TWEAK SKIN "Hologram.tiny.index4000.grenade.Clear"     "Hologram.tiny.index4000.grenade"
+			//TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+			
+			GoSub FUNChideHologramPartsPermanently
+			
+			Set 刨cale 100 //just in case it is combined with the big hologram on the floor
+			SetScale 刨cale
+			
+			Set 你ncientDeviceTriggerStep 1
+			PlayerStackSize 12
+			SetGroup -r "DeviceTechBasic"
+			SetGroup "Explosive"
+		} else {
+		if ( ｘncientDeviceMode == "Grenade" ) { Set ｘncientDeviceMode "LandMine"
+			TWEAK SKIN "Hologram.tiny.index4000.box.Clear" "Hologram.tiny.index4000.boxLandMine"
+			TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
+			Set ΓUNCnameUpdate_NameBase "Holo Landmine"
+			Set Ζcon "HoloLandMine"
+			Set 你ncientDeviceTriggerStep 1
+			PLAYERSTACKSIZE 9
+		} else {
+		if ( ｘncientDeviceMode == "LandMine" ) { Set ｘncientDeviceMode "Teleport"
+			TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
+			Set ΓUNCnameUpdate_NameBase "Holo Teleport"
+			Set Ζcon "HoloTeleport"
+			Set 你ncientDeviceTriggerStep 1
+			PLAYERSTACKSIZE 6
+		} else {
+		if ( ｘncientDeviceMode == "Teleport" ) { Set ｘncientDeviceMode "MindControl"
+			// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
+			// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
+			TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
+			Set ΓUNCnameUpdate_NameBase "Holo Mind Control"
+			Set Ζcon "HoloMindControl"
+			Set 你ncientDeviceTriggerStep 1
+			PLAYERSTACKSIZE 3
+		} } } } } }
+		
+		if(你ncientDeviceTriggerStep == 1) {
+			if ( 利uality >= 4 ) {
+				Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameBase~ MK2+"
+				Set Ζcon "~Ζcon~MK2"
+			}
+			
+			GoSub FUNCupdateUses
+			GoSub FUNCnameUpdate
+
+			Set Ζcon "~Ζcon~[icon]"
+			TWEAK ICON "~Ζcon~"
+			
+			if( ｘncientDeviceMode != "Hologram" ) SET_SHADOW ON
+		}
+	} else {
+		//SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
+		////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
+		GoSub FUNCbreakDevice
+		showlocals
+	}
+	RETURN
+}
+>>FUNCcfgHologram { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCcfgHologram" 
+	todoabcd
 	RETURN
 }

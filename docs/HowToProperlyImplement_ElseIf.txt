@@ -52,6 +52,19 @@ if ( §test == 1 ) { //block is skipped
 }  }  }
 showlocals
 
+//tho this is better for code folding
+if ( §test == 1 ) { //block is skipped
+  Set £work "~£work~;~§test~:ok1"
+} else {
+if ( §test == 2 ) {
+  Set £work "~£work~;~§test~:ok2"
+} else {
+if ( §test == 3 ) {
+  Set £work "~£work~;~§test~:ok3"
+} else { 
+  Set £work "~£work~;~§test~:okElse"
+}  }  }
+
 // as you can see above, you need to keep nesting new 'else if' like that or it will fail because...
 Set §test 1
 if ( §test == 1 ) {
