@@ -82,12 +82,14 @@ MYDBG(anyVar<<","<<anything<<anythinElse);
 
 ================================ PR_... comments
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_Interpolate2
+Interpolate command
+Interpolate an entity near a target by percent or absolute distance
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2
 Debug Line and Column Info
 Terminal log will show line and column where the problem happened.
 
-PR_Interpolate
-Interpolate an entity near a target by percent or absolute distance
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2
 Distance variable now can use an absolute location as target

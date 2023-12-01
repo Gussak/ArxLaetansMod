@@ -20,17 +20,22 @@ TODO:OBS.: windows .bat files to create windows file links are WIP and still nee
 
 ___
 
-# __PULL request branches:__  
+# __PULL Request Branches:__  
 
 About 'PR_.*' branches at https://github.com/Gussak/ArxLibertatis:  
+
 These branches are meant to create pull requests to main Arx Libertatis project.  
-They may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments.  
-They will all be merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
+
+They may all be already merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
+
 If you want you can improve them and/or also create a pull request at Arx Libertatis from these branches instead of me.  
+
 Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
+
 Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
 
-_READY (possibly) PR_.* BRANCHES_ (and commit messages):  
+
+_These below are possibly ready. They were cleaned and prepared for a PR:_  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 Logical Operators for "if" command  
@@ -66,6 +71,8 @@ This patch limits the amount of shadows for them still using strided().
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
 Added Remainder arithmetic operation  
+
+Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
 ___
 
