@@ -33,9 +33,9 @@ If you want you can improve them and/or also create a pull request at Arx Libert
 Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
 
 Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
-
-
-__These below are possibly ready. They were cleaned and prepared for a PR:__  
+  
+  
+***These below are possibly ready. They were cleaned and prepared for a PR:***  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 Logical Operators for "if" command  
