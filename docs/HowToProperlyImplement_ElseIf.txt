@@ -27,7 +27,7 @@ if ( §test == 1 ) {
 Set §test 2
 if ( §test == 1 ) { //block is skipped
   Set £work "ok1"
-} else { // else is consumed by the above 'if-skip-self-block' so this 'else's block will be processed
+} else { // this 'else' command is consumed/destroyed by the above 'if-skip-self-block' so this 'else's block will be preserved/processed
   if ( §test == 2 ) {
     Set £work "ok2"
   } else { //'else' wants to skip self block now
@@ -37,7 +37,7 @@ if ( §test == 1 ) { //block is skipped
       Set £work "ok3b"
     }
   }
-}
+} //this last '}' must match the first '} else {' opening, so it is easy to confirm in a code editor
 
 // can look more like cpp (call this many times to see if it all works properly):
 ++ §test
