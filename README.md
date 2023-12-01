@@ -28,16 +28,16 @@ They may not be ready yet, may contain backup/untested commits, complicated code
 They will all be merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
 If you want you can improve them and/or also create a pull request at Arx Libertatis from these branches instead of me.  
 Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches .  
-Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
+Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
 
 _READY BRANCHES_ (and commit message):  
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3
-added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity
+https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3  
+added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity  
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2
-Added ^degrees... variables
-only degrees, also for pitch x and roll z now
+https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2  
+Added ^degrees... variables  
+only degrees, also for pitch x and roll z now  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
 src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
