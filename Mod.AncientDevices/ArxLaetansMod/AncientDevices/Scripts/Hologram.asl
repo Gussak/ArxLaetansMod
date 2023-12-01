@@ -199,14 +199,13 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
     
     showlocals
     ACCEPT
-  } 
-  else if (助seBlockedMili < 0) {
+  } else { if (助seBlockedMili < 0) {
     // log to help fix inconsistency if it ever happens
     timerBlocked off
     Set ΠcriptDebugLog "~ΠcriptDebugLog~;Fix_A:Blocked=~助seBlockedMili~ IsNegative, fixing it to 0"
     //showlocals
     Set 助seBlockedMili 0
-  }
+  } }
   
   if (呆HologramInitialized == 1) {
     if ( ^#PLAYERDIST > 200 ) { //after scale up. 185 was almost precise but annoying to use. 190 is good but may be annoying if there is things on the ground.
@@ -516,22 +515,17 @@ On Main { Set ΠcriptDebugLog "On_Main" //HeartBeat happens once per second appa
         //}
       }
     }
-  } 
-  else if ( ｘncientDeviceMode == "SignalRepeater" ) {
+  } else { if ( ｘncientDeviceMode == "SignalRepeater" ) {
     SENDEVENT -ir CUSTOM 3000 "CustomCmdSignalRepeater ~^me~ ~@SignalStrength~"
-  }
-  else if ( ｘncientDeviceMode == "Grenade" ) {
+  } else { if ( ｘncientDeviceMode == "Grenade" ) {
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
-  }
-  else if ( ｘncientDeviceMode == "LandMine" ) {
+  } else { if ( ｘncientDeviceMode == "LandMine" ) {
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
-  }
-  else if ( ｘncientDeviceMode == "TeleportKill" ) {
+  } else { if ( ｘncientDeviceMode == "TeleportKill" ) {
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
-  }
-  else if ( ｘncientDeviceMode == "MindControlBats" ) {
+  } else { if ( ｘncientDeviceMode == "MindControlBats" ) {
 		Set ΠcriptDebugLog "~ΠcriptDebugLog~;~ｘncientDeviceMode~" //TODO
-  }
+  } } } } } }
   
   // any item that is going to explode will benefit from this
 	Set ΠcriptDebugLog "~ΠcriptDebugLog~;Chk:TrapCanKillMode"
@@ -565,7 +559,7 @@ ON CUSTOM { Set ΠcriptDebugLog "On_Custom" //this is the receiving end of the t
   ACCEPT
 }
 
-ON COMBINE { Set ΠcriptDebugLog "On_Combine"
+ON COMBINE { Set ΠcriptDebugLog "On_Combine:~^$param1~"
   UnSet ΠcriptDebugCombineFailReason
   showlocals //this is excellent here as any attempt will help showing the log!
   
@@ -647,18 +641,15 @@ ON COMBINE { Set ΠcriptDebugLog "On_Combine"
       PlayerStackSize 5
       SetGroup -r "DeviceTechBasic"
       SetGroup "Explosive"
-    } 
-    else if ( ｘncientDeviceMode == "Grenade" ) { Set ｘncientDeviceMode "LandMine"
+    } else { if ( ｘncientDeviceMode == "Grenade" ) { Set ｘncientDeviceMode "LandMine"
       //TODO
-    } 
-    else if ( ｘncientDeviceMode == "LandMine" ) { Set ｘncientDeviceMode "TeleportKill"
+    } else { if ( ｘncientDeviceMode == "LandMine" ) { Set ｘncientDeviceMode "TeleportKill"
       //TODO
-    } 
-    else if ( ｘncientDeviceMode == "TeleportKill" ) { Set ｘncientDeviceMode "MindControlBats"
+    } else { if ( ｘncientDeviceMode == "TeleportKill" ) { Set ｘncientDeviceMode "MindControlBats"
       // why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
       // why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
       //TODO
-    }
+    } } } }
   } else {
     //SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
     ////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
@@ -876,12 +867,12 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
     //Set ΠcriptDebugLog "~ΠcriptDebugLog~;~@ItemCondition~=~助seRemain~"
     Div @ItemCondition 助seMax
     //Set ΠcriptDebugLog "~ΠcriptDebugLog~;/~助seMax~=~@ItemCondition~"
-    //TODO why the below wont work? it is always bad or critical...
+    //TODO try again these 'else { if' below
     //if      ( @ItemCondition >= 0.80 ) { Set ΖtemConditionDesc "excellent" }
-    //else if ( @ItemCondition >= 0.60 ) { Set ΖtemConditionDesc "good"      }
-    //else if ( @ItemCondition >= 0.40 ) { Set ΖtemConditionDesc "average"   }
-    //else if ( @ItemCondition >= 0.20 ) { Set ΖtemConditionDesc "bad"       }
-    //else {                               Set ΖtemConditionDesc "critical"  }
+    //else { if ( @ItemCondition >= 0.60 ) { Set ΖtemConditionDesc "good"      }
+    //else { if ( @ItemCondition >= 0.40 ) { Set ΖtemConditionDesc "average"   }
+    //else { if ( @ItemCondition >= 0.20 ) { Set ΖtemConditionDesc "bad"       }
+    //else {                               Set ΖtemConditionDesc "critical"    } } } }
     Set @ItemConditionSureTmp @ItemCondition
     Mul @ItemConditionSureTmp 10 //0-10
     Div @ItemConditionSureTmp  2 //0-5
@@ -940,7 +931,7 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
       Set 吱econds ^gameseconds
       Mod 吱econds 60
       // as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
-      Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
+      Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,吩ours~:~%02d,吮inutes~:~%02d,吱econds~" 
       //Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
       Set ΖtemQuality "~ΖtemQuality~(~助seMax~)"
     }
@@ -1127,8 +1118,7 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
       Inc #SignalModeChangeTime  ^rnd_300 //up to
       RETURN
     }
-  } 
-  else if(ΠignalMode == "None"){
+  } else { if(ΠignalMode == "None"){
     if(^gameseconds > #SignalModeChangeTime){
       Set ΠignalMode "Working" //configures the working signal delay below
       Set #SignalModeChangeTime  ^gameseconds
@@ -1137,7 +1127,7 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
       RETURN
     }
     RETURN
-  }
+  } }
   
   if(ΟepeaterStrongestDeployedID != "") { //TODO implement signal repeaters
     ////if(and(刨ignalRepeater == 1 && ^dist_player <= 3000)) { // 1: there is a signal repeater at player inventory (good as forces player to want to not move) 
@@ -1152,12 +1142,11 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
         //Inc @RepeaterSignalStrength ^locationy_player
         //Inc @RepeaterSignalStrength ^locationz_player
       //}
-    ////} 
-    ////else if(刨ignalRepeater == 2) { // 2: there is a deployed repeater nearby
+    //} else { if(刨ignalRepeater == 2) { // 2: there is a deployed repeater nearby
     //} else {
       ////todoa ΠignalRepeaterID
       //Set @RepeaterSignalDist ^dist_~ΟepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
-    //}
+    //} }
     Set @RepeaterSignalDist ^dist_~ΟepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
   } else {
     Set @AncientGlobalTransmitterSignalDist ^dist_{0,0,0} //could be anywhere, if  I create a bunker map with it, then it will have a proper location 
@@ -1216,11 +1205,13 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 
 //////////////////////////// TESTS /////////////////////////////
 >>FUNChoverInfo { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNChoverInfo" 
-	if(~^hover~ != "") {
+	Set ΠcriptDebugLog "~ΠcriptDebugLog~;HOVER='~^hover~'"
+	showlocals
+	if(^hover != "none") {
 		Set ΕoverEnt "~^hover~"
-		Set @testDegreesXh ^degreesx_~^hover~
-		Set @testDegreesYh ^degreesy_~^hover~
-		Set @testDegreesZh ^degreesz_~^hover~ //some potions are inclined a bit
+		Set @testDegreesXh   ^degreesx_~^hover~
+		Set @testDegreesYh   ^degreesy_~^hover~
+		Set @testDegreesZh   ^degreesz_~^hover~ //some potions are inclined a bit
 		Set @testDegreesYtoh ^degreesyto_~^hover~
 		showlocals
 	}
@@ -1323,13 +1314,28 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
   // distance to absolute locations
   Set 含estDistAbsolute ^dist_{0,0,0}
   Set @testDistAbsolute2 ^dist_{1000.123,2000.56,3000}
-  Set 含estAbs 5000
-  Set @testAbs2 500.45
-  Set @testDistAbsolute3 ^dist_{~含estAbs~,~@testAbs2~,~含estAbs~}
-  Set 含estDistAbsolute4 ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
+  Set 含estAbsX 5000
+  Set @testAbsY 500.45
+  Set @testAbsZ 500.45
+  Set @testDistAbsolute3  ^dist_{~含estAbsX~,~@testAbsY~,~含estAbsZ~}
+  Set 含estDistAbsolute4  ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
   Set @testDistAbsolute4b ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
-  Set @testDistAbsolute4b ^dist_"{~^locationx_player~,~^locationy_player~,~^locationz_player~}" //rm tests the warn msg with line and column
+  //Set @testDistAbsolute4b ^dist_"{~^locationx_player~,~^locationy_player~,~^locationz_player~}" //rm tests the warn msg with line and column about unexpected "
   ++ 含estsPerformed
+	RETURN
+}
+>>FUNCtestElseIf {
+	++ 含est
+	if ( 含est == 1 ) {
+		Set ㄈork "~ㄈork~;~含est~:ok1"
+	} else { if ( 含est == 2 ) {
+		Set ㄈork "~ㄈork~;~含est~:ok2"
+	} else { if ( 含est == 3 ) {
+		Set ㄈork "~ㄈork~;~含est~:ok3"
+	} else { 
+		Set ㄈork "~ㄈork~;~含est~:okElse"
+	}  }  }
+	showlocals
 	RETURN
 }
 >>FUNCtests { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCtests" 
@@ -1360,8 +1366,9 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 		GoSub FUNCdistAbsPos
 		GoSub FUNCtestPrintfFormats
 		GoSub FUNCtestLogicOperators
+		GoSub FUNCtestElseIf
 	}
-  
+   
   showlocals
   RETURN
 }

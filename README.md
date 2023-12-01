@@ -28,7 +28,7 @@ They may not be ready yet, may contain backup/untested commits, complicated code
 They will all be merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
 If you want you can improve them, and then also create a pull request at Arx Libertatis from these branches instead of me.  
 
-READY BRANCHES (and commit message):  
+_READY BRANCHES_ (and commit message):  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
 src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  

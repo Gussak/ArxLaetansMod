@@ -22,6 +22,11 @@ strPathRun="`realpath ../ArxLibertatis`"
 strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
 mkdir -vp "`dirname "$strFlLog"`"
 
+if [[ ! -f "$strPathRun/arx" ]];then
+  cd ..
+  secOverrideMultiLayerMountPoint.sh ArxLibertatis
+fi
+
 while true;do
   : ${bBuildB4Run:=true} #help
   if $bBuildB4Run;then 

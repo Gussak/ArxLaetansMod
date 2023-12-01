@@ -1,0 +1,61 @@
+///////////// HOW TO PROPERLY IMPLEMENT 'ELSE IF' ? /////////////////
+
+// when 'if' condition fails, it will skip it's own block/commandLine AND WILL CONSUME the 'else' just after!
+// when 'else' is executed, it will skip the next block/commandLine just after it.
+// so, when 'if' condition succeeds, it will execute it's own block/command and will also let the 'else' just after to be executed too (what skips it's own block/commandLine, see above).
+// OBS.: the problem is not when the 'if' condition fails, as it will just consume the 'else' after it, preventing it being executed, therefore allowing 'else's command/block to be executed. The problem is when 'if' succeeds, because it will execute 'else' just after it's command/block, but the evil 'else' wants to skip it's own block!!!
+
+////// so let's code it in a way it works:
+
+Set §test 1 //the problem is when 'if' succeeds
+
+//// single commandLine after else
+if ( §test == 1 ) {
+  Set £work "ok"
+} else //attention now, else will want to skip it's own commandLine, so it must be a SINGLE line after it! 
+if ( §test == 2 ) Set £work "ok"
+//// block after else
+if ( §test == 1 ) {
+  Set £work "ok1"
+} else { //attention now, else will want to skip it's own block!
+  if ( §test == 2 ) {
+    Set £work "ok2"
+  }
+}
+
+//// block for the 2nd if
+Set §test 2
+if ( §test == 1 ) { //block is skipped
+  Set £work "ok1"
+} else { // else is consumed by the above 'if-skip-self-block' so this 'else's block will be processed
+  if ( §test == 2 ) {
+    Set £work "ok2"
+  } else { //'else' wants to skip self block now
+    if ( §test == 3 ) {
+      Set £work "ok3"
+    } else { //'else' wants to skip self block now
+      Set £work "ok3b"
+    }
+  }
+}
+
+// can look more like cpp (call this many times to see if it all works properly):
+++ §test
+if ( §test == 1 ) { //block is skipped
+  Set £work "~£work~;~§test~:ok1"
+} else { if ( §test == 2 ) {
+  Set £work "~£work~;~§test~:ok2"
+} else { if ( §test == 3 ) {
+  Set £work "~£work~;~§test~:ok3"
+} else { 
+  Set £work "~£work~;~§test~:okElse"
+}  }  }
+showlocals
+
+// as you can see above, you need to keep nesting new 'else if' like that or it will fail because...
+Set §test 1
+if ( §test == 1 ) {
+  Set £work "ok"
+} else if ( §test == 2 ) { // ...'else' would just want to skip the next commandLine (as '{' was not imediately found after it) and then 'if(...){' would be ignored, so...
+  Set £work "ok"
+} //... this '}' block closure would not close the above if, but instead it could close a whole event and break the script!
