@@ -518,7 +518,7 @@ On Main { Set £ScriptDebugLog "On_Main" //HeartBeat happens once per second appa
   } else { if ( £AncientDeviceMode == "SignalRepeater" ) {
     SENDEVENT -ir CUSTOM 3000 "CustomCmdSignalRepeater ~^me~ ~@SignalStrength~"
   } else { if ( £AncientDeviceMode == "Grenade" ) {
-		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO
+		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO chk ^dragged to hold cooking?
   } else { if ( £AncientDeviceMode == "LandMine" ) {
 		Set £ScriptDebugLog "~£ScriptDebugLog~;~£AncientDeviceMode~" //TODO
   } else { if ( £AncientDeviceMode == "TeleportKill" ) {
