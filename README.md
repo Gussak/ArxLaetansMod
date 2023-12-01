@@ -35,7 +35,7 @@ Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/
 Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
 
 
-_These below are possibly ready. They were cleaned and prepared for a PR:_  
+__These below are possibly ready. They were cleaned and prepared for a PR:__  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 Logical Operators for "if" command  
