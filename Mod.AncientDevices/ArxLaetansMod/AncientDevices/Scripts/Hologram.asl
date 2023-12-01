@@ -1157,10 +1157,10 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
   Inc §NoSignalRegion ^locationz_player
   Mod §NoSignalRegion §SignalDistBase
   if(§NoSignalRegion >= §SignalDistMin) {
-    Set @SignalStrength ^locationx_self 
-    Inc @SignalStrength ^locationy_self
+    Set @SignalStrength ^locationx_~^me~
+    Inc @SignalStrength ^locationy_~^me~
     if (^inPlayerInventory == 1) Inc @SignalStrength 90 //if at player inventory, items are 90 dist from ground (based on tests above). Could just use ^locationy_player tho.
-    Inc @SignalStrength ^locationz_self
+    Inc @SignalStrength ^locationz_~^me~
     
     if(§SignalRepeater == 0) {
       // less cubic/less previsible (this alone would be like spheric regions btw)

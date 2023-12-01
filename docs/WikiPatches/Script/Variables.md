@@ -34,3 +34,19 @@
 | direction (yaw) from the caller to the given entity
 | align="center" | {{Y}}
 
+|-
+| <code>^locationx_{{Highlight|entity|&lt;entity&gt;}}</code>
+| {{number}}
+| absolute X position of the given entity, 99999999999.0 on error
+| align="center" | {{Y}}
+|-
+| <code>^locationy_{{Highlight|entity|&lt;entity&gt;}}</code>
+| {{number}}
+| absolute Y position of the given entity, 99999999999.0 on error
+| align="center" | {{Y}}
+|-
+| <code>^locationz_{{Highlight|entity|&lt;entity&gt;}}</code>
+| {{number}}
+| absolute Z position of the given entity, 99999999999.0 on error
+| align="center" | {{Y}}
+
