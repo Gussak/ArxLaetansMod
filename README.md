@@ -27,7 +27,7 @@ These branches are meant to create pull requests to main Arx Libertatis project.
 They may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments.  
 They will all be merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
 If you want you can improve them and/or also create a pull request at Arx Libertatis from these branches instead of me.  
-Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches .  
+Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
 Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
 
 _READY BRANCHES_ (and commit message):  
