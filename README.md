@@ -32,9 +32,9 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 
 _READY BRANCHES_ (and commit message):  
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2
-^dist_ variable now can use an absolute location as target
-ex.: ^dist_{8000.25,7800.44,8500.32}
+https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2  
+^dist_ variable now can use an absolute location as target  
+ex.: ^dist_{8000.25,7800.44,8500.32}  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
 Debug Line and Column Info  
