@@ -97,6 +97,14 @@ PR_FormatSyntax?
 Format expanded variables thru printf syntax
 WIP this was not tested yet! this is a backup commit only.
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2
+Added ^degrees... variables
+only degrees, also for pitch and roll now
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation
+Distance variable now can use an absolute location as target
+ex.: ^dist_{8000.25,7800.44,8500.32}
+
 
 ================================ DONE TESTING
 

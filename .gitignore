@@ -16,6 +16,9 @@
 
 !docs
 !docs/*.txt
+!docs/WikiPatches/
+!docs/WikiPatches/Script/
+!docs/WikiPatches/Script/*.md
 
 !plugins/
 !plugins/blender/

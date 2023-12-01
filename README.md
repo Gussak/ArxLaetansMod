@@ -30,6 +30,10 @@ If you want you can improve them, and then also create a pull request at Arx Lib
 
 _READY BRANCHES_ (and commit message):  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2
+Added ^degrees... variables
+only degrees, also for pitch x and roll z now
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
 src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
 High poly dropped items' models create a very dark ugly shadow.  
