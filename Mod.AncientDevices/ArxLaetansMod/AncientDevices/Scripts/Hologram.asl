@@ -171,7 +171,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 				////SpecialFX TORCH //it vanished..
 				//SpecialFX FIERY
 				//SetGroup "DeviceTechBroken"
-				GoSub FUNCbreakDevice
+				GoSub FUNCbreakDeviceDelayed
 			}
 			//timerTrapDestroy -m 1 5100 GoSub FUNCDestroySelfSafely
 			//timerTrapDestroy -m 1 7000 GoSub FUNCDestroySelfSafely //some effects have infinite time and then will last 2s (from 5000 to 7000)
@@ -188,11 +188,13 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 	if ( £AncientDeviceMode == "LandMine" ) {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 //activate
+			Set §Scale 500 SetScale §Scale //TODOA should be a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg
 			timerLandMineDetectNearbyNPC -m 0 100 GoSub FUNCLandMine
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
-			Set §AncientDeviceTriggerStep = 1  //stop
+			Set §Scale 100 SetScale §Scale
+			Set §AncientDeviceTriggerStep 1  //stop
 			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
 		GoSub FUNCnameUpdate
@@ -205,7 +207,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerTeleportDetectHoverNPC off
-			Set §AncientDeviceTriggerStep = 1  //stop
+			Set §AncientDeviceTriggerStep 1  //stop
 			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
 		GoSub FUNCnameUpdate
@@ -218,7 +220,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerMindControlDetectHoverNPC off
-			Set §AncientDeviceTriggerStep = 1  //stop
+			Set §AncientDeviceTriggerStep 1  //stop
 			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
 		GoSub FUNCnameUpdate
@@ -843,17 +845,19 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	RETURN
 }
 
->>FUNCbreakDevice { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCbreakDevice"
+>>FUNCbreakDeviceDelayed { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCbreakDeviceDelayed"
 	SetGroup "DeviceTechBroken"
 	GoSub FUNCshockPlayer
-	if (^inPlayerInventory == 1) {
-		//TODOA find a way to just auto drop the item to work the more challenging code below
-		DoDamage -lu PLAYER 3
-		GoSub FUNCDestroySelfSafely
-	} else {
+	//if (^inPlayerInventory == 1) {
+		////TODOA find a way to just auto drop the item to work the more challenging code below
+		//DoDamage -lu PLAYER 3
+		//GoSub FUNCDestroySelfSafely
+	//} else {
 		Set £FUNCnameUpdate_NameBase "Broken Hologram Device" 
 		GoSub FUNCupdateUses
 		GoSub FUNCnameUpdate
+		
+		TWEAK ICON "HologramBroken[icon]"
 		
 		SetInteractivity NONE
 		SpecialFX FIERY
@@ -864,7 +868,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoSub FUNCparalyseIfPlayerNearby //the trap tried to capture the player xD //TODOA not working?
 		Inc §TmpBreakDestroyMilis ^rnd_15000
 		timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoSub FUNCDestroySelfSafely //to give time to let the player examine it a bit
-	}
+	//}
 	showlocals
 	RETURN
 }
@@ -1067,9 +1071,9 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec GoSub FUNCchkAndAttackProjectile
 	}  
 	
-	timerTrapVanish       1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade" "alpha"
+	timerTrapVanish       1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade"       "alpha"
 	timerTrapVanishActive 1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
-	timerTrapVanishGlow   1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "alpha"
+	timerTrapVanishGlow   1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"   "alpha"
 	
 	// trap effect time
 	Set §TmpTrapDestroyTime §FUNCtrapAttack_TrapTimeSec
@@ -1409,43 +1413,57 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 }
 
 >>FUNCLandMine { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCLandMine" 
-	Set £OnTopEnt "~^$objontop~"
-	Set §OnTopLife ^life_~£OnTopEnt~
-	if(and(£OnTopEnt != "none" && §OnTopLife > 0)) {
+	//TODO new command attractor to NPCs range 150?
+	Set £FUNCLandMine_OnTopEnt "~^$objontop~"
+	Set §OnTopLife ^life_~£FUNCLandMine_OnTopEnt~
+	if(and(£FUNCLandMine_OnTopEnt != "none" && §OnTopLife > 0)) {
+		//Set §Scale 100
+		timerShrink1 -m 0 100 Dec §Scale 1
+		timerShrink2 -m 0 100 SetScale §Scale
+		
 		GoSub FUNCtrapAttack
+		
+		timerLandMineDetectNearbyNPC off
+		
 		showlocals
 	}
 	RETURN
 }
 >>FUNCteleportToAndKillNPC { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCteleportToAndKillNPC" 
-	//TODO may be can use cpp ARX_NPC_TryToCutSomething to explode the body
-	Set £HoverEnt "~^hover~"
-	Set §HoverLife ^life_~£HoverEnt~
-	if(and(£HoverEnt != "none" && §HoverLife > 0)) {
-		timerTeleportSelf    -m 1 333 teleport    "~£HoverEnt~"
-		timerTeleportKillNPC -m 1 666 DoDamage -fmplcgewsao "~£HoverEnt~" 999
-		timerTeleportPlayer  -m 1 999 teleport -p "~£HoverEnt~"
-		//timerTeleportPlayer  -m 1 999 GoSub FUNCbreakDevice
-		GoSub FUNCbreakDevice //this takes a long time to finish breaking it
+	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
+	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
+	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover~"
+	Set §HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
+	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §HoverLife > 0)) {
+		timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
+		//timerTeleportKillNPC -m 0 50 SENDEVENT -nr CRUSH_BOX 50 "" //SENDEVENT -finr CRUSH_BOX 50 ""
+		//timerTeleportPlayer  -m 1 666 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
+		timerInterpolatePlayer -m 1 333 interpolate "~player~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
+		timerTeleportKillNPC -m 1 666 DoDamage -fmplcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
+		//TODO explode npc in gore dismembering
+		timerBreakDevice     -m 1 999 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+		timerTeleportDetectHoverNPC off
 		showlocals
 	}
 	RETURN
 }
 >>FUNCMindControl { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
-	Set £HoverEnt "~^hover~"
-	Set §HoverLife ^life_~£HoverEnt~
-	if(and(£HoverEnt != "none" && §HoverLife > 0)) {
-		timerTeleportSelf -m 1 50 teleport ~£HoverEnt~
-		timerMindControlSpawnBat -m 1 100 spawn npc "bat\\bat" ~£HoverEnt~
-		if(@AncientTechSkill >   20) timerMindControlSpawnBat -m 1 200 spawn npc "bat\\bat" ~£HoverEnt~
-		if(@AncientTechSkill >   40) timerMindControlSpawnBat -m 1 400 spawn npc "bat\\bat" ~£HoverEnt~
-		if(@AncientTechSkill >   60) timerMindControlSpawnBat -m 1 600 spawn npc "bat\\bat" ~£HoverEnt~
-		if(@AncientTechSkill >   80) timerMindControlSpawnBat -m 1 800 spawn npc "bat\\bat" ~£HoverEnt~
+	Set £FUNCMindControl_HoverEnt "~^hover~"
+	Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
+	if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
+		timerTeleportSelf -m 0 50 teleport ~£FUNCMindControl_HoverEnt~
+		//TODO bats are getting stuck in the walls...
+		timerMindControlSpawnBat -m 1 1000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   20) timerMindControlSpawnBat2 -m 1 2000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   40) timerMindControlSpawnBat3 -m 1 3000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   60) timerMindControlSpawnBat4 -m 1 4000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   80) timerMindControlSpawnBat5 -m 1 5000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
 		if(@AncientTechSkill >= 100) {
-			timerMindControlSpawnBat -m 1 1000 spawn npc "bat\\bat" ~£HoverEnt~
-			timerMindControlSpawnBat -m 1 1100 spawn npc "bat\\bat" ~£HoverEnt~
+			timerMindControlSpawnBat6 -m 1 6000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+			timerMindControlSpawnBat7 -m 1 7000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
 		}
-		GoSub FUNCbreakDevice
+		timerBreakDevice -m 1 1500 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+		timerMindControlDetectHoverNPC off
 		showlocals
 	}
 	RETURN
@@ -1488,8 +1506,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 			
 			GoSub FUNChideHologramPartsPermanently
 			
-			Set §Scale 100 //just in case it is combined with the big hologram on the floor
-			SetScale §Scale
+			Set §Scale 100 SetScale §Scale //just in case it is combined with the big hologram on the floor
 			
 			Set §AncientDeviceTriggerStep 1
 			PlayerStackSize 12
@@ -1538,7 +1555,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	} else {
 		//SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
 		////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
-		GoSub FUNCbreakDevice
+		GoSub FUNCbreakDeviceDelayed
 		showlocals
 	}
 	
@@ -1568,12 +1585,12 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	if(§FUNCblinkGlow_times >= 0){
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 		//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
-		timerTrapGlowBlinkOff -m §FUNCblinkGlow_times  900 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+		timerTrapGlowBlinkOff -m §FUNCblinkGlow_times  901 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear" //901 will last 100 times til it matches multiple of 1000 below
 		//On  at 1000 2000 3000 4000 5000
 		timerTrapGlowBlinkOn  -m §FUNCblinkGlow_times 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 	} else {
-		timerTrapGlowBlinkOn  off
 		timerTrapGlowBlinkOff off
+		timerTrapGlowBlinkOn  off
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
 	}
 	RETURN
