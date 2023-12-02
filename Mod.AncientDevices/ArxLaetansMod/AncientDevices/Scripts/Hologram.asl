@@ -56,8 +56,8 @@
 //TODO box icon grey if unidentified. cyan when identified.
 //TODO grenade icon and texture dark when inactive, red (current) when activated.
 //TODO create a signal repeater item that can be placed in a high signal stregth place and repeats that signal str to 1000to3000 dist from it (depending on player ancientdev skill that will set it's initial quality). code at FUNCcalcSignalStrength
-//TODO x8 buttons circular option choser: place on ground, rotate it to 0 degrees, diff player yaw to it, on activate will highlight the chosen button.
-//TODO at 75 ancientskill, player can chose what targeted spell will be cast. at 100, what explosion will happen. using the circular x8 buttons
+//TODO x8 buttons CircularOptionChoser: place on ground, rotate it to 0 degrees, diff player yaw to it, on activate will highlight the chosen button.
+//TODO at 75 ancientskill, player can chose what targeted spell will be cast. at 100, what explosion will happen. using the CircularOptionChoser x8 buttons
 ///// <> /////PRIORITY:LOW
 //TODO teleportArrow stack 10
 //TODO grenade+hologram=teleportArrow (insta-kill any foe and teleport the player there)
@@ -107,7 +107,7 @@ ON IDENTIFY { Set £ScriptDebugLog "On_Identify" //this is called (apparently eve
 			
 			Set £ScriptDebugLog "~£ScriptDebugLog~;Identified_Now"
 			
-			showlocals
+			GoSub FUNCshowlocals
 		}
 	} else {
 		if (^#timer2 == 0) starttimer timer2
@@ -188,12 +188,13 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 	if ( £AncientDeviceMode == "LandMine" ) {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 //activate
-			Set §Scale 500 SetScale §Scale //TODOA should be a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg
+			//Set §Scale 500 SetScale §Scale //TODOA should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//Set §Scale 10 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			timerLandMineDetectNearbyNPC -m 0 100 GoSub FUNCLandMine
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
-			Set §Scale 100 SetScale §Scale
+			//Set §Scale 100 SetScale §Scale
 			Set §AncientDeviceTriggerStep 1  //stop
 			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
@@ -233,7 +234,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 	if(£AncientDeviceMode != "Hologram") {
 		Set £ScriptDebugLog "~£ScriptDebugLog~;Unrecognized:£AncientDeviceMode='~£AncientDeviceMode~'"
 		SPEAK -p [player_no] NOP
-		showlocals
+		GoSub FUNCshowlocals
 		ACCEPT
 	}
 	
@@ -250,7 +251,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 			GoSub FUNCmorphUpgrade //revert to hologram
 		} else {
 			PLAY "POWER_DOWN"
-			showlocals
+			GoSub FUNCshowlocals
 		}	}
 		ACCEPT //can only be activated if deployed
 	}
@@ -263,13 +264,13 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 		GoSub FUNCupdateUses //an attempt to use while blocked will damage it too, the player must wait the cooldown
 		GoSub FUNCnameUpdate
 		
-		showlocals
+		GoSub FUNCshowlocals
 		ACCEPT
 	} else { if (§UseBlockedMili < 0) {
 		// log to help fix inconsistency if it ever happens
 		timerBlocked off
 		Set £ScriptDebugLog "~£ScriptDebugLog~;Fix_A:Blocked=~§UseBlockedMili~ IsNegative, fixing it to 0"
-		//showlocals
+		//GoSub FUNCshowlocals
 		Set §UseBlockedMili 0
 	} }
 	
@@ -277,7 +278,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 		if ( ^#PLAYERDIST > 200 ) { //after scale up. 185 was almost precise but annoying to use. 190 is good but may be annoying if there is things on the ground.
 			GoSub FUNCMalfunction
 			Set £ScriptDebugLog "~£ScriptDebugLog~;Deny_C:PlayerDist=~^#PLAYERDIST~"
-			showlocals
+			GoSub FUNCshowlocals
 			ACCEPT
 		}
 	}
@@ -325,7 +326,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 		GoSub FUNCnameUpdate
 		
 		//showvars
-		showlocals //to not need to scroll up the log in terminal
+		GoSub FUNCshowlocals //to not need to scroll up the log in terminal
 		ACCEPT
 	}
 	
@@ -485,7 +486,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 		GoSub FUNCnameUpdate
 		
 		showvars
-		showlocals //last to be easier to read on log
+		GoSub FUNCshowlocals //last to be easier to read on log
 		ACCEPT
 	}
 	
@@ -509,7 +510,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
 	
-	showlocals
+	GoSub FUNCshowlocals
 	ACCEPT
 }
 
@@ -531,7 +532,7 @@ On Main { Set £ScriptDebugLog "On_Main" //HeartBeat happens once per second appa
 			//attractor SELF 1 3000
 			GoSub FUNCaimPlayerCastLightning
 			GoSub FUNCMakeNPCsHostile // as NPC may be in-between
-			Set £ScriptDebugProblemTmp "MAIN:BeingDestroyed;" showlocals
+			Set £ScriptDebugProblemTmp "MAIN:BeingDestroyed;" GoSub FUNCshowlocals
 			PLAY -s //stops sounds started with -i flag
 		} else {
 			//////////////// auto repairs the hologram device
@@ -544,7 +545,7 @@ On Main { Set £ScriptDebugLog "On_Main" //HeartBeat happens once per second appa
 					if (§UseCount < 0) Set §UseCount 0
 					GoSub FUNCupdateUses
 					GoSub FUNCnameUpdate
-					showlocals
+					GoSub FUNCshowlocals
 				}
 				starttimer timer1
 			}
@@ -632,21 +633,21 @@ ON CUSTOM { Set £ScriptDebugLog "On_Custom" //this is the receiving end of the t
 
 ON COMBINE { Set £ScriptDebugLog "On_Combine:~^$PARAM1~"
 	UnSet £ScriptDebugCombineFailReason
-	showlocals //this is excellent here as any attempt will help showing the log!
+	GoSub FUNCshowlocals //this is excellent here as any attempt will help showing the log!
 	
 	// check other (^$PARAM1 is the one that you double click)
 	if (^$PARAM1 ISCLASS "Hologram") else ACCEPT //only combine with these
 	if (^$PARAM1 !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic:Aka_hologram"
-		showlocals
+		GoSub FUNCshowlocals
 		ACCEPT
 	}
 	
 	if(£AncientDeviceMode == "MindControl") { //sync with last/max combine option
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
-		showlocals
+		GoSub FUNCshowlocals
 		ACCEPT
 	}
 	
@@ -654,25 +655,25 @@ ON COMBINE { Set £ScriptDebugLog "On_Combine:~^$PARAM1~"
 	//if (§bHologramInitialized == 0){
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Self:NotInitialized"
-		//showlocals
+		//GoSub FUNCshowlocals
 		//ACCEPT
 	//}
 	if (^amount > 1) { //this must not be a stack of items
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:IsStack"
-		showlocals
+		GoSub FUNCshowlocals
 		ACCEPT
 	}
 	if (§Identified == 0) {
 		SPEAK -p [player_not_skilled_enough] NOP
 		Set £ScriptDebugCombineFailReason "Self:NotIdentified"
-		showlocals
+		GoSub FUNCshowlocals
 		ACCEPT
 	}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
-		//showlocals
+		//GoSub FUNCshowlocals
 		//ACCEPT
 	//}
 	
@@ -721,7 +722,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		GoSub FUNCshockPlayer
 		timerRestoreRotationSpeed -m 1 100 Set §RotateY §RotateYBkp // restore auto rotate speed after the shock has time to be cast
 	//}
-	//showlocals
+	//GoSub FUNCshowlocals
 	RETURN //to return to wherever it needs?
 }
 
@@ -767,7 +768,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		TWEAK SKIN "~£SkyBoxPreviousUVS~" "~£SkyBoxCurrentUVS~"
 		Set §SkyMode 1
 	}
-	//showlocals
+	//GoSub FUNCshowlocals
 	RETURN
 }
 
@@ -805,7 +806,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Damager -eu 3 //doesnt damage NPCs when thrown?
 	
 	Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCinitDefaults"
-	showlocals
+	GoSub FUNCshowlocals
 	
 	RETURN
 }
@@ -869,7 +870,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		Inc §TmpBreakDestroyMilis ^rnd_15000
 		timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoSub FUNCDestroySelfSafely //to give time to let the player examine it a bit
 	//}
-	showlocals
+	GoSub FUNCshowlocals
 	RETURN
 }
 
@@ -991,7 +992,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	//Set @TestFloat5 0.3
 	//Mul @TestFloat5 100 //30
 	//Set §TestInt5 @TestFloat5
-	showlocals
+	GoSub FUNCshowlocals
 }
 
 >>FUNCcalcAncientTechSkill { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCcalcAncientTechSkill"
@@ -1024,7 +1025,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Div @FUNCskillCheckAncientTech_addBonus_OUTPUT @TmpRandomBonus
 	
 	// unset after log if any
-	showlocals
+	GoSub FUNCshowlocals
 	Unset @TmpRandomBonus
 	
 	RETURN
@@ -1080,7 +1081,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Inc §TmpTrapDestroyTime §TrapEffectTime
 	timerTrapDestroy 1 §TmpTrapDestroyTime GoSub FUNCDestroySelfSafely 
 	
-	showlocals
+	GoSub FUNCshowlocals
 	// unset after log
 	//Unset §TmpTrapDestroyTime //DO NOT UNSET OR IT WILL BREAK THE TIMER!!!
 	
@@ -1242,7 +1243,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 //////////////////////////// TESTS /////////////////////////////
 >>FUNChoverInfo { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNChoverInfo" 
 	Set £ScriptDebugLog "~£ScriptDebugLog~;HOVER='~^hover~'"
-	showlocals
+	GoSub FUNCshowlocals
 	if(^hover != "none") {
 		Set £HoverEnt "~^hover~"
 		Set £HoverClass ^class_~^hover~
@@ -1252,7 +1253,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		Set @testDegreesYh   ^degreesy_~^hover~
 		Set @testDegreesZh   ^degreesz_~^hover~ //some potions are inclined a bit
 		Set @testDegreesYtoh ^degreesyto_~^hover~
-		showlocals
+		GoSub FUNCshowlocals
 	}
 	RETURN
 }
@@ -1374,7 +1375,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	} else { 
 		Set £work "~£work~;~§test~:okElse"
 	}  }  }
-	showlocals
+	GoSub FUNCshowlocals
 	RETURN
 }
 >>FUNCtests { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtests" 
@@ -1394,8 +1395,16 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Set @testDegreesYme3 ^degrees_~^me~
 	Set @testDegreesYp2  ^degrees_player
 	
-	//if(^degreesx_player == 301) { //maximum Degrees player can look up is that
+	if(^degreesx_player == 301) { //maximum Degrees player can look up is that
+		//TODO put this on CircularOptionChoser
+		++ §FUNCshowlocals_enabled
+		if(§FUNCshowlocals_enabled > 1) Set §FUNCshowlocals_enabled 0
+		GoSub FUNCshowlocals
+	}
+	
 	if(^degreesx_player == 74.9) { //minimum Degrees player can look down is that
+		//TODO put this on CircularOptionChoser
+		
 		//fail teleport -pi //tele the player to its starting spawn point
 		//Set @TstDistToSomeFixedPoint ^RealDist_PRESSUREPAD_GOB_0022 //this gives a wrong(?) huge value..
 		//Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
@@ -1408,7 +1417,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		GoSub FUNCtestElseIf
 	}
 	 
-	showlocals
+	GoSub FUNCshowlocals
 	RETURN
 }
 
@@ -1425,7 +1434,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		
 		timerLandMineDetectNearbyNPC off
 		
-		showlocals
+		GoSub FUNCshowlocals
 	}
 	RETURN
 }
@@ -1435,15 +1444,16 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover~"
 	Set §HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
 	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §HoverLife > 0)) {
-		timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
+		//timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
+		timerInterpolateSelf -m 0 50 interpolate "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.9 //the idea is to be unsafe positioning over npc location
 		//timerTeleportKillNPC -m 0 50 SENDEVENT -nr CRUSH_BOX 50 "" //SENDEVENT -finr CRUSH_BOX 50 ""
 		//timerTeleportPlayer  -m 1 666 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
-		timerInterpolatePlayer -m 1 333 interpolate "~player~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
-		timerTeleportKillNPC -m 1 666 DoDamage -fmplcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
+		timerInterpolatePlayer -m 1 333 interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
+		timerTeleportKillNPC -m 1 666 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
 		//TODO explode npc in gore dismembering
 		timerBreakDevice     -m 1 999 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 		timerTeleportDetectHoverNPC off
-		showlocals
+		GoSub FUNCshowlocals
 	}
 	RETURN
 }
@@ -1451,20 +1461,61 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Set £FUNCMindControl_HoverEnt "~^hover~"
 	Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
 	if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
+		Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
+		//Set £FUNCMindControl_SpawnFoe "rat_base\\rat_base" //rats wont attack goblins...
+		//TODO track all spawnings with ^last_spawned, kill them after the NPC dies, destroy the corpses and their loot
+		timerTeleportSelf -m 0 50 teleport "~£FUNCMindControl_HoverEnt~"
+		
+		Set §FUNCMindControl_FrenzyDelay 60000
+		
+		spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		Set £FUNCMindControl_SpawnFoeLastID ^last_spawned
+		timerVanishLastSpawn -m 1 §FUNCMindControl_FrenzyDelay Destroy "~£FUNCMindControl_SpawnFoeLastID~"
+		
+		//timerKillMCSpawn -m 1 59900 DoDamage -fmlcgewsao "~£FUNCMindControl_SpawnFoeLastID~" 99999
+		timerFUNCMindControlKillSpawn -m 0 333 GoSub FUNCMindControlKillSpawn
+		
+		timerBreakDevice -m 1 §FUNCMindControl_FrenzyDelay GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+		timerMindControlDetectHoverNPC off
+		
+		GoSub FUNCshowlocals
+	}
+	RETURN
+}
+>>FUNCMindControlKillSpawn {
+	//teleport "~£FUNCMindControl_HoverEnt~" //should be enough to force bat attack the npc as it dont fly..
+	interpolate "~£FUNCMindControl_SpawnFoeLastID~" "~£FUNCMindControl_HoverEnt~" 0.1
+	if(^life_~£FUNCMindControl_HoverEnt~ <= 0){
+		//DoDamage -fmlcgewsao "~£FUNCMindControl_SpawnFoeLastID~" 99999 //uneccessary?
+		Destroy "~£FUNCMindControl_SpawnFoeLastID~"
+		
+		//Destroy "~£FUNCMindControl_HoverEnt~" //TODOABC will lose any items on it right? how to drop its items on floor? or could just change NPC mesh to "movable\\npc_gore\\npc_gore" and keep inventory stuff there! //this is unsafe anyway, may destroy something that is game breaking...
+		USEMESH -e "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEnt~"
+		//SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEnt~"
+		timerFUNCMindControlKillSpawn off
+	}
+	RETURN
+}
+>>FUNCMindControlBkp2 { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
+	Set £FUNCMindControl_HoverEnt "~^hover~"
+	Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
+	if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
+		Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
+		//Set £FUNCMindControl_SpawnFoe "rat_base\\rat_base" //rats wont attack goblins...
+		//TODO track all spawnings with ^last_spawned, kill them after the NPC dies, destroy the corpses and their loot
 		timerTeleportSelf -m 0 50 teleport ~£FUNCMindControl_HoverEnt~
-		//TODO bats are getting stuck in the walls...
-		timerMindControlSpawnBat -m 1 1000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   20) timerMindControlSpawnBat2 -m 1 2000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   40) timerMindControlSpawnBat3 -m 1 3000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   60) timerMindControlSpawnBat4 -m 1 4000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   80) timerMindControlSpawnBat5 -m 1 5000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+		timerMindControlSpawnBat -m 1 1000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   20) timerMindControlSpawnBat2 -m 1 2000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   40) timerMindControlSpawnBat3 -m 1 3000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   60) timerMindControlSpawnBat4 -m 1 4000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		if(@AncientTechSkill >   80) timerMindControlSpawnBat5 -m 1 5000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
 		if(@AncientTechSkill >= 100) {
-			timerMindControlSpawnBat6 -m 1 6000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
-			timerMindControlSpawnBat7 -m 1 7000 spawn npc "bat\\bat" "~£FUNCMindControl_HoverEnt~"
+			timerMindControlSpawnBat6 -m 1 6000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+			timerMindControlSpawnBat7 -m 1 7000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
 		}
 		timerBreakDevice -m 1 1500 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 		timerMindControlDetectHoverNPC off
-		showlocals
+		GoSub FUNCshowlocals
 	}
 	RETURN
 }
@@ -1516,6 +1567,8 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		if ( £AncientDeviceMode == "Grenade" ) { Set £AncientDeviceMode "LandMine"
 			TWEAK SKIN "Hologram.tiny.index4000.box.Clear" "Hologram.tiny.index4000.boxLandMine"
 			TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
+			//TODO TWEAK SKIN "Hologram.tiny.index4000.LandMine.Clear"   "Hologram.tiny.index4000.LandMine"
+			Set §Scale 10 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			Set £FUNCnameUpdate_NameBase "Holo Landmine"
 			Set £Icon "HoloLandMine"
 			Set §AncientDeviceTriggerStep 1
@@ -1523,6 +1576,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		} else {
 		if ( £AncientDeviceMode == "LandMine" ) { Set £AncientDeviceMode "Teleport"
 			TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
+			Set §Scale 100 SetScale §Scale
 			Set £FUNCnameUpdate_NameBase "Holo Teleport"
 			Set £Icon "HoloTeleport"
 			Set §AncientDeviceTriggerStep 1
@@ -1532,6 +1586,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 			// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
 			// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
 			TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
+			Set §Scale 100 SetScale §Scale
 			Set £FUNCnameUpdate_NameBase "Holo Mind Control"
 			Set £Icon "HoloMindControl"
 			Set §AncientDeviceTriggerStep 1
@@ -1556,7 +1611,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		//SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
 		////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
 		GoSub FUNCbreakDeviceDelayed
-		showlocals
+		GoSub FUNCshowlocals
 	}
 	
 	RETURN
@@ -1592,6 +1647,13 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		timerTrapGlowBlinkOff off
 		timerTrapGlowBlinkOn  off
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+	}
+	RETURN
+}
+
+>>FUNCshowlocals { //no £ScriptDebugLog. this func is to easy disable showlocals.
+	if(§FUNCshowlocals_enabled >= 1){
+		showlocals
 	}
 	RETURN
 }
