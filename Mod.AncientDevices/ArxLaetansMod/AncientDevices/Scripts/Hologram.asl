@@ -103,11 +103,7 @@ ON IDENTIFY { Set ΠcriptDebugLog "On_Identify" //this is called (apparently eve
 				TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~ΠkyBoxCurrent~"
 			}
 			
-			SET_PRICE 100
-			
-			Set ΓUNCnameUpdate_NameBase "Holograms of the over world"
-			GoSub FUNCupdateUses
-			GoSub FUNCnameUpdate
+			GoSub FUNCcfgHologram
 			
 			Set ΠcriptDebugLog "~ΠcriptDebugLog~;Identified_Now"
 			
@@ -130,7 +126,18 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 	++ 別nInventoryUseCount //total activations just for debug
 	GoSub FUNCtests //COMMENT_ON_RELEASE
 	
-	///////////////// TRAP MODE SECTION ///////////////////
+	if(^inPlayerInventory == 1) {
+		if(and(ｘncientDeviceMode == "Hologram" && 呆HologramInitialized == 0)) { //signal repeater can only be created inside the inventory
+			Set ｘncientDeviceMode "_BecomeSignalRepeater_"
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} else {
+		if(ｘncientDeviceMode == "SignalRepeater") { //signal repeater can only revert to hologram inside the inventory
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} }
+	}
+	
 	if ( ｘncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off
 		if ( 你ncientDeviceTriggerStep == 1 ) {
 			if (^amount > 1) { //cannot activate a stack of items
@@ -149,11 +156,7 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 				TWEAK ICON "HologramGrenadeActive[icon]"
 				
 				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
-				TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
-				//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
-				timerTrapGlowBlinkOff -m 佝UNCtrapAttack_TrapTimeSec  900 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
-				//On  at 1000 2000 3000 4000 5000
-				timerTrapGlowBlinkOn  -m 佝UNCtrapAttack_TrapTimeSec 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+				Set 佝UNCblinkGlow_times 佝UNCtrapAttack_TrapTimeSec GoSub FUNCblinkGlow
 				
 				timerTrapVanish     1 佝UNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
 				timerTrapVanishGlow 1 佝UNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -185,10 +188,12 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 	if ( ｘncientDeviceMode == "LandMine" ) {
 		if ( 你ncientDeviceTriggerStep == 1 ) {
 			Set 你ncientDeviceTriggerStep 2 //activate
-			timerLandMineDetectNearbyNPC -m 0 333 GoSub FUNCLandMine
+			timerLandMineDetectNearbyNPC -m 0 100 GoSub FUNCLandMine
+			Set 佝UNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
 			Set 你ncientDeviceTriggerStep = 1  //stop
+			Set 佝UNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -197,9 +202,11 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 		if ( 你ncientDeviceTriggerStep == 1 ) {
 			Set 你ncientDeviceTriggerStep 2 // activate
 			timerTeleportDetectHoverNPC -m 0 333 GoSub FUNCteleportToAndKillNPC
+			Set 佝UNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
 			timerTeleportDetectHoverNPC off
 			Set 你ncientDeviceTriggerStep = 1  //stop
+			Set 佝UNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -208,15 +215,15 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 		if ( 你ncientDeviceTriggerStep == 1 ) {
 			Set 你ncientDeviceTriggerStep 2 //seek ^hover
 			timerMindControlDetectHoverNPC -m 0 333 GoSub FUNCMindControl
+			Set 佝UNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
 			timerMindControlDetectHoverNPC off
 			Set 你ncientDeviceTriggerStep = 1  //stop
+			Set 佝UNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} } } }
-	
-	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////  !!! HOLOGRAM ONLY BELOW HERE !!!  /////////////////
@@ -233,10 +240,16 @@ ON INVENTORYUSE { Set ΠcriptDebugLog "On_InventoryUse"
 	Set ΠcriptDebugLog "~ΠcriptDebugLog~;DebugLog:10"
 	//Set ΠcriptDebugLog "~ΠcriptDebugLog~;20"
 	if (^inPlayerInventory == 1) {
-		if(and(ｘncientDeviceMode == "Hologram" && 呆HologramInitialized == 0)) Set ｘncientDeviceMode "_BecomeSignalRepeater_"
-		GoSub FUNCmorph
-		//PLAY "POWER_DOWN"
-		//showlocals
+		if(and(ｘncientDeviceMode == "Hologram" && 呆HologramInitialized == 0)) {
+			Set ｘncientDeviceMode "_BecomeSignalRepeater_"
+			GoSub FUNCmorphUpgrade
+		} else {
+		if(ｘncientDeviceMode == "SignalRepeater") {
+			GoSub FUNCmorphUpgrade //revert to hologram
+		} else {
+			PLAY "POWER_DOWN"
+			showlocals
+		}	}
 		ACCEPT //can only be activated if deployed
 	}
 	
@@ -665,80 +678,7 @@ ON COMBINE { Set ΠcriptDebugLog "On_Combine:~^$PARAM1~"
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	GoSub FUNCmorph
-	//Set 你ncientDeviceTriggerStep 0
-	//GoSub FUNCskillCheckAncientTech
-	//Set 低reateChance 佝UNCskillCheckAncientTech_chanceSuccess_OUTPUT
-	//if (and(利uality >= 4 && 兌temConditionSure == 5)) Set 低reateChance 100
-	//RANDOM 低reateChance {
-		//if ( ｘncientDeviceMode == "Hologram" ) { Set ｘncientDeviceMode "Grenade"
-			//Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-			//Div 判ristineChance 10
-			//If (判ristineChance < 5) Set 判ristineChance 5
-			//RANDOM 判ristineChance { // grants a minimal chance based on skill in case the player do not initialize it
-				//Set 利uality 5 
-			//}
-			
-			//Set ΓUNCnameUpdate_NameBase "HoloGrenade"
-			//Set Ζcon "HologramGrenade"
-			
-			////PLAY "TRAP"
-			//TWEAK SKIN "Hologram.tiny.index4000.box"               "Hologram.tiny.index4000.box.Clear"
-			//TWEAK SKIN "Hologram.tiny.index4000.grenade.Clear"     "Hologram.tiny.index4000.grenade"
-			////TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
-			
-			//GoSub FUNChideHologramPartsPermanently
-			
-			//Set 刨cale 100 //just in case it is combined with the big hologram on the floor
-			//SetScale 刨cale
-			
-			//Set 你ncientDeviceTriggerStep 1
-			//PlayerStackSize 12
-			//SetGroup -r "DeviceTechBasic"
-			//SetGroup "Explosive"
-		//} else { if ( ｘncientDeviceMode == "Grenade" ) { Set ｘncientDeviceMode "LandMine"
-			//TWEAK SKIN "Hologram.tiny.index4000.box.Clear" "Hologram.tiny.index4000.boxLandMine"
-			//TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
-			//Set ΓUNCnameUpdate_NameBase "LandMine"
-			//Set Ζcon "HoloLandMine"
-			//Set 你ncientDeviceTriggerStep 1
-			//PLAYERSTACKSIZE 9
-		//} else { if ( ｘncientDeviceMode == "LandMine" ) { Set ｘncientDeviceMode "Teleport"
-			//TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
-			//Set ΓUNCnameUpdate_NameBase "Teleport"
-			//Set Ζcon "HoloTeleport"
-			//Set 你ncientDeviceTriggerStep 1
-			//PLAYERSTACKSIZE 6
-		//} else { if ( ｘncientDeviceMode == "Teleport" ) { Set ｘncientDeviceMode "MindControl"
-			//// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
-			//// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
-			//TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
-			//Set ΓUNCnameUpdate_NameBase "MindControl"
-			//Set Ζcon "HoloMindControl"
-			//Set 你ncientDeviceTriggerStep 1
-			//PLAYERSTACKSIZE 3
-		//} } } }
-		
-		//if(你ncientDeviceTriggerStep == 1) {
-			//if ( 利uality >= 4 ) {
-				//Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameBase~ MK2+"
-				//Set Ζcon "~Ζcon~MK2"
-			//}
-			
-			//GoSub FUNCupdateUses
-			//GoSub FUNCnameUpdate
-
-			//Set Ζcon "~Ζcon~[icon]"
-			//TWEAK ICON "~Ζcon~"
-			
-			//if( ｘncientDeviceMode != "Hologram" ) SET_SHADOW ON
-		//}
-	//} else {
-		////SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
-		//////SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
-		//GoSub FUNCbreakDevice
-		//showlocals
-	//}
+	GoSub FUNCmorphUpgrade
 	
 	ACCEPT
 }
@@ -1478,13 +1418,15 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	RETURN
 }
 >>FUNCteleportToAndKillNPC { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCteleportToAndKillNPC" 
+	//TODO may be can use cpp ARX_NPC_TryToCutSomething to explode the body
 	Set ΕoverEnt "~^hover~"
 	Set 佚overLife ^life_~ΕoverEnt~
 	if(and(ΕoverEnt != "none" && 佚overLife > 0)) {
-		timerTeleportKillNPC -m 1 1333 DoDamage -l ~ΕoverEnt~ 99999
-		timerTeleportSelf    -m 1 2666 teleport    ~ΕoverEnt~
-		timerTeleportPlayer  -m 1 3999 teleport -p ~ΕoverEnt~
-		timerTeleportPlayer  -m 1 4999 GoSub FUNCbreakDevice
+		timerTeleportSelf    -m 1 333 teleport    "~ΕoverEnt~"
+		timerTeleportKillNPC -m 1 666 DoDamage -fmplcgewsao "~ΕoverEnt~" 999
+		timerTeleportPlayer  -m 1 999 teleport -p "~ΕoverEnt~"
+		//timerTeleportPlayer  -m 1 999 GoSub FUNCbreakDevice
+		GoSub FUNCbreakDevice //this takes a long time to finish breaking it
 		showlocals
 	}
 	RETURN
@@ -1509,25 +1451,25 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 	RETURN
 }
 
->>FUNCmorph { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCmorph" 
+>>FUNCmorphUpgrade { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCmorphUpgrade" 
 	Set 你ncientDeviceTriggerStep 0
 	GoSub FUNCskillCheckAncientTech
 	Set 低reateChance 佝UNCskillCheckAncientTech_chanceSuccess_OUTPUT
 	if (and(利uality >= 4 && 兌temConditionSure == 5)) Set 低reateChance 100
 	RANDOM 低reateChance {
-		if ( ｘncientDeviceMode == "SignalRepeater" ) { Set ｘncientDeviceMode "Hologram"
-			TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
-			GoSub FUNCcfgHologram
-			RETURN
-		} else {
 		if (ｘncientDeviceMode == "_BecomeSignalRepeater_") { Set ｘncientDeviceMode "SignalRepeater"
 			// this must be easy to become again a hologram, so do minimal changes!
 			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
 			Set ΓUNCnameUpdate_NameBase "Holo Signal Repeater"
 			Set Ζcon "HoloSignalRepeater"
 			//Set 你ncientDeviceTriggerStep 1
-			//PLAYERSTACKSIZE 1
+			//PlayerStackSize 1
 		} else { 
+		if ( ｘncientDeviceMode == "SignalRepeater" ) { Set ｘncientDeviceMode "Hologram"
+			TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
+			GoSub FUNCcfgHologram
+			RETURN //ONLY HERE!!! is just reverting to hologram!
+		} else {
 		if (ｘncientDeviceMode == "Hologram") { Set ｘncientDeviceMode "Grenade"
 			Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
 			Div 判ristineChance 10
@@ -1599,9 +1541,40 @@ ON InventoryOut { Set ΠcriptDebugLog "On_InventoryOut"
 		GoSub FUNCbreakDevice
 		showlocals
 	}
+	
 	RETURN
 }
 >>FUNCcfgHologram { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCcfgHologram" 
-	todoabcd
+	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "Hologram.tiny.index4000.box"
+	TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
+	TWEAK SKIN "Hologram.tiny.index4000.boxLandMine"       "Hologram.tiny.index4000.box"
+	TWEAK SKIN "Hologram.tiny.index4000.boxTeleport"       "Hologram.tiny.index4000.box"
+	TWEAK SKIN "Hologram.tiny.index4000.boxMindControl"    "Hologram.tiny.index4000.box"
+	
+	SET_PRICE 100
+	
+	Set ΓUNCnameUpdate_NameBase "Holograms of the over world"
+	GoSub FUNCupdateUses
+	GoSub FUNCnameUpdate
+	
+	PlayerStackSize 50 
+	
+	TWEAK ICON "Hologram[icon]"
+	
+	RETURN
+}
+>>FUNCblinkGlow { Set ΠcriptDebugLog "~ΠcriptDebugLog~;FUNCblinkGlow" 
+	//PARAMS: 佝UNCblinkGlow_times
+	if(佝UNCblinkGlow_times >= 0){
+		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+		//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
+		timerTrapGlowBlinkOff -m 佝UNCblinkGlow_times  900 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+		//On  at 1000 2000 3000 4000 5000
+		timerTrapGlowBlinkOn  -m 佝UNCblinkGlow_times 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+	} else {
+		timerTrapGlowBlinkOn  off
+		timerTrapGlowBlinkOff off
+		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+	}
 	RETURN
 }
