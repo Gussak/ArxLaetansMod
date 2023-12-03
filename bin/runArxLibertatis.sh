@@ -45,7 +45,8 @@ while true;do
   acmdParams=(
     --data-dir="../Arx Fatalis" #TODOA could just place data*.pak at libertatis path? or on a layer?
     #--debug="warn,error,debug" #TODOA this works???
-    --debug="Debug,Info,Console,Warning,Error,Critical"
+    #--debug="debug,info,console,warning,error,critical"
+    --debug="debug"
     --debug-gl
   );
   strNewestSaveFile="`FUNCsaveList |tail -n 1 |sed -r "s@.*($HOME/.*)@\1@"`"

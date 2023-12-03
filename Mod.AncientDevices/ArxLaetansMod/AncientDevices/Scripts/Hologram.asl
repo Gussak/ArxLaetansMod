@@ -216,7 +216,7 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 	} else {
 	if ( £AncientDeviceMode == "MindControl" ) {
 		if ( §AncientDeviceTriggerStep == 1 ) {
-			Set §AncientDeviceTriggerStep 2 //seek ^hover
+			Set §AncientDeviceTriggerStep 2 //seek ^hover_5000
 			timerMindControlDetectHoverNPC -m 0 333 GoSub FUNCMindControl
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
@@ -1242,17 +1242,20 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 
 //////////////////////////// TESTS /////////////////////////////
 >>FUNChoverInfo { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNChoverInfo" 
-	Set £ScriptDebugLog "~£ScriptDebugLog~;HOVER='~^hover~'"
+	Set £ScriptDebugLog "~£ScriptDebugLog~;HOVER='~^hover_5000~'"
 	GoSub FUNCshowlocals
-	if(^hover != "none") {
-		Set £HoverEnt "~^hover~"
-		Set £HoverClass ^class_~^hover~
-		Set §HoverLife  ^life_~^hover~
+	Set £HoverEnt "~^hover_5000~"
+	if(£HoverEnt != "none") {
+		Set £HoverClass ^class_~^hover_5000~
+		Set §HoverLife ^life_~^hover_5000~
 		Set @HoverLife2 ^life_~£HoverEnt~
-		Set @testDegreesXh   ^degreesx_~^hover~
-		Set @testDegreesYh   ^degreesy_~^hover~
-		Set @testDegreesZh   ^degreesz_~^hover~ //some potions are inclined a bit
-		Set @testDegreesYtoh ^degreesyto_~^hover~
+		Set @testDegreesXh   ^degreesx_~^hover_5000~
+		Set @testDegreesYh   ^degreesy_~^hover_5000~
+		Set @testDegreesZh   ^degreesz_~^hover_5000~ //some potions are inclined a bit
+		Set @testDegreesYtoh ^degreesyto_~^hover_5000~
+    //DropAllItems "~£HoverEnt~" //todoRM!!! test
+    //just crashes... if(§HoverLife > 0) USEMESH -e "~£HoverEnt~" "movable\\npc_gore\\npc_gore" //todoRM 
+    //nothing happens if(§HoverLife > 0) SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£HoverEnt~" //todoRM
 		GoSub FUNCshowlocals
 	}
 	RETURN
@@ -1441,63 +1444,106 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 >>FUNCteleportToAndKillNPC { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCteleportToAndKillNPC" 
 	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
-	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover~"
+	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover_5000~"
 	Set §HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
 	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §HoverLife > 0)) {
 		//timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
 		timerInterpolateSelf -m 0 50 interpolate "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.9 //the idea is to be unsafe positioning over npc location
 		//timerTeleportKillNPC -m 0 50 SENDEVENT -nr CRUSH_BOX 50 "" //SENDEVENT -finr CRUSH_BOX 50 ""
-		//timerTeleportPlayer  -m 1 666 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
-		timerInterpolatePlayer -m 1 333 interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
-		timerTeleportKillNPC -m 1 666 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
+		timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
+		timerInterpolatePlayer -m 1 200 interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
 		//TODO explode npc in gore dismembering
-		timerBreakDevice     -m 1 999 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+    timerTeleportKillNPC -m 1 300 DropAllItems "~£FUNCteleportToAndKillNPC_HoverEnt~" //todo: DropItems entID ALL; DropItems entID ~ItemID~
+    timerTeleportKillNPC -m 1 300 SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCteleportToAndKillNPC_HoverEnt~"
+    timerTeleportKillNPC -m 1 400 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
+    timerTeleportKillNPC -m 1 500 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands //TODOABCDEF drop all it's items firts, new command: dropAllItems <entityID> 
+		timerBreakDevice     -m 1 600 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 		timerTeleportDetectHoverNPC off
 		GoSub FUNCshowlocals
 	}
 	RETURN
 }
 >>FUNCMindControl { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
-	Set £FUNCMindControl_HoverEnt "~^hover~"
-	Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
-	if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
-		Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
+  // this works like a frenzied NPC
+  
+  //TODO goblin_base.asl: settarget -a ~othergoblinnearby~; BEHAVIOR -f MOVE_TO;  WEAPON ON; SETMOVEMODE RUN; Aim the first goblin, aim the second, the 1st attacks the 2nd and vice versa. then: sendevent call_help to the 2nd, that will make them look for the player, then keep aiming on them, they will then attack the 1st!
+	Set £FUNCMindControl_HoverEntTmp "~^hover_5000~"
+	Set §FUNCMindControl_HoverLife ^life_~£FUNCMindControl_HoverEntTmp~
+	if(and(£FUNCMindControl_HoverEntTmp != "none" && §FUNCMindControl_HoverLife > 0)) {
+    if(£FUNCMindControl_HoverEntMain == "") {
+      Set £FUNCMindControl_HoverEntMain "~£FUNCMindControl_HoverEntTmp~"
+      timerTeleportSelf -m 0 50 teleport "~£FUNCMindControl_HoverEntMain~"
+      timerBreakDevice -m 1 60000 GoSub FUNCbreakDeviceDelayed
+      RETURN
+    } else {
+      if(£FUNCMindControl_HoverEntMain == "~£FUNCMindControl_HoverEntTmp~"){
+        RETURN
+      }
+    }
+    
+    ++ §FUNCMindControl_HoverExtraCount
+    
+    //if(§FUNCMindControl_HoverExtraCount == 1) {
+    if(or(£FUNCMindControl_HoverEntAttackedByMain == "" || ^life_~£FUNCMindControl_HoverEntAttackedByMain~ == 0)) {
+      Set £FUNCMindControl_HoverEntAttackedByMain "~£FUNCMindControl_HoverEntTmp~"
+      SetTarget   -e ~£FUNCMindControl_HoverEntMain~ -a "~£FUNCMindControl_HoverEntAttackedByMain~"
+      Behavior    -e ~£FUNCMindControl_HoverEntMain~ -f MOVE_TO
+      Weapon      -e ~£FUNCMindControl_HoverEntMain~ ON
+      SetMoveMode -e ~£FUNCMindControl_HoverEntMain~ RUN
+    }
+    
+    //SendEvent -nr CALL_HELP 1500 "" //they will seek for the player, now player can aim them too
+    
+    SetTarget   -e ~£FUNCMindControl_HoverEntTmp~ -a "~£FUNCMindControl_HoverEntMain~"
+    Behavior    -e ~£FUNCMindControl_HoverEntTmp~ -f MOVE_TO
+    Weapon      -e ~£FUNCMindControl_HoverEntTmp~ ON
+    SetMoveMode -e ~£FUNCMindControl_HoverEntTmp~ RUN
+    
+    if(^life_~£FUNCMindControl_HoverEntAttackedByMain~ == 0) {
+      GoSub FUNCbreakDeviceDelayed
+      timerMindControlDetectHoverNPC off
+    }
+    //++ §FUNCMindControl_HoverExtraCount
+    //if(§FUNCMindControl_HoverExtraCount >= 3) {
+      //timerMindControlDetectHoverNPC off
+    //}
+
+		//Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
 		//Set £FUNCMindControl_SpawnFoe "rat_base\\rat_base" //rats wont attack goblins...
 		//TODO track all spawnings with ^last_spawned, kill them after the NPC dies, destroy the corpses and their loot
-		timerTeleportSelf -m 0 50 teleport "~£FUNCMindControl_HoverEnt~"
 		
-		Set §FUNCMindControl_FrenzyDelay 60000
+		//Set §FUNCMindControl_FrenzyDelay 60000
 		
-		spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		Set £FUNCMindControl_SpawnFoeLastID ^last_spawned
-		timerVanishLastSpawn -m 1 §FUNCMindControl_FrenzyDelay Destroy "~£FUNCMindControl_SpawnFoeLastID~"
+		//spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEntTmp~"
+		//Set £FUNCMindControl_SpawnFoeLastID ^last_spawned
+		//timerVanishLastSpawn -m 1 §FUNCMindControl_FrenzyDelay Destroy "~£FUNCMindControl_SpawnFoeLastID~"
 		
 		//timerKillMCSpawn -m 1 59900 DoDamage -fmlcgewsao "~£FUNCMindControl_SpawnFoeLastID~" 99999
-		timerFUNCMindControlKillSpawn -m 0 333 GoSub FUNCMindControlKillSpawn
+		//timerFUNCMindControlKillSpawn -m 0 333 GoSub FUNCMindControlKillSpawn
 		
-		timerBreakDevice -m 1 §FUNCMindControl_FrenzyDelay GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
-		timerMindControlDetectHoverNPC off
+		//timerBreakDevice -m 1 §FUNCMindControl_FrenzyDelay GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+		//timerMindControlDetectHoverNPC off
 		
 		GoSub FUNCshowlocals
 	}
 	RETURN
 }
 >>FUNCMindControlKillSpawn {
-	//teleport "~£FUNCMindControl_HoverEnt~" //should be enough to force bat attack the npc as it dont fly..
-	interpolate "~£FUNCMindControl_SpawnFoeLastID~" "~£FUNCMindControl_HoverEnt~" 0.1
-	if(^life_~£FUNCMindControl_HoverEnt~ <= 0){
+	//teleport "~£FUNCMindControl_HoverEntTmp~" //should be enough to force bat attack the npc as it dont fly..
+	interpolate "~£FUNCMindControl_SpawnFoeLastID~" "~£FUNCMindControl_HoverEntTmp~" 0.1
+	if(^life_~£FUNCMindControl_HoverEntTmp~ <= 0){
 		//DoDamage -fmlcgewsao "~£FUNCMindControl_SpawnFoeLastID~" 99999 //uneccessary?
 		Destroy "~£FUNCMindControl_SpawnFoeLastID~"
 		
-		//Destroy "~£FUNCMindControl_HoverEnt~" //TODOABC will lose any items on it right? how to drop its items on floor? or could just change NPC mesh to "movable\\npc_gore\\npc_gore" and keep inventory stuff there! //this is unsafe anyway, may destroy something that is game breaking...
-		USEMESH -e "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEnt~"
-		//SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEnt~"
+		//Destroy "~£FUNCMindControl_HoverEntTmp~" //TODOABC will lose any items on it right? how to drop its items on floor? or could just change NPC mesh to "movable\\npc_gore\\npc_gore" and keep inventory stuff there! //destoying the npc is unsafe anyway, may destroy something that is game breaking...
+		//just crashes... USEMESH -e "~£FUNCMindControl_HoverEntTmp~" "movable\\npc_gore\\npc_gore"
+		//nothing happens SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEntTmp~"
 		timerFUNCMindControlKillSpawn off
 	}
 	RETURN
 }
 >>FUNCMindControlBkp2 { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
-	Set £FUNCMindControl_HoverEnt "~^hover~"
+	Set £FUNCMindControl_HoverEnt "~^hover_5000~"
 	Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
 	if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
 		Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
