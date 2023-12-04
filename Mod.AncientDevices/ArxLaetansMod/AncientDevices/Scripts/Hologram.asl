@@ -1253,7 +1253,6 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		Set @testDegreesYh   ^degreesy_~^hover_5000~
 		Set @testDegreesZh   ^degreesz_~^hover_5000~ //some potions are inclined a bit
 		Set @testDegreesYtoh ^degreesyto_~^hover_5000~
-    //DropAllItems "~£HoverEnt~" //todoRM!!! test
     //just crashes... if(§HoverLife > 0) USEMESH -e "~£HoverEnt~" "movable\\npc_gore\\npc_gore" //todoRM 
     //nothing happens if(§HoverLife > 0) SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£HoverEnt~" //todoRM
 		GoSub FUNCshowlocals
@@ -1453,10 +1452,10 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
 		timerInterpolatePlayer -m 1 200 interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
 		//TODO explode npc in gore dismembering
-    timerTeleportKillNPC -m 1 300 DropAllItems "~£FUNCteleportToAndKillNPC_HoverEnt~" //todo: DropItems entID ALL; DropItems entID ~ItemID~
+    timerTeleportKillNPC -m 1 300 DropItem -f "~£FUNCteleportToAndKillNPC_HoverEnt~" all //todo: DropItems entID ALL; DropItems entID ~ItemID~
     timerTeleportKillNPC -m 1 300 SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCteleportToAndKillNPC_HoverEnt~"
     timerTeleportKillNPC -m 1 400 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
-    timerTeleportKillNPC -m 1 500 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands //TODOABCDEF drop all it's items firts, new command: dropAllItems <entityID> 
+    timerTeleportKillNPC -m 1 500 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
 		timerBreakDevice     -m 1 600 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 		timerTeleportDetectHoverNPC off
 		GoSub FUNCshowlocals

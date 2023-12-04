@@ -82,6 +82,19 @@ MYDBG(anyVar<<","<<anything<<anythinElse);
 
 ================================ PR_... comments
 
+PR_LifeOfOtherEnt
+^live_<entityID> can get the life value of any entity that have it
+
+PR_HoverFar
+^hover_<dist> returns any entity at most at specified distance.
+
+PR_DropItems
+New command: dropitem
+Can drop one or all items of any entity inventory where it is or in front of the player.
+
+PR_WeaponCmdOtherEnt
+weapon command accepts a entity to apply it now
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_Interpolate2
 Interpolate command
 Interpolate an entity near a target by percent or absolute distance
