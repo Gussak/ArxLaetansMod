@@ -81,6 +81,11 @@ spawn npc "goblin_base\\goblin_base" player
 MYDBG(anyVar<<","<<anything<<anythinElse);
 
 ================================ PR_... comments
+PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget
+Let other entities be set by these commands: bahavior, setmovemode, settarget
+
+PR_UsemeshOtherEnt
+command 'usemesh' now accepts other entityID to apply it
 
 PR_LifeOfOtherEnt
 ^live_<entityID> can get the life value of any entity that have it

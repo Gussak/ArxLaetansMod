@@ -13,7 +13,7 @@ Extract each compressed package you want (and the respective setup package from 
 Obs.: The setup package is important to create compatibility with Arx Fatalis/Libertatis and to keep the models work independent. As they are CC-BY they can be re-used and adapted to work elsewhere too if you want.  
 
 My new mods' scripts found here will probably not fully work unless you merge/compile this branch: https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod
-or with the newest (possibly unstable) with tests:
+or with the newest (possibly unstable or just broken WIP backup commits) with tests:
 https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
@@ -34,7 +34,9 @@ Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/
 
 Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
   
-  
+.  
+.  
+.  
 ***These below are possibly ready. They were cleaned and prepared for a PR:***  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
