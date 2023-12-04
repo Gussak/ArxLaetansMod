@@ -1493,16 +1493,18 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	
 	if(and(^dist_~£FUNCteleportToAndKillNPC_HoverEnt~ < §TeleDistEndTele && §TelePlayerNow == 0)) {
 		Set §TelePlayerNow 1 //to start player flying only once
-		GoSub FUNCcalcFlyMilis
-		timerTFUNCteleportToAndKillNPC_flyPlayer -m 0 §FUNCcalcFlyMilis_TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayer
+		GoSub FUNCcalcFrameMilis Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis //must be a new var to let the func one modifications not interfere with this timer below
+		timerTFUNCteleportToAndKillNPC_flyPlayer -m 0 §TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayer
 	}
+	
+	GoSub FUNCshowlocals
 	RETURN
 }
->>FUNCcalcFlyMilis {
-	Set §FPS ^fps
-	Set §FUNCcalcFlyMilis_TeleTimerFlyMilis 1000
-	Div §FUNCcalcFlyMilis_TeleTimerFlyMilis §FPS
-	if(§FUNCcalcFlyMilis_TeleTimerFlyMilis < 1) Set §FUNCcalcFlyMilis_TeleTimerFlyMilis 1
+>>FUNCcalcFrameMilis {
+	Set @FPS ^fps
+	Set §FUNCcalcFrameMilis_FrameMilis 1000
+	Div §FUNCcalcFrameMilis_FrameMilis @FPS
+	if(§FUNCcalcFrameMilis_FrameMilis < 1) Set §FUNCcalcFrameMilis_FrameMilis 1
 	RETURN
 }
 >>TFUNCteleportToAndKillNPC_flyPlayer {
@@ -1512,14 +1514,13 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 >>FUNCteleportToAndKillNPC_flyPlayer {
 	//if(§TeleSteps == 0) {
 	if(@TelePlayerDistInit == 0) {
-		Set §TelePlayerToX ^locationx_~£FUNCteleportToAndKillNPC_HoverEnt~
-		Set §TelePlayerToY ^locationy_~£FUNCteleportToAndKillNPC_HoverEnt~
-		Set §TelePlayerToZ ^locationz_~£FUNCteleportToAndKillNPC_HoverEnt~
+		//Set §TelePlayerToX ^locationx_~£FUNCteleportToAndKillNPC_HoverEnt~
+		//Set §TelePlayerToY ^locationy_~£FUNCteleportToAndKillNPC_HoverEnt~
+		//Set §TelePlayerToZ ^locationz_~£FUNCteleportToAndKillNPC_HoverEnt~
 		//todo? if §TelePlayerToX > 90000000000 fail
 		Set @TelePlayerDistInit ^dist_~£FUNCteleportToAndKillNPC_HoverEnt~
 		//this will take 20 frames and is not based in time, TODO make it fly based in time, must use the FPS to calc it. or make it fly in a fixed speed/distance
-		GoSub FUNCcalcFlyMilis
-		Set §TeleSteps §FUNCcalcFlyMilis_TeleTimerFlyMilis //will take 1s to fly to any distance
+		GoSub FUNCcalcFrameMilis Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis //will take 1s to fly to any distance
 		Set @TelePlayerStepDist @TelePlayerDistInit
 		Div @TelePlayerStepDist §TeleSteps
 		//Set @TelePlayerStepDist 50 //fixed fly speed per frame, it is bad as is not time based.. TODOA use FPS to calc it per second
