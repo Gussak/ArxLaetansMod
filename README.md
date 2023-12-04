@@ -120,7 +120,7 @@ Lower all textures resolution on the current folder:
 
 ___
 
-# __Mod Merging (or mixing with overwriting priorities) Suggestion__  
+# __Mod Merging (or mixing with overriding priorities) Suggestion__  
 
 Suggestion: Instead of overwriting exiting files with mods' ones, I use mergerfs thru `secOverrideMultiLayerMountPoint.sh ArxLibertatis`, but you can just run something like (btw, all folders and files must be readonly only least the write layer) ex.:  
 ```
