@@ -6,5 +6,5 @@ while true;do
 	strFlLog="${strPathHere}/../../log/arx.linux.log"
 	nLastLocalVarsIniLine="$(cat "$strFlLog" |egrep "Local variables for" -n |cut -d: -f1 |tail -n 1)";
 	tail -n +$((nLastLocalVarsIniLine+1)) "$strFlLog" |sort
-	echoc -w -t 5
+	echoc -w
 done
