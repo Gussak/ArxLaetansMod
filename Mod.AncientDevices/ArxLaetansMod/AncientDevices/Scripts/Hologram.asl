@@ -49,6 +49,17 @@
 
 //apparently items can only stack if they have the exact same name and/or icon?
 
+// when a timer calls a function, it should end with ACCEPT and not RETURN, or the log may flood with errors!
+//  a easy trick to have both is have a TFUNC call the FUNC ex.:
+//  GoTo TFUNCdoSomething //Timer Called Function = TFUNC
+//  >>TFUNCdoSomething {
+//    GoSub FUNCdoSomething
+//    ACCEPT
+//  }
+//  >>FUNCdoSomething { //now, this function can be called from anywhere with GoSub w/o flooding the log with errors!
+//    RETURN
+//  }
+
 //////////////////////////////// TODO LIST: /////////////////////////
 ///// <><><> /////PRIORITY:HIGH (low difficulty also)
 //TODO contextualizeDocModDesc: These Ancient Devices were found in collapsed ancient bunkers of a long lost and extremelly technologically advanced civilization. They are powered by an external energy source that, for some reason, is less effective or turns off when these devices are nearby strong foes and bosses. //TODO all or most of these ancient tech gets disabled near them
@@ -204,10 +215,10 @@ ON INVENTORYUSE { Set £ScriptDebugLog "On_InventoryUse"
 	if ( £AncientDeviceMode == "Teleport" ) {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 // activate
-			timerTeleportDetectHoverNPC -m 0 333 GoSub FUNCteleportToAndKillNPC
+			timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			timerTeleportDetectHoverNPC off
+			timerTFUNCteleportToAndKillNPC off
 			Set §AncientDeviceTriggerStep 1  //stop
 			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
 		} }
@@ -1247,14 +1258,14 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	Set £HoverEnt "~^hover_5000~"
 	if(£HoverEnt != "none") {
 		Set £HoverClass ^class_~^hover_5000~
-		Set §HoverLife ^life_~^hover_5000~
-		Set @HoverLife2 ^life_~£HoverEnt~
+		Set §HoverLifeTmp ^life_~^hover_5000~
+		Set @HoverLifeTmp2 ^life_~£HoverEnt~
 		Set @testDegreesXh   ^degreesx_~^hover_5000~
 		Set @testDegreesYh   ^degreesy_~^hover_5000~
 		Set @testDegreesZh   ^degreesz_~^hover_5000~ //some potions are inclined a bit
 		Set @testDegreesYtoh ^degreesyto_~^hover_5000~
-    //just crashes... if(§HoverLife > 0) USEMESH -e "~£HoverEnt~" "movable\\npc_gore\\npc_gore" //todoRM 
-    //nothing happens if(§HoverLife > 0) SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£HoverEnt~" //todoRM
+    //just crashes... if(§HoverLifeTmp > 0) USEMESH -e "~£HoverEnt~" "movable\\npc_gore\\npc_gore" //todoRM 
+    //nothing happens if(§HoverLifeTmp > 0) SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£HoverEnt~" //todoRM
 		GoSub FUNCshowlocals
 	}
 	RETURN
@@ -1440,26 +1451,108 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	}
 	RETURN
 }
+>>TFUNCteleportToAndKillNPC {
+	GoSub FUNCteleportToAndKillNPC
+	ACCEPT
+}
 >>FUNCteleportToAndKillNPC { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCteleportToAndKillNPC" 
 	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
 	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover_5000~"
-	Set §HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
-	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §HoverLife > 0)) {
+	Set §FUNCteleportToAndKillNPC_HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
+	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §FUNCteleportToAndKillNPC_HoverLife > 0)) {
 		//timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
-		timerInterpolateSelf -m 0 50 interpolate "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.9 //the idea is to be unsafe positioning over npc location
+		Set §TeleDistEndTele 100
+		//DropItem player "~^me~"
+		timerTFUNCteleportToAndKillNPC_flyMe -m 0 50 GoTo TFUNCteleportToAndKillNPC_flyMe
 		//timerTeleportKillNPC -m 0 50 SENDEVENT -nr CRUSH_BOX 50 "" //SENDEVENT -finr CRUSH_BOX 50 ""
-		timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
-		timerInterpolatePlayer -m 1 200 interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
+		//timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
+		//timerTFUNCteleportToAndKillNPC_flyPlayer -m 0 50 GoTo TFUNCteleportToAndKillNPC_flyPlayer
 		//TODO explode npc in gore dismembering
-    timerTeleportKillNPC -m 1 300 DropItem -p "~£FUNCteleportToAndKillNPC_HoverEnt~" all //todo: DropItems entID ALL; DropItems entID ~ItemID~
-    timerTeleportKillNPC -m 1 300 SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCteleportToAndKillNPC_HoverEnt~"
-    timerTeleportKillNPC -m 1 400 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
-    timerTeleportKillNPC -m 1 500 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
-		timerBreakDevice     -m 1 600 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
-		timerTeleportDetectHoverNPC off
+    //timerTeleportDropNPCItems     -m 1 2000 DropItem "~£FUNCteleportToAndKillNPC_HoverEnt~" all
+    ////nothing happens: timerTeleportKillNPC -m 1 300 SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCteleportToAndKillNPC_HoverEnt~"
+    //timerTeleportDamageAndKillNPC -m 1 2100 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
+    //timerTeleportDestroyNPC       -m 1 2200 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
+		//timerBreakDevice              -m 1 2300 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+		timerTFUNCteleportToAndKillNPC off
 		GoSub FUNCshowlocals
 	}
+	RETURN
+}
+>>TFUNCteleportToAndKillNPC_flyMe {
+	GoSub FUNCteleportToAndKillNPC_flyMe
+	ACCEPT
+}
+>>FUNCteleportToAndKillNPC_flyMe {
+	if(^life_~£FUNCteleportToAndKillNPC_HoverEnt~ > 0) {
+		//the idea is to be unsafe positioning over npc location as it will be destroyed
+		interpolate "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.5 //0.9 the less the smoother anim it gets :), dont put too low tho..
+	} else {
+		timerTFUNCteleportToAndKillNPC_flyMe off
+	}
+	
+	if(and(^dist_~£FUNCteleportToAndKillNPC_HoverEnt~ < §TeleDistEndTele && §TelePlayerNow == 0)) {
+		Set §TelePlayerNow 1 //to start player flying only once
+		GoSub FUNCcalcFlyMilis
+		timerTFUNCteleportToAndKillNPC_flyPlayer -m 0 §FUNCcalcFlyMilis_TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayer
+	}
+	RETURN
+}
+>>FUNCcalcFlyMilis {
+	Set §FPS ^fps
+	Set §FUNCcalcFlyMilis_TeleTimerFlyMilis 1000
+	Div §FUNCcalcFlyMilis_TeleTimerFlyMilis §FPS
+	if(§FUNCcalcFlyMilis_TeleTimerFlyMilis < 1) Set §FUNCcalcFlyMilis_TeleTimerFlyMilis 1
+	RETURN
+}
+>>TFUNCteleportToAndKillNPC_flyPlayer {
+	GoSub FUNCteleportToAndKillNPC_flyPlayer
+	ACCEPT
+}
+>>FUNCteleportToAndKillNPC_flyPlayer {
+	//if(§TeleSteps == 0) {
+	if(@TelePlayerDistInit == 0) {
+		Set §TelePlayerToX ^locationx_~£FUNCteleportToAndKillNPC_HoverEnt~
+		Set §TelePlayerToY ^locationy_~£FUNCteleportToAndKillNPC_HoverEnt~
+		Set §TelePlayerToZ ^locationz_~£FUNCteleportToAndKillNPC_HoverEnt~
+		//todo? if §TelePlayerToX > 90000000000 fail
+		Set @TelePlayerDistInit ^dist_~£FUNCteleportToAndKillNPC_HoverEnt~
+		//this will take 20 frames and is not based in time, TODO make it fly based in time, must use the FPS to calc it. or make it fly in a fixed speed/distance
+		GoSub FUNCcalcFlyMilis
+		Set §TeleSteps §FUNCcalcFlyMilis_TeleTimerFlyMilis //will take 1s to fly to any distance
+		Set @TelePlayerStepDist @TelePlayerDistInit
+		Div @TelePlayerStepDist §TeleSteps
+		//Set @TelePlayerStepDist 50 //fixed fly speed per frame, it is bad as is not time based.. TODOA use FPS to calc it per second
+	}
+	
+	//if(§TeleSteps > 0) {
+	//if(and(@TelePlayerDistInit > 0 && ^dist_player > §TeleDistEndTele)) {
+	if(@TelePlayerDistInit > 0) {
+		Set @TeleHoloToPlayerDist ^dist_player
+		if(@TeleHoloToPlayerDist > §TeleDistEndTele) {
+			//the idea is to be unsafe positioning over/colliding with npc (that will be destroyed) location
+			//is like fly speed
+			//TODO not working, wont move: interpolate player "~§TelePlayerToX~,~§TelePlayerToY~,~§TelePlayerToZ~" @TelePlayerStepDist
+			//Set @TelePlayerPlaceDist @TelePlayerDistInit
+			//Dec @TelePlayerPlaceDist @TelePlayerStepDist
+			//interpolate player "~§TelePlayerToX~,~§TelePlayerToY~,~§TelePlayerToZ~" @TelePlayerPlaceDist
+			//interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" @TelePlayerStepDist
+			interpolate player "~^me~" @TelePlayerStepDist
+			//-- §TeleSteps
+		} else {
+			DropItem "~£FUNCteleportToAndKillNPC_HoverEnt~" all
+			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
+			Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
+			GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+			timerTFUNCteleportToAndKillNPC_flyPlayer off
+		}
+	}
+	
+	//if(§TeleSteps == 0) {
+		//timerTFUNCteleportToAndKillNPC_flyPlayer off
+	//}
+	GoSub FUNCshowlocals
+	
 	RETURN
 }
 >>FUNCMindControl { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
@@ -1541,29 +1634,29 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	}
 	RETURN
 }
->>FUNCMindControlBkp2 { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
-	Set £FUNCMindControl_HoverEnt "~^hover_5000~"
-	Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
-	if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
-		Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
-		//Set £FUNCMindControl_SpawnFoe "rat_base\\rat_base" //rats wont attack goblins...
-		//TODO track all spawnings with ^last_spawned, kill them after the NPC dies, destroy the corpses and their loot
-		timerTeleportSelf -m 0 50 teleport ~£FUNCMindControl_HoverEnt~
-		timerMindControlSpawnBat -m 1 1000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   20) timerMindControlSpawnBat2 -m 1 2000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   40) timerMindControlSpawnBat3 -m 1 3000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   60) timerMindControlSpawnBat4 -m 1 4000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >   80) timerMindControlSpawnBat5 -m 1 5000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		if(@AncientTechSkill >= 100) {
-			timerMindControlSpawnBat6 -m 1 6000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-			timerMindControlSpawnBat7 -m 1 7000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
-		}
-		timerBreakDevice -m 1 1500 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
-		timerMindControlDetectHoverNPC off
-		GoSub FUNCshowlocals
-	}
-	RETURN
-}
+//>>FUNCMindControlBkp2 { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCMindControl" 
+	//Set £FUNCMindControl_HoverEnt "~^hover_5000~"
+	//Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
+	//if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
+		//Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
+		////Set £FUNCMindControl_SpawnFoe "rat_base\\rat_base" //rats wont attack goblins...
+		////TODO track all spawnings with ^last_spawned, kill them after the NPC dies, destroy the corpses and their loot
+		//timerTeleportSelf -m 0 50 teleport ~£FUNCMindControl_HoverEnt~
+		//timerMindControlSpawnBat -m 1 1000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		//if(@AncientTechSkill >   20) timerMindControlSpawnBat2 -m 1 2000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		//if(@AncientTechSkill >   40) timerMindControlSpawnBat3 -m 1 3000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		//if(@AncientTechSkill >   60) timerMindControlSpawnBat4 -m 1 4000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		//if(@AncientTechSkill >   80) timerMindControlSpawnBat5 -m 1 5000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		//if(@AncientTechSkill >= 100) {
+			//timerMindControlSpawnBat6 -m 1 6000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+			//timerMindControlSpawnBat7 -m 1 7000 spawn npc "~£FUNCMindControl_SpawnFoe~" "~£FUNCMindControl_HoverEnt~"
+		//}
+		//timerBreakDevice -m 1 1500 GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+		//timerMindControlDetectHoverNPC off
+		//GoSub FUNCshowlocals
+	//}
+	//RETURN
+//}
 
 >>FUNCmorphUpgrade { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCmorphUpgrade" 
 	Set §AncientDeviceTriggerStep 0
