@@ -22,11 +22,6 @@ strPathRun="`realpath ../ArxLibertatis`"
 strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
 mkdir -vp "`dirname "$strFlLog"`"
 
-if [[ ! -f "$strPathRun/arx" ]];then
-  cd ..
-  secOverrideMultiLayerMountPoint.sh ArxLibertatis
-fi
-
 while true;do
   : ${bBuildB4Run:=true} #help
   if $bBuildB4Run;then 
@@ -34,6 +29,12 @@ while true;do
     while ! ./buildArxLibertatis.sh;do echoc -w "fix the code and retry";done;
   fi
   
+  if [[ ! -f "$strPathRun/arx" ]];then
+    cd "$strPathIni"
+    cd ..
+    secOverrideMultiLayerMountPoint.sh ArxLibertatis
+  fi
+
   cd "$strPathRun"
   
   function FUNCsaveList() { 

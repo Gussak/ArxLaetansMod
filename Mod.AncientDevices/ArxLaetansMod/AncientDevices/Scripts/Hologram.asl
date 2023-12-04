@@ -1452,7 +1452,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
 		timerInterpolatePlayer -m 1 200 interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //the idea is to be unsafe positioning over npc location
 		//TODO explode npc in gore dismembering
-    timerTeleportKillNPC -m 1 300 DropItem -f "~£FUNCteleportToAndKillNPC_HoverEnt~" all //todo: DropItems entID ALL; DropItems entID ~ItemID~
+    timerTeleportKillNPC -m 1 300 DropItem -p "~£FUNCteleportToAndKillNPC_HoverEnt~" all //todo: DropItems entID ALL; DropItems entID ~ItemID~
     timerTeleportKillNPC -m 1 300 SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCteleportToAndKillNPC_HoverEnt~"
     timerTeleportKillNPC -m 1 400 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
     timerTeleportKillNPC -m 1 500 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
