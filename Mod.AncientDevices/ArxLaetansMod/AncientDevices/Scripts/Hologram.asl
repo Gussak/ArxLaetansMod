@@ -61,7 +61,8 @@
 //  }
 // LC_ALL=C sed -i.bkp -r -e 's@^(>>)(FUNC[^ ]*)@>>T\2 { GoSub \2 ACCEPT } >>\2 @' Hologram.asl #creates the TFUNC...
 // LC_ALL=C sed -i.bkp2 -r -e 's@(timer.*)([ \t]*GoSub)( *)(FUNC)@\1 GoTo\3T\4@' Hologram.asl #fixes timers to use TFUNC...
-// LC_ALL=C egrep "timer.*GoSub" -ia #confirm
+// LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
+// export LC_ALL=C;egrep "GoTo" -wia Hologram.asl |egrep -via "timer|loop" #check if GoTo is being used by something else than a timer or a loop
 
 //////////////////////////////// TODO LIST: /////////////////////////
 ///// <><><> /////PRIORITY:HIGH (low difficulty also)
@@ -123,7 +124,7 @@ ON IDENTIFY { Set £ScriptDebugLog "On_Identify" //this is called (apparently ev
 			GoSub FUNCshowlocals
 		}
 	} else {
-		if (^#timer2 == 0) starttimer timer2
+		if (^#timer2 == 0) StartTimer timer2
 		if (^#timer2 > 333) { //TOKEN_MOD_CFG
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
@@ -785,7 +786,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	RETURN
 }
 
->>TFUNCinitDefaults { GoTo FUNCinitDefaults ACCEPT } >>FUNCinitDefaults { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCinitDefaults"
+>>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCinitDefaults"
 	Set £AncientDeviceMode "Hologram"
 	
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified" "Hologram.skybox.index2000.DocUnidentified"
