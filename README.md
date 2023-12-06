@@ -12,9 +12,9 @@ Extract each compressed package you want (and the respective setup package from 
 
 Obs.: The setup package is important to create compatibility with Arx Fatalis/Libertatis and to keep the models work independent. As they are CC-BY they can be re-used and adapted to work elsewhere too if you want.  
 
-My new mods' scripts found here will probably not fully work unless you merge/compile this branch: https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod
-or with the newest (possibly unstable or just broken WIP backup commits) with tests:
-https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST
+My new mods' scripts found here will probably not fully work unless you merge/compile this branch:  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod  
+or the newest (that may be unstable or just broken as may contain WIP and backup commits):  
+https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST (or TEST2 ...)  
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
 
@@ -48,31 +48,44 @@ or(... || ... || ...) //only accepts '||' or ','
 and nesting: if(and(... && !or(... || ... || and(... , ... , ...)) && ...))  
 where '...' are the existing comparisons that use == != >= <= > <  
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
-Format expanded variables thru printf syntax  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2  
-^dist_ variable now can use an absolute location as target  
-ex.: ^dist_{8000.25,7800.44,8500.32}  
-
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
 Debug Line and Column Info  
 Terminal log will show line and column where the problem happened.  
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3  
-added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity  
+https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
+QOL: new control (default key 'N') to combine items w/o having to double click
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2  
-Added ^degrees... variables  
-only degrees, also for pitch x and roll z now  
+https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
+Format expanded variables thru printf syntax  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
 src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
 High poly dropped items' models create a very dark ugly shadow.  
 This patch limits the amount of shadows for them still using strided().  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_NewVarFPS  
+New variable ^fps to get the frame rate
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_Interpolate2  
+Interpolate command  
+Interpolate an entity near a target  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_LifeOfOtherEnt  
+new ^life_<entityID> and ^life_max_<entityID>
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
 Added Remainder arithmetic operation  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2  
+Added ^degrees... variables  
+only degrees, also for pitch x and roll z now  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2  
+^dist_ variable now can use an absolute location as target  
+ex.: ^dist_{8000.25,7800.44,8500.32}  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3  
+added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity  
 
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
