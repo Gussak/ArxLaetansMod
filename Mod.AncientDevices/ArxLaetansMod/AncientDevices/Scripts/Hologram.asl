@@ -861,6 +861,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 }
 
 >>TFUNCbreakDeviceDelayed { GoSub FUNCbreakDeviceDelayed ACCEPT } >>FUNCbreakDeviceDelayed  { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCbreakDeviceDelayed"
+	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayer]
 	SetGroup "DeviceTechBroken"
 	GoSub FUNCshockPlayer
 	//if (^inPlayerInventory == 1) {
@@ -883,8 +884,19 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoTo TFUNCparalyseIfPlayerNearby //the trap tried to capture the player xD //TODOA not working?
 		Inc §TmpBreakDestroyMilis ^rnd_15000
 		timerTrapBreakDestroy -m 1 §TmpBreakDestroyMilis GoTo TFUNCDestroySelfSafely //to give time to let the player examine it a bit
+		if(§FUNCbreakDeviceDelayed_ParalyzePlayer == 1) {
+			Set @TmpParalyzePlayerMilis 100
+			Dec @TmpParalyzePlayerMilis @AncientTechSkill
+			if(@TmpParalyzePlayerMilis > 0) {
+				Div @TmpParalyzePlayerMilis 100 //percent now
+				Mul @TmpParalyzePlayerMilis §TmpBreakDestroyMilis
+				SPELLCAST -fmsd @TmpParalyzePlayerMilis @SignalStrLvl PARALYSE PLAYER
+			}
+		}
 	//}
 	GoSub FUNCshowlocals
+	//reset to default b4 next call
+	Set §TFUNCbreakDeviceDelayed_ParalizePlayer 0
 	RETURN
 }
 
@@ -1046,8 +1058,9 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 }
 
 >>TFUNCtrapAttack { GoSub FUNCtrapAttack ACCEPT } >>FUNCtrapAttack  { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCtrapAttack" 
-	//INPUT: §FUNCtrapAttack_TrapMode 0=explosion 1=projectile/targetPlayer
-	//INPUT: §FUNCtrapAttack_TrapTimeSec in seconds (not milis)
+	//INPUT: <§FUNCtrapAttack_TrapTimeSec>: in seconds (not milis)
+	//INPUT: [§FUNCtrapAttack_TrapMode]: 0=explosion 1=projectile/targetPlayer
+	
 	SendEvent GLOW SELF "" //TODO this also makes it glow or just calls the ON GLOW event that needs to be implemented here?
 	
 	SetGroup "DeviceTechExplosionActivated"
@@ -1065,7 +1078,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	GoSub FUNCcalcSignalStrength
 	
 	// random trap
-	Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec //must be seconds (not milis) to easify things below like timer count and text
+	if(§FUNCtrapAttack_TrapTimeSec == 0) Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec //must be seconds (not milis) to easify things below like timer count and text
 	timerTrapTime     §FUNCtrapAttack_TrapTimeSec 1 Dec §FUNCtrapAttack_TrapTimeSec 1
 	timerTrapTimeName §FUNCtrapAttack_TrapTimeSec 1 SetName "Holo-Grenade Activated (~§FUNCtrapAttack_TrapTimeSec~s)"
 	//timerTrapAttack  -m 0  100 GoTo TFUNCMakeNPCsHostile //doesnt work
@@ -1101,6 +1114,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	
 	//restore defaults for next call "w/o params"
 	Set §FUNCtrapAttack_TrapMode 0
+	Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec
 	RETURN
 }
 
@@ -1468,7 +1482,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		
 		SetInteractivity None
 		
-		GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis //must be a new var to let the func one modifications not interfere with this timer below
+		GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
 		timerTFUNCteleportToAndKillNPC_flyMeToNPC -m 0 §TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyMeToNPC
 		//timerTeleportKillNPC -m 0 50 SENDEVENT -nr CRUSH_BOX 50 "" //SENDEVENT -finr CRUSH_BOX 50 ""
 		//timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
@@ -1498,7 +1512,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	
 	if(and(^dist_~£FUNCteleportToAndKillNPC_HoverEnt~ < §TeleDistEndTele && §TelePlayerNow == 0)) {
 		Set §TelePlayerNow 1 //to start player flying only once
-		GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis //must be a new var to let the func one modifications not interfere with this timer below
+		GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
 		timerTFUNCteleportToAndKillNPC_flyPlayerToMe -m 0 §TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe
 	}
 	
@@ -1516,8 +1530,8 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 		//Set @TelePlayerDistInit ^dist_~£FUNCteleportToAndKillNPC_HoverEnt~
 		
 		//this will take 20 frames and is not based in time, TODO make it fly based in time, must use the FPS to calc it. or make it fly in a fixed speed/distance
-		Set @FUNCcalcInterpolateTeleStepDist_Init ^dist_~^me~	GoSub FUNCcalcInterpolateTeleStepDist()	Set @TelePlayerStepDist @FUNCcalcInterpolateTeleStepDist_OUTPUT
-		//GoSub FUNCcalcFrameMilis Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis //will take 1s to fly to any distance
+		Set @FUNCcalcInterpolateTeleStepDist_Init ^dist_player	GoSub FUNCcalcInterpolateTeleStepDist()	Set @TelePlayerStepDist @FUNCcalcInterpolateTeleStepDist_OUTPUT
+		//GoSub FUNCcalcFrameMilis Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis_OUTPUT //will take 1s to fly to any distance
 		//Set @TelePlayerStepDist @TelePlayerDistInit
 		//Div @TelePlayerStepDist §TeleSteps
 		//Div @TelePlayerStepDist 10 //to make it nicely slower
@@ -1527,7 +1541,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 	
 	//if(§TeleSteps > 0) {
 	//if(and(@TelePlayerDistInit > 0 && ^dist_player > §TeleDistEndTele)) {
-	if(@TelePlayerDistInit > 0) {
+	if(@TelePlayerStepDist > 0) {
 		Set @TeleHoloToPlayerDist ^dist_player
 		if(@TeleHoloToPlayerDist > §TeleDistEndTele) {
 			//the idea is to be unsafe positioning over/colliding with npc (that will be destroyed) location
@@ -1543,7 +1557,15 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 			DropItem "~£FUNCteleportToAndKillNPC_HoverEnt~" all
 			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
 			Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
-			GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+			
+			Set @TeleDmgPlayer ^life_max_player
+			Mul @TeleDmgPlayer 0.95
+			DoDamage -l @TeleDmgPlayer player //must be before paralyze???
+			
+			Weapon -e player ON //doesnt work on player?
+			
+			Set §FUNCbreakDeviceDelayed_ParalyzePlayer 1	GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+			
 			timerTFUNCteleportToAndKillNPC_flyPlayerToMe off
 		}
 	}
@@ -1557,15 +1579,15 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 }
 >>TFUNCcalcFrameMilis { GoSub FUNCcalcFrameMilis ACCEPT } >>FUNCcalcFrameMilis  {
 	Set @FPS ^fps
-	Set §FUNCcalcFrameMilis_FrameMilis 1000
-	Div §FUNCcalcFrameMilis_FrameMilis @FPS
-	if(§FUNCcalcFrameMilis_FrameMilis < 1) Set §FUNCcalcFrameMilis_FrameMilis 1
+	Set §FUNCcalcFrameMilis_FrameMilis_OUTPUT 1000
+	Div §FUNCcalcFrameMilis_FrameMilis_OUTPUT @FPS
+	if(§FUNCcalcFrameMilis_FrameMilis_OUTPUT < 1) Set §FUNCcalcFrameMilis_FrameMilis_OUTPUT 1
 	RETURN
 }
 >>FUNCcalcInterpolateTeleStepDist { 
-	//PARAM: @FUNCcalcInterpolateTeleStepDist_Init
+	//INPUT:  <@FUNCcalcInterpolateTeleStepDist_Init>
 	//OUTPUT: @FUNCcalcInterpolateTeleStepDist_OUTPUT
-	GoSub FUNCcalcFrameMilis	Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis //will take 1s to fly to any distance
+	GoSub FUNCcalcFrameMilis	Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis_OUTPUT //will take 1s to fly to any distance
 	Set @FUNCcalcInterpolateTeleStepDist_OUTPUT @FUNCcalcInterpolateTeleStepDist_Init
 	Div @FUNCcalcInterpolateTeleStepDist_OUTPUT §TeleSteps
 	if(@FUNCcalcInterpolateTeleStepDist_OUTPUT <= 1.0) {
