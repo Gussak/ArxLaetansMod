@@ -766,18 +766,20 @@ else #OBJ TO FTL ###############################################################
   #fi
   ##fi
 	
-	# Fix wrong blender export to obj vectors at 0,0,0
-	: ${strVectorOriginFromBlenderRegex:="v 0[.]000000 -0[.]000002 0[.]000000"} #help blender export vectors at 0,0,0 with the y no exactly at 0.0 !!! so you must configure the wrong value to be fixed!
-	strOriginVecMsg="origin made of 3 vertexes creating a face with the material sM=\@Origin texture=SPECIALTX_ORIGIN.png at absolute position 0,0,0"
-	if ! egrep "${strVectorOriginFromBlenderRegex}" "$strFlWFObj";then
-		echoc -p "the obj file does not contain the ${strOriginVecMsg} , please fix it!"
-		exit 1
-	fi
 	strVecFix="v 0.000000 0.000000 0.000000"
-	sed ${strSedBkpOpt} -r -e "s@${strVectorOriginFromBlenderRegex}@${strVecFix}@" "$strFlWFObj"
 	if ! egrep "$strVecFix" "$strFlWFObj";then
-		echoc -p "fix fail for: ${strOriginVecMsg}"
-		exit 1
+		# Fix wrong blender export to obj vectors at 0,0,0
+		: ${strVectorOriginFromBlenderRegex:="v -*0[.]00000[0-9] -*0[.]00000[0-9] -*0[.]00000[0-9]"} #help blender export vectors at 0,0,0 with the y no exactly at 0.0 !!! so you must configure the wrong value to be fixed!
+		strOriginVecMsg="origin made of 3 vertexes creating a face with the material sM=\@Origin texture=SPECIALTX_ORIGIN.png at absolute position 0,0,0"
+		if ! egrep "${strVectorOriginFromBlenderRegex}" "$strFlWFObj";then
+			echoc -p "the obj file does not contain the ${strOriginVecMsg} , please fix it!"
+			exit 1
+		fi
+		sed ${strSedBkpOpt} -r -e "s@${strVectorOriginFromBlenderRegex}@${strVecFix}@" "$strFlWFObj"
+		if ! egrep "$strVecFix" "$strFlWFObj";then
+			echoc -p "fix fail for: ${strOriginVecMsg}"
+			exit 1
+		fi
 	fi
 	
   (
