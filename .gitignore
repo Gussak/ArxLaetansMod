@@ -38,6 +38,7 @@
 !tools/interim/convertOBJtoFTL.sh
 !tools/interim/convertOBJtoFTL.sh.WIP
 !tools/interim/HowTo.interim.ImportExportFtl.txt
+!tools/interim/SPECIALTX_ORIGIN.png
 
 # Mod AncientDevices: find Mod.AncientDevices -type d |sed -r 's@^(.*)@!\1\n!\1/*@'
 !Mod.AncientDevices

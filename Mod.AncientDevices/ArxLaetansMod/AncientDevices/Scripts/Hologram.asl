@@ -862,6 +862,7 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 
 >>TFUNCbreakDeviceDelayed { GoSub FUNCbreakDeviceDelayed ACCEPT } >>FUNCbreakDeviceDelayed  { Set £ScriptDebugLog "~£ScriptDebugLog~;FUNCbreakDeviceDelayed"
 	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayer]
+	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis]
 	SetGroup "DeviceTechBroken"
 	GoSub FUNCshockPlayer
 	//if (^inPlayerInventory == 1) {
@@ -889,14 +890,16 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 			Dec @TmpParalyzePlayerMilis @AncientTechSkill
 			if(@TmpParalyzePlayerMilis > 0) {
 				Div @TmpParalyzePlayerMilis 100 //percent now
-				Mul @TmpParalyzePlayerMilis §TmpBreakDestroyMilis
+				Mul @TmpParalyzePlayerMilis §TmpBreakDestroyMilis //a percent of the destroy time
+				Inc @TmpParalyzePlayerMilis §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
 				SPELLCAST -fmsd @TmpParalyzePlayerMilis @SignalStrLvl PARALYSE PLAYER
 			}
 		}
 	//}
 	GoSub FUNCshowlocals
 	//reset to default b4 next call
-	Set §TFUNCbreakDeviceDelayed_ParalizePlayer 0
+	Set §FUNCbreakDeviceDelayed_ParalizePlayer 0
+	Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 0
 	RETURN
 }
 
@@ -1554,15 +1557,28 @@ ON InventoryOut { Set £ScriptDebugLog "On_InventoryOut"
 			interpolate -ls player "~^me~" @TelePlayerStepDist
 			//-- §TeleSteps
 		} else {
+			//Set @TeleDmgPlayer ^lifemax_player
+			Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 0
+			Set @TeleDmgPlayer ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
+			if(@TeleDmgPlayer >= ^life_player) {
+				Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis @TeleDmgPlayer
+				Dec §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis ^life_player
+				if(§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis == 0) ++ §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
+				Mul §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 1000 //to milis
+				Div §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 10 //10% of extra life only
+				Set @TeleDmgPlayer ^life_player
+				Dec @TeleDmgPlayer 0.5 //barely alive
+			}
+			//Mul @TeleDmgPlayer 0.95
+			//if(@TeleDmgPlayer > 1) Dec @TeleDmgPlayer 1
+			//timerTeleDmgPlayer -m 1 50 DoDamage -l player @TeleDmgPlayer
+			DoDamage -l player @TeleDmgPlayer
+			
 			DropItem "~£FUNCteleportToAndKillNPC_HoverEnt~" all
-			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
-			Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
+			DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
+			timerTeleDestroyNPC -m 1 50 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
 			
-			Set @TeleDmgPlayer ^life_max_player
-			Mul @TeleDmgPlayer 0.95
-			DoDamage -l @TeleDmgPlayer player //must be before paralyze???
-			
-			Weapon -e player ON //doesnt work on player?
+			//Weapon -e player ON //doesnt work on player?
 			
 			Set §FUNCbreakDeviceDelayed_ParalyzePlayer 1	GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 			

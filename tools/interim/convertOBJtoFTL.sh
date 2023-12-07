@@ -627,7 +627,7 @@ else #OBJ TO FTL ###############################################################
   #bIsTxPathFixed
   
   #if ! egrep "newmtl .*sM=.*sFT=" -i "${strFlWFMtl}";then 
-    #echoc --info 'yoy need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT="POLY_NO_SHADOW|POLY_WATER";fTr=1.85; #obs.: sFT can be just a number too if the readable dont fit there'
+    #echoc --info 'you need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT="POLY_NO_SHADOW|POLY_WATER";fTr=1.85; #obs.: sFT can be just a number too if the readable dont fit there'
     #exit 1
   #fi
 
@@ -686,25 +686,27 @@ else #OBJ TO FTL ###############################################################
     egrep "newmtl|map_Kd" "${strFlWFMtl}" \
       |sed -r \
         -e 's@\\@/@g' \
-        -e "s@map_Kd (.*)@;strTxNm='\1';_TOKEN_ADDNEWLINE_@i" \
-        -e 's@;;@;@g' \
+        -e "s@map_Kd (.*)@;strTxNm=\"\1\";_TOKEN_ADDNEWLINE_@i" \
         -e "s@newmtl (.*)@\1@" \
       |tr -d '\n' \
+      |sed -r -e 's@;;@;@g' \
       |sed -r -e 's@_TOKEN_ADDNEWLINE_@\n@g' \
   )&&:
+  declare -p astrAutoCfgTmpList
   SECFUNCarrayShow -v astrAutoCfgTmpList
-  #sed -i -r -e 's@\\@/@g' "${strFlWFMtl}" #undo windows folder separator to avoid overcomplexity
+  #sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #undo windows folder separator to avoid overcomplexity
   iTextureContainerIndex=-1
   bErrorCfgMissing=false
   for strAutoCfg in "${astrAutoCfgTmpList[@]}";do
     ((iTextureContainerIndex++))&&:
     declare -p strAutoCfg
-    if ! [[ "$strAutoCfg" =~ ^sM=.*sFT= ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
+    #if ! [[ "$strAutoCfg" =~ ^sM=.*sFT= ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
+    if ! [[ "$strAutoCfg" =~ ^sM=.* ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
     #if ! echo "$strAutoCfg" |egrep "newmtl sM=.*sFT=";then echo "SKIP, no valid cfg found";continue;fi
     #newmtl sM=Bottle;sFT="POLY_NO_SHADOW|POLY_TRANS";fTr=0.95;
     eval "$strAutoCfg"
-    declare -p sM sFT strTxNm #required
-    declare -p fTr&&: #optional
+    declare -p sM strTxNm #required
+    declare -p sFT fTr&&: #optional
     if [[ -z "${sM-}" ]];then echo "SKIP, no valid sM (strMaterialId) found above";bErrorCfgMissing=true;continue;fi
     ##strTxNm="`basename "$strTxNm"`" #astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
     #strTxNm="$(echo "$strTxNm" |sed -r -e "s@.*${strTXPathRelative}/(.*)@\1@")" #inside strTXPathRelative path, there may exist a subpath and it shall be part of the texture name
@@ -715,12 +717,15 @@ else #OBJ TO FTL ###############################################################
       echoc -p "invalid fTr='$fTr', did you add a ';' at the end of the material name? (it is the last var and shall have a separator before strTxNm that will be appended here)"
       exit 1
     fi
+    
+    sFT=${sFT-0}
     if [[ "$sFT" =~ ^[a-zA-Z] ]];then
       if ! [[ "$sFT" =~ POLY_ ]];then #add POLY_ to all parts to let it calc
         sFT="$(echo "$sFT" |tr "|" "\n" |sed -r -e 's@.*@POLY_&|@' |tr -d "\n")0" #final 0 is to complete the a|b|c| as a|b|c|0 to let it calc
         declare -p sFT
       fi
     fi
+    
     astrAutoCfgList["${strMaterialId}"]="iTextureContainerIndex=$iTextureContainerIndex; strTxNm='$strTxNm'; strMaterialId='$strMaterialId'; strFaceTypeOpt='${sFT}'; iFaceTypeOpt=$(($sFT)); fFaceTranspValOpt=${fTr-0};"
     echoc --info "BlenderAutoCfg[$strMaterialId]=${astrAutoCfgList[${strMaterialId}]}"
     #FUNCclearMaterialVars #cleanup to not mess next
@@ -731,7 +736,7 @@ else #OBJ TO FTL ###############################################################
   done
   SECFUNCarrayShow -v astrAutoCfgList
   if $bErrorCfgMissing;then
-    echoc -p "yoy need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT=\"POLY_NO_SHADOW|POLY_WATER\";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there"
+    echoc -p "you need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT=\"POLY_NO_SHADOW|POLY_WATER\";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there"
     exit 1
   fi
   
@@ -760,7 +765,21 @@ else #OBJ TO FTL ###############################################################
     #fi
   #fi
   ##fi
-
+	
+	# Fix wrong blender export to obj vectors at 0,0,0
+	: ${strVectorOriginFromBlenderRegex:="v 0[.]000000 -0[.]000002 0[.]000000"} #help blender export vectors at 0,0,0 with the y no exactly at 0.0 !!! so you must configure the wrong value to be fixed!
+	strOriginVecMsg="origin made of 3 vertexes creating a face with the material sM=\@Origin texture=SPECIALTX_ORIGIN.png at absolute position 0,0,0"
+	if ! egrep "${strVectorOriginFromBlenderRegex}" "$strFlWFObj";then
+		echoc -p "the obj file does not contain the ${strOriginVecMsg} , please fix it!"
+		exit 1
+	fi
+	strVecFix="v 0.000000 0.000000 0.000000"
+	sed ${strSedBkpOpt} -r -e "s@${strVectorOriginFromBlenderRegex}@${strVecFix}@" "$strFlWFObj"
+	if ! egrep "$strVecFix" "$strFlWFObj";then
+		echoc -p "fix fail for: ${strOriginVecMsg}"
+		exit 1
+	fi
+	
   (
     SECFUNCexecA -ce cd "$strPathTools"; #must be run from where it is installed to find required deps: ArxLibertatisFTLConverter.pdb libArxIO.so.0
     SECFUNCexecA -ce ./ArxLibertatisFTLConverter "$strFlWFObj"
@@ -846,6 +865,9 @@ else #OBJ TO FTL ###############################################################
     Use some zoom/magnifier OS tool (like xzoom on linux, click on its window and draw outside to let it work) to see the tiny index in blue color if you need.
     You have to set the correct vertexIdx matching the empties.
     Obs.:TODO:TEST/TRY: if it is not the index from blender, you can find out their index by creating a tiny triangle there and setting that face to a dummy texture named like HIT_10.png. When exporting to wavefront obj, and then to ftl, the HIT_10 faces for that texture HIT_10.png, will have the corresponding axes you can choose from. WIP:TODO: compare with blender vertex index.
+    
+    The Origin vertex, 3 vertextes creating a face that should all be at (0,0,0), can be found with this regex in geany: "vector": \{\n *"x": 0,\n *"y": [^,]*,\n *"z": 0\n
+      You need to fix the "y" to 0 because blender exports them to obj like this: v 0.000000 -0.000002 0.000000 !!!
     '
     fi
 
