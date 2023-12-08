@@ -55,6 +55,9 @@ Terminal log will show line and column where the problem happened.
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 QOL: new control (default key 'N') to combine items w/o having to double click
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_TakeAllItemsKey  
+QOL: new Key to TakeAllItems from g_secondaryInventoryHud without having to aim the mouse on the tiny button there.
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
 Format expanded variables thru printf syntax  
 
@@ -168,13 +171,14 @@ ___
 
 # __Issues/Todo__  
 
-ISSUE: if there are many high poly objects on the view sight, it will degrade the FPS. TODO:WIP: do more cleanup on the existing models' meshes while keeping visual quality.  
-
-TODO: fix the dropped items' shadows, they are too big and too dark not matching replaced models' shadows.  
-TODO: windows automatic setup compatibility (generate the .bat files to prepare the relative links with mklink and prepare a top .bat that will call all the others)  
-TODO: Crafting/mixing/etc could optionally drop new (droppable/non-quest?) things on the ground. Increases challenge (like in that you need a place to craft things, even if it is on the ground) but also let the user appreciate new crafted models.  
-TODO: hitting a wall with bare hands will damage the player or the melee weapon.
+ TODO: put a vertext/face amount check on the script, it should not go too much beyond 2000 vertexes per ftl model ISSUE: if there are many high poly objects on the view sight, it will degrade the FPS. TODO:WIP: do more cleanup on the existing models' meshes while keeping visual quality.  
+ TODO: windows automatic setup compatibility (generate the .bat files to prepare the relative links with mklink and prepare a top .bat that will call all the others)  
+ TODO: Crafting/mixing/etc could optionally drop new (droppable/non-quest?) things on the ground. Increases challenge (like in that you need a place to craft things, even if it is on the ground) but also let the user appreciate new crafted models.  
+ TODO: hitting a wall with bare hands should damage the player or the melee weapon.
 
 updating forked branches:  
   github.com/Gussak/ArxLibertatis/compare/insanity...arx-insanity:ArxLibertatis:insanity
   
+# __Done__  
+
+ DONE at PR_LimitShadowBlobs: TODO: fix the dropped items' shadows, they are too big and too dark not matching replaced models' shadows.  
