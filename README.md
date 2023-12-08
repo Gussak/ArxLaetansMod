@@ -170,7 +170,8 @@ Obs.: this is not a recommended layer sort order, this is just an example as I h
 ___
 
 # __Issues/Todo__  
-
+	
+ TODO: material names like sM=@Origin can be used to configure special groups in the json file. probably sM=@HIT_10 with tiny transparen SPECIALTX_HIT_10.png, will help a lot on the script to prepare the section on .json file before converting to .ftl. This can also be used to prepare these sections when replacing door models and other models too I guess.
  TODO: put a vertext/face amount check on the script, it should not go too much beyond 2000 vertexes per ftl model ISSUE: if there are many high poly objects on the view sight, it will degrade the FPS. TODO:WIP: do more cleanup on the existing models' meshes while keeping visual quality.  
  TODO: windows automatic setup compatibility (generate the .bat files to prepare the relative links with mklink and prepare a top .bat that will call all the others)  
  TODO: Crafting/mixing/etc could optionally drop new (droppable/non-quest?) things on the ground. Increases challenge (like in that you need a place to craft things, even if it is on the ground) but also let the user appreciate new crafted models.  
