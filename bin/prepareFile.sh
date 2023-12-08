@@ -75,7 +75,7 @@ for strWork in "${astrWorkList[@]}";do
   echoc --info "validate lowercase (at setup only)"
   (
     cd "../../${strModNm}Setup.github/${strWork}.Setup/";pwd
-    if find |egrep -v "^./${strModNm}$" |egrep "[A-Z]";then #ignores the folder that will not be on the package
+    if find -type f |egrep -v "^./${strModNm}$" |egrep "[A-Z]";then #ignores the folder that will not be on the package #TODO should also rename folders to lowercase, but is a lot of work, or fix the target on the symlinks thru this script (a lot of trouble anyway)
       if echoc -q "Everything that will be installed must be lowercase. Fix it now?@Dy";then
         FUNCtoLower() { strFl="$1";strFlLw="`echo "$1" |tr '[:upper:]' '[:lower:]'`";if [[ "$strFl" != "$strFlLw" ]];then mv -vT "$1" "${strFlLw}";fi; };export -f FUNCtoLower
         find -iregex ".*[A-Z].*" -exec bash -c "FUNCtoLower '{}'" \;

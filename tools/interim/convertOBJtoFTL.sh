@@ -27,6 +27,8 @@ if ! which ScriptEchoColor;then
 fi
 source <(secinit) #init echoc and SECFUNC... #set -eEu #ScriptEchoColor
 
+export SECnExecWaitDelayOnError=99999 #all SECFUNCexec will wait until you see the problem
+
 strSelf="`realpath "$0"`"
 
 #if [[ "${1-}" == --help ]];then shift;egrep "[#]help" "${strSelf}";exit 0;fi
@@ -260,7 +262,7 @@ if SECFUNCarrayCheck -n astrRemainingParams;then :;fi
 
 #COPY TO HERE: for simple scripts
 
-function FUNCchkDep() { local lstrMsg="$1";shift;if ! SECFUNCexecA -ce "$@";then echoc --info "${lstrMsg} (may exit now)";return 1;fi; }
+function FUNCchkDep() { local lstrMsg="$1";shift;if ! SECFUNCexecA --noerrormessage -ce "$@";then echoc --info "${lstrMsg} (may exit now)";return 1;fi; }
 function FUNCchkVersion() { local lstrCmd="$1";shift;local lstrVersion="$1";shift;if [[ "`"$lstrCmd" --version |head -n 1`" != "$lstrVersion" ]];then echoc --info "WARN: '$lstrCmd' version is not '$lstrVersion' and may not work properly.";fi; }
 
 #FUNCchkDep "install uchardet" which uchardet #no, results doesnt match geany
@@ -390,8 +392,13 @@ function FUNCapplyTweaks() { #helpf
     done
   fi
   
-  echo ">>>>>>>>>>>>>>>>>>> WORKWITH:faces <<<<<<<<<<<<<<<<<<<<"
   local liTotTx="`egrep "filename" "${lstrFlUgly}25textureContainers.json" |wc -l`"
+  
+  echo ">>>>>>>>>>>>>>>>>>> WORKWITH:texturecontainers <<<<<<<<<<<<<<<<<<<<"
+  # materials in blender beggining with 'sM=@Dummy_' will fail to export the texture to .mtl, or may just be used temporarily to bake for ex. So this fix the arx log error about missing empty texture
+  SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@[{]"filename":""[}],@{"filename":"specialtx_dummy.png"},@' "${lstrFlUgly}25textureContainers.json"
+  
+  echo ">>>>>>>>>>>>>>>>>>> WORKWITH:faces <<<<<<<<<<<<<<<<<<<<"
   local li;for((li=0;li<liTotTx;li++));do # SPLITTER
     #egrep '"faceType":[0-9]*,.*"textureIdx":'"$li"',.*"transval":[0-9.]*,' "${lstrFlUgly}25faces.json"
     if [[ "${lstrFlUgly}.json" -nt "${lstrFlUgly}25faces.tx${li}.json" ]];then
@@ -648,13 +655,6 @@ else #OBJ TO FTL ###############################################################
   
   function FUNCtxNmRegex() { strTxNmRegex="`echo "$strTxNm" |sed -r 's@.@[&]@g'`"; declare -p strTxNmRegex; } 
   
-  #function FUNCclearMaterialVars() { 
-    #unset sM sFT fTr;
-    #unset strTxNm strMaterialId fFaceTranspValOpt; 
-    #unset iFaceTypeOpt strFaceTypeOpt strDescription;
-    ## do not unset iTextureContainerIndex tho!
-  #}
-  
   declare -A astrAutoCfgList
   #if $bCanAutoFixTxPath && 
   echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there. fTr is optional, will default to 0). Textures matching regex '.*[.]index[0-9]*' will be auto deployed, so you need to set only one in blender to all of them be detected."
@@ -682,14 +682,20 @@ else #OBJ TO FTL ###############################################################
     fi
   fi
   #IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(egrep "newmtl|map_Kd" "${strFlWFMtl}" |sed -r -e "s@newmtl (.*)@strCfgLn='\1';@" -e "s@map_Kd (.*)@strTxNm='\1';@" |tr -d "\n" |sed -r -e 's@strCfgLn.*@\n&@')&&:
-  IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <( \
+  IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(
+		strRegexFixPathSeparator='s@\\@/@g'
+		strRegexMaterialNameToBashScript="s@newmtl (.*)@\1;@"
+		strRegexFixDoublePontoEVirgula='s@[;][;]@;@g' #repeat this a few times in case there is like ;;; or ;;;; ...
+		strRegexFixDummyMaterial='s#sM=@Dummy_.*#&;_TOKEN_ADDNEWLINE_#' # dummy material have no texture. it MUST be in it's own line to receive a proper iTextureContainerIndex
+		# _TOKEN_ADDNEWLINE_ is important to keep one material per line, so would be "sM=...strTxNm=...\n" ("newmtrl...mapKd\n")
     egrep "newmtl|map_Kd" "${strFlWFMtl}" \
       |sed -r \
-        -e 's@\\@/@g' \
+        -e "${strRegexFixPathSeparator}" \
+        -e "${strRegexMaterialNameToBashScript}" \
+        -e "${strRegexFixDummyMaterial}" \
         -e "s@map_Kd (.*)@;strTxNm=\"\1\";_TOKEN_ADDNEWLINE_@i" \
-        -e "s@newmtl (.*)@\1@" \
       |tr -d '\n' \
-      |sed -r -e 's@;;@;@g' \
+      |sed -r -e "$strRegexFixDoublePontoEVirgula" -e "$strRegexFixDoublePontoEVirgula" -e "$strRegexFixDoublePontoEVirgula" \
       |sed -r -e 's@_TOKEN_ADDNEWLINE_@\n@g' \
   )&&:
   declare -p astrAutoCfgTmpList
@@ -697,17 +703,24 @@ else #OBJ TO FTL ###############################################################
   #sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #undo windows folder separator to avoid overcomplexity
   iTextureContainerIndex=-1
   bErrorCfgMissing=false
+  function FUNCclearMaterialVars() { 
+    #cleanup to not mess next iteration
+    unset sM sFT fTr;
+    unset strTxNm strMaterialId strFaceTypeOpt iFaceTypeOpt fFaceTranspValOpt strDescription 
+    # do not unset iTextureContainerIndex tho as it is being calculated here!
+  }
   for strAutoCfg in "${astrAutoCfgTmpList[@]}";do
     ((iTextureContainerIndex++))&&:
     declare -p strAutoCfg
-    #if ! [[ "$strAutoCfg" =~ ^sM=.*sFT= ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
-    if ! [[ "$strAutoCfg" =~ ^sM=.* ]];then echo "SKIP, no valid cfg found above";bErrorCfgMissing=true;continue;fi
-    #if ! echo "$strAutoCfg" |egrep "newmtl sM=.*sFT=";then echo "SKIP, no valid cfg found";continue;fi
+    #if ! [[ "$strAutoCfg" =~ ^sM=.*sFT= ]];then echo "SKIP, no valid cfg found above";FUNCclearMaterialVars;bErrorCfgMissing=true;continue;fi
+    if ! [[ "$strAutoCfg" =~ ^sM=.* ]];then echoc -p "SKIP, no valid cfg found above";FUNCclearMaterialVars;bErrorCfgMissing=true;continue;fi
+    #if ! echo "$strAutoCfg" |egrep "newmtl sM=.*sFT=";then echo "SKIP, no valid cfg found";FUNCclearMaterialVars;continue;fi
     #newmtl sM=Bottle;sFT="POLY_NO_SHADOW|POLY_TRANS";fTr=0.95;
     eval "$strAutoCfg"
-    declare -p sM strTxNm #required
-    declare -p sFT fTr&&: #optional
-    if [[ -z "${sM-}" ]];then echo "SKIP, no valid sM (strMaterialId) found above";bErrorCfgMissing=true;continue;fi
+    declare -p sM #required
+    declare -p strTxNm sFT fTr&&: #optional
+    if [[ -z "${sM-}" ]];then echoc -p "SKIP, no valid sM (strMaterialId) found above";FUNCclearMaterialVars;bErrorCfgMissing=true;continue;fi
+    if [[ "${sM}" =~ ^@Dummy_.*$ ]];then echoc --info "SKIP, dummy material helper that have no texture exported by blender";FUNCclearMaterialVars;continue;fi
     ##strTxNm="`basename "$strTxNm"`" #astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
     #strTxNm="$(echo "$strTxNm" |sed -r -e "s@.*${strTXPathRelative}/(.*)@\1@")" #inside strTXPathRelative path, there may exist a subpath and it shall be part of the texture name
     ##strLTxNm="`echo "$strTxNm" |tr '[:upper:]' '[:lower:]'`" #strLTxNm="`echo "$strTxNm" |sed -r 's@.*/([^/]*)@\1@'`"
@@ -728,15 +741,15 @@ else #OBJ TO FTL ###############################################################
     
     astrAutoCfgList["${strMaterialId}"]="iTextureContainerIndex=$iTextureContainerIndex; strTxNm='$strTxNm'; strMaterialId='$strMaterialId'; strFaceTypeOpt='${sFT}'; iFaceTypeOpt=$(($sFT)); fFaceTranspValOpt=${fTr-0};"
     echoc --info "BlenderAutoCfg[$strMaterialId]=${astrAutoCfgList[${strMaterialId}]}"
-    #FUNCclearMaterialVars #cleanup to not mess next
-    #cleanup to not mess next
-    unset sM sFT fTr;
-    unset strTxNm strMaterialId strFaceTypeOpt iFaceTypeOpt fFaceTranspValOpt; 
-    # do not unset iTextureContainerIndex tho as it is being calculated here!
+    FUNCclearMaterialVars #cleanup to not mess next
+    ##cleanup to not mess next
+    #unset sM sFT fTr;
+    #unset strTxNm strMaterialId strFaceTypeOpt iFaceTypeOpt fFaceTranspValOpt; 
+    ## do not unset iTextureContainerIndex tho as it is being calculated here!
   done
   SECFUNCarrayShow -v astrAutoCfgList
   if $bErrorCfgMissing;then
-    echoc -p "you need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT=\"POLY_NO_SHADOW|POLY_WATER\";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there"
+    echoc -p "you need to name a material in blender like this, to let that cfg be auto applied after exporting it to wavefront .obj .mtl: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; #obs.: sFT can be just a number too (see --facetype option here) if the readable dont fit there"
     exit 1
   fi
   
@@ -879,7 +892,7 @@ else #OBJ TO FTL ###############################################################
     
     SECFUNCarrayShow -v astrAutoCfgList
     if echoc -t $fPromptTm -q "Apply all material cfgs now?@Dy";then
-      : ${bMultiThreadFaceTxProccess:=false} #help
+      : ${bMultiThreadFaceTxProccess:=false} #help WIP, not tested
       if $bMultiThreadFaceTxProccess;then echo "$$" >"${strFlCoreName}.${strMTSuffix}";fi
       for strLnCmd in "${astrAutoCfgList[@]}";do
         eval "$strLnCmd"
@@ -932,7 +945,7 @@ else #OBJ TO FTL ###############################################################
   SECFUNCtrash "$strPathReleaseHelper/"
   SECFUNCtrash "$strPathReleaseSetupHelper/"
   mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
-  if ! SECFUNCexecA -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
+  if ! SECFUNCexecA --noerrormessage -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
     echoc -t 3 -p "license file not found"
   fi
   SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathReleaseHelper/"
