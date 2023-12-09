@@ -84,6 +84,9 @@ Interpolate an entity near a target
 https://github.com/Gussak/ArxLibertatis/tree/PR_LifeOfOtherEnt  
 new ^life_<entityID> ^lifemax_<entityID> ^lifemodmax_<entityID>  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_InInventory  
+new ^ininventory returns entity id
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
 Added Remainder arithmetic operation  
 

@@ -530,6 +530,8 @@ ON INVENTORYUSE { Set £_aaaDebugScriptStackAndLog "On_InventoryUse"
 
 On Main { Set £_aaaDebugScriptStackAndLog "On_Main" //HeartBeat happens once per second apparently (but may be less often?)
 	if (^amount > 1) ACCEPT //this must not be a stack of items
+	Set £inInventory ^ininventory
+	if (!or(£inInventory == "none" || £inInventory == "player")) ACCEPT
 	
 	//starttimer timer1 //^#timer1 used ON MAIN
 	//starttimer timer2 //^#timer2 used ON IDENTIFY
