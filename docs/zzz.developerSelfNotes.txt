@@ -167,3 +167,25 @@ MYDBG("DEGREES():(name="<<name<<",xyz="<<xyz<<",deg="<<degrees<<",fixedDeg="<<(*
 MYDBG("INTERPOLATE(): strEntityToMove="<<strEntityToMove <<",strTarget="<<strTarget <<",entToMoveId="<<entToMove->idString() <<",entTargetId="<<(entTarget?entTarget->idString():"null") <<",posTarget="<< vec3fToStr(posTarget)<<",posFrom="<< vec3fToStr(posFrom)<<",fDistMax="<<fDistMax<<",posRequested="<< vec3fToStr(posRequested)<<",bLimitDist="<< bLimitDist<<",bAbsPosFrom="<<bAbsPosFrom <<",bPosTarget="<< bPosTarget<<",fContextDist="<< fContextDist);
 
 MYDBG("getLife()@Script.cpp: player.Full_life="<<player.Full_life<<"," <<"player.m_lifeMaxWithoutMods="<<player.m_lifeMaxWithoutMods<<"," <<"player.lifePool.max="<<player.lifePool.max<<"," <<"cType="<<cType<<"," <<"ent="<<ent<<"," <<"name="<<name<<"," <<"offset="<<offset<<"," <<"entOverride="<<entOverride<<"," );
+
+
+======================== etc
+
+class ShowCallStackCommand : public Command {
+	
+public:
+	
+	ShowCallStackCommand() : Command("showcallstack", AnyEntity) { }
+	
+	Result execute(Context & context) override {
+		
+		DebugScript("");
+		
+		LogInfo << "GoTo and GoSub call stack for " << context.getEntity()->idString() << ":\n"
+		        << PrintCallStack(context.getEntity());
+		for(std::string_view func : m_stackId) todoa
+		
+		return Success;
+	}
+	
+};

@@ -52,6 +52,9 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2
 Debug Line and Column Info  
 Terminal log will show line and column where the problem happened.  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_WarnMsgShowsGotoGosubCallStack  
+now if there is a GoTo/GoSub call stack it will show in the log  
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 QOL: new control (default key 'N') to combine items w/o having to double click
 

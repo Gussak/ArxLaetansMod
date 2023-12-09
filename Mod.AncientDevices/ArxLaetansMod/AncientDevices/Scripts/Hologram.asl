@@ -1169,6 +1169,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 }
 
 >>TFUNCcalcSignalStrength { GoSub FUNCcalcSignalStrength ACCEPT } >>FUNCcalcSignalStrength  { Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCcalcSignalStrength"  //this is meant to be independent from magic skills so instead of ^spelllevel to cast spells, use @SignalStrLvl
+	//Set @testCallStack 1 2 //TODORM
+	
 	// reset to recalc
 	Set @RepeaterSignalStrength 0 //0.0 to 100.0
 	Set @SignalStrength 0         //0.0 to 100.0
