@@ -1434,8 +1434,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	
 	if(^degreesx_player == 301) { //maximum Degrees player can look up is that
 		//TODO put this on CircularOptionChoser
-		++ §FUNCshowlocals_enabled
-		if(§FUNCshowlocals_enabled > 1) Set §FUNCshowlocals_enabled 0
+		++ #FUNCshowlocals_enabled
+		if(#FUNCshowlocals_enabled > 1) Set #FUNCshowlocals_enabled 0
 		GoSub FUNCshowlocals
 	}
 	
@@ -1851,11 +1851,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 }
 
 >>TFUNCshowlocals { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
-	if(§FUNCshowlocals_enabled >= 1){
+	if(#FUNCshowlocals_enabled >= 1){
 		showlocals
 	}
 	RETURN
 }
-rnd_abc
-^rnd_123
-^rnd_abc

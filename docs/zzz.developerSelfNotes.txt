@@ -10,6 +10,7 @@ collision true
 addxp 7000
 inventory add magic/hologram/hologram
 inventory addmulti magic/hologram/hologram 50
+spawn npc "goblin_base\\goblin_base" player
 
 // search the src for clues of what set the player as enemy to let it happen when activating the hologram (to happen from the hologram onInventoryUse event)
 
@@ -72,8 +73,6 @@ inventory playeradd magic/potion_purple/potion_purple
 inventory playeradd provisions/backpack/backpack
 
 inventory playeradd movable/broken_bottle/broken_bottle
-
-spawn npc "goblin_base\\goblin_base" player
 
 ================================ CPP quick helpers, delete before pull request
 
