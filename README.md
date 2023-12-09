@@ -93,7 +93,18 @@ ex.: ^dist_{8000.25,7800.44,8500.32}
 https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3  
 added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_HoverFar  
+^hover_<dist> returns any entity at most at specified distance.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DropItems  
+New command: dropitem Can drop one or all items of any entity inventory where it is or in front of the player.  
+
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
+
+PS.: These are tests and are not working yet or may just be useless:  
+/PR_UsemeshOtherEnt  
+/PR_WeaponCmdOtherEnt  
+/PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget  
 
 ___
 

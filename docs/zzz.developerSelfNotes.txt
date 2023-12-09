@@ -81,6 +81,9 @@ spawn npc "goblin_base\\goblin_base" player
 #define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
 MYDBG(anyVar<<","<<anything<<anythinElse);
 
+================================ show missing PR_ from readme.md
+(git branch -r && cat "../ArxLaetansMod.github/README.md" |sed 's@.*@&(atMD)@') |grep -o "/PR_.*" |sort -u
+
 ================================ PR_... comments
 PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget
 Let other entities be set by these commands: bahavior, setmovemode, settarget
