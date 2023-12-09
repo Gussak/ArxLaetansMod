@@ -58,6 +58,9 @@ QOL: new control (default key 'N') to combine items w/o having to double click
 https://github.com/Gussak/ArxLibertatis/tree/PR_TakeAllItemsKey  
 QOL: new Key to TakeAllItems from g_secondaryInventoryHud without having to aim the mouse on the tiny button there.
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_QOLUnstackItemsKey  
+QOL: New unstak key to unstack one item from the stack in the current inventory.  
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
 Format expanded variables thru printf syntax  
 

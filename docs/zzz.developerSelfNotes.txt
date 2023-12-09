@@ -62,6 +62,7 @@ inventory playeradd provisions/bottle_wine/bottle_wine
 inventory playeradd provisions/bottle_blood/bottle_blood
 inventory playeradd magic/potion_green/potion_green
 
+inventory playeraddmulti magic/potion_mana/potion_mana 20
 inventory playeradd magic/potion_mana/potion_mana
 inventory playeradd magic/potion_invisible/potion_invisible
 
