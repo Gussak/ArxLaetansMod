@@ -53,7 +53,9 @@ Debug Line and Column Info
 Terminal log will show line and column where the problem happened.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_WarnMsgShowsGotoGosubCallStack  
-now if there is a GoTo/GoSub call stack it will show in the log for warn messages, showlocals and showvars 
+logs with more details for mod developers  
+  warnings will show GoTo/GoSub call stack  
+  showlocals and showvars will also show event and params, and the GoTo/GoSub call stack  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 QOL: new control (default key 'N') to combine items w/o having to double click
