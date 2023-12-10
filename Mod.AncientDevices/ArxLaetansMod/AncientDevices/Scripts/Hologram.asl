@@ -186,15 +186,18 @@ ON INVENTORYUSE {
 				Set §ActivateChance 100
 			}
 			RANDOM §ActivateChance { //not granted to successfully activate it as it is a defective device
-				Set §FUNCtrapAttack_TrapTimeSec 5
+				Set §FUNCtrapAttack_TimeoutMillis 5000
 				
 				TWEAK ICON "HologramGrenadeActive[icon]"
 				
 				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
-				Set §FUNCblinkGlow_times §FUNCtrapAttack_TrapTimeSec GoSub FUNCblinkGlow
 				
-				timerTrapVanish     1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
-				timerTrapVanishGlow 1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+				Set §FUNCblinkGlow_times §FUNCtrapAttack_TimeoutMillis
+				Div §FUNCblinkGlow_times 1000
+				GoSub FUNCblinkGlow
+				
+				//timerTrapVanish     -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
+				//timerTrapVanishGlow -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
 				
 				GoSub FUNCtrapAttack
 			} else {
@@ -214,7 +217,7 @@ ON INVENTORYUSE {
 		} else { // after trap being activated will only shock the player and who is in-between too
 			GoSub FUNCshockPlayer
 			if (^inPlayerInventory == 1) { //but if in inventory, will dissassemble the grenade recovering 2 holograms used to create it
-				INVENTORY ADDMULTI "magic\hologram\hologram" 2 //TODOA this isnt working?
+				INVENTORY ADDMULTI "magic\hologram\hologram" 2 //TODO this isnt working?
 				GoSub FUNCDestroySelfSafely
 			}
 		}
@@ -223,9 +226,9 @@ ON INVENTORYUSE {
 	if ( £AncientDeviceMode == "LandMine" ) {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 //activate
-			//Set §Scale 500 SetScale §Scale //TODOA should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			//Set §Scale 10 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			timerLandMineDetectNearbyNPC -m 0 100 GoTo TFUNCLandMine
+			timerLandMineDetectNearbyNPC -m 0 50 GoTo TFUNCLandMine
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
@@ -410,7 +413,7 @@ ON INVENTORYUSE {
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;70.spawn rat"
 			Inc §UseBlockedMili ^rnd_15000
 			Set §Malfunction 1
-		//} else { //TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)!
+		//} else { //TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)! try the demon and the blue creature
 			////RANDOM 75 {
 				//spawn npc "dog\\dog" player //these dogs are friendly...
 				//Inc §UseBlockedMili 30000
@@ -509,18 +512,18 @@ ON INVENTORYUSE {
 			//timerAttack55 -m  1 4950 SETTARGET PLAYER //for fireball
 			//timerAttack56 -m  1 5000 SPAWN FIREBALL //the origin to fire from must be above floor
 			Set §FUNCtrapAttack_TrapMode 1 //projectile at player
-			Set §FUNCtrapAttack_TrapTimeSec 5
+			Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
 			GoSub FUNCtrapAttack
-		}
+		} else {
 		RANDOM 25 { //to prevent player using as granted weapon against NPCs
-			Set §FUNCtrapAttack_TrapTimeSec 5
-			timerTrapVanish 1 §FUNCtrapAttack_TrapTimeSec GoTo TFUNChideHologramPartsPermanently
+			Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
+			//timerTrapVanish -m 1 §FUNCtrapAttack_TimeoutMillis GoTo TFUNChideHologramPartsPermanently
 			GoSub FUNCtrapAttack
 			//timerDestroy -m   1 5100 GoTo TFUNCDestroySelfSafely
-		}
+		} }
 		
 		if (§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 0) {
-			timerGrantDestroySelf 1 §DefaultTrapTimoutSec GoTo TFUNCDestroySelfSafely
+			timerGrantDestroySelf -m 1 §DefaultTrapTimeoutMillis GoTo TFUNCDestroySelfSafely
 		}
 		
 		GoSub FUNCupdateUses
@@ -557,6 +560,8 @@ ON INVENTORYUSE {
 
 //>>FUNCisnInvOrFloor
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
+	Set £_aaaDebugScriptStackAndLog "On Main:"
+	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	Set £inInventory ^ininventory
 	if (!or(£inInventory == "none" || £inInventory == "player")) ACCEPT
@@ -850,7 +855,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	
 	//Set §IdentifyObjectKnowledgeRequirement 35
 	Set §UseCount 0
-	Set §DefaultTrapTimoutSec 5 //SED_TOKEN_MOD_CFG
+	//Set §DefaultTrapTimoutSec 5 //SED_TOKEN_MOD_CFG
+	Set §DefaultTrapTimeoutMillis 5000 //SED_TOKEN_MOD_CFG
 	
 	Collision ON //nothing happens when thrown?
 	Damager -eu 3 //doesnt damage NPCs when thrown?
@@ -915,21 +921,25 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	SpecialFX FIERY
 	SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
 	//SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
-	Set §TmpBreakDestroyMilis §DefaultTrapTimoutSec
-	Mul §TmpBreakDestroyMilis 5000
+	Set §TmpBreakDestroyMilis §DefaultTrapTimeoutMillis
+	//Mul §TmpBreakDestroyMilis 5000
 	Inc §TmpBreakDestroyMilis ^rnd_10000
 	timerTrapBreakDestroySafely -m 1 §TmpBreakDestroyMilis GoTo TFUNCDestroySelfSafely //to give time to let the player examine it a bit
 	if(§FUNCbreakDeviceDelayed_ParalyzePlayer == 1) {
-		Set @FUNCparalysePlayer_Millis 100
-		Dec @FUNCparalysePlayer_Millis @AncientTechSkill
-		if(@FUNCparalysePlayer_Millis > 0) {
-			Div @FUNCparalysePlayer_Millis 100 //percent now
-			Mul @FUNCparalysePlayer_Millis §TmpBreakDestroyMilis //a percent of the destroy time
-			Inc @FUNCparalysePlayer_Millis §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
-			Set @FUNCparalysePlayer_Millis 1000
-			Inc @FUNCparalysePlayer_Millis ^rnd_2000
-			GoSub FUNCparalysePlayer
-		}
+		//Set @FUNCparalysePlayer_Millis 100
+		//Dec @FUNCparalysePlayer_Millis @AncientTechSkill
+		//if(@FUNCparalysePlayer_Millis > 0) {
+			//Div @FUNCparalysePlayer_Millis 100 //percent now
+			//Mul @FUNCparalysePlayer_Millis §TmpBreakDestroyMilis //a percent of the destroy time
+			//Inc @FUNCparalysePlayer_Millis §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
+			//Set @FUNCparalysePlayer_Millis 1000
+			//Inc @FUNCparalysePlayer_Millis ^rnd_2000
+			//GoSub FUNCparalysePlayer
+		//}
+		Set @FUNCparalysePlayer_Millis §TmpBreakDestroyMilis
+		Inc @FUNCparalysePlayer_Millis §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
+		GoSub FUNCparalysePlayer
+		
 		timerTrapBreakDestroyParalyze -m 1 §TmpBreakDestroyMilis GoTo TFUNCparalyseIfPlayerNearby //the trap tried to capture the player
 	}
 	
@@ -1070,6 +1080,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	Inc @AncientTechSkill ^PLAYER_SKILL_OBJECT_KNOWLEDGE
 	Inc @AncientTechSkill ^PLAYER_SKILL_INTUITION
 	Div @AncientTechSkill 3 //the total skills used for it
+	
+	Set @AncientTechSkillDebuffPercMultiplyer 100
+	Dec @AncientTechSkillDebuffPercMultiplyer @AncientTechSkill
+	if(@AncientTechSkillDebuffPercMultiplyer <  5) Set @AncientTechSkillDebuffPercMultiplyer 5
+	if(@AncientTechSkillDebuffPercMultiplyer > 95) Set @AncientTechSkillDebuffPercMultiplyer 95
+	Div @AncientTechSkillDebuffPercMultiplyer 100 //perc 0.0 to 1.0
 	RETURN
 }
 
@@ -1102,8 +1118,10 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 }
 
 >>TFUNCtrapAttack { GoSub FUNCtrapAttack ACCEPT } >>FUNCtrapAttack {
-	//INPUT: <§FUNCtrapAttack_TrapTimeSec>: in seconds (not milis)
-	//INPUT: [§FUNCtrapAttack_TrapMode]: 0=explosion 1=projectile/targetPlayer
+	//INPUT: <§FUNCtrapAttack_TimeoutMillis>
+	//INPUT: [§FUNCtrapAttack_TrapMode]: 0=explosion(default) 1=projectile/targetPlayer
+	
+	//TODORM //INPUT: <§FUNCtrapAttack_TrapTimeSec>: in seconds (not milis)
 	
 	SendEvent GLOW SELF "" //TODO this also makes it glow or just calls the ON GLOW event that needs to be implemented here?
 	
@@ -1122,43 +1140,49 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	GoSub FUNCcalcSignalStrength
 	
 	// random trap
-	if(§FUNCtrapAttack_TrapTimeSec == 0) Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec //must be seconds (not milis) to easify things below like timer count and text
-	timerTrapTime     §FUNCtrapAttack_TrapTimeSec 1 Dec §FUNCtrapAttack_TrapTimeSec 1
-	timerTrapTimeName §FUNCtrapAttack_TrapTimeSec 1 SetName "Holo-Grenade Activated (~§FUNCtrapAttack_TrapTimeSec~s)"
+	if(§FUNCtrapAttack_TimeoutMillis == 0)	Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
+	Set §FUNCtrapAttack_TrapTimeSec §FUNCtrapAttack_TimeoutMillis
+	Div §FUNCtrapAttack_TrapTimeSec 1000 //must be seconds (not milis) to easify things below like timer count and text
+	if(§FUNCtrapAttack_TrapTimeSec > 0) {
+		timerTrapTime     §FUNCtrapAttack_TrapTimeSec 1 Dec §FUNCtrapAttack_TrapTimeSec 1
+		timerTrapTimeName §FUNCtrapAttack_TrapTimeSec 1 SetName "Holo-Grenade Activated (~§FUNCtrapAttack_TrapTimeSec~s)"
+	}
 	//timerTrapAttack  -m 0  100 GoTo TFUNCMakeNPCsHostile //doesnt work
 	
-	Set §TrapEffectTime 0
+	Set §TrapEffectTimeMillis 0
 	if (§FUNCtrapAttack_TrapMode == 0) { //explosion around self
 		Set §TmpTrapKind ^rnd_5
-		if (§TmpTrapKind == 0) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl explosion  SELF
-		if (§TmpTrapKind == 1) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl fire_field SELF
-		if (§TmpTrapKind == 2) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl harm       SELF
-		if (§TmpTrapKind == 3) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl ice_field  SELF
-		if (§TmpTrapKind == 4) timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec SPELLCAST -smf @SignalStrLvl life_drain SELF
+		if (§TmpTrapKind == 0) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl explosion  SELF
+		if (§TmpTrapKind == 1) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl fire_field SELF
+		if (§TmpTrapKind == 2) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl harm       SELF
+		if (§TmpTrapKind == 3) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl ice_field  SELF
+		if (§TmpTrapKind == 4) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl life_drain SELF
 		//this cause no damage? //if (§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf @SignalStrLvl mass_incinerate SELF
-		Unset §TmpTrapKind
-		Set §TrapEffectTime 2 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
-	}
+		//Unset §TmpTrapKind
+		Set §TrapEffectTimeMillis 2000 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
+	} else {
 	if (§FUNCtrapAttack_TrapMode == 1) { //projectile at player
-		timerTrapAttack 1 §FUNCtrapAttack_TrapTimeSec GoTo TFUNCchkAndAttackProjectile
-	}  
+		timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis GoTo TFUNCchkAndAttackProjectile
+	} }
 	
-	timerTrapVanish       1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenade"       "alpha"
-	timerTrapVanishActive 1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
-	timerTrapVanishGlow   1 §FUNCtrapAttack_TrapTimeSec TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"   "alpha"
+	timerTrapVanish       -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"       "alpha"
+	timerTrapVanishActive -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
+	timerTrapVanishGlow   -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"   "alpha"
 	
 	// trap effect time
-	Set §TmpTrapDestroyTime §FUNCtrapAttack_TrapTimeSec
-	Inc §TmpTrapDestroyTime §TrapEffectTime
-	timerTrapDestroy 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely 
+	Set §TmpTrapDestroyTime §FUNCtrapAttack_TimeoutMillis
+	Inc §TmpTrapDestroyTime §TrapEffectTimeMillis
+	timerTrapDestroy -m 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely 
 	
+	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;§FUNCtrapAttack_TimeoutMillis=~§FUNCtrapAttack_TimeoutMillis~"
 	GoSub FUNCshowlocals
 	// unset after log
 	//Unset §TmpTrapDestroyTime //DO NOT UNSET OR IT WILL BREAK THE TIMER!!!
 	
 	//restore defaults for next call "w/o params"
 	Set §FUNCtrapAttack_TrapMode 0
-	Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec
+	//Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec
+	Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
 	RETURN
 }
 
@@ -1204,11 +1228,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 }
 >>TFUNCparalysePlayer { GoSub FUNCparalysePlayer ACCEPT } >>FUNCparalysePlayer {
 	//INPUT: @FUNCparalysePlayer_Millis
-	Set @FUNCparalysePlayer_Resist 100
-	Dec @FUNCparalysePlayer_Resist @AncientTechSkill //calc resist percent
-	Mul @FUNCparalysePlayer_Millis @FUNCparalysePlayer_Resist //lower the delay by the percent
+	
+	//Set @FUNCparalysePlayer_Resist 100	Dec @FUNCparalysePlayer_Resist @AncientTechSkill //calc resist percent
+	//Mul @FUNCparalysePlayer_Millis @FUNCparalysePlayer_Resist //lower the delay by the percent
+	GoSub FUNCcalcAncientTechSkill
+	Mul @FUNCparalysePlayer_Millis @AncientTechSkillDebuffPercMultiplyer
 	if(@FUNCparalysePlayer_Millis > 50) { // needs a minimum to make sense
-		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCparalysePlayer_Millis=@FUNCparalysePlayer_Millis"
+		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCparalysePlayer_Millis=~@FUNCparalysePlayer_Millis~"
 		SPELLCAST -fmsd @FUNCparalysePlayer_Millis @SignalStrLvl PARALYSE PLAYER
 	}
 	// reset input to default
@@ -1268,7 +1294,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			//}
 		//} else { if(§SignalRepeater == 2) { // 2: there is a deployed repeater nearby
 		//} else {
-			////todoa £SignalRepeaterID
+			////TODO £SignalRepeaterID
 			//Set @RepeaterSignalDist ^dist_~£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
 		//} }
 		Set @RepeaterSignalDist ^dist_~£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
@@ -1511,7 +1537,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 }
 
 >>TFUNCLandMine { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine {
-	//TODO new command attractor to NPCs range 150?
+	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
 	Set £FUNCLandMine_OnTopEnt "~^$objontop~"
 	Set §OnTopLife ^life_~£FUNCLandMine_OnTopEnt~
 	if(and(£FUNCLandMine_OnTopEnt != "none" && §OnTopLife > 0)) {
@@ -1519,6 +1545,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		timerShrink1 -m 0 100 Dec §Scale 1
 		timerShrink2 -m 0 100 SetScale §Scale
 		
+		Set §FUNCtrapAttack_TimeoutMillis 2000
+		GoSub FUNCcalcAncientTechSkill
+		Mul §FUNCtrapAttack_TimeoutMillis @AncientTechSkillDebuffPercMultiplyer
 		GoSub FUNCtrapAttack
 		
 		timerLandMineDetectNearbyNPC off
@@ -1601,7 +1630,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		//Div @TelePlayerStepDist §TeleSteps
 		//Div @TelePlayerStepDist 10 //to make it nicely slower
 		
-		////Set @TelePlayerStepDist 50 //fixed fly speed per frame, it is bad as is not time based.. TODOA use FPS to calc it per second
+		////Set @TelePlayerStepDist 50 //fixed fly speed per frame, it is bad as is not time based.. TODO use FPS to calc it per second
 	}
 	
 	//if(§TeleSteps > 0) {
@@ -1751,7 +1780,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		//DoDamage -fmlcgewsao "~£FUNCMindControl_SpawnFoeLastID~" 99999 //uneccessary?
 		Destroy "~£FUNCMindControl_SpawnFoeLastID~"
 		
-		//Destroy "~£FUNCMindControl_HoverEntTmp~" //TODOABC will lose any items on it right? how to drop its items on floor? or could just change NPC mesh to "movable\\npc_gore\\npc_gore" and keep inventory stuff there! //destoying the npc is unsafe anyway, may destroy something that is game breaking...
+		//Destroy "~£FUNCMindControl_HoverEntTmp~" //TODO will lose any items on it right? how to drop its items on floor? or could just change NPC mesh to "movable\\npc_gore\\npc_gore" and keep inventory stuff there! //destoying the npc is unsafe anyway, may destroy something that is game breaking...
 		//just crashes... USEMESH -e "~£FUNCMindControl_HoverEntTmp~" "movable\\npc_gore\\npc_gore"
 		//nothing happens SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEntTmp~"
 		timerTFUNCMindControlKillSpawn off
@@ -1830,7 +1859,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			TWEAK SKIN "Hologram.tiny.index4000.box.Clear" "Hologram.tiny.index4000.boxLandMine"
 			TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
 			//TODO TWEAK SKIN "Hologram.tiny.index4000.LandMine.Clear"   "Hologram.tiny.index4000.LandMine"
-			Set §Scale 10 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//Set §Scale 10 SetScale §Scale //TODO create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			Set £FUNCnameUpdate_NameBase "Holo Landmine"
 			Set £Icon "HoloLandMine"
 			Set §AncientDeviceTriggerStep 1
