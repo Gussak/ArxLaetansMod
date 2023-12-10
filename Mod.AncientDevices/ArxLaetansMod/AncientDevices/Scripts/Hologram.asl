@@ -186,7 +186,7 @@ ON INVENTORYUSE {
 				Set §ActivateChance 100
 			}
 			RANDOM §ActivateChance { //not granted to successfully activate it as it is a defective device
-				Set §FUNCtrapAttack_TimeoutMillis 5000
+				Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
 				
 				TWEAK ICON "HologramGrenadeActive[icon]"
 				
@@ -254,7 +254,7 @@ ON INVENTORYUSE {
 	} else {
 	if ( £AncientDeviceMode == "MindControl" ) {
 		if ( §AncientDeviceTriggerStep == 1 ) {
-			Set §AncientDeviceTriggerStep 2 //seek ^hover_5000
+			Set §AncientDeviceTriggerStep 2 //seek ^hover_5001
 			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
@@ -1355,17 +1355,17 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 
 //////////////////////////// TESTS /////////////////////////////
 >>TFUNChoverInfo { GoSub FUNChoverInfo ACCEPT } >>FUNChoverInfo {
-	//Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;HOVER='~^hover_5000~'"
+	//Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;HOVER='~^hover_5001~'"
 	GoSub FUNCshowlocals
-	Set £HoverEnt "~^hover_5000~"
+	Set £HoverEnt "~^hover_5001~"
 	if(£HoverEnt != "none") {
-		Set £HoverClass ^class_~^hover_5000~
-		Set §HoverLifeTmp ^life_~^hover_5000~
+		Set £HoverClass ^class_~^hover_5001~
+		Set §HoverLifeTmp ^life_~^hover_5001~
 		Set @HoverLifeTmp2 ^life_~£HoverEnt~
-		Set @testDegreesXh   ^degreesx_~^hover_5000~
-		Set @testDegreesYh   ^degreesy_~^hover_5000~
-		Set @testDegreesZh   ^degreesz_~^hover_5000~ //some potions are inclined a bit
-		Set @testDegreesYtoh ^degreesyto_~^hover_5000~
+		Set @testDegreesXh   ^degreesx_~^hover_5001~
+		Set @testDegreesYh   ^degreesy_~^hover_5001~
+		Set @testDegreesZh   ^degreesz_~^hover_5001~ //some potions are inclined a bit
+		Set @testDegreesYtoh ^degreesyto_~^hover_5001~
     //just crashes... if(§HoverLifeTmp > 0) USEMESH -e "~£HoverEnt~" "movable\\npc_gore\\npc_gore" //todoRM 
     //nothing happens if(§HoverLifeTmp > 0) SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£HoverEnt~" //todoRM
 		GoSub FUNCshowlocals
@@ -1559,7 +1559,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 >>TFUNCteleportToAndKillNPC { GoSub FUNCteleportToAndKillNPC ACCEPT } >>FUNCteleportToAndKillNPC {
 	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
-	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover_5000~"
+	Set £FUNCteleportToAndKillNPC_HoverEnt "~^hover_5001~"
 	Set §FUNCteleportToAndKillNPC_HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
 	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §FUNCteleportToAndKillNPC_HoverLife > 0)) {
 		//timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
@@ -1712,7 +1712,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
   // this works like a frenzied NPC
   
   //TODO goblin_base.asl: settarget -a ~othergoblinnearby~; BEHAVIOR -f MOVE_TO;  WEAPON ON; SETMOVEMODE RUN; Aim the first goblin, aim the second, the 1st attacks the 2nd and vice versa. then: sendevent call_help to the 2nd, that will make them look for the player, then keep aiming on them, they will then attack the 1st!
-	Set £FUNCMindControl_HoverEntTmp "~^hover_5000~"
+	Set £FUNCMindControl_HoverEntTmp "~^hover_5001~"
 	Set §FUNCMindControl_HoverLife ^life_~£FUNCMindControl_HoverEntTmp~
 	if(and(£FUNCMindControl_HoverEntTmp != "none" && §FUNCMindControl_HoverLife > 0)) {
     if(£FUNCMindControl_HoverEntMain == "") {
@@ -1788,7 +1788,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	RETURN
 }
 //>>FUNCMindControlBkp2 { Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCMindControl" 
-	//Set £FUNCMindControl_HoverEnt "~^hover_5000~"
+	//Set £FUNCMindControl_HoverEnt "~^hover_5001~"
 	//Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
 	//if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
 		//Set £FUNCMindControl_SpawnFoe "bat\\bat" //TODO bats are getting stuck in the walls... they also get stuck in the air? they dont fly at all???
