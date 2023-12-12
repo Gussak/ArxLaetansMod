@@ -66,6 +66,25 @@ QOL: new Key to TakeAllItems from g_secondaryInventoryHud without having to aim 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLUnstackItemsKey  
 QOL: New unstak key to unstack one item from the stack in the current inventory.  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_IncAddDecSub  
+QOL: can use Inc or Add now. Can use Dec or Sub now.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_Pow  
+Pow var exponent  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_NthRoot  
+NthRoot var <any root value>
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
+The command Set now has extra options  
+Set can now read from and write to other entities, also can get a value from an array and the item count from any entity inventory.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_CmdLootInventory  
+new ^lootinventory if another entity inventory is being looted, this will return it's id  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_objOnTopExtraBoundary  
+^$objontop_<extraBoundaryXZ> can check for a larger area above the entity  
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
 Format expanded variables thru printf syntax  
 
@@ -111,8 +130,8 @@ Obs.: other PR_.* branches may not be ready yet, may contain backup/untested com
 
 PS.: These are tests and are not working yet or may just be useless:  
 /PR_UsemeshOtherEnt  
-/PR_WeaponCmdOtherEnt  
-/PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget  
+/PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now  
+/PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget  
 
 ___
 
