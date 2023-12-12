@@ -86,15 +86,32 @@
 // LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
 // export LC_ALL=C;egrep "GoTo" -wia Hologram.asl |egrep -via "timer|loop" #check if GoTo is being used by something else than a timer or a loop
 
-// loops (for/while)
-//>>FUNC { //FUNC is the context example, could be the name of an event like LOOP_MAIN_...
-	//>>LOOP_FUNC_ShortDescription_BEGIN
-		//if(...) GoTo LOOP_FUNC_ShortDescription_BEGIN //continue
-		//if(...) GoTo LOOP_FUNC_ShortDescription_END //break
-		//GoTo LOOP_FUNC_ShortDescription_BEGIN //next iteration LAST THING ON THE LOOP!
-	//>>LOOP_FUNC_ShortDescription_END
-	//RETURN
-//}
+//	//LOOPS: for/while, how to easily implement them:
+//	//Obs.: loop control/index vars are only required to be unique when nesting them.
+//	//Obs.: arrays always end with empty "" string when iterating thru them
+//	//Obs.: GoTo targets always have to be unique on the whole script
+//	//Obs.: the implementation can be further simplified, see the working code for LOOP_FLM_ChkNPC
+//	>>FUNCtst { //FUNCtst is the context example, could be the name of an event like LOOP_MAIN_...
+//		>>LOOP_FUNCtst_ShortDescription_BEGIN
+//			// do something useful
+//			if(...) GoTo LOOP_FUNCtst_ShortDescription_BEGIN //continue
+//			if(...) GoTo LOOP_FUNCtst_ShortDescription_END //break
+//			GoTo LOOP_FUNCtst_ShortDescription_BEGIN //next iteration LAST THING ON THE LOOP!
+//		>>LOOP_FUNCtst_ShortDescription_END
+//		RETURN
+//	}
+//
+// //simplified count loop starting in 0 index
+//	Set §FUNCtst_index 0	>>LOOP_FUNCtst_lookForSmtng
+//		//do something
+//	++ §FUNCtst_index	if(§FUNCtst_index < 10) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC
+//
+// //simplified array loop. Code the conditions to end the loop and easily surround them with '!or()'.
+//	Set §FUNCtst_index 0	>>LOOP_FUNCtst_iterArray1_a
+//		Set -a £FUNCtst_entry "~£FUNCtst_array1~" §FUNCtst_index
+//		// do something
+//	++ §FUNCtst_index	if(!or(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == "")) GoTo LOOP_FUNCtst_iterArray1_a
+
 
 //////////////////////////////// TODO LIST: /////////////////////////
 ///// <><><> /////PRIORITY:HIGH (low difficulty also)
@@ -1116,9 +1133,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
 			if(§Identified == 1) {
-				Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req ~%.1f,@SignalStrengthReq~, now is ~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			} else {
-				Set £SignalStrInfo "~£SignalStrInfo~(0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@SignalStrengthReq~, now is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			}
 			Set §hours   ^gamehours
 			Mod §hours 24
@@ -1157,12 +1174,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 >>TFUNCcalcAncientTechSkill { GoSub FUNCcalcAncientTechSkill ACCEPT } >>FUNCcalcAncientTechSkill {
 	Set @AncientTechSkill ^PLAYER_SKILL_MECANISM
-	Inc @AncientTechSkill ^PLAYER_SKILL_OBJECT_KNOWLEDGE
-	Inc @AncientTechSkill ^PLAYER_SKILL_INTUITION
+	Add @AncientTechSkill ^PLAYER_SKILL_OBJECT_KNOWLEDGE
+	Add @AncientTechSkill ^PLAYER_SKILL_INTUITION
 	Div @AncientTechSkill 3 //the total skills used for it
 	
 	Set @AncientTechSkillDebuffPercMultiplyer 100
-	Dec @AncientTechSkillDebuffPercMultiplyer @AncientTechSkill
+	Sub @AncientTechSkillDebuffPercMultiplyer @AncientTechSkill
 	if(@AncientTechSkillDebuffPercMultiplyer <  5) Set @AncientTechSkillDebuffPercMultiplyer 5
 	if(@AncientTechSkillDebuffPercMultiplyer > 95) Set @AncientTechSkillDebuffPercMultiplyer 95
 	Div @AncientTechSkillDebuffPercMultiplyer 100 //perc 0.0 to 1.0
@@ -1231,12 +1248,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set §TrapEffectTimeMillis 0
 	if (§FUNCtrapAttack_TrapMode == 0) { //explosion around self
-		Set §TmpTrapKind ^rnd_5
-		if (§TmpTrapKind == 0) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl explosion  SELF
-		if (§TmpTrapKind == 1) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl fire_field SELF
-		if (§TmpTrapKind == 2) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl harm       SELF
-		if (§TmpTrapKind == 3) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl ice_field  SELF
-		if (§TmpTrapKind == 4) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl life_drain SELF
+		//Set §TmpTrapKind ^rnd_5
+		//if (§TmpTrapKind == 0) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl explosion  SELF
+		//if (§TmpTrapKind == 1) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl fire_field SELF
+		//if (§TmpTrapKind == 2) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl harm       SELF
+		//if (§TmpTrapKind == 3) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl ice_field  SELF
+		//if (§TmpTrapKind == 4) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl life_drain SELF
+		timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis GoTo TFUNCchkAndAttackExplosion
 		//this cause no damage? //if (§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf @SignalStrLvl mass_incinerate SELF
 		//Unset §TmpTrapKind
 		Set §TrapEffectTimeMillis 2000 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
@@ -1266,18 +1284,36 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
+>>TFUNCchkAndAttackExplosion { GoSub FUNCchkAndAttackExplosion ACCEPT } >>FUNCchkAndAttackExplosion {
+	GoSub FUNCchkSignalStrenghCheck	if(§FUNCchkSignalStrenghCheck_IsAcceptable == 1) {
+		Set §TmpTrapKind ^rnd_5
+		if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl explosion  SELF
+		if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl fire_field SELF
+		if (§TmpTrapKind == 2) SPELLCAST -smf @SignalStrLvl harm       SELF
+		if (§TmpTrapKind == 3) SPELLCAST -smf @SignalStrLvl ice_field  SELF
+		if (§TmpTrapKind == 4) SPELLCAST -smf @SignalStrLvl life_drain SELF
+	} else {
+		GoSub FUNCbreakDeviceDelayed
+	}
+	RETURN
+}
+
 >>TFUNCchkAndAttackProjectile { GoSub FUNCchkAndAttackProjectile ACCEPT } >>FUNCchkAndAttackProjectile {
-	if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
-	Set §TmpTrapKind ^rnd_6
-	if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl FIREBALL              PLAYER
-	if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl FIRE_PROJECTILE       PLAYER
-	if (§TmpTrapKind == 2) SPELLCAST -smf @SignalStrLvl ICE_PROJECTILE        PLAYER
-	if (§TmpTrapKind == 3) SPELLCAST -smf @SignalStrLvl MAGIC_MISSILE         PLAYER
-	if (§TmpTrapKind == 4) SPELLCAST -smf @SignalStrLvl MASS_LIGHTNING_STRIKE PLAYER
-	if (§TmpTrapKind == 5) SPELLCAST -smf @SignalStrLvl POISON_PROJECTILE     PLAYER
-	//TODO semi-paralize, every 1-3s shocks NPC and slowly pull it back to grenade or mine location thru interpolate and paralize it there for 0-1s
-	//if (§TrapKind == 0) SPELLCAST -smf @SignalStrLvl LIGHTNING_STRIKE PLAYER //too weak
-	Unset §TmpTrapKind
+	//if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
+	GoSub FUNCchkSignalStrenghCheck	if(§FUNCchkSignalStrenghCheck_IsAcceptable == 1) {
+		Set §TmpTrapKind ^rnd_6
+		if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl FIREBALL              PLAYER
+		if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl FIRE_PROJECTILE       PLAYER
+		if (§TmpTrapKind == 2) SPELLCAST -smf @SignalStrLvl ICE_PROJECTILE        PLAYER
+		if (§TmpTrapKind == 3) SPELLCAST -smf @SignalStrLvl MAGIC_MISSILE         PLAYER
+		if (§TmpTrapKind == 4) SPELLCAST -smf @SignalStrLvl MASS_LIGHTNING_STRIKE PLAYER
+		if (§TmpTrapKind == 5) SPELLCAST -smf @SignalStrLvl POISON_PROJECTILE     PLAYER
+		//TODO semi-paralize, every 1-3s shocks NPC and slowly pull it back to grenade or mine location thru interpolate and paralize it there for 0-1s
+		//if (§TrapKind == 0) SPELLCAST -smf @SignalStrLvl LIGHTNING_STRIKE PLAYER //too weak
+		//Unset §TmpTrapKind
+	} else {
+		GoSub FUNCbreakDeviceDelayed
+	}
 	RETURN
 }
 
@@ -1314,6 +1350,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCcalcAncientTechSkill
 	Mul @FUNCparalysePlayer_Millis @AncientTechSkillDebuffPercMultiplyer
 	if(@FUNCparalysePlayer_Millis > 50) { // needs a minimum to make sense
+		if(@FUNCparalysePlayer_Millis > 250) Set @FUNCparalysePlayer_Millis 250 //TODO find some alternative, being paralyzed so often for so long is too annoying, so limiting paralyze to 250ms for now...
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCparalysePlayer_Millis=~@FUNCparalysePlayer_Millis~"
 		SPELLCAST -fmsd @FUNCparalysePlayer_Millis @SignalStrLvl PARALYSE PLAYER
 	}
@@ -1633,24 +1670,30 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 >>TFUNCLandMine { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine {
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
-	Set £FUNCLandMine_OnTopEntList "~^$objontop_75~"
-	if(£FUNCLandMine_OnTopEntList != "none") {
-		Set §FUNCLandMine_OnTopLife 0
+	if(@SignalStrength < 15) ACCEPT //minimum requirement to function
+	Set @LandMineTriggerRange 50
+	Add @LandMineTriggerRange @AncientTechSkill
+	Set £FLM_OnTopEntList ^$objontop_~@LandMineTriggerRange~
+	if(£FLM_OnTopEntList != "none") {
+		Set §FLM_OnTopLife 0
 		
-		//TODO: Set §FUNCLandMine_OnTopIndex 0 For(§FUNCLandMine_OnTopIndex < 10) { ++ §FUNCLandMine_OnTopIndex // a single first line. ForCommand works like IfCommand, but will execute the block while the condition is true!
-		//TODO: ForIterateArray( £FUNCLandMine_OnTopEnt in "~£FUNCLandMine_OnTopEntList~" ) {
-		Set §FUNCLandMine_OnTopIndex 0
-		>>LOOP_FUNCLandMine_CheckIfAliveNPC_BEGIN
-			Set -a £FUNCLandMine_OnTopEnt "~£FUNCLandMine_OnTopEntList~" §FUNCLandMine_OnTopIndex
-			Set §FUNCLandMine_OnTopLife ^life_~£FUNCLandMine_OnTopEnt~
-			showlocals
-			if(§FUNCLandMine_OnTopLife > 0) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC_END //break on found
-			if(£FUNCLandMine_OnTopEnt == "") GoTo LOOP_FUNCLandMine_CheckIfAliveNPC_END //break on array ended
-			++ §FUNCLandMine_OnTopIndex
-			GoTo LOOP_FUNCLandMine_CheckIfAliveNPC_BEGIN //next iteration LAST THING ON THE LOOP!
-		>>LOOP_FUNCLandMine_CheckIfAliveNPC_END
+		Set §LoopIndex 0	>>LOOP_FLM_ChkNPC
+			Set -a £FLM_OnTopEntId "~£FLM_OnTopEntList~" §LoopIndex
+			if(£FLM_OnTopEntId != "") {
+				Set §FLM_OnTopLife ^life_~£FLM_OnTopEntId~
+				if(§FLM_OnTopLife > 0) {
+					if(§Quality >= 4) { // high quality wont trigger with innofensive rats
+						Set £FLM_OnTopEntClass ^class_~£FLM_OnTopEntId~
+						if(£FLM_OnTopEntClass == "rat") {
+							Set §FLM_OnTopLife 0 //for safety
+							GoTo LOOP_FLM_ChkNPC
+						}
+					}
+				}
+			}
+		++ §LoopIndex	if(!or(§FLM_OnTopLife > 0 || £FLM_OnTopEntId == "")) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
 		
-		if(§FUNCLandMine_OnTopLife > 0) {
+		if(§FLM_OnTopLife > 0) {
 			//Set §Scale 100
 			timerShrink1 -m 0 100 Dec §Scale 1
 			timerShrink2 -m 0 100 SetScale §Scale
@@ -2100,9 +2143,27 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	RETURN
 }
+>>FUNCchkSignalStrenghCheck {
+	//OUTPUT: §FUNCchkSignalStrenghCheck_IsAcceptable
+	Set §FUNCchkSignalStrenghCheck_IsAcceptable 0
+	
+	Set @SignalStrengthReq 0
+	if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReq  1
+	if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReq  1
+	if(£AncientDeviceMode == "Hologram"      ) Set @SignalStrengthReq  5
+	if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReq 10
+	if(£AncientDeviceMode == "LandMine"      ) Set @SignalStrengthReq 15
+	if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReq 20
+	if(£AncientDeviceMode == "MindControl"   ) Set @SignalStrengthReq 25
+	if(§Quality >= 4) Mul @SignalStrengthReq 1.66
+	
+	if(@SignalStrength >= @SignalStrengthReq) Set §FUNCchkSignalStrenghCheck_IsAcceptable 1
+	RETURN
+}
 >>TFUNCblinkGlow { GoSub FUNCblinkGlow ACCEPT } >>FUNCblinkGlow {
 	//PARAMS: §FUNCblinkGlow_times
-	if(§FUNCblinkGlow_times >= 0){
+	GoSub FUNCchkSignalStrenghCheck
+	if(and(§FUNCblinkGlow_times >= 0 && §FUNCchkSignalStrenghCheck_IsAcceptable == 1)){
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 		//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
 		timerTrapGlowBlinkOff -m §FUNCblinkGlow_times  901 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear" //901 will last 100 times til it matches multiple of 1000 below

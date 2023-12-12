@@ -14,6 +14,7 @@ The information shown for it depends on your AncientTech skill based on these co
 There are these information details levels that will appear the more you get skilled in AncientTech: quality, condition and detailed condition (shows numeric values for nerds).  
 The more skilled you get in AncientTech skill, the easier will be to prepare and use this Ancient Tech.  
 High quality (pristine) AncientTech items, that are also in perfect condition, will grant success on modifying (crafting, combining) and using them.  
+High quality (superior/pristine) will not trigger with small innofensive rats.
 
 As these devices are defective, they are dangerous to use, and everyone is aware of that. So, using Ancient devices near them will get you in trouble.  
 
