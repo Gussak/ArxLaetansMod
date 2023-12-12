@@ -109,6 +109,10 @@ new ^ininventory returns entity id
 https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
 Added Remainder arithmetic operation  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_CmdInventoryAddAtOtherEntity  
+Inventory command can now add items to other entities  
+so we can now dynamically patch NPCs, no need to edit/override .asl files  
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2  
 Added ^degrees... variables  
 only degrees, also for pitch x and roll z now  
@@ -129,7 +133,7 @@ New command: dropitem Can drop one or all items of any entity inventory where it
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
 PS.: These are tests and are not working yet or may just be useless:  
-/PR_UsemeshOtherEnt  
+/PR_UsemeshOtherEnt command 'usemesh' now accepts other entityID to apply it  
 /PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now  
 /PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget  
 
