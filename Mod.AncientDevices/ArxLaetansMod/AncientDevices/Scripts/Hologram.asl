@@ -11,6 +11,10 @@
 // Combining any quality AncientBox with a low quality AncientDevice may break it. Combining any quality AncientBox with a high quality+ AncientDevice will always upgrade it. So, the second, or the target of the combination must be of quality+. Also, if you double click on a quality+ and combine it with a low quality, you may lose both! TODO: find a way to detect the quality of the PARAM1 item for combine.
 // Bones and stones can be used to destroy AncientDevices if you want.
 // Ancient Teleport will damage and paralize you randomly, less if you are highly skilled in AncientTechSkill.
+// Signal strength is useful to position yourself to get better results when using it.
+// Quality useful to chose wich one to keep or to combine to have better results when crafting.
+// Condition is useful to hold your hand to avoid destroying the device.
+// While unidentified, words will be in latin or messed up letters order, and numbers will be in hexadecimal.
 
 /////////////////// Timers control:
 //starttimer timer1 //^#timer1 used ON MAIN
@@ -81,6 +85,16 @@
 // LC_ALL=C sed -i.bkp2 -r -e 's@(timer.*)([ \t]*GoSub)( *)(FUNC)@\1 GoTo\3T\4@' Hologram.asl #fixes timers to use TFUNC...
 // LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
 // export LC_ALL=C;egrep "GoTo" -wia Hologram.asl |egrep -via "timer|loop" #check if GoTo is being used by something else than a timer or a loop
+
+// loops (for/while)
+//>>FUNC { //FUNC is the context example, could be the name of an event like LOOP_MAIN_...
+	//>>LOOP_FUNC_ShortDescription_BEGIN
+		//if(...) GoTo LOOP_FUNC_ShortDescription_BEGIN //continue
+		//if(...) GoTo LOOP_FUNC_ShortDescription_END //break
+		//GoTo LOOP_FUNC_ShortDescription_BEGIN //next iteration LAST THING ON THE LOOP!
+	//>>LOOP_FUNC_ShortDescription_END
+	//RETURN
+//}
 
 //////////////////////////////// TODO LIST: /////////////////////////
 ///// <><><> /////PRIORITY:HIGH (low difficulty also)
@@ -227,7 +241,7 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 //activate
 			//Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			//Set §Scale 10 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			timerLandMineDetectNearbyNPC -m 0 50 GoTo TFUNCLandMine
 			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
@@ -564,9 +578,39 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	Set £inInventory ^ininventory
-	if (!or(£inInventory == "none" || £inInventory == "player")) ACCEPT
+	if (!or(£inInventory == "none" || £inInventory == "player")) ACCEPT //only works if in player inventory or on floor, so will not work on other containers, on corpses and on NPC inventories
 	
 	GoSub FUNChoverInfo
+	
+	Set £LootingInventory ^lootinventory
+	if(£LootingInventory != "none") { //dynamically patch inventories
+		Set -r "~£LootingInventory~" §HoloLootPatchOther §HoloLootPatchDone
+		if(§HoloLootPatchOther == 0) { //each item has a weight
+			Set -ri "~£LootingInventory~" §HoloAdd "ring"
+			Mul §HoloAdd 15
+			Add §HoloAddTotal §HoloAdd
+			
+			Set -ri "~£LootingInventory~" §HoloAdd "scroll"
+			Mul §HoloAdd 9
+			Add §HoloAddTotal §HoloAdd
+			
+			Set -ri "~£LootingInventory~" §HoloAdd "potion"
+			Mul §HoloAdd 6
+			Add §HoloAddTotal §HoloAdd
+			
+			Set -ri "~£LootingInventory~" §HoloAdd "bottle"
+			Mul §HoloAdd 2
+			Add §HoloAddTotal §HoloAdd
+			
+			Add §HoloAddTotal ^rnd_4
+			
+			if(§HoloAddTotal > 0) {
+				Inventory AddMulti -e "~£LootingInventory~" "magic/hologram/hologram" §HoloAddTotal
+			}
+			
+			Set -w "~£LootingInventory~" §HoloLootPatchDone 1
+		}
+	}
 	
 	if ( £AncientDeviceMode == "Hologram" ) {
 		if (§bHologramInitialized == 0) ACCEPT
@@ -696,7 +740,7 @@ ON COMBINE {
 		ACCEPT
 	}
 	
-	if(£AncientDeviceMode == "MindControl") { //sync with last/max combine option
+	if(£AncientDeviceMode == "MindControl") { //SYNC_WITH_LAST_COMBINE sync with last/max combine option
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
 		GoSub FUNCshowlocals
@@ -729,23 +773,23 @@ ON COMBINE {
 		//ACCEPT
 	//}
 	
-	DESTROY ^$PARAM1
-	
 	PLAY -s //stops sounds started with -i flag
 	
-	//§FUNCmorphUpgrade_otherQuality
+	Set -r "~^$PARAM1~" §FUNCmorphUpgrade_otherQuality §Quality
 	GoSub FUNCmorphUpgrade
+	
+	DESTROY ^$PARAM1
 	
 	ACCEPT
 }
 
-ON InventoryIn { Set £_aaaDebugScriptStackAndLog "On_InventoryIn"
+ON InventoryIn { Set £_aaaDebugScriptStackAndLog "On_InventoryIn" //this happens when item is added to an inventory right?
 	//if (^amount > 1) ACCEPT //this must not be a stack of items
 	PLAY -s //stops sounds started with -i flag
 	ACCEPT
 }
 
-ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
+ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happens when item is removed from an inventory right?
 	//if (^amount > 1) ACCEPT //this must not be a stack of items
 	PLAY -s //stops sounds started with -i flag
 	ACCEPT
@@ -911,7 +955,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	SetGroup "DeviceTechBroken"
 	//GoSub FUNCshockPlayer
 	
-	Set £FUNCnameUpdate_NameBase "Broken Hologram Device" 
+	if(§Identified == 1) {
+		Set £FUNCnameUpdate_NameBase "Broken Hologram Device" 
+	} else {
+		Set £FUNCnameUpdate_NameBase "Fracti Grolhoam Fabrica" 
+	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
 	
@@ -963,8 +1011,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 }
 
 >>TFUNCnameUpdate { GoSub FUNCnameUpdate ACCEPT } >>FUNCnameUpdate {
+	// if not identified, words will be in latin or messed up letters order
 	//OUTPUT: £FUNCnameUpdate_NameFinal_OUTPUT
-	if ( §Identified == 0 ) ACCEPT //the player is still not sure about what is going on
+	//if(§Identified == 0) ACCEPT //the player is still not sure about what is going on
 	
 	Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameBase~."
 	
@@ -990,23 +1039,40 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		Mul @ItemConditionSureTmp 10 //0-10
 		Div @ItemConditionSureTmp  2 //0-5
 		Set §ItemConditionSure @ItemConditionSureTmp //trunc
-		if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "perfect"
-		if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "excellent"
-		if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "good"
-		if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "average"
-		if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
-		if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
+		if(§Identified == 1) {
+			if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "perfect"
+			if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "excellent"
+			if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "good"
+			if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "average"
+			if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
+			if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
+		} else {
+			if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "etcerpf"
+			if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "ntexlecel"
+			if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "bonae" //latin
+			if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "gearave"
+			if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "malae" //latin
+			if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "discrimine" //latin
+		}
 		
 		Set §SignalStrSure §SignalStrengthTrunc
 		Div §SignalStrSure 33
 		Inc §SignalStrSure 1
 		if(§SignalStrengthTrunc == 0) Set §SignalStrSure 0
 		if(§SignalStrengthTrunc >= 95) Set §SignalStrSure 4
-		if(§SignalStrSure == 0) Set £SignalStrInfo "none"
-		if(§SignalStrSure == 1) Set £SignalStrInfo "bad"
-		if(§SignalStrSure == 2) Set £SignalStrInfo "good"
-		if(§SignalStrSure == 3) Set £SignalStrInfo "strong"
-		if(§SignalStrSure == 4) Set £SignalStrInfo "excellent"
+		if(§Identified == 1) {
+			if(§SignalStrSure == 0) Set £SignalStrInfo "none"
+			if(§SignalStrSure == 1) Set £SignalStrInfo "bad"
+			if(§SignalStrSure == 2) Set £SignalStrInfo "good"
+			if(§SignalStrSure == 3) Set £SignalStrInfo "strong"
+			if(§SignalStrSure == 4) Set £SignalStrInfo "excellent"
+		} else {
+			if(§SignalStrSure == 0) Set £SignalStrInfo "nullum" //latin
+			if(§SignalStrSure == 1) Set £SignalStrInfo "malae" //latin
+			if(§SignalStrSure == 2) Set £SignalStrInfo "bonae" //latin
+			if(§SignalStrSure == 3) Set £SignalStrInfo "fortis" //latin
+			if(§SignalStrSure == 4) Set £SignalStrInfo "ntexlecel"
+		}
 		
 		// perc
 		Set @ItemConditionTmp @ItemCondition
@@ -1028,19 +1094,32 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			Div §Quality 10
 			Div §Quality  2
 		}
-		if(§Quality >= 5) Set £ItemQuality "pristine+"
-		if(§Quality == 4) Set £ItemQuality "superior+"
-		if(§Quality == 3) Set £ItemQuality "decent"
-		if(§Quality == 2) Set £ItemQuality "mediocre"
-		if(§Quality == 1) Set £ItemQuality "inferior"
-		if(§Quality == 0) Set £ItemQuality "dreadful"
+		if(§Identified == 1) {
+			if(§Quality >= 5) Set £ItemQuality "pristine+"
+			if(§Quality == 4) Set £ItemQuality "superior+"
+			if(§Quality == 3) Set £ItemQuality "decent"
+			if(§Quality == 2) Set £ItemQuality "mediocre"
+			if(§Quality == 1) Set £ItemQuality "inferior"
+			if(§Quality == 0) Set £ItemQuality "dreadful"
+		} else {
+			if(§Quality >= 5) Set £ItemQuality "nistepri+"
+			if(§Quality == 4) Set £ItemQuality "orpesuri+"
+			if(§Quality == 3) Set £ItemQuality "tdenec"
+			if(§Quality == 2) Set £ItemQuality "edimecro"
+			if(§Quality == 1) Set £ItemQuality "nrifeior"
+			if(§Quality == 0) Set £ItemQuality "horribilis" //latin
+		}
 		
 		if(§AncientDeviceTriggerStep == 2){
 			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (ACTIVE)."
 		}
 		
-		if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
-			Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
+			if(§Identified == 1) {
+				Set £SignalStrInfo "~£SignalStrInfo~(~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+			} else {
+				Set £SignalStrInfo "~£SignalStrInfo~(0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
+			}
 			Set §hours   ^gamehours
 			Mod §hours 24
 			Set §minutes ^gameminutes
@@ -1048,13 +1127,24 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			Set §seconds ^gameseconds
 			Mod §seconds 60
 			// as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
-			Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,§hours~:~%02d,§minutes~:~%02d,§seconds~" 
+			if(§Identified == 1) {
+				Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,§hours~:~%02d,§minutes~:~%02d,§seconds~" 
+			} else {
+				Set £ItemConditionDesc "~£ItemConditionDesc~(0x~%X,§ItemConditionPercent~% 0x~%X,§UseCount~/0x~%X,§UseMax~ Reliquum 0x~%X,§UseRemain~) RT:0x~%X,^gamedays~day(s) 0x~%02X,§hours~:0x~%02X,§minutes~:0x~%02X,§seconds~" 
+			}
 			//Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
 			Set £ItemQuality "~£ItemQuality~(~§UseMax~)"
+		//}
+		if(§Identified == 1) {
+			// latin is almost identical...
+			if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." 
+			if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~£ItemQuality~."
+			if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~."
+		} else {
+			if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Nagsil:~£SignalStrInfo~." 
+			if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Itaquyl:~£ItemQuality~."
+			if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Ditononic:~£ItemConditionDesc~."
 		}
-		if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." //useful to position yourself
-		if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~£ItemQuality~." //useful to chose wich one to keep
-		if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~." //useful to hold your hand avoiding destroy it
 		//if(@AncientTechSkill >= 50) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~§SignalStrengthTrunc~, ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;) 
 	//} else {
 		//Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
@@ -1062,16 +1152,6 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	
 	//SetName "~£FUNCnameUpdate_NameBase~. Quality:~£ItemQuality~, Condition:~£ItemConditionDesc~(~§ItemConditionPercent~%), Uses:Count=~§UseCount,Remain=~§UseRemain~,Max=~§UseMax~"
 	SetName "~£FUNCnameUpdate_NameFinal_OUTPUT~"
-	//Set @TestFloat 0.1
-	//Set @TestFloat2 0.999999
-	//Set §TestInt2 @TestFloat2
-	//Set @TestFloat3 0.3
-	//Mul @TestFloat3 0.5 //0.15
-	//Set @TestFloat4 0.8
-	//Div @TestFloat4 2 //0.4
-	//Set @TestFloat5 0.3
-	//Mul @TestFloat5 100 //30
-	//Set §TestInt5 @TestFloat5
 	GoSub FUNCshowlocals
 }
 
@@ -1373,6 +1453,20 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	RETURN
 }
 
+>>TFUNCtestArithmetics { GoSub FUNCtestArithmetics ACCEPT } >>FUNCtestArithmetics {
+	Set @testAriFloat 2
+	Set §testAriInt 2
+	NthRoot @testAriFloat §testAriInt //1.41...
+	Add §testAriInt 1
+	Set @testAriFloat3 2 //
+	NthRoot @testAriFloat3 §testAriInt //
+	Set @testAriFloat4 -2
+	NthRoot @testAriFloat4 2 //-1.41...
+	Sub §testAriInt 1
+	Set @testAriFloat2 2
+	Pow @testAriFloat2 3 //8
+	RETURN
+}
 >>TFUNCtestPrintfFormats { GoSub FUNCtestPrintfFormats ACCEPT } >>FUNCtestPrintfFormats {
 	Set @testFloat 78.12345
 	Set §testInt 513
@@ -1530,6 +1624,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		GoSub FUNCtestLogicOperators
 		GoSub FUNCtestElseIf
 		GoSub FUNCtestDegrees
+		GoSub TFUNCtestArithmetics
 	}
 	 
 	GoSub FUNCshowlocals
@@ -1538,21 +1633,37 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 
 >>TFUNCLandMine { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine {
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
-	Set £FUNCLandMine_OnTopEnt "~^$objontop~"
-	Set §OnTopLife ^life_~£FUNCLandMine_OnTopEnt~
-	if(and(£FUNCLandMine_OnTopEnt != "none" && §OnTopLife > 0)) {
-		//Set §Scale 100
-		timerShrink1 -m 0 100 Dec §Scale 1
-		timerShrink2 -m 0 100 SetScale §Scale
+	Set £FUNCLandMine_OnTopEntList "~^$objontop_75~"
+	if(£FUNCLandMine_OnTopEntList != "none") {
+		Set §FUNCLandMine_OnTopLife 0
 		
-		Set §FUNCtrapAttack_TimeoutMillis 2000
-		GoSub FUNCcalcAncientTechSkill
-		Mul §FUNCtrapAttack_TimeoutMillis @AncientTechSkillDebuffPercMultiplyer
-		GoSub FUNCtrapAttack
+		//TODO: Set §FUNCLandMine_OnTopIndex 0 For(§FUNCLandMine_OnTopIndex < 10) { ++ §FUNCLandMine_OnTopIndex // a single first line. ForCommand works like IfCommand, but will execute the block while the condition is true!
+		//TODO: ForIterateArray( £FUNCLandMine_OnTopEnt in "~£FUNCLandMine_OnTopEntList~" ) {
+		Set §FUNCLandMine_OnTopIndex 0
+		>>LOOP_FUNCLandMine_CheckIfAliveNPC_BEGIN
+			Set -a £FUNCLandMine_OnTopEnt "~£FUNCLandMine_OnTopEntList~" §FUNCLandMine_OnTopIndex
+			Set §FUNCLandMine_OnTopLife ^life_~£FUNCLandMine_OnTopEnt~
+			showlocals
+			if(§FUNCLandMine_OnTopLife > 0) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC_END //break on found
+			if(£FUNCLandMine_OnTopEnt == "") GoTo LOOP_FUNCLandMine_CheckIfAliveNPC_END //break on array ended
+			++ §FUNCLandMine_OnTopIndex
+			GoTo LOOP_FUNCLandMine_CheckIfAliveNPC_BEGIN //next iteration LAST THING ON THE LOOP!
+		>>LOOP_FUNCLandMine_CheckIfAliveNPC_END
 		
-		timerLandMineDetectNearbyNPC off
-		
-		GoSub FUNCshowlocals
+		if(§FUNCLandMine_OnTopLife > 0) {
+			//Set §Scale 100
+			timerShrink1 -m 0 100 Dec §Scale 1
+			timerShrink2 -m 0 100 SetScale §Scale
+			
+			Set §FUNCtrapAttack_TimeoutMillis 2000
+			GoSub FUNCcalcAncientTechSkill
+			Mul §FUNCtrapAttack_TimeoutMillis @AncientTechSkillDebuffPercMultiplyer
+			GoSub FUNCtrapAttack
+			
+			timerLandMineDetectNearbyNPC off
+			
+			GoSub FUNCshowlocals
+		}
 	}
 	RETURN
 }
@@ -1594,10 +1705,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCteleportToAndKillNPC_HoverEnt~
 			GoSub FUNCcalcInterpolateTeleStepDist1s()
 			Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
-			Div @TeleMeStepDist 5 //this will make it take 5 times longer to travel, is more challenging
+			Div @TeleMeStepDist 3 //this will make it take 3 times longer to travel, is more challenging
 		}
-		interpolate -ls "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
+		interpolate -s "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 	} else {
+		interpolate "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" 0.0 //one last step to be precise
 		timerTFUNCteleportToAndKillNPC_flyMeToNPC off
 	}
 	
@@ -1645,7 +1757,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			//Dec @TelePlayerPlaceDist @TelePlayerStepDist
 			//interpolate player "~§TelePlayerToX~,~§TelePlayerToY~,~§TelePlayerToZ~" @TelePlayerPlaceDist
 			//interpolate player "~£FUNCteleportToAndKillNPC_HoverEnt~" @TelePlayerStepDist
-			interpolate -ls player "~^me~" @TelePlayerStepDist
+			interpolate -s player "~^me~" @TelePlayerStepDist
 			//-- §TeleSteps
 		} else {
 			//Set @TeleDmgPlayer ^lifemax_player
@@ -1673,6 +1785,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			
 			Set §FUNCbreakDeviceDelayed_ParalyzePlayer 1	GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 			
+			interpolate player "~^me~" 0.0 //one last step to be precise
 			timerTFUNCteleportToAndKillNPC_flyPlayerToMe off
 		}
 	}
@@ -1820,7 +1933,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		if (£AncientDeviceMode == "_BecomeSignalRepeater_") { Set £AncientDeviceMode "SignalRepeater"
 			// this must be easy to become again a hologram, so do minimal changes!
 			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
-			Set £FUNCnameUpdate_NameBase "Holo Signal Repeater"
+			if(§Identified == 1) {
+				Set £FUNCnameUpdate_NameBase "Hologram Signal Repeater" 
+			} else {
+				Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" 
+			}
 			Set £Icon "HoloSignalRepeater"
 			//Set §AncientDeviceTriggerStep 1
 			//PlayerStackSize 1
@@ -1838,7 +1955,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 				Set §Quality 5 
 			}
 			
-			Set £FUNCnameUpdate_NameBase "Holo Grenade"
+			if(§Identified == 1) {
+				Set £FUNCnameUpdate_NameBase "Hologram Grenade" 
+			} else {
+				Set £FUNCnameUpdate_NameBase "Grolhoam Degnare" 
+			}
 			Set £Icon "HologramGrenade"
 			
 			//PLAY "TRAP"
@@ -1860,7 +1981,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 			TWEAK SKIN "Hologram.tiny.index4000.grenade"   "Hologram.tiny.index4000.grenade.Clear"
 			//TODO TWEAK SKIN "Hologram.tiny.index4000.LandMine.Clear"   "Hologram.tiny.index4000.LandMine"
 			//Set §Scale 10 SetScale §Scale //TODO create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			Set £FUNCnameUpdate_NameBase "Holo Landmine"
+			if(§Identified == 1) {
+				Set £FUNCnameUpdate_NameBase "Hologram Landmine" 
+			} else {
+				Set £FUNCnameUpdate_NameBase "Grolhoam Terra Perdere" 
+			}
 			Set £Icon "HoloLandMine"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 9
@@ -1868,17 +1993,25 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		if ( £AncientDeviceMode == "LandMine" ) { Set £AncientDeviceMode "Teleport"
 			TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
 			Set §Scale 100 SetScale §Scale
-			Set £FUNCnameUpdate_NameBase "Holo Teleport"
+			if(§Identified == 1) {
+				Set £FUNCnameUpdate_NameBase "Hologram Teleport" 
+			} else {
+				Set £FUNCnameUpdate_NameBase "Grolhoam Itinerantur" 
+			}
 			Set £Icon "HoloTeleport"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 6
 		} else {
-		if ( £AncientDeviceMode == "Teleport" ) { Set £AncientDeviceMode "MindControl"
+		if ( £AncientDeviceMode == "Teleport" ) { Set £AncientDeviceMode "MindControl" //SYNC_WITH_LAST_COMBINE
 			// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
 			// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
 			TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
 			Set §Scale 100 SetScale §Scale
-			Set £FUNCnameUpdate_NameBase "Holo Mind Control"
+			if(§Identified == 1) {
+				Set £FUNCnameUpdate_NameBase "Hologram Mind Control" 
+			} else {
+				Set £FUNCnameUpdate_NameBase "Grolhoam Mens Moderantum" 
+			}
 			Set £Icon "HoloMindControl"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
@@ -1886,7 +2019,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 		
 		if(§AncientDeviceTriggerStep == 1) {
 			if ( §Quality >= 4 ) {
-				Set £FUNCnameUpdate_NameBase "~£FUNCnameUpdate_NameBase~ MK2+"
+				if(§Identified == 1) {
+					Set £FUNCnameUpdate_NameBase "~£FUNCnameUpdate_NameBase~ MK2+" 
+				} else {
+					Set £FUNCnameUpdate_NameBase "~£FUNCnameUpdate_NameBase~ gradus duo+" 
+				}
 				Set £Icon "~£Icon~MK2"
 			}
 			
@@ -1918,7 +2055,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	
 	SET_PRICE 50
 	
-	Set £FUNCnameUpdate_NameBase "Ancient Box (OFF)"
+	if(§Identified == 1) {
+		Set £FUNCnameUpdate_NameBase "Ancient Box (OFF)" 
+	} else {
+		Set £FUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" 
+	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
 	
@@ -1945,7 +2086,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut"
 	
 	SET_PRICE 100
 	
-	Set £FUNCnameUpdate_NameBase "Holograms of the over world"
+	if(§Identified == 1) {
+		Set £FUNCnameUpdate_NameBase "Holograms of the over world" 
+	} else {
+		Set £FUNCnameUpdate_NameBase "Grolhoam Super Mundi" 
+	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
 	

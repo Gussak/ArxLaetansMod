@@ -62,7 +62,7 @@ while true;do
   #./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
   echoc --info "EXEC: ${acmd[@]}"
   ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest
-  rxvt -e tail -F "$strFlLog"&disown #rxvt wont stack with xterm windows group on ubuntu windows docks
+  rxvt -geometry 100x1 -e tail -F "$strFlLog"&disown #rxvt wont stack with xterm windows group on ubuntu windows docks
   unbuffer "${acmd[@]}" 2>&1 |tee "$strFlLog"
   
   echoc -w "re-run"
