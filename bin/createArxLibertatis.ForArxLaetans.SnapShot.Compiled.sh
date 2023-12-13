@@ -2,13 +2,15 @@
 
 source <(secinit)
 
-strFlBN="ArxLibertatis.ForArxLaetansMod.SourceCode.SnapShot.Compiled.`SECFUNCdtFmt --filename`"
+bCompiledMode=true createArxLibertatis.ForArxLaetans.SnapShot.sh
 
-tar \
-	--exclude="ArxLibertatis.github/build/CMakeFiles" \
-	-vcf "${strFlBN}.tar" \
-	ArxLibertatis.github/build/*
+#strFlBN="ArxLibertatis.ForArxLaetansMod.SourceCode.SnapShot.Compiled.`SECFUNCdtFmt --filename`"
 
-7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "${strFlBN}.tar.7z" "${strFlBN}.tar"
+#tar \
+	#--exclude="ArxLibertatis.github/build/CMakeFiles" \
+	#-vcf "${strFlBN}.tar" \
+	#ArxLibertatis.github/build/*
 
-trash "${strFlBN}.tar"
+#7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "${strFlBN}.tar.7z" "${strFlBN}.tar"
+
+#trash "${strFlBN}.tar"

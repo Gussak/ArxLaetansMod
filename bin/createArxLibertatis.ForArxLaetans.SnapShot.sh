@@ -1,14 +1,29 @@
 #!/bin/bash
 
+egrep "[#]help" "$0"
+
 source <(secinit)
 
-strFlBN="ArxLibertatis.ForArxLaetansMod.SourceCode.SnapShot.`SECFUNCdtFmt --filename`"
+: ${bCompiledMode:=false} #help
 
-tar \
-	--exclude="ArxLibertatis.github/build" \
-	--exclude="ArxLibertatis.github/.git" \
-	-vcf "${strFlBN}.tar" \
-	ArxLibertatis.github/*
+: ${strBPath:="ArxLibertatis.github"} #help
+
+strBranch="$(cd "${strBPath}";git branch |egrep "^[*]" |cut -f2 -d' ')"
+
+strFlBN="${strBPath}.ForArxLaetansMod.SourceCode.Branch_${strBranch}.SnapShot.`SECFUNCdtFmt --filename`"
+
+if $bCompiledMode;then
+	astrTarParams=(
+		--exclude="${strBPath}/build/CMakeFiles"
+	)
+else
+	astrTarParams=(
+		--exclude="${strBPath}/build"
+		--exclude="${strBPath}/.git"
+	)
+fi
+
+tar "${astrTarParams[@]}" -vcf "${strFlBN}.tar" "${strBPath}/"*
 
 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "${strFlBN}.tar.7z" "${strFlBN}.tar"
 
