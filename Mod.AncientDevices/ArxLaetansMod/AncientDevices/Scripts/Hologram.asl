@@ -603,23 +603,29 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 	if(£LootingInventory != "none") { //dynamically patch inventories
 		Set -r "~£LootingInventory~" §HoloLootPatchOther §HoloLootPatchDone
 		if(§HoloLootPatchOther == 0) { //each item has a weight
+			Set -ri "~£LootingInventory~" §HoloAdd "rune"
+			Mul §HoloAdd 36
+			Add §HoloAddTotal ^rnd_~§HoloAdd~
+			
 			Set -ri "~£LootingInventory~" §HoloAdd "ring"
-			Mul §HoloAdd 15
-			Add §HoloAddTotal §HoloAdd
+			Mul §HoloAdd 18
+			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
 			Set -ri "~£LootingInventory~" §HoloAdd "scroll"
-			Mul §HoloAdd 9
-			Add §HoloAddTotal §HoloAdd
+			Mul §HoloAdd 12
+			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
 			Set -ri "~£LootingInventory~" §HoloAdd "potion"
 			Mul §HoloAdd 6
-			Add §HoloAddTotal §HoloAdd
+			Add §HoloAddTotal ^rnd_~§HoloAdd~
+			
+			//todo other magic items could add 4
 			
 			Set -ri "~£LootingInventory~" §HoloAdd "bottle"
 			Mul §HoloAdd 2
-			Add §HoloAddTotal §HoloAdd
+			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Add §HoloAddTotal ^rnd_4
+			Add §HoloAddTotal ^rnd_1
 			
 			if(§HoloAddTotal > 0) {
 				Inventory AddMulti -e "~£LootingInventory~" "magic/hologram/hologram" §HoloAddTotal
