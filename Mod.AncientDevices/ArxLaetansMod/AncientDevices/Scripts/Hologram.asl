@@ -71,7 +71,7 @@
 
 //apparently items can only stack if they have the exact same name and/or icon?
 
-// when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors!
+// when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
 //  an easy trick to have both is have a TFUNC call the FUNC ex.:
 //  timerTFUNCdoSomething GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
 //  >>TFUNCdoSomething {
@@ -81,6 +81,7 @@
 //  >>FUNCdoSomething { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
 //    RETURN
 //  }
+// Obs.: a CFUNC (child function) is not meant to be called directly. call it only by it's related func
 // LC_ALL=C sed -i.bkp -r -e 's@^(>>)(FUNC[^ ]*)@>>T\2 { GoSub \2 ACCEPT } >>\2 @' Hologram.asl #creates the TFUNC...
 // LC_ALL=C sed -i.bkp2 -r -e 's@(timer.*)([ \t]*GoSub)( *)(FUNC)@\1 GoTo\3T\4@' Hologram.asl #fixes timers to use TFUNC...
 // LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
@@ -892,35 +893,133 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
+>>FUNCconfigOptionHover {
+	// X degrees from 74.9 (downest) to 301 (upperest)
+	// Each face has 11 options.
+	// Top and bottom faces can only provide access to half the options looking upwards, so we will use just 5 and the limit to the center one.
+	// total accessibblle options in X: 11+5+5 = 21
+	// available degrees in X: 301-74.9 = 226.1
+	// each opt degrees range: 226.1 / 21 = 10.766666667
+	Set @CfgOptHoverX ^degreesx_player 
+	Set @CfgOptHoverY ^degreesy_player 
+	// calc option up/down degrees range to index
+	Set @CfgOptIndexTmp @CfgOptHoverX
+	Sub @CfgOptIndexTmp 74.9
+	Div @CfgOptIndexTmp 10.766666667
+	Set §CfgOptIndexTruncTmp @CfgOptIndexTmp
+	Add §CfgOptIndexTruncTmp 1 //to fix from 0.0 to 1.0 that is the lowest option
+	// §CfgOptIndexTruncTmp 1-5 (5) bottom, 6-16 (11) horizon, 17-21 (5) top
+	Set §CfgOptIndex -1
+	// quadrants in Y rotation
+	if(@CfgOptHoverY > 0 && @CfgOptHoverY < 90) {
+		if(§CfgOptIndexTruncTmp == 5) {
+			Set §CfgOptIndex 33 //TODO:WIP:TEST, the indexes at .sh must be reorganized to be less confuse to implement here
+		}
+	} else {
+	if(@CfgOptHoverY > 90 && @CfgOptHoverY < 180) {
+	} else {
+	if(@CfgOptHoverY > 180 && @CfgOptHoverY < 270) {
+	} else {
+	if(@CfgOptHoverY > 270 && @CfgOptHoverY < 360) {
+	}	} } }
+	Set §FUNCconfigOptionHighlight_index §CfgOptIndex GoSub FUNCconfigOptionHighlight
+	RETURN
+}
+>>FUNCconfigOptionHighlight {
+	//INPUT: <§FUNCconfigOptionHighlight_index>
+	Set £FUNCconfigOptions_mode "show"
+	
+	if(§FUNCconfigOptionHighlight_indexPrevious > -1) {
+		//Set £FUNCconfigOptions_mode "hide"
+		Set §FUNCconfigOptions_index §FUNCconfigOptionHighlight_indexPrevious
+		GoSub FUNCconfigOptions_Update
+	}
+	
+	Set §FUNCconfigOptions_index §FUNCconfigOptionHighlight_index
+	GoSub FUNCconfigOptions_Update
+	
+	Set §FUNCconfigOptionHighlight_indexPrevious §FUNCconfigOptionHighlight_index
+	RETURN
+}
 >>FUNCconfigOptions {
-	//INPUT: £FUNCconfigOptions_mode "clear" "show"
-	if(£FUNCconfigOptions_mode == "clear") {
+	//INPUT: [£FUNCconfigOptions_mode] values: "hide" "show"
+	if(£FUNCconfigOptions_mode == "hide") {
 		TWEAK SKIN "Hologram.ConfigOptions"	"Hologram.ConfigOptions.Clear"
+		Set §FUNCconfigOptions_index 1 >>LOOP_FCO_ClearAll
+			GoSub CFUNCconfigOptionHide
+		++ §FUNCconfigOptions_index if(§FUNCconfigOptions_index <= §ConfigOptions_maxIndex) GoTo LOOP_FCO_ClearAll
 	} else {
 	if(£FUNCconfigOptions_mode == "show") {
 		TWEAK SKIN "Hologram.ConfigOptions.Clear" "Hologram.ConfigOptions"
+		
+		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_ClassFocus GoSub CFUNCconfigOptionUpdate
+		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_DebugTests GoSub CFUNCconfigOptionUpdate
+		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_ShowLocals GoSub CFUNCconfigOptionUpdate
 	} }
 	
-	Set §FUNCconfigOptions_index 1 >>LOOP_FCO_ClearAll
-		if(£FUNCconfigOptions_mode == "clear") {
-			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-		} else {
-		if(£FUNCconfigOptions_mode == "show") {
-			if(§ConfigOption_ClassFocus == 1) {
-				TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" 
-			}
-		} }
-	++ §FUNCconfigOptions_index if(§FUNCconfigOptions_index < 66) GoTo LOOP_FCO_ClearAll
-	
-	Set £FUNCconfigOptions_mode "clear" //default for next call
+	Set £FUNCconfigOptions_mode "hide" //default for next call
 	RETURN
 }
+>>CFUNCconfigOptionUpdate {
+	//INPUT: <@CFUNCconfigOptionUpdate_check>
+	Set §FUNCconfigOptions_index @CFUNCconfigOptionUpdate_check
+	// trunc will get the index. if identical, means disabled: ex.: disabled: 33.0 == 33, enabled: 33.1 != 33
+	if(@CFUNCconfigOptionUpdate_check == §FUNCconfigOptions_index) { //.0 means disabled
+		GoSub CFUNCconfigOptionDisable
+	} else { //.1 means enabled
+		GoSub CFUNCconfigOptionEnable
+	}
+}
+>>CFUNCconfigOptionToggle {
+	//INPUT: <@CFUNCconfigOptionToggle_check>
+	//OUTPUT: <@CFUNCconfigOptionToggle_set_OUTPUT>
+	Set §CFUNCconfigOptionToggle_trunc @CFUNCconfigOptionToggle_check
+	Sub @CFUNCconfigOptionToggle_check §CFUNCconfigOptionToggle_trunc
+	Set @CFUNCconfigOptionToggle_set_OUTPUT §CFUNCconfigOptionToggle_trunc //disable (the below if fails so..)
+	if(@CFUNCconfigOptionToggle_check == 0.0)	Add @CFUNCconfigOptionToggle_set_OUTPUT 0.1 //enable
+	RETURN
+}
+>>CFUNCconfigOptionEnable {
+	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" 
+	RETURN
+}
+>>CFUNCconfigOptionDisable {
+	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+	RETURN
+}
+>>CFUNCconfigOptionHide {
+	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+	if(§FUNCconfigOptions_index == §FUNCconfigOptions_HighlightIndex) {
+		TWEAK SKIN "Hologram.ConfigOptions.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+		TWEAK SKIN "Hologram.ConfigOptions.EnabledAndHighlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+	}
+	RETURN
+}
+//>>CFUNCconfigOptions_Update {
+	////INPUT: <§FUNCconfigOptions_index>
+	////INPUT: <£FUNCconfigOptions_mode>
+	//if(£FUNCconfigOptions_mode == "hide") { //mainly used to hide this skybox layer 
+		//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+		//if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions_index) {
+			//TWEAK SKIN "Hologram.ConfigOptions.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+			//TWEAK SKIN "Hologram.ConfigOptions.EnabledAndHighlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+		//}
+	//} else {
+	//if(£FUNCconfigOptions_mode == "show") {
+		//if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions_index) {
+			//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.EnabledAndHighlight" 
+			//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.EnabledAndHighlight" 
+		//} else {
+			//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" 
+			//if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions_indexprevious todoa) {
+			//}
+		//}
+	//} }
+	//RETURN
+//}
 
 >>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
 	Set £AncientDeviceMode "AncientBox"
-	
-	//Set #FUNCshowlocals_enabled 1 //COMMENT_ON_RELEASE
 	
 	GoSub FUNCconfigOptions
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
@@ -931,6 +1030,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set §iFUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range //SED_TOKEN_MOD_CFG
 		Set §iFUNCMakeNPCsHostile_range §iFUNCMakeNPCsHostile_rangeDefault
 	}
+	
+	Set §ConfigOptions_maxIndex 66 //SED_TOKEN_MOD_CFG
+	// .0 means initially disabled (.1 would mean enabled initially)
+	if(&G_HologCfgOpt_ClassFocus == 0) Set &G_HologCfgOpt_ClassFocus 33.0
+	if(&G_HologCfgOpt_ShowLocals == 0) Set &G_HologCfgOpt_ShowLocals 58.0
+	if(&G_HologCfgOpt_DebugTests == 0) Set &G_HologCfgOpt_DebugTests 59.0
 	
 	Set §UseMax 5
 	Inc §UseMax ^rnd_110
@@ -1733,7 +1838,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		//Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
 		//Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
 		
-		Rotate 0 0 0
+		Rotate -a 0 0 0
 		
 		Set £ScriptDebug________________Tests "FUNCtests"
 		GoSub FUNCdistAbsPos
@@ -2257,15 +2362,20 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
+//>>FUNCconfigOptionChk {
+	////INPUT: <@FUNCconfigOptionChk_chk>
+	//Set §FUNCconfigOptionChk_chkTrunc @FUNCconfigOptionChk_chk
+	//RETURN
+//}
 >>TFUNCshowlocals { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
-	//INPUT: §FUNCshowlocals_force
-	//TODOABC if(or(#FUNCshowlocals_enabled >= 1 || §FUNCshowlocals_force >= 1)) showlocals
-	if(§FUNCshowlocals_force >= 1){
-		showlocals
-	} else {
-	if(#FUNCshowlocals_enabled >= 1){
-		showlocals
-	} }
+	//INPUT: [§FUNCshowlocals_force]
+	if(or(&G_HologCfgOpt_ShowLocals == 33.1 || §FUNCshowlocals_force >= 1)) showlocals
+	//if(§FUNCshowlocals_force >= 1){
+		//showlocals
+	//} else {
+	//if(#FUNCshowlocals_enabled >= 1){
+		//showlocals
+	//} }
 	Set §FUNCshowlocals_force 0 //default for next call
 	RETURN
 }
