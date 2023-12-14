@@ -1,5 +1,8 @@
 #!/bin/bash
 
+strPathHere="$(realpath "$(dirname "$0")")"
+strFlHolog="${strPathHere}/../Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Hologram.asl"
+
 #                                              123456789,123456789,123456789,123456789,12
 nItemsPerFace=11
 nFaces=6
@@ -8,7 +11,9 @@ strSpacesFaceFullW="                                              "
 
 declare -a astrOptions astrCfgVar
 function FUNCaddOpt() { # index cfgVarID comment
-	i=$1;astrCfgVar[$i]="§ConfigOption_${2}";astrOptions[$i]="${astrCfgVar[$i]:14} ${3}"
+	i=$1;
+	astrCfgVar[$i]="&G_HologCfgOpt_${2}"; #globals
+	astrOptions[$i]="${astrCfgVar[$i]:14} ${3}"
 }
 #obs.: options doesnt need to have the same name size it is cohincidence for now...
 FUNCaddOpt 33 ClassFocus "(TODO/WIP)"
@@ -20,6 +25,10 @@ nRmSpaces=1 #before the %
 ((nRmSpaces+=2))&&: #the ') '
 ((nRmSpaces+=1))&&: #was needed...
 
+iColumn1=$(((nItemsPerFace*1)+1))
+iColumn2=$(((nItemsPerFace*2)+1))
+iColumn3=$(((nItemsPerFace*3)+1))
+iColumn4=$(((nItemsPerFace*4)+1))
 for((i=1;i<=nTot;i++));do
 	strOpt="${astrOptions[$i]}"
 	if(( (${#strOpt}+nRmSpaces) > ${#strSpacesFaceFullW} ));then 
@@ -37,17 +46,33 @@ for((i=1;i<=nTot;i++));do
 	
 	if $bTopBottom;then
 		printf "${strSpacesFaceFullW}%02d) ${strOptOk}\n" $i;
-		echo " "
+		echo " " #an empty line with a single space to separate them clearly
 	else # left front right back
-		if(((i+nItemsPerFace-2)%4 == 3));then echo -n " ";fi;
-		if((i>nItemsPerFace));then printf " %02d) ${strOptOk}" $i;fi;
-		if(((i+nItemsPerFace-2)%4 == 0));then echo;echo " ";fi;
+		if(((i+nItemsPerFace-2)%4 == 2));then echo -n " ";fi; #before column1 in the line
+		
+		if(((i+nItemsPerFace-2)%4 == 2));then iIndexForColumn=$((iColumn1++));fi #column 1
+		if(((i+nItemsPerFace-2)%4 == 3));then iIndexForColumn=$((iColumn2++));fi #column 2
+		if(((i+nItemsPerFace-2)%4 == 0));then iIndexForColumn=$((iColumn3++));fi #column 3
+		if(((i+nItemsPerFace-2)%4 == 1));then iIndexForColumn=$((iColumn4++));fi #column 4
+		
+		if((i>nItemsPerFace));then printf " %02d) ${strOptOk}" $((iIndexForColumn));fi;
+		if(((i+nItemsPerFace-2)%4 == 0));then 
+			echo; #new line at end of the line
+			echo " "; #an empty line with a single space to separate them clearly
+		fi; 
 	fi
 	
 	if((i>1));then
-		ln -vsf "./Hologram.ConfigOptions.index00001.Clear.png"     "Hologram.ConfigOptions.index`printf %05d $i`.Clear.png"     >&2
-		ln -vsf "./Hologram.ConfigOptions.index00001.Enabled.png"   "Hologram.ConfigOptions.index`printf %05d $i`.Enabled.png"   >&2
-		ln -vsf "./Hologram.ConfigOptions.index00001.Highlight.png" "Hologram.ConfigOptions.index`printf %05d $i`.Highlight.png" >&2
+		strPrefixPng="./Hologram.ConfigOptions.index"
+		if [[ -f "${strPrefixPng}00001.Clear.png" ]];then
+			ln -vsf "${strPrefixPng}00001.Clear.png"   "${strPrefixPng}`printf %05d $i`.Clear.png"     >&2
+		fi
+		if [[ -f "${strPrefixPng}00001.Enabled.png" ]];then
+			ln -vsf "${strPrefixPng}00001.Enabled.png"   "${strPrefixPng}`printf %05d $i`.Enabled.png"   >&2
+		fi
+		if [[ -f "${strPrefixPng}00001.Highlight.png" ]];then
+			ln -vsf "${strPrefixPng}00001.Highlight.png" "${strPrefixPng}`printf %05d $i`.Highlight.png" >&2
+		fi
 	fi
 done >$0.txt
 echoc --info "updating text: select all text in gimp least the first char, paste, hit home and del 1st char"
