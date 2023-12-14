@@ -10,6 +10,7 @@ declare -a astrOptions astrCfgVar
 function FUNCaddOpt() { # index cfgVarID comment
 	i=$1;astrCfgVar[$i]="§ConfigOption_${2}";astrOptions[$i]="${astrCfgVar[$i]:14} ${3}"
 }
+#obs.: options doesnt need to have the same name size it is cohincidence for now...
 FUNCaddOpt 33 ClassFocus "(TODO/WIP)"
 FUNCaddOpt 58 ShowLocals "(DEBUG)"
 FUNCaddOpt 59 DebugTests "(DEBUG)"
