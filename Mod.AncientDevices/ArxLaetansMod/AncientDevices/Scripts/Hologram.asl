@@ -1524,65 +1524,109 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>TFUNCtestLogicOperators { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests"
-	Set @testFloat 1.5
-	Set §testInt 7
-	Set £testString "foo"
+	
+	Set @testFloat 1.5 //dont change!
+	Set §testInt 7 //dont change!
+	Set £testString "foo" //dont change!
 	
 	// OK means can appear on the £ScriptDebug________________Tests. WRONG means it should not have appeared.
 	
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A1:OK"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A1=ok"
 	}
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A2:WRONG"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A2=WRONG"
 	}
-	if(and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A3:WRONG"
+	if(and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A3=WRONG"
 	}
-	if(and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A4:WRONG"
+	if(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A4=WRONG"
 	}
 	// test without block delimiters { }
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A11:OK"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A11=ok"
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A12:WRONG"
-	if(and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A13:WRONG"
-	if(and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14:WRONG"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A12=WRONG"
+	if(and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A13=WRONG"
+	if(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14=WRONG"
 	
 	// not(!)
 	if(!and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11:wrong"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11=WRONG"
 	if(!and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12:ok"
-	if(!and(@testFloat == 1.5 && §testInt == 8 && £testString == "foo"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13:ok"
-	if(!and(@testFloat == 1.6 && §testInt == 7 && £testString == "foo"))
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14:ok"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12=ok"
+	if(!and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13=ok"
+	if(!and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14=ok"
 	
 	// or !or
 	if(or(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c1:OK"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c1=ok"
 	}
 	if(!or(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c2:WRONG"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c2=WRONG"
 	}
-	if(!or(@testFloat != 1.5 || §testInt != 8 || £testString == "foo")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3:WRONG"
+	if(!or(@testFloat != 1.5 || §testInt == 7 || £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3=WRONG"
 	}
-	if(or(@testFloat == 1.6 || §testInt != 7 || £testString == "foo")){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c4:ok"
+	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c4=ok"
 	}
 	
-	// nesting and multiline
-	if(or(      @testFloat == 1.6 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt == 8 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt == 8 , £testString == "foo")     )  ){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1:ok"
+	// nesting and multiline conditions
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7))){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1a=ok"
 	}
-	if(or(      @testFloat == 1.6 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt == 8 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt != 8 , £testString == "foo")     )  ){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2:wrong"
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt =! 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b=ok"
 	}
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") || !and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1z=ok"
+	}
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")     )  ){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1=ok"
+	}
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")     )  ){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=WRONG"
+	}
+	
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_begin"
+	if(
+		or(
+				@testFloat != 1.5 ||
+				§testInt   != 7   ||
+				and(
+						£testString == "foo"
+						&&
+						§testInt != 7
+				) ||
+				!or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
+				!and(@testFloat == 1.5  , §testInt != 7  , £testString == "foo")
+		)
+	){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=ok"
+	}
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_3"
+	if(
+		or(
+				@testFloat != 1.5 ||
+				§testInt   != 7   ||
+				and(
+						£testString == "foo"
+						&&
+						§testInt != 7
+				) ||
+				!or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
+				!and(@testFloat == 1.5  , §testInt == 7  , £testString == "foo")
+		)
+	){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
+	}
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_4"
 	
 	//Set @test1 1.0
 	//Set @test2 11.0

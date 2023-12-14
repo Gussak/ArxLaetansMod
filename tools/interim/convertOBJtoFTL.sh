@@ -891,6 +891,7 @@ else #OBJ TO FTL ###############################################################
     bUpdatedCfg=false
     
     SECFUNCarrayShow -v astrAutoCfgList
+    SECFUNCarrayShow astrAutoCfgList
     if echoc -t $fPromptTm -q "Apply all material cfgs now?@Dy";then
       : ${bMultiThreadFaceTxProccess:=false} #help WIP, not tested
       if $bMultiThreadFaceTxProccess;then echo "$$" >"${strFlCoreName}.${strMTSuffix}";fi
@@ -920,7 +921,7 @@ else #OBJ TO FTL ###############################################################
       SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlCoreName}.ftl.unpack.json";
     fi
     
-    if echoc -t $fPromptTm -q "apply the changes to json creating a new ftl file?@Dy";then
+    if echoc -t $fPromptTm -q "apply the changes to json (you can manually edit it too) creating a new ftl file?@Dy";then
       if $bDoBkpEverything;then
         SECFUNCexecA -ce mv -vT "${strFlCoreName}.ftl" "${strFlCoreName}.ftl.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
       fi
@@ -950,7 +951,10 @@ else #OBJ TO FTL ###############################################################
   fi
   SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathReleaseHelper/"
   SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "${strBlenderSafePath}/${strFlCoreName}.blend" #TODOA chk blender file if all is ok
-  egrep "map_Kd" "$strFlWFMtl" |sed -r -e 's@\\@/@g' -e 's@map_Kd @@' |while read strFlRelatPathTx;do
+  
+  astrFlRelatPathTxCpAllList=()
+  IFS=$'\n' read -d '' -r -a astrFlRelatPathTxTmpList < <(egrep "map_Kd" "$strFlWFMtl" |sed -r -e 's@\\@/@g' -e 's@map_Kd @@')&&:
+  for strFlRelatPathTx in "${astrFlRelatPathTxTmpList[@]}";do
     SECFUNCdrawLine "$strFlRelatPathTx"
     astrFlRelatPathTxCpList=("$strFlRelatPathTx")
     declare -p astrFlRelatPathTxCpList
@@ -968,27 +972,30 @@ else #OBJ TO FTL ###############################################################
       echoc -p "invalid empty astrFlRelatPathTxCpList"
       exit 1
     fi
-    
-    #textures
-    pwd
-    for strFlRelatPathTxCp in "${astrFlRelatPathTxCpList[@]}";do
-      declare -p strBlenderSafePath strFlRelatPathTxCp strPathReleaseHelper strPathDeployAtModInstallFolder strTXPathRelative
-      #SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathReleaseHelper}/textures/"
-      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp" "${strPathReleaseHelper}/textures/"
-      
-      #SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}"* #this prevents overwriting symlinks target if any there
-      SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}" #this prevents overwriting symlinks target if any there
-      #SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
-      SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp" "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
-      
-      strFlNoBakeTx="${strBlenderSafePath}/$(dirname "$strFlRelatPathTxCp")/NoBakedTextures/$(basename "$strFlRelatPathTxCp")"
-      if [[ -f "$strFlNoBakeTx" ]];then
-        #TODO? SECFUNCtrash strFlNoBakeTx at "$strPathReleaseHelper/textures/NoBakedTextures/"
-        #SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
-        SECFUNCexecA -ce cp -vfL "$strFlNoBakeTx" "$strPathReleaseHelper/textures/NoBakedTextures/"
-      fi
-    done
+    astrFlRelatPathTxCpAllList+=("${astrFlRelatPathTxCpList[@]}")
   done
+  #textures
+  SECFUNCarrayShow -v astrFlRelatPathTxCpAllList
+  SECFUNCarrayUniq astrFlRelatPathTxCpAllList
+  SECFUNCarrayShow -v astrFlRelatPathTxCpAllList
+  echoc -t $fPromptTm -w "confirm if the above list looks ok (no dups, no wrong files)"
+	for strFlRelatPathTxCp in "${astrFlRelatPathTxCpAllList[@]}";do
+		declare -p strBlenderSafePath strFlRelatPathTxCp strPathReleaseHelper strPathDeployAtModInstallFolder strTXPathRelative
+		#SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathReleaseHelper}/textures/"
+		SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp" "${strPathReleaseHelper}/textures/"
+		
+		#SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}"* #this prevents overwriting symlinks target if any there
+		SECFUNCtrash "${strPathDeployAtModInstallFolder}/${strFlRelatPathTxCp}" #this prevents overwriting symlinks target if any there
+		#SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp"* "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
+		SECFUNCexecA -ce cp -vfL "${strBlenderSafePath}/$strFlRelatPathTxCp" "${strPathDeployAtModInstallFolder}/${strTXPathRelative}/"
+		
+		strFlNoBakeTx="${strBlenderSafePath}/$(dirname "$strFlRelatPathTxCp")/NoBakedTextures/$(basename "$strFlRelatPathTxCp")"
+		if [[ -f "$strFlNoBakeTx" ]];then
+			#TODO? SECFUNCtrash strFlNoBakeTx at "$strPathReleaseHelper/textures/NoBakedTextures/"
+			#SECFUNCexecA -ce cp -vf "$strFlNoBakeTx"* "$strPathReleaseHelper/textures/NoBakedTextures/"
+			SECFUNCexecA -ce cp -vfL "$strFlNoBakeTx" "$strPathReleaseHelper/textures/NoBakedTextures/"
+		fi
+	done
   
   echoc --info "scripts etc"
   strRelativeScriptPath="`pwd |sed -r "s@.*${strDeveloperWorkingPath}/game/@@"`"  #AUTOCFG
