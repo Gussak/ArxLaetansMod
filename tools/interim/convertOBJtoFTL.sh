@@ -785,7 +785,7 @@ else #OBJ TO FTL ###############################################################
 		: ${strVectorOriginFromBlenderRegex:="v -*0[.]00000[0-9] -*0[.]00000[0-9] -*0[.]00000[0-9]"} #help blender export vectors at 0,0,0 with the y no exactly at 0.0 !!! so you must configure the wrong value to be fixed!
 		strOriginVecMsg="origin made of 3 vertexes creating a face with the material sM=\@Origin texture=SPECIALTX_ORIGIN.png at absolute position 0,0,0"
 		if ! egrep "${strVectorOriginFromBlenderRegex}" "$strFlWFObj";then
-			echoc -p "the obj file does not contain the ${strOriginVecMsg} , please fix it!"
+			echoc -p "the obj file does not contain the ${strOriginVecMsg}, please fix it!"
 			exit 1
 		fi
 		sed ${strSedBkpOpt} -r -e "s@${strVectorOriginFromBlenderRegex}@${strVecFix}@" "$strFlWFObj"
@@ -794,6 +794,17 @@ else #OBJ TO FTL ###############################################################
 			exit 1
 		fi
 	fi
+	
+	astrChkMtlList=(
+		SPECIALTX_ORIGIN #help SpecialMaterials: this texture must be set in a material named sM=@Ogirin in blender
+	)
+	for strChkMtl in "${astrChkMtlList[@]}";do
+		if ! egrep -i "${strChkMtl}" "$strFlWFMtl";then
+			echoc -p "the mtl file does not contain the ${strChkMtl}, please fix it!"
+			egrep "[#]help SpecialMaterials:" "$0"
+			exit 1
+		fi
+	done
 	
   (
     SECFUNCexecA -ce cd "$strPathTools"; #must be run from where it is installed to find required deps: ArxLibertatisFTLConverter.pdb libArxIO.so.0

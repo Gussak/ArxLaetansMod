@@ -10,18 +10,19 @@ source <(secinit)
 
 strBranch="$(cd "${strBPath}";git branch |egrep "^[*]" |cut -f2 -d' ')"
 
-strFlBN="${strBPath}.ForArxLaetansMod.SourceCode.Branch_${strBranch}.SnapShot.`SECFUNCdtFmt --filename`"
-
 if $bCompiledMode;then
+	strWhat="Compiled"
 	astrTarParams=(
 		--exclude="${strBPath}/build/CMakeFiles"
 	)
 else
+	strWhat="SourceCode"
 	astrTarParams=(
 		--exclude="${strBPath}/build"
 		--exclude="${strBPath}/.git"
 	)
 fi
+strFlBN="${strBPath}.ForArxLaetansMod.${strWhat}.Branch_${strBranch}.SnapShot.`SECFUNCdtFmt --filename`"
 
 tar "${astrTarParams[@]}" -vcf "${strFlBN}.tar" "${strBPath}/"*
 

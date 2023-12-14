@@ -892,14 +892,40 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
+>>FUNCconfigOptions {
+	//INPUT: £FUNCconfigOptions_mode "clear" "show"
+	if(£FUNCconfigOptions_mode == "clear") {
+		TWEAK SKIN "Hologram.ConfigOptions"	"Hologram.ConfigOptions.Clear"
+	} else {
+	if(£FUNCconfigOptions_mode == "show") {
+		TWEAK SKIN "Hologram.ConfigOptions.Clear" "Hologram.ConfigOptions"
+	} }
+	
+	Set §FUNCconfigOptions_index 1 >>LOOP_FCO_ClearAll
+		if(£FUNCconfigOptions_mode == "clear") {
+			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+		} else {
+		if(£FUNCconfigOptions_mode == "show") {
+			if(§ConfigOption_ClassFocus == 1) {
+				TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" 
+			}
+		} }
+	++ §FUNCconfigOptions_index if(§FUNCconfigOptions_index < 66) GoTo LOOP_FCO_ClearAll
+	
+	Set £FUNCconfigOptions_mode "clear" //default for next call
+	RETURN
+}
+
 >>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
 	Set £AncientDeviceMode "AncientBox"
 	
-	Set #FUNCshowlocals_enabled 1 //COMMENT_ON_RELEASE
+	//Set #FUNCshowlocals_enabled 1 //COMMENT_ON_RELEASE
 	
-	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified" "Hologram.skybox.index2000.DocUnidentified"
-	TWEAK SKIN "Hologram.tiny.index4000.grenade"         "Hologram.tiny.index4000.grenade.Clear"
-	TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"     "Hologram.tiny.index4000.grenadeGlow.Clear"
+	GoSub FUNCconfigOptions
+	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
+	TWEAK SKIN "Hologram.tiny.index4000.grenade"					"Hologram.tiny.index4000.grenade.Clear"
+	TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"			"Hologram.tiny.index4000.grenadeGlow.Clear"
 	
 	if(§iFUNCMakeNPCsHostile_rangeDefault == 0) {
 		Set §iFUNCMakeNPCsHostile_rangeDefault 350 //the spell explosion(chaos) range //SED_TOKEN_MOD_CFG
@@ -1523,7 +1549,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCtestLogicOperators { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators {
-	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests"
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestLogicOperators"
 	
 	Set @testFloat 1.5 //dont change!
 	Set §testInt 7 //dont change!
@@ -1581,7 +1607,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1a=ok"
 	}
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt =! 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b=ok"
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") || !and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))){
@@ -1691,19 +1717,23 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCtests { GoSub FUNCtests ACCEPT } >>FUNCtests {
-	if(^degreesx_player == 301) { //maximum Degrees player can look up is that
+	//GoSub FUNCtestDegrees showlocals
+	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
 		//TODO put this on CircularOptionChoser
 		++ #FUNCshowlocals_enabled	if(#FUNCshowlocals_enabled > 1) Set #FUNCshowlocals_enabled 0
 		GoSub FUNCshowlocals
 	}
 	
-	if(^degreesx_player == 74.9) { //minimum Degrees player can look down is that
+	//if(^degreesx_player == 74.9) { //minimum Degrees player can look down is that
+	if(^degreesx_player < 75) { // 74.9 is the minimum Degrees player can look down is that
 		//TODO put this on CircularOptionChoser
 		
 		//fail teleport -pi //tele the player to its starting spawn point
 		//Set @TstDistToSomeFixedPoint ^RealDist_PRESSUREPAD_GOB_0022 //this gives a wrong(?) huge value..
 		//Set @TstDistToSomeFixedPoint ^Dist_PRESSUREPAD_GOB_0022 //this doesnt seem to work, the value wont change..
 		//Set §TstDistToSomeFixedPoint @TstDistToSomeFixedPoint
+		
+		Rotate 0 0 0
 		
 		Set £ScriptDebug________________Tests "FUNCtests"
 		GoSub FUNCdistAbsPos
@@ -1712,6 +1742,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		GoSub FUNCtestElseIf
 		GoSub FUNCtestDegrees
 		GoSub TFUNCtestArithmetics
+		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 	}
 	 
 	GoSub FUNCshowlocals
@@ -2227,8 +2258,14 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCshowlocals { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
+	//INPUT: §FUNCshowlocals_force
+	//TODOABC if(or(#FUNCshowlocals_enabled >= 1 || §FUNCshowlocals_force >= 1)) showlocals
+	if(§FUNCshowlocals_force >= 1){
+		showlocals
+	} else {
 	if(#FUNCshowlocals_enabled >= 1){
 		showlocals
-	}
+	} }
+	Set §FUNCshowlocals_force 0 //default for next call
 	RETURN
 }

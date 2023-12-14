@@ -2,7 +2,7 @@
 
 source <(secinit)
 
-bCompiledMode=true createArxLibertatis.ForArxLaetans.SnapShot.sh
+bCompiledMode=true ./createArxLibertatis.ForArxLaetans.SnapShot.sh
 
 #strFlBN="ArxLibertatis.ForArxLaetansMod.SourceCode.SnapShot.Compiled.`SECFUNCdtFmt --filename`"
 
