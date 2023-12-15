@@ -155,6 +155,7 @@ ON INIT {
 ON IDENTIFY { //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
 	
 	GoSub FUNChoverInfo
+	if(ｘncientDeviceMode == "ConfigOptions")	GoSub FUNCconfigOptionHover
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	//Set ΠcriptDebugProblemTmp "identified=~兌dentified~;ObjKnow=~^PLAYER_SKILL_OBJECT_KNOWLEDGE~"
@@ -170,7 +171,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 				//TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~ΠkyBoxCurrent~"
 			//}
 			
-			GoSub FUNCcfgAncientBox
+			Set ｘncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
 			
 			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Identified_Now"
 			
@@ -194,6 +195,7 @@ ON INVENTORYUSE {
 	GoSub FUNCtests
 	
 	if(^inPlayerInventory == 1) {
+		// this is another morph cycle, just activate to go, no combining:
 		if(and(ｘncientDeviceMode == "AncientBox" && 呆HologramInitialized == 0)) { //signal repeater can only be created inside the inventory
 			Set ｘncientDeviceMode "_BecomeSignalRepeater_"
 			GoSub FUNCmorphUpgrade
@@ -910,11 +912,20 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Add 低fgOptIndexTruncTmp 1 //to fix from 0.0 to 1.0 that is the lowest option
 	// 低fgOptIndexTruncTmp 1-5 (5) bottom, 6-16 (11) horizon, 17-21 (5) top
 	Set 低fgOptIndex -1
+	
+	// this below translates to CfgOptions
 	// quadrants in Y rotation
-	if(@CfgOptHoverY > 0 && @CfgOptHoverY < 90) {
-		if(低fgOptIndexTruncTmp == 5) {
-			Set 低fgOptIndex 33 //TODO:WIP:TEST, the indexes at .sh must be reorganized to be less confuse to implement here
-		}
+	Set 低fgOptIndexTruncTmp2 21
+	Sub 低fgOptIndexTruncTmp2 低fgOptIndexTruncTmp
+	if(@CfgOptHoverY > 0 && @CfgOptHoverY < 90) { //Cfg Opts 6-
+		if(低fgOptIndexTruncTmp <= 5) { //bottom
+		} else {
+		if(and(低fgOptIndexTruncTmp >= 6 && 低fgOptIndexTruncTmp <= 16)) { //horizon
+			Set 低fgOptIndex 6
+			Add 低fgOptIndex 低fgOptIndexTruncTmp
+		} else {
+		if(低fgOptIndexTruncTmp >= 17) { //top
+		} } }
 	} else {
 	if(@CfgOptHoverY > 90 && @CfgOptHoverY < 180) {
 	} else {
@@ -952,9 +963,11 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(ΓUNCconfigOptions_mode == "show") {
 		TWEAK SKIN "Hologram.ConfigOptions.Clear" "Hologram.ConfigOptions"
 		
+		//TOKEN_AUTOPATCH_UpdateCfgOpt_BEGIN
 		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_ClassFocus GoSub CFUNCconfigOptionUpdate
 		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_DebugTests GoSub CFUNCconfigOptionUpdate
 		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_ShowLocals GoSub CFUNCconfigOptionUpdate
+		//TOKEN_AUTOPATCH_UpdateCfgOpt_END
 	} }
 	
 	Set ΓUNCconfigOptions_mode "hide" //default for next call
@@ -1033,9 +1046,11 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set 低onfigOptions_maxIndex 66 //SED_TOKEN_MOD_CFG
 	// .0 means initially disabled (.1 would mean enabled initially)
-	if(&G_HologCfgOpt_ClassFocus == 0) Set &G_HologCfgOpt_ClassFocus 33.0
-	if(&G_HologCfgOpt_ShowLocals == 0) Set &G_HologCfgOpt_ShowLocals 58.0
-	if(&G_HologCfgOpt_DebugTests == 0) Set &G_HologCfgOpt_DebugTests 59.0
+	//TOKEN_AUTOPATCH_CfgOptDefaults_BEGIN
+	if(&G_HologCfgOpt_ClassFocus == 0) Set &G_HologCfgOpt_ClassFocus 17.0
+	if(&G_HologCfgOpt_ShowLocals == 0) Set &G_HologCfgOpt_ShowLocals 21.0
+	if(&G_HologCfgOpt_DebugTests == 0) Set &G_HologCfgOpt_DebugTests 22.0
+	//TOKEN_AUTOPATCH_CfgOptDefaults_BEGIN
 	
 	Set 助seMax 5
 	Inc 助seMax ^rnd_110
@@ -1825,7 +1840,12 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//GoSub FUNCtestDegrees showlocals
 	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
 		//TODO put this on CircularOptionChoser
-		++ #FUNCshowlocals_enabled	if(#FUNCshowlocals_enabled > 1) Set #FUNCshowlocals_enabled 0
+		//++ #FUNCshowlocals_enabled	if(#FUNCshowlocals_enabled > 1) Set #FUNCshowlocals_enabled 0
+		if(&G_HologCfgOpt_ShowLocals == 21.1) { //TODOA use CFUNCconfigOptionToggle instead
+			Set &G_HologCfgOpt_ShowLocals 21.0
+		} else {
+			Set &G_HologCfgOpt_ShowLocals 21.1
+		}
 		GoSub FUNCshowlocals
 	}
 	
@@ -2159,6 +2179,8 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCskillCheckAncientTech	Set 低reateChance 佝UNCskillCheckAncientTech_chanceSuccess_OUTPUT
 	if (and(or(利uality >= 4 || 佝UNCmorphUpgrade_otherQuality >= 4) && 兌temConditionSure == 5)) Set 低reateChance 100
 	RANDOM 低reateChance {
+		/////////////////////////////////////////////////////////////////
+		////////////// MORPH thru simple activation while in inventory
 		if (ｘncientDeviceMode == "_BecomeSignalRepeater_") { Set ｘncientDeviceMode "SignalRepeater"
 			// this must be easy to become again a hologram, so do minimal changes!
 			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
@@ -2171,11 +2193,19 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			//Set 你ncientDeviceTriggerStep 1
 			//PlayerStackSize 1
 		} else { 
-		if ( ｘncientDeviceMode == "SignalRepeater" ) { Set ｘncientDeviceMode "AncientBox"
-			TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
-			GoSub FUNCcfgAncientBox
-			RETURN //ONLY HERE!!! is just reverting to hologram!
+		if ( ｘncientDeviceMode == "SignalRepeater" ) { Set ｘncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
+			Set ΓUNCconfigOptions_mode "show" GoSub FUNCconfigOptions
+			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
+			RETURN //because this is not a normal tool
 		} else {
+		//// last, reinits the cycle
+		if ( ｘncientDeviceMode == "ConfigOptions" ) { Set ｘncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
+			Set ΓUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
+			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
+			RETURN //because this is not a normal tool
+		} else {
+		/////////////////////////////////////////////////////////////////
+		/////////////////// MORPH only by combining
 		if (or(ｘncientDeviceMode == "Hologram" || ｘncientDeviceMode == "AncientBox")) { Set ｘncientDeviceMode "Grenade"
 			Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
 			Div 判ristineChance 10
@@ -2244,7 +2274,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Set Ζcon "HoloMindControl"
 			Set 你ncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
-		} } } } } }
+		} } } } } } }
 		
 		if(你ncientDeviceTriggerStep == 1) {
 			if ( 利uality >= 4 ) {
@@ -2273,28 +2303,38 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	RETURN
 }
->>TFUNCcfgAncientBox { GoSub FUNCcfgHologram ACCEPT } >>FUNCcfgAncientBox {
-	Set ｘncientDeviceMode "AncientBox"
-	
-	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "Hologram.tiny.index4000.box"
-	TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
-	TWEAK SKIN "Hologram.tiny.index4000.boxLandMine"       "Hologram.tiny.index4000.box"
-	TWEAK SKIN "Hologram.tiny.index4000.boxTeleport"       "Hologram.tiny.index4000.box"
-	TWEAK SKIN "Hologram.tiny.index4000.boxMindControl"    "Hologram.tiny.index4000.box"
-	
-	SET_PRICE 50
-	
-	if(兌dentified == 1) {
-		Set ΓUNCnameUpdate_NameBase "Ancient Box (OFF)" 
+>>FUNCcfgSkin {
+	//INPUT: <ΓUNCcfgSkin_simple>
+	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "~ΓUNCcfgSkin_simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "~ΓUNCcfgSkin_simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxLandMine"       "~ΓUNCcfgSkin_simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxTeleport"       "~ΓUNCcfgSkin_simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxMindControl"    "~ΓUNCcfgSkin_simple~"
+	RETURN
+}
+>>TFUNCcfgAncientDevice { GoSub FUNCcfgAncientDevice ACCEPT } >>FUNCcfgAncientDevice {
+	//INPUT: 
+	if(ｘncientDeviceMode == "AncientBox") {
+		Set ΓUNCcfgSkin_simple "Hologram.tiny.index4000.box" GoSub FUNCcfgSkin
+		SET_PRICE 50
+		PlayerStackSize 50 
+		TWEAK ICON "AncientBox[icon]"
+		if(兌dentified == 1) {
+			Set ΓUNCnameUpdate_NameBase "Ancient Box (OFF)" 
+		} else {
+			Set ΓUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" 
+		}
 	} else {
-		Set ΓUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" 
-	}
+	if(ｘncientDeviceMode == "ConfigOptions") {
+		Set FUNCcfgSkin "Hologram.tiny.index4000.boxConfigOptions" GoSub FUNCcfgSkin
+		SET_PRICE 13
+		PlayerStackSize 1
+		TWEAK ICON "AncientConfigOptions[icon]"
+		Set ΓUNCnameUpdate_NameBase "Ancient Device Config Options" //keep always readable!
+	} }
+	
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
-	
-	PlayerStackSize 50 
-	
-	TWEAK ICON "Hologram[icon]"
 	
 	RETURN
 }
@@ -2336,6 +2376,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @SignalStrengthReq 0
 	if(ｘncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReq  1
 	if(ｘncientDeviceMode == "SignalRepeater") Set @SignalStrengthReq  1
+	if(ｘncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReq  0 //keep 0!
 	if(ｘncientDeviceMode == "Hologram"      ) Set @SignalStrengthReq  5
 	if(ｘncientDeviceMode == "Grenade"       ) Set @SignalStrengthReq 10
 	if(ｘncientDeviceMode == "LandMine"      ) Set @SignalStrengthReq 15
@@ -2369,7 +2410,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 //}
 >>TFUNCshowlocals { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals  { //no δaaaDebugScriptStackAndLog. this func is to easy disable showlocals.
 	//INPUT: [佝UNCshowlocals_force]
-	if(or(&G_HologCfgOpt_ShowLocals == 33.1 || 佝UNCshowlocals_force >= 1)) showlocals
+	if(or(&G_HologCfgOpt_ShowLocals == 21.1 || 佝UNCshowlocals_force >= 1)) showlocals
 	//if(佝UNCshowlocals_force >= 1){
 		//showlocals
 	//} else {
