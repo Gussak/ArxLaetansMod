@@ -26,6 +26,9 @@ SECFUNCarrayShow -v astrCfgVar
 
 strEmptyLineWithNL=" \n" #an empty line with a single space to separate them clearly
 
+strCodeGenUpdateCfgOpt=""
+strCodeGenDefaultsCfgOpt=""
+
 nRmSpaces=1 #before the %
 ((nRmSpaces+=2))&&: #from the %02d as max is nTot that is less than 100
 ((nRmSpaces+=2))&&: #the ') '
@@ -104,16 +107,43 @@ for((i=iStartIndex;i<=nTot;i++));do
 		fi
 	fi
 	
+	# validate the script
 	if [[ -n "${astrCfgVar[$i]-}" ]];then 
-		echo "${astrCfgVar[$i]}" >&2;
-		strRegexVar="`echo "${astrCfgVar[$i]}" |sed 's@.@[&]@g'`"
-		if ! egrep "[\t ]*if\(${strRegexVar} == 0\) Set ${strRegexVar} ${i}[.]0" "${strFlHolog}" >&2;then
-			echoc -p "The above line is missing at .asl script" >&2
+		strCodeGenUpdateCfgOpt+="		Set @CFUNCconfigOptionUpdate_check ${astrCfgVar[$i]} GoSub CFUNCconfigOptionUpdate\n"
+		strCodeGenDefaultsCfgOpt+="	if(${astrCfgVar[$i]} == 0) Set ${astrCfgVar[$i]} ${i}.0\n"
+		
+		strRegexVar="`echo "${astrCfgVar[$i]}" |sed 's@.@[&]@g'`" 
+		echo "VALIDATING[$i]: ${astrCfgVar[$i]} '$strRegexVar'" >&2;
+		egrep "${strRegexVar}" "${strFlHolog}" -ai >&2
+		strRegexChk="${strRegexVar}[ =!><]*"
+		if egrep "${strRegexChk}.*[0-9]" "${strFlHolog}" -ai |egrep -v "${strRegexChk}(0|${i})" -wai >&2;then
+			echoc -p "Invalid use at .asl script (${astrCfgVar[$i]}, $i)" >&2
 		fi
+		#if ! egrep "[\t ]*if\(${strRegexVar} == 0\) Set ${strRegexVar} ${i}[.]0" "${strFlHolog}" -a >&2;then
+			#echoc -p "The above line is missing at .asl script (${astrCfgVar[$i]}, $i)" >&2
+		#fi
+		#if egrep "${strRegexVar} *[=!><]* *" "${strFlHolog}" -ain |egrep -vaw "^[0-9]*:.*${strRegexVar} [=!><] (0|${i})" >&2;then
+			#echoc -p "invalid comparison at .asl script (${astrCfgVar[$i]}, $i)"
+		#fi
+		#if egrep "Set ${strRegexVar} " "${strFlHolog}" -ain |egrep -vaw "^[0-9]*:.*Set ${strRegexVar} (0|${i})" >&2;then # usually a comparison like ... == nn or an assignment like set ... nn
+			#echoc -p "invalid assignment at .asl script (${astrCfgVar[$i]}, $i)"
+		#fi
+		echo >&2
 	fi
-done >$0.txt
+done >"$0.txt"
+
+echo "TOKEN_AUTOPATCH_strCodeGenUpdateCfgOpt_BEGIN"
+echo -e "$strCodeGenUpdateCfgOpt"
+echo "TOKEN_AUTOPATCH_strCodeGenUpdateCfgOpt_END"
+echo
+echo "TOKEN_AUTOPATCH_strCodeGenDefaultsCfgOpt_BEGIN"
+echo -e "$strCodeGenDefaultsCfgOpt"
+echo "TOKEN_AUTOPATCH_strCodeGenDefaultsCfgOpt_END"
+
 echoc --info "updating text: select all text in gimp least the first char, paste, hit home and del 1st char"
 echoc --info "fixing: between top/front and front/bottom, the font needs to be 29 size for the single space there to better align everything at front and bottom."
+
 echoc --info "@s@{lyB}TODO:@S autogen asl code for options"
 echoc --info "@s@{lyB}TODO:@S pages of options with named tabs"
+
 echoc --info "@s@{lrB}ISSUE:@S half of the top and half of the bottom options will be weird to click as they should be upside down. may be this can be fixed on the UV !!!?"
