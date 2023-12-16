@@ -1709,14 +1709,18 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14=WRONG"
 	
 	// not(!)
-	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
+	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11=WRONG"
-	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
+	}
+	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString != "foo")) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12=ok"
-	if(nand(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))
+	}
+	if(nand(@testFloat == 1.5 && §testInt != 7 && £testString == "foo")) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13=ok"
-	if(nand(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))
+	}
+	if(nand(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14=ok"
+	}
 	
 	// or nor
 	if(or(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")){
@@ -1728,8 +1732,36 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(nor(@testFloat != 1.5 || §testInt == 7 || £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3=WRONG"
 	}
+	if(nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3b=WRONG"
+	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c4=ok"
+	}
+	
+	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e1=ok"
+	}
+	if(nand(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e1b=ok"
+	}
+	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e2=ok"
+	}
+	if(nor(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e2b=ok"
+	}
+	if(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e3=wrong"
+	}
+	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e3b=wrong"
+	}
+	if(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e4=wrong"
+	}
+	if(nor(@testFloat == 1.5 || §testInt != 7 || £testString != "foo")){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e4b=wrong"
 	}
 	
 	// nesting and multiline conditions
@@ -1757,7 +1789,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=WRONG"
 	}
 	
-	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_begin"
+	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_begin"
 	if(
 		or(
 				@testFloat != 1.5 ||
@@ -1773,7 +1805,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=ok"
 	}
-	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_3"
+	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_3"
 	if(
 		or(
 				@testFloat != 1.5 ||
@@ -1789,7 +1821,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
 	}
-	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_4"
+	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_4"
 	
 	//Set @test1 1.0
 	//Set @test2 11.0
