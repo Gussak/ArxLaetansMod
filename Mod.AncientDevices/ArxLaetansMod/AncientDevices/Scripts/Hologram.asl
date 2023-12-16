@@ -107,11 +107,11 @@
 //		//do something
 //	++ §FUNCtst_index	if(§FUNCtst_index < 10) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC
 //
-// //simplified array loop. Code the conditions to end the loop and easily surround them with '!or()'.
+// //simplified array loop. Code the conditions to end the loop and easily surround them with 'nor()'.
 //	Set §FUNCtst_index 0	>>LOOP_FUNCtst_iterArray1_a
 //		Set -a £FUNCtst_entry "~£FUNCtst_array1~" §FUNCtst_index
 //		// do something
-//	++ §FUNCtst_index	if(!or(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == "")) GoTo LOOP_FUNCtst_iterArray1_a
+//	++ §FUNCtst_index	if(nor(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == "")) GoTo LOOP_FUNCtst_iterArray1_a
 
 
 //////////////////////////////// TODO LIST: /////////////////////////
@@ -189,7 +189,10 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 }
 
 ON INVENTORYUSE {
-	if (^amount > 1) ACCEPT //this must not be a stack of items
+	if (^amount > 1) {
+		todoabc
+		ACCEPT //this must not be a stack of items
+	}
 
 	++ §OnInventoryUseCount //total activations just for debug
 	GoSub FUNCtests
@@ -598,7 +601,7 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	Set £inInventory ^ininventory
-	if (!or(£inInventory == "none" || £inInventory == "player")) ACCEPT //only works if in player inventory or on floor, so will not work on other containers, on corpses and on NPC inventories
+	if (nor(£inInventory == "none" || £inInventory == "player")) ACCEPT //only works if in player inventory or on floor, so will not work on other containers, on corpses and on NPC inventories
 	
 	GoSub FUNChoverInfo
 	
@@ -757,7 +760,10 @@ ON COMBINE {
 	}
 	
 	// check other (^$PARAM1 is the one that you double click)
-	if (^$PARAM1 ISCLASS "AncientBox") else ACCEPT //only combine with these
+	if (nand(^$PARAM1 ISCLASS "AncientBox")) {
+		SPEAK -p [player_no] NOP
+		ACCEPT //only combine with these
+	}
 	
 	if (^$PARAM1 !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
@@ -943,11 +949,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(§FUNCconfigOptionHighlight_indexPrevious > -1) {
 		//Set £FUNCconfigOptions_mode "hide"
 		Set §FUNCconfigOptions_index §FUNCconfigOptionHighlight_indexPrevious
-		GoSub FUNCconfigOptions_Update
+		GoSub CFUNCconfigOptionUpdate
 	}
 	
 	Set §FUNCconfigOptions_index §FUNCconfigOptionHighlight_index
-	GoSub FUNCconfigOptions_Update
+	GoSub CFUNCconfigOptionUpdate
 	
 	Set §FUNCconfigOptionHighlight_indexPrevious §FUNCconfigOptionHighlight_index
 	RETURN
@@ -1034,7 +1040,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
 	Set £AncientDeviceMode "AncientBox"
 	
-	GoSub FUNCconfigOptions
+	Set £FUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
 	TWEAK SKIN "Hologram.tiny.index4000.grenade"					"Hologram.tiny.index4000.grenade.Clear"
 	TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"			"Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -1643,6 +1649,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 
 >>TFUNCtestArithmetics { GoSub FUNCtestArithmetics ACCEPT } >>FUNCtestArithmetics {
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestArithmetics"
 	Set @testAriFloat 2
 	Set §testAriInt 2
 	NthRoot @testAriFloat §testAriInt //1.41...
@@ -1654,9 +1661,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Sub §testAriInt 1
 	Set @testAriFloat2 2
 	Pow @testAriFloat2 3 //8
+	++ §testsPerformed
 	RETURN
 }
 >>TFUNCtestPrintfFormats { GoSub FUNCtestPrintfFormats ACCEPT } >>FUNCtestPrintfFormats {
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestPrintfFormats"
 	Set @testFloat 78.12345
 	Set §testInt 513
 	Set £testString "foo"
@@ -1700,23 +1709,23 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14=WRONG"
 	
 	// not(!)
-	if(!and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
+	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11=WRONG"
-	if(!and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
+	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12=ok"
-	if(!and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))
+	if(nand(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13=ok"
-	if(!and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))
+	if(nand(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14=ok"
 	
-	// or !or
+	// or nor
 	if(or(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c1=ok"
 	}
-	if(!or(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1")){
+	if(nor(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c2=WRONG"
 	}
-	if(!or(@testFloat != 1.5 || §testInt == 7 || £testString == "foo")){
+	if(nor(@testFloat != 1.5 || §testInt == 7 || £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3=WRONG"
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
@@ -1727,16 +1736,24 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1a=ok"
 	}
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || nor(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b=ok"
 	}
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") || !and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))){
+	if(or(
+		@testFloat != 1.5 || 
+		§testInt != 7     || 
+		and(£testString == "foo" && §testInt != 7) ||
+		nor(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")
+	)){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b2=ok"
+	}
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") || nand(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1z=ok"
 	}
-	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")     )  ){
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      nand(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")     )  ){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1=ok"
 	}
-	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      !or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      !and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")     )  ){
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      nand(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")     )  ){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=WRONG"
 	}
 	
@@ -1750,8 +1767,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 						&&
 						§testInt != 7
 				) ||
-				!or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
-				!and(@testFloat == 1.5  , §testInt != 7  , £testString == "foo")
+				nor( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
+				nand(@testFloat == 1.5  , §testInt != 7  , £testString == "foo")
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=ok"
@@ -1766,8 +1783,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 						&&
 						§testInt != 7
 				) ||
-				!or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
-				!and(@testFloat == 1.5  , §testInt == 7  , £testString == "foo")
+				nor( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
+				nand(@testFloat == 1.5  , §testInt == 7  , £testString == "foo")
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
@@ -1792,7 +1809,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
->>TFUNCdistAbsPos { GoSub FUNCdistAbsPos ACCEPT } >>FUNCdistAbsPos {
+>>TFUNCtestDistAbsPos { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos {
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCdistAbsPos"
 	// distance to absolute locations
 	Set §testDistAbsolute ^dist_{0,0,0}
 	Set @testDistAbsolute2 ^dist_{1000.123,2000.56,3000}
@@ -1807,20 +1825,26 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCtestElseIf { GoSub FUNCtestElseIf ACCEPT } >>FUNCtestElseIf {
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestElseIf"
 	++ §test
 	if ( §test == 1 ) {
 		Set £work "~£work~;~§test~:ok1"
-	} else { if ( §test == 2 ) {
+	} else {
+	if ( §test == 2 ) {
 		Set £work "~£work~;~§test~:ok2"
-	} else { if ( §test == 3 ) {
+	} else {
+	if ( §test == 3 ) {
 		Set £work "~£work~;~§test~:ok3"
 	} else { 
 		Set £work "~£work~;~§test~:okElse"
 	}  }  }
+	++ §testsPerformed
 	GoSub FUNCshowlocals
 	RETURN
 }
 >>TFUNCtestDegrees { GoSub FUNCtestDegrees ACCEPT } >>FUNCtestDegrees {
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestDegrees"
+	
 	Set @testDegreesXp ^degreesx_player
 	Set @testDegreesYp ^degreesy_player
 	Set @testDegreesZp ^degreesz_player //usually always 0 to player I think
@@ -1834,6 +1858,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testDegreesYme2 ^degrees
 	Set @testDegreesYme3 ^degrees_~^me~
 	Set @testDegreesYp2  ^degrees_player
+	
+	++ §testsPerformed
 	RETURN
 }
 >>TFUNCtests { GoSub FUNCtests ACCEPT } >>FUNCtests {
@@ -1861,12 +1887,18 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Rotate -a 0 0 0
 		
 		Set £ScriptDebug________________Tests "FUNCtests"
-		GoSub FUNCdistAbsPos
+		Set §testsPerformed 0
+		GoSub FUNCtestDistAbsPos
+		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestPrintfFormats
-		GoSub FUNCtestLogicOperators
+		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestElseIf
+		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestDegrees
-		GoSub TFUNCtestArithmetics
+		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
+		GoSub FUNCtestArithmetics
+		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
+		GoSub FUNCtestLogicOperators
 		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 	}
 	 
@@ -1897,7 +1929,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 					}
 				}
 			}
-		++ §LoopIndex	if(!or(§FLM_OnTopLife > 0 || £FLM_OnTopEntId == "")) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
+		++ §LoopIndex	if(nor(§FLM_OnTopLife > 0 || £FLM_OnTopEntId == "")) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
 		
 		if(§FLM_OnTopLife > 0) {
 			//Set §Scale 100
