@@ -190,7 +190,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 
 ON INVENTORYUSE {
 	if (^amount > 1) {
-		todoabc
+		SPEAK -p [player_no] NOP
 		ACCEPT //this must not be a stack of items
 	}
 
@@ -204,10 +204,14 @@ ON INVENTORYUSE {
 			GoSub FUNCmorphUpgrade
 			ACCEPT
 		} else {
-		if(£AncientDeviceMode == "SignalRepeater") { //signal repeater can only revert to hologram inside the inventory
+		if(£AncientDeviceMode == "SignalRepeater") {
 			GoSub FUNCmorphUpgrade
 			ACCEPT
-		} }
+		} else {
+		if(£AncientDeviceMode == "ConfigOptions") { //last only revert to hologram inside the inventory
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} } }
 	}
 	
 	if ( £AncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off
@@ -312,7 +316,7 @@ ON INVENTORYUSE {
 		ACCEPT
 	}
 	
-	if(£AncientDeviceMode != "Hologram") {
+	if(£AncientDeviceMode != "HologramMode") {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Unrecognized:£AncientDeviceMode='~£AncientDeviceMode~'"
 		SPEAK -p [player_no] NOP
 		GoSub FUNCshowlocals
@@ -324,7 +328,7 @@ ON INVENTORYUSE {
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;DebugLog:10"
 	//Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;20"
 	//if (^inPlayerInventory == 1) {
-		//if(and(£AncientDeviceMode == "Hologram" && §bHologramInitialized == 0)) {
+		//if(and(£AncientDeviceMode == "HologramMode" && §bHologramInitialized == 0)) {
 			//Set £AncientDeviceMode "_BecomeSignalRepeater_"
 			//GoSub FUNCmorphUpgrade
 		//} else {
@@ -641,7 +645,7 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 		}
 	}
 	
-	if ( £AncientDeviceMode == "Hologram" ) {
+	if ( £AncientDeviceMode == "HologramMode" ) {
 		if (§bHologramInitialized == 0) ACCEPT
 		
 		if (§DestructionStarted == 1) {
@@ -748,34 +752,62 @@ ON CUSTOM { //this is the receiving end of the transmission
 }
 
 ON COMBINE {
-	Set £ClassMe ^class_~^me~
-	Set £ClassParam1 ^class_~^$PARAM1~
-	//Set £_aaaDebugScriptStackAndLog "On_Combine:Self=~^me~,class=~£ClassMe~;Param1=~^$PARAM1~,Class1=~£ClassParam1~"
-	UnSet £ScriptDebugCombineFailReason
-	GoSub FUNCshowlocals //keep here
+	Set £ClassMe ^class_~^me~ //SELF
+	Set £OtherToCombineWithMe ^$PARAM1
+	Set £ClassParam1 ^class_~£OtherToCombineWithMe~ //OTHER
+	Set -r £OtherToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode //TODOABC fix, not reading, not setting £OtherAncientDeviceMode at ^me
+	Set -rw ^me £OtherToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode //TODOABC fix, not reading, not setting £OtherAncientDeviceMode at ^me
 	
-	if (or(^$PARAM1 ISCLASS "wall_block" || ^$PARAM1 ISCLASS "bone" || ^$PARAM1 ISCLASS "jail_stone")) { //add anything that can smash it but these are enough
+	//Set £_aaaDebugScriptStackAndLog "On_Combine:Self=~^me~,class=~£ClassMe~;Param1=~£OtherToCombineWithMe~,Class1=~£ClassParam1~"
+	UnSet £ScriptDebugCombineFailReason
+	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
+	
+	if (or(£OtherToCombineWithMe ISCLASS "wall_block" || £OtherToCombineWithMe ISCLASS "bone" || £OtherToCombineWithMe ISCLASS "jail_stone")) { //add anything that can smash it but these are enough. This is not a combine actually, is more like an action. this can break a stack!
 		GoSub FUNCbreakDeviceDelayed
 		ACCEPT
 	}
 	
-	// check other (^$PARAM1 is the one that you double click)
-	if (not(and(^$PARAM1 ISCLASS "AncientBox"))) {
+	// check other (£OtherToCombineWithMe is the one that you double click)
+	if (not(and(£OtherToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
 		SPEAK -p [player_no] NOP
-		ACCEPT //only combine with these
+		Set £ScriptDebugCombineFailReason "Other:Not:Class:Hologram"
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		ACCEPT
 	}
 	
-	if (^$PARAM1 !isgroup "DeviceTechBasic") {
+	//TODOABC fix the above set £OtherAncientDeviceMode first...
+	//if(£OtherAncientDeviceMode != "AncientBox") { //only combine if other is this
+		//SPEAK -p [player_no] NOP
+		//Set £ScriptDebugCombineFailReason "Other:Not:AncientBox"
+		//Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		//ACCEPT
+	//}
+	
+	if(£ClassMe != £ClassParam1) {  //only combine if same kind
+		SPEAK -p [player_no] NOP
+		Set £ScriptDebugCombineFailReason "Class:Differs"
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		ACCEPT
+	}
+	
+	if (^me isgroup "Special") { //TODO the special objects could create other crafting trees tho
+		SPEAK -p [player_no] NOP
+		Set £ScriptDebugCombineFailReason "Me:Is:Special"
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		ACCEPT
+	}
+	
+	if (£OtherToCombineWithMe !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic:Aka_hologram"
-		GoSub FUNCshowlocals
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 		ACCEPT
 	}
 	
 	if(£AncientDeviceMode == "MindControl") { //SYNC_WITH_LAST_COMBINE sync with last/max combine option
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
-		GoSub FUNCshowlocals
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 		ACCEPT
 	}
 	
@@ -789,29 +821,30 @@ ON COMBINE {
 	if (^amount > 1) { //this must not be a stack of items
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:IsStack"
-		GoSub FUNCshowlocals
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 		ACCEPT
 	}
 	if (§Identified == 0) {
 		SPEAK -p [player_not_skilled_enough] NOP
 		Set £ScriptDebugCombineFailReason "Self:NotIdentified"
-		GoSub FUNCshowlocals
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 		ACCEPT
 	}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
-		//GoSub FUNCshowlocals
+		//Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 		//ACCEPT
 	//}
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	Set -r "~^$PARAM1~" §FUNCmorphUpgrade_otherQuality §Quality
+	Set -r "~£OtherToCombineWithMe~" §FUNCmorphUpgrade_otherQuality §Quality
 	GoSub FUNCmorphUpgrade
 	
-	DESTROY ^$PARAM1
+	DESTROY £OtherToCombineWithMe
 	
+	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 	ACCEPT
 }
 
@@ -1773,7 +1806,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	if(or(
 		@testFloat != 1.5 || 
-		§testInt != 7     || 
+		§testInt   != 7   || 
 		and(£testString == "foo" && §testInt != 7) ||
 		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
 	)){
@@ -1787,15 +1820,35 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b3=WRONG"
 	}
-	//todo review below
-	if(or( @testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) || not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")) )){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1z=ok"
+	//todo review below, not working yet
+	if(or(
+		@testFloat != 1.5 ||
+		§testInt   != 7   ||
+		and(£testString == "foo" && §testInt != 7) ||
+		not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||
+		not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))
+	)){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=ok"
 	}
-	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||      not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")) )){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1=ok"
+	if(or(
+		@testFloat != 1.5 ||
+		§testInt   != 7   ||
+		and(
+			£testString == "foo" &&
+			§testInt != 7       
+		) ||      
+		not(or(
+			@testFloat != 1.5 || §testInt != 7 || £testString == "foo"
+		)) ||
+		not(and(
+			@testFloat == 1.5 , 
+			§testInt != 7 , 
+			£testString == "foo" ))
+	)){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2b=ok"
 	}
 	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||      not(and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo"))     )  ){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=WRONG"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=WRONG"
 	}
 	
 	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_begin"
@@ -1812,7 +1865,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 				not(and( @testFloat == 1.5  , §testInt != 7  , £testString == "foo" ))
 		)
 	){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=ok"
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3b=ok"
 	}
 	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_3"
 	if(
@@ -1830,7 +1883,6 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
 	}
-	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_4"
 	
 	//Set @test1 1.0
 	//Set @test2 11.0
@@ -1847,6 +1899,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 <= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:D"
 	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:E"
 	
+	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Logic_operators_test_ended"
 	++ §testsPerformed
 	RETURN
 }
@@ -2263,23 +2316,26 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 				Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" 
 			}
 			Set £Icon "HoloSignalRepeater"
+			SetGroup "Special"
 			//Set §AncientDeviceTriggerStep 1
 			//PlayerStackSize 1
 		} else { 
 		if ( £AncientDeviceMode == "SignalRepeater" ) { Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
 			Set £FUNCconfigOptions_mode "show" GoSub FUNCconfigOptions
+			SetGroup "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
 			RETURN //because this is not a normal tool
 		} else {
-		//// last, reinits the cycle
+		////////////////////////// last, reinits/resets the Special cycle ///////////////////////
 		if ( £AncientDeviceMode == "ConfigOptions" ) { Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
 			Set £FUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
+			SetGroup -r "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
 		} else {
 		/////////////////////////////////////////////////////////////////
 		/////////////////// MORPH only by combining
-		if (or(£AncientDeviceMode == "Hologram" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
+		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
 			Set §PristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
 			Div §PristineChance 10
 			If (§PristineChance < 5) Set §PristineChance 5
@@ -2365,7 +2421,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Set £Icon "~£Icon~[icon]"
 			TWEAK ICON "~£Icon~"
 			
-			if( £AncientDeviceMode != "Hologram" ) SET_SHADOW ON
+			if( £AncientDeviceMode != "HologramMode" ) SET_SHADOW ON
 		}
 	} else {
 		//SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
@@ -2412,7 +2468,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCcfgHologram { GoSub FUNCcfgHologram ACCEPT } >>FUNCcfgHologram  {
-	Set £AncientDeviceMode "Hologram"
+	Set £AncientDeviceMode "HologramMode"
 	
 	if (§UseCount == 0) { //no uses will still be showing the doc so we know it is still to show the doc. this prevents changing if already showing a nice landscape
 		Set £SkyBoxCurrent "Hologram.skybox.index2000.DocIdentified"
@@ -2450,7 +2506,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReq  1
 	if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReq  1
 	if(£AncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReq  0 //keep 0!
-	if(£AncientDeviceMode == "Hologram"      ) Set @SignalStrengthReq  5
+	if(£AncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReq  5
 	if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReq 10
 	if(£AncientDeviceMode == "LandMine"      ) Set @SignalStrengthReq 15
 	if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReq 20
