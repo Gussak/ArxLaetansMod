@@ -3,7 +3,7 @@
 source <(secinit)
 
 strPathHere="$(realpath "$(dirname "$0")")"
-strFlHolog="${strPathHere}/../Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Hologram.asl"
+: ${strFlHolog:="${strPathHere}/../Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Hologram.asl"} #help
 
 #                                              123456789,123456789,123456789,123456789,12
 nItemsPerFace=11
