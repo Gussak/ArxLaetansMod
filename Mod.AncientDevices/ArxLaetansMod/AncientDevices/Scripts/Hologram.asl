@@ -107,11 +107,11 @@
 //		//do something
 //	++ §FUNCtst_index	if(§FUNCtst_index < 10) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC
 //
-// //simplified array loop. Code the conditions to end the loop and easily surround them with 'nor()'.
+// //simplified array loop. Code the conditions to end the loop and easily surround them with 'not(or())'.
 //	Set §FUNCtst_index 0	>>LOOP_FUNCtst_iterArray1_a
 //		Set -a £FUNCtst_entry "~£FUNCtst_array1~" §FUNCtst_index
 //		// do something
-//	++ §FUNCtst_index	if(nor(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == "")) GoTo LOOP_FUNCtst_iterArray1_a
+//	++ §FUNCtst_index	if(not(or(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == ""))) GoTo LOOP_FUNCtst_iterArray1_a
 
 
 //////////////////////////////// TODO LIST: /////////////////////////
@@ -601,7 +601,7 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	Set £inInventory ^ininventory
-	if (nor(£inInventory == "none" || £inInventory == "player")) ACCEPT //only works if in player inventory or on floor, so will not work on other containers, on corpses and on NPC inventories
+	if (not(or(£inInventory == "none" || £inInventory == "player"))) ACCEPT //only works if in player inventory or on floor, so will not work on other containers, on corpses and on NPC inventories
 	
 	GoSub FUNChoverInfo
 	
@@ -760,7 +760,7 @@ ON COMBINE {
 	}
 	
 	// check other (^$PARAM1 is the one that you double click)
-	if (nand(^$PARAM1 ISCLASS "AncientBox")) {
+	if (not(and(^$PARAM1 ISCLASS "AncientBox"))) {
 		SPEAK -p [player_no] NOP
 		ACCEPT //only combine with these
 	}
@@ -1709,16 +1709,16 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A14=WRONG"
 	
 	// not(!)
-	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")) {
+	if(not(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11=WRONG"
 	}
-	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString != "foo")) {
+	if(not(and(@testFloat == 1.5 && §testInt == 7 && £testString != "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12=ok"
 	}
-	if(nand(@testFloat == 1.5 && §testInt != 7 && £testString == "foo")) {
+	if(not(and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13=ok"
 	}
-	if(nand(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")) {
+	if(not(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14=ok"
 	}
 	
@@ -1726,13 +1726,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(or(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c1=ok"
 	}
-	if(nor(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1")){
+	if(not(or(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c2=WRONG"
 	}
-	if(nor(@testFloat != 1.5 || §testInt == 7 || £testString == "foo")){
+	if(not(or(@testFloat != 1.5 || §testInt == 7 || £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3=WRONG"
 	}
-	if(nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
+	if(not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3b=WRONG"
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
@@ -1742,25 +1742,25 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e1=ok"
 	}
-	if(nand(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
+	if(not(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e1b=ok"
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e2=ok"
 	}
-	if(nor(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")){
+	if(not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e2b=ok"
 	}
 	if(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e3=wrong"
 	}
-	if(nand(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
+	if(not(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e3b=wrong"
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e4=wrong"
 	}
-	if(nor(@testFloat == 1.5 || §testInt != 7 || £testString != "foo")){
+	if(not(or(@testFloat == 1.5 || §testInt != 7 || £testString != "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e4b=wrong"
 	}
 	
@@ -1768,24 +1768,33 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1a=ok"
 	}
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || nor(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
+	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b=ok"
 	}
 	if(or(
 		@testFloat != 1.5 || 
 		§testInt != 7     || 
 		and(£testString == "foo" && §testInt != 7) ||
-		nor(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")
+		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b2=ok"
 	}
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") || nand(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))){
+	if(not(or(
+		@testFloat != 1.5 || 
+		§testInt != 7     || 
+		and(£testString == "foo" && §testInt != 7) ||
+		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
+	))){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b3=WRONG"
+	}
+	//todo review below
+	if(or( @testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) || not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")) )){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1z=ok"
 	}
-	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      nand(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")     )  ){
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||      not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo")) )){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1=ok"
 	}
-	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      nor(@testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||      nand(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")     )  ){
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||      not(and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo"))     )  ){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=WRONG"
 	}
 	
@@ -1799,8 +1808,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 						&&
 						§testInt != 7
 				) ||
-				nor( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
-				nand(@testFloat == 1.5  , §testInt != 7  , £testString == "foo")
+				not(or(  @testFloat != 1.5 || §testInt != 7 || £testString == "foo" )) ||
+				not(and( @testFloat == 1.5  , §testInt != 7  , £testString == "foo" ))
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=ok"
@@ -1815,8 +1824,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 						&&
 						§testInt != 7
 				) ||
-				nor( @testFloat != 1.5 || §testInt != 7 || £testString == "foo") ||
-				nand(@testFloat == 1.5  , §testInt == 7  , £testString == "foo")
+				not(or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||
+				not(and(@testFloat == 1.5  , §testInt == 7  , £testString == "foo"))
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
@@ -1961,7 +1970,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 					}
 				}
 			}
-		++ §LoopIndex	if(nor(§FLM_OnTopLife > 0 || £FLM_OnTopEntId == "")) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
+		++ §LoopIndex	if(not(or(§FLM_OnTopLife > 0 || £FLM_OnTopEntId == ""))) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
 		
 		if(§FLM_OnTopLife > 0) {
 			//Set §Scale 100
