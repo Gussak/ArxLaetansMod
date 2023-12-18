@@ -16,7 +16,7 @@
 // Condition is useful to hold your hand to avoid destroying the device.
 // While unidentified, words will be in latin or messed up letters order, and numbers will be in hexadecimal.
 
-/////////////////// Timers control:
+/////////////////// Global Timers dev track:
 //starttimer timer1 //^#timer1 used ON MAIN
 //starttimer timer2 //^#timer2 used ON IDENTIFY
 //starttimer timer3 //^#timer3
@@ -73,7 +73,7 @@
 
 // when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
 //  an easy trick to have both is have a TFUNC call the FUNC ex.:
-//  timerTFUNCdoSomething GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
+//  timerTFUNCdoSomething -m 1 333 GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
 //  >>TFUNCdoSomething {
 //    GoSub FUNCdoSomething
 //    ACCEPT
@@ -295,7 +295,7 @@ ON INVENTORYUSE {
 	} else {
 	if ( ｘncientDeviceMode == "MindControl" ) {
 		if ( 你ncientDeviceTriggerStep == 1 ) {
-			Set 你ncientDeviceTriggerStep 2 //seek ^hover_5001
+			Set 你ncientDeviceTriggerStep 2
 			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
 			Set 佝UNCblinkGlow_times 0 GoSub FUNCblinkGlow
 		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
@@ -305,7 +305,20 @@ ON INVENTORYUSE {
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
-	} } } }
+	} else {
+	if ( ｘncientDeviceMode == "SniperBullet" ) {
+		if ( 你ncientDeviceTriggerStep == 1 ) {
+			Set 你ncientDeviceTriggerStep 2
+			GoSub FUNCSniperBullet
+			Set 佝UNCblinkGlow_times 0 GoSub FUNCblinkGlow
+		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
+			Set 佝UNCSniperBullet_stop 1	GoSub FUNCSniperBullet
+			Set 你ncientDeviceTriggerStep 1  //stop
+			Set 佝UNCblinkGlow_times -1 GoSub FUNCblinkGlow
+		} }
+		GoSub FUNCnameUpdate
+		ACCEPT
+	} } } } }
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////  !!! HOLOGRAM ONLY BELOW HERE !!!  /////////////////
@@ -715,7 +728,9 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;~ｘncientDeviceMode~" //TODO
 	} else { if ( ｘncientDeviceMode == "MindControl" ) {
 		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;~ｘncientDeviceMode~" //TODO
-	} } } } } }
+	} else { if ( ｘncientDeviceMode == "SniperBullet" ) {
+		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;~ｘncientDeviceMode~" //TODO
+	} } } } } } }
 	
 	// any item that is going to explode will benefit from this
 	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Chk:TrapCanKillMode"
@@ -753,39 +768,62 @@ ON CUSTOM { //this is the receiving end of the transmission
 
 ON COMBINE {
 	Set ｚlassMe ^class_~^me~ //SELF
-	Set ΜtherToCombineWithMe ^$PARAM1
-	Set ｚlassParam1 ^class_~ΜtherToCombineWithMe~ //OTHER
-	Set -r ΜtherToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode //TODOABC fix, not reading, not setting ΜtherAncientDeviceMode at ^me
-	Set -rw ^me ΜtherToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode //TODOABC fix, not reading, not setting ΜtherAncientDeviceMode at ^me
+	Set ΜtherToCombineWithMe ^$PARAM1 // is the one that you double click
+	Set ΜtherClass ^class_~ΜtherToCombineWithMe~ //OTHER
 	
-	//Set δaaaDebugScriptStackAndLog "On_Combine:Self=~^me~,class=~ｚlassMe~;Param1=~ΜtherToCombineWithMe~,Class1=~ｚlassParam1~"
 	UnSet ΠcriptDebugCombineFailReason
 	Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
+	
+	///////////////////// combine with other classes ///////////////////////
 	
 	if (or(ΜtherToCombineWithMe ISCLASS "wall_block" || ΜtherToCombineWithMe ISCLASS "bone" || ΜtherToCombineWithMe ISCLASS "jail_stone")) { //add anything that can smash it but these are enough. This is not a combine actually, is more like an action. this can break a stack!
 		GoSub FUNCbreakDeviceDelayed
 		ACCEPT
 	}
 	
+	///////////////////// ancient devices only ///////////////////////
+	
 	// check other (ΜtherToCombineWithMe is the one that you double click)
-	if (not(and(ΜtherToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
+	//if (not(and(ΜtherToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
+		//SPEAK -p [player_no] NOP
+		//Set ΠcriptDebugCombineFailReason "Other:Not:Class:Hologram"
+		//Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
+		//ACCEPT
+	//}
+	if(ｚlassMe != ΜtherClass) {  //only combine if same kind
 		SPEAK -p [player_no] NOP
-		Set ΠcriptDebugCombineFailReason "Other:Not:Class:Hologram"
+		Set ΠcriptDebugCombineFailReason "Class:Differs"
 		Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
 		ACCEPT
 	}
 	
-	//TODOABC fix the above set ΜtherAncientDeviceMode first...
-	//if(ΜtherAncientDeviceMode != "AncientBox") { //only combine if other is this
-		//SPEAK -p [player_no] NOP
-		//Set ΠcriptDebugCombineFailReason "Other:Not:AncientBox"
-		//Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
-		//ACCEPT
-	//}
+	Set -r ΜtherToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode //	Set -rw ^me ΜtherToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode
+	if(and(ΜtherAncientDeviceMode == ｘncientDeviceMode && ｘncientDeviceMode != "AncientBox")) { //this is to increase quality, least for the cheapest
+		if(助seMax >= 80) { //quality 4+
+			SPEAK -p [player_no] NOP
+			Set ΠcriptDebugCombineFailReason "Quality:Already:MK2"
+			Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
+		} else {
+			Set -r ΜtherToCombineWithMe 別therUseMax 助seMax
+			if(別therUseMax > 助seMax) {
+				Set 助seMaxImprove 助seMax
+				Set 助seMax 別therUseMax
+			} else {
+				Set 助seMaxImprove 別therUseMax
+			}
+			Div 助seMaxImprove 5
+			Add 助seMax 助seMaxImprove
+			
+			GoSub FUNCupdateUses
+			GoSub FUNCnameUpdate
+			GoSub FUNCupdateIcon
+		}
+		ACCEPT
+	}
 	
-	if(ｚlassMe != ｚlassParam1) {  //only combine if same kind
+	if(ΜtherAncientDeviceMode != "AncientBox") { //this is for upgrading/morphing the item
 		SPEAK -p [player_no] NOP
-		Set ΠcriptDebugCombineFailReason "Class:Differs"
+		Set ΠcriptDebugCombineFailReason "Other:Not:AncientBox"
 		Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
 		ACCEPT
 	}
@@ -804,7 +842,7 @@ ON COMBINE {
 		ACCEPT
 	}
 	
-	if(ｘncientDeviceMode == "MindControl") { //SYNC_WITH_LAST_COMBINE sync with last/max combine option
+	if(ｘncientDeviceMode == "SniperBullet") { //SYNC_WITH_LAST_COMBINE sync with last/max combine option
 		SPEAK -p [player_no] NOP
 		Set ΠcriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
 		Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
@@ -1094,6 +1132,10 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set 助seMax 5
 	Inc 助seMax ^rnd_110
 	
+	Set 刨eekTargetDistance 5001
+	Set 劫eleDistEndTele 200 //if player is above the item on the floor, it will be 177 dist. The dist of the item on the floor to a goblin is 67 btw. Must be above these.
+	
+	// signal
 	Set ΠignalMode "Working"
 	Set #SignalModeChangeTime 0
 	
@@ -1104,6 +1146,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set 刨ignalDistMin 刨ignalDistBase
 	Mul 刨ignalDistMin 0.25
+	
 	
 	//Set 兌dentifyObjectKnowledgeRequirement 35
 	Set 助seCount 0
@@ -1255,10 +1298,10 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			if ( 兌temConditionSure == 1 ) Set ΖtemConditionDesc "bad"
 			if ( 兌temConditionSure == 0 ) Set ΖtemConditionDesc "critical"
 		} else {
-			if ( 兌temConditionSure == 5 ) Set ΖtemConditionDesc "etcerpf"
-			if ( 兌temConditionSure == 4 ) Set ΖtemConditionDesc "ntexlecel"
+			if ( 兌temConditionSure == 5 ) Set ΖtemConditionDesc "etcerpf" //messy
+			if ( 兌temConditionSure == 4 ) Set ΖtemConditionDesc "ntexlecel" //messy
 			if ( 兌temConditionSure == 3 ) Set ΖtemConditionDesc "bonae" //latin
-			if ( 兌temConditionSure == 2 ) Set ΖtemConditionDesc "gearave"
+			if ( 兌temConditionSure == 2 ) Set ΖtemConditionDesc "gearave" //messy
 			if ( 兌temConditionSure == 1 ) Set ΖtemConditionDesc "malae" //latin
 			if ( 兌temConditionSure == 0 ) Set ΖtemConditionDesc "discrimine" //latin
 		}
@@ -1279,7 +1322,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			if(刨ignalStrSure == 1) Set ΠignalStrInfo "malae" //latin
 			if(刨ignalStrSure == 2) Set ΠignalStrInfo "bonae" //latin
 			if(刨ignalStrSure == 3) Set ΠignalStrInfo "fortis" //latin
-			if(刨ignalStrSure == 4) Set ΠignalStrInfo "ntexlecel"
+			if(刨ignalStrSure == 4) Set ΠignalStrInfo "ntexlecel" //messy
 		}
 		
 		// perc
@@ -1305,7 +1348,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		
 		if(兌dentified == 1) {
 			if(利uality >= 5) Set ΖtemQuality "pristine+"
-			if(利uality == 4) Set ΖtemQuality "superior+"
+			if(利uality == 4) Set ΖtemQuality "superior+" //80+
 			if(利uality == 3) Set ΖtemQuality "decent"
 			if(利uality == 2) Set ΖtemQuality "mediocre"
 			if(利uality == 1) Set ΖtemQuality "inferior"
@@ -1318,6 +1361,15 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			if(利uality == 1) Set ΖtemQuality "nrifeior"
 			if(利uality == 0) Set ΖtemQuality "horribilis" //latin
 		}
+		
+		if ( 利uality >= 4 ) {
+			if(兌dentified == 1) {
+				Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameFinal_OUTPUT~ MK2+" 
+			} else {
+				Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameFinal_OUTPUT~ Gradus Duo+" 
+			}
+		}
+		GoSub FUNCupdateIcon
 		
 		if(你ncientDeviceTriggerStep == 2){
 			Set ΓUNCnameUpdate_NameFinal_OUTPUT "~ΓUNCnameUpdate_NameFinal_OUTPUT~ (ACTIVE)."
@@ -1362,6 +1414,34 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//SetName "~ΓUNCnameUpdate_NameBase~. Quality:~ΖtemQuality~, Condition:~ΖtemConditionDesc~(~兌temConditionPercent~%), Uses:Count=~助seCount,Remain=~助seRemain~,Max=~助seMax~"
 	SetName "~ΓUNCnameUpdate_NameFinal_OUTPUT~"
 	GoSub FUNCshowlocals
+}
+
+>>FUNCupdateIcon {
+	Set ΖconPrevious Ζcon
+	
+	Set Ζcon "~ΖconBasename~"
+	if(利uality >= 4) Set Ζcon "~Ζcon~MK2"
+	Set Ζcon "~Ζcon~[icon]"
+	
+	if(ΖconPrevious != Ζcon)	TWEAK ICON "~Ζcon~"
+	
+	//INPUT: [佝UNCupdateIcon_force]
+	//if (Ζcon == "") Set 佝UNCupdateIcon_force 1
+	//if (and(利uality >= 4 && not("MK2" IsIn Ζcon))) Set 佝UNCupdateIcon_force 1
+	//if ( 利uality >= 4 ) {
+		//if(or(not("MK2" IsIn Ζcon) || 佝UNCupdateIcon_force > 0)) {
+			//Set Ζcon "~ΖconBasename~MK2[icon]"
+			//TWEAK ICON "~Ζcon~"
+		//}
+	//} else {
+		//if(or(Ζcon == "" || 佝UNCupdateIcon_force > 0)) { //first time
+			//Set Ζcon "~ΖconBasename~[icon]"
+			//TWEAK ICON "~Ζcon~"
+		//}
+	//}
+	//if(佝UNCupdateIcon_force > 0) TWEAK ICON "~Ζcon~"
+	//Set 佝UNCupdateIcon_force 0 //reset for next unparametrised call
+	RETURN
 }
 
 >>TFUNCcalcAncientTechSkill { GoSub FUNCcalcAncientTechSkill ACCEPT } >>FUNCcalcAncientTechSkill {
@@ -1664,9 +1744,8 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 //////////////////////////// TESTS /////////////////////////////
 >>TFUNChoverInfo { GoSub FUNChoverInfo ACCEPT } >>FUNChoverInfo {
-	//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;HOVER='~^hover_5001~'"
 	GoSub FUNCshowlocals
-	Set ΕoverEnt "~^hover_5001~"
+	Set ΕoverEnt ^hover_~刨eekTargetDistance~
 	if(ΕoverEnt != "none") {
 		Set ΕoverClass ^class_~^hover_5001~
 		Set 佚overLifeTmp ^life_~^hover_5001~
@@ -2001,6 +2080,79 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
+>>TFUNCseekTarget { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget {
+	//INPUT: <init||seek?ΓUNCseekTarget_callFuncWhenTargetFound>
+	//INPUT: [ΓUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
+	//OUTPUT: ΓUNCseekTarget_TargetFoundEnt_OUTPUT
+	if(ΓUNCseekTarget_targetCheck == "init") {
+		Set ΓUNCseekTarget_TargetFoundEnt_OUTPUT ""
+		Set ΓUNCseekTarget_targetCheck "seek"
+		timerTFUNCseekTarget -m 0 333 GoTo TFUNCseekTarget
+	} else {
+	if(ΓUNCseekTarget_targetCheck == "seek") {
+		Set ΓUNCseekTarget_HoverEnt ^hover_~刨eekTargetDistance~
+		Set 佝UNCseekTarget_HoverLife ^life_~ΓUNCseekTarget_HoverEnt~
+		if(and(ΓUNCseekTarget_HoverEnt != "none" && 佝UNCseekTarget_HoverLife > 0)) {
+			Set ΓUNCseekTarget_targetCheck "stop"
+			Set ΓUNCseekTarget_TargetFoundEnt_OUTPUT ΓUNCseekTarget_HoverEnt
+			GoSub "~ΓUNCseekTarget_callFuncWhenTargetFound~"
+		}
+	} else {
+	if(ΓUNCseekTarget_targetCheck == "stop") {
+		timerTFUNCseekTarget off
+	} } }
+	Set ΓUNCseekTarget_targetCheck "init" //reset b4 next call
+	RETURN
+}
+>>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {
+	//INPUT: <ｚFUNCFlyMeToTarget_callFuncWhenTargetReached>
+	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
+	
+	if(and(^life_~ΓUNCseekTarget_HoverEnt~ > 0 && ^dist_~ΓUNCseekTarget_HoverEnt~ > 劫eleDistEndTele)) {
+		//the idea is to be unsafe positioning over npc location as it will be destroyed
+		if(@TeleMeStepDist == 0) { //initialize
+			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~ΓUNCseekTarget_HoverEnt~
+			GoSub FUNCcalcInterpolateTeleStepDist1s()
+			Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
+			
+			if(and(@CFUNCFlyMeToTarget_flySpeed > 0.0 && @CFUNCFlyMeToTarget_flySpeed != 1.0)) {
+				Mul @TeleMeStepDist @CFUNCFlyMeToTarget_flySpeed // < 1.0 takes longer to travel
+			}
+			
+			GoSub FUNCcalcFrameMilis	Set 劫eleTimerFlyMilis 佝UNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
+			timerTCFUNCFlyMeToTarget -m 0 劫eleTimerFlyMilis GoTo TCFUNCFlyMeToTarget
+		}
+		interpolate -s "~^me~" "~ΓUNCseekTarget_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
+	} else {
+		interpolate "~^me~" "~ΓUNCseekTarget_HoverEnt~" 0.0 //one last step to be precise
+		timerTCFUNCFlyMeToTarget off
+		GoSub "~ｚFUNCFlyMeToTarget_callFuncWhenTargetReached~"
+	}
+	
+	Set @CFUNCFlyMeToTarget_flySpeed 1.0 //reset b4 next call
+	RETURN
+}
+>>TFUNCSniperBullet { GoSub FUNCSniperBullet ACCEPT } >>FUNCSniperBullet {
+	//INPUT: [佝UNCSniperBullet_stop]
+	if(佝UNCSniperBullet_stop == 0){
+		if(ΓUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
+			Set ｚFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCSniperBullet"
+			Set ΓUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
+			GoSub FUNCseekTarget
+		} else {
+			Set ΓUNCkillNPC ΓUNCseekTarget_TargetFoundEnt_OUTPUT	GoSub FUNCkillNPC
+			GoSub FUNCbreakDeviceDelayed
+			Set 佝UNCSniperBullet_stop 1
+		}
+	}
+	
+	if(佝UNCSniperBullet_stop == 1){
+		Set ΓUNCseekTarget_targetCheck "stop"	GoSub FUNCseekTarget
+	}
+	
+	Set 佝UNCSniperBullet_stop 0 //reset b4 next call
+	RETURN
+}
 >>TFUNCLandMine { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine {
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
 	if(@SignalStrength < 15) ACCEPT //minimum requirement to function
@@ -2046,12 +2198,10 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>TFUNCteleportToAndKillNPC { GoSub FUNCteleportToAndKillNPC ACCEPT } >>FUNCteleportToAndKillNPC {
 	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
-	Set ΓUNCteleportToAndKillNPC_HoverEnt "~^hover_5001~"
+	Set ΓUNCteleportToAndKillNPC_HoverEnt ^hover_~刨eekTargetDistance~
 	Set 佝UNCteleportToAndKillNPC_HoverLife ^life_~ΓUNCteleportToAndKillNPC_HoverEnt~
 	if(and(ΓUNCteleportToAndKillNPC_HoverEnt != "none" && 佝UNCteleportToAndKillNPC_HoverLife > 0)) {
 		//timerTeleportSelf    -m 0 50 teleport "~ΓUNCteleportToAndKillNPC_HoverEnt~"
-		Set 劫eleDistEndTele 200 //if player is above the item on the floor, it will be 177 dist. The dist of the item on the floor to a goblin is 67 btw. Must be above these.
-		
 		DropItem player "~^me~" //or wont be able to calc the distance from it to the player 
 		Set 冶eY ^dist_player	Div 冶eY 2	Mul 冶eY -1	Move 0 冶eY 0 //to not fly from the floor position, to look better
 		
@@ -2081,7 +2231,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~ΓUNCteleportToAndKillNPC_HoverEnt~
 			GoSub FUNCcalcInterpolateTeleStepDist1s()
 			Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
-			Div @TeleMeStepDist 3 //this will make it take 3 times longer to travel, is more challenging
+			Mul @TeleMeStepDist 0.33 //this will make it take 3 times longer to travel, is more challenging
 		}
 		interpolate -s "~^me~" "~ΓUNCteleportToAndKillNPC_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 	} else {
@@ -2153,12 +2303,12 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			//timerTeleDmgPlayer -m 1 50 DoDamage -l player @TeleDmgPlayer
 			DoDamage -l player @TeleDmgPlayer
 			
-			DropItem "~ΓUNCteleportToAndKillNPC_HoverEnt~" all
-			DoDamage -fmlcgewsao "~ΓUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
+			//DropItem "~ΓUNCteleportToAndKillNPC_HoverEnt~" all
+			//DoDamage -fmlcgewsao "~ΓUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
+			Set 佝UNCkillNPC_destroyCorpse 1	Set ΓUNCkillNPC_target ΓUNCteleportToAndKillNPC_HoverEnt	GoSub FUNCkillNPC
 			//timerTeleDestroyNPC -m 1 50 Destroy "~ΓUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
 			
 			//Weapon -e player ON //doesnt work on player?
-			
 			Set 佝UNCbreakDeviceDelayed_ParalyzePlayer 1	GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 			
 			interpolate player "~^me~" 0.0 //one last step to be precise
@@ -2171,6 +2321,17 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//}
 	GoSub FUNCshowlocals
 	
+	RETURN
+}
+>>FUNCkillNPC {
+	//INPUT: <ΓUNCkillNPC_target>
+	//INPUT: [佝UNCkillNPC_destroyCorpse]
+	if(佝UNCkillNPC_destroyCorpse == 1) {
+		//TODO destroy the corpse and spawn gore
+		DropItem "~ΓUNCkillNPC_target~" all
+	}
+	DoDamage -fmlcgewsao "~ΓUNCkillNPC_target~" 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
+	Set 佝UNCkillNPC_destroyCorpse 0 //reset before next call if it has no params
 	RETURN
 }
 >>TFUNCcalcFrameMilis { GoSub FUNCcalcFrameMilis ACCEPT } >>FUNCcalcFrameMilis {
@@ -2201,7 +2362,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
   // this works like a frenzied NPC
   
   //TODO goblin_base.asl: settarget -a ~othergoblinnearby~; BEHAVIOR -f MOVE_TO;  WEAPON ON; SETMOVEMODE RUN; Aim the first goblin, aim the second, the 1st attacks the 2nd and vice versa. then: sendevent call_help to the 2nd, that will make them look for the player, then keep aiming on them, they will then attack the 1st!
-	Set ΓUNCMindControl_HoverEntTmp "~^hover_5001~"
+	Set ΓUNCMindControl_HoverEntTmp ^hover_~刨eekTargetDistance~
 	Set 佝UNCMindControl_HoverLife ^life_~ΓUNCMindControl_HoverEntTmp~
 	if(and(ΓUNCMindControl_HoverEntTmp != "none" && 佝UNCMindControl_HoverLife > 0)) {
     if(ΓUNCMindControl_HoverEntMain == "") {
@@ -2276,7 +2437,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
-//>>FUNCMindControlBkp2 { Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;FUNCMindControl" 
+//>>FUNCMindControlSpawnFoeTrick { Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;FUNCMindControl" 
 	//Set ΓUNCMindControl_HoverEnt "~^hover_5001~"
 	//Set 佚overLife ^life_~ΓUNCMindControl_HoverEnt~
 	//if(and(ΓUNCMindControl_HoverEnt != "none" && 佚overLife > 0)) {
@@ -2316,7 +2477,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			} else {
 				Set ΓUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" 
 			}
-			Set Ζcon "HoloSignalRepeater"
+			Set ΖconBasename "HoloSignalRepeater"
 			SetGroup "Special"
 			//Set 你ncientDeviceTriggerStep 1
 			//PlayerStackSize 1
@@ -2326,16 +2487,13 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			SetGroup "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
 			RETURN //because this is not a normal tool
-		} else {
-		////////////////////////// last, reinits/resets the Special cycle ///////////////////////
+		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
 		if ( ｘncientDeviceMode == "ConfigOptions" ) { Set ｘncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
 			Set ΓUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
 			SetGroup -r "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
-		} else {
-		/////////////////////////////////////////////////////////////////
-		/////////////////// MORPH only by combining
+		} else { /////////////////// MORPH only by combining below here! ////////////////////////////
 		if (or(ｘncientDeviceMode == "HologramMode" || ｘncientDeviceMode == "AncientBox")) { Set ｘncientDeviceMode "Grenade"
 			Set 判ristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
 			Div 判ristineChance 10
@@ -2349,7 +2507,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			} else {
 				Set ΓUNCnameUpdate_NameBase "Grolhoam Degnare" 
 			}
-			Set Ζcon "HologramGrenade"
+			Set ΖconBasename "HologramGrenade"
 			
 			//PLAY "TRAP"
 			TWEAK SKIN "Hologram.tiny.index4000.box"               "Hologram.tiny.index4000.box.Clear"
@@ -2375,7 +2533,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			} else {
 				Set ΓUNCnameUpdate_NameBase "Grolhoam Terra Perdere" 
 			}
-			Set Ζcon "HoloLandMine"
+			Set ΖconBasename "HoloLandMine"
 			Set 你ncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 9
 		} else {
@@ -2387,11 +2545,11 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			} else {
 				Set ΓUNCnameUpdate_NameBase "Grolhoam Itinerantur" 
 			}
-			Set Ζcon "HoloTeleport"
+			Set ΖconBasename "HoloTeleport"
 			Set 你ncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 6
 		} else {
-		if ( ｘncientDeviceMode == "Teleport" ) { Set ｘncientDeviceMode "MindControl" //SYNC_WITH_LAST_COMBINE
+		if ( ｘncientDeviceMode == "Teleport" ) { Set ｘncientDeviceMode "MindControl"
 			// why bats? they are foes of everyone else and the final result is equivalent. //TODO But, may be, make them disappear as soon they die to prevent looting their corpses as easy bonus loot.
 			// why not mind control the targeted foe directly? too complicated. //TODO create new copy foes asl that behave as a player summon? create a player summon and change it's model after killing the targeted foe? implement something in c++ that make it easier to let mind control work as initially intended?
 			TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
@@ -2401,28 +2559,29 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			} else {
 				Set ΓUNCnameUpdate_NameBase "Grolhoam Mens Moderantum" 
 			}
-			Set Ζcon "HoloMindControl"
+			Set ΖconBasename "HoloMindControl"
+			Set 你ncientDeviceTriggerStep 1
+			PLAYERSTACKSIZE 3
+		} else {
+		if ( ｘncientDeviceMode == "MindControl" ) { Set ｘncientDeviceMode "SniperBullet"
+			TWEAK SKIN "Hologram.tiny.index4000.boxMindControl" "Hologram.tiny.index4000.boxSniperBullet" 
+			Set 刨cale 100 SetScale 刨cale
+			if(兌dentified == 1) {
+				Set ΓUNCnameUpdate_NameBase "Hologram Sniper Bullet" 
+			} else {
+				Set ΓUNCnameUpdate_NameBase "Grolhoam Procul Occidere" 
+			}
+			Set ΖconBasename "AncientSniperBullet"
 			Set 你ncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
 		} } } } } } }
 		
 		if(你ncientDeviceTriggerStep == 1) {
-			if ( 利uality >= 4 ) {
-				if(兌dentified == 1) {
-					Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameBase~ MK2+" 
-				} else {
-					Set ΓUNCnameUpdate_NameBase "~ΓUNCnameUpdate_NameBase~ gradus duo+" 
-				}
-				Set Ζcon "~Ζcon~MK2"
-			}
-			
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
+			GoSub FUNCupdateIcon
 
-			Set Ζcon "~Ζcon~[icon]"
-			TWEAK ICON "~Ζcon~"
-			
-			if( ｘncientDeviceMode != "HologramMode" ) SET_SHADOW ON
+			if( ｘncientDeviceMode != "HologramMode" ) SET_SHADOW ON //because hologram emits light
 		}
 	} else {
 		//SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
@@ -2507,12 +2666,16 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(ｘncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReq  1
 	if(ｘncientDeviceMode == "SignalRepeater") Set @SignalStrengthReq  1
 	if(ｘncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReq  0 //keep 0!
-	if(ｘncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReq  5
-	if(ｘncientDeviceMode == "Grenade"       ) Set @SignalStrengthReq 10
-	if(ｘncientDeviceMode == "LandMine"      ) Set @SignalStrengthReq 15
-	if(ｘncientDeviceMode == "Teleport"      ) Set @SignalStrengthReq 20
-	if(ｘncientDeviceMode == "MindControl"   ) Set @SignalStrengthReq 25
-	if(利uality >= 4) Mul @SignalStrengthReq 1.66
+	if(ｘncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReq  5 //can randomly be dangerous
+	if(ｘncientDeviceMode == "Grenade"       ) Set @SignalStrengthReq 30 //can instakill
+	if(ｘncientDeviceMode == "LandMine"      ) Set @SignalStrengthReq 75 //can instakill, easy to use
+	if(ｘncientDeviceMode == "MindControl"   ) Set @SignalStrengthReq 20 //
+	if(ｘncientDeviceMode == "Teleport"      ) Set @SignalStrengthReq 40 //instakills and travels
+	if(ｘncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReq 50 //instakills, safe to use
+	if(利uality >= 4) {
+		Mul @SignalStrengthReq 1.666
+		if(@SignalStrengthReq > 95) Set @SignalStrengthReq 95
+	}
 	
 	if(@SignalStrength >= @SignalStrengthReq) Set 佝UNCchkSignalStrenghCheck_IsAcceptable 1
 	RETURN
