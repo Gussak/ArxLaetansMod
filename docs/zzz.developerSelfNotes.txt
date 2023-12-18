@@ -161,11 +161,11 @@ attractor SELF 10 300 //hologram blackhole test
 
 ============================== CPP DBG bkp
 
-MYDBG("DEGREES():(name="<<name<<",xyz="<<xyz<<",deg="<<degrees<<",fixedDeg="<<(*fcontent)<<",pitch="<<entity->angle.getPitch()<<",yaw="<<entity->angle.getYaw()<<",roll="<<entity->angle.getRoll()<<",Ppitch="<<player.angle.getPitch()<<",Pyaw="<<player.angle.getYaw()<<",Proll="<<player.angle.getRoll()<<",Cpitch="<<context.getEntity()->angle.getPitch()<<",Cyaw="<<context.getEntity()->angle.getYaw()<<",Croll="<<context.getEntity()->angle.getRoll()<<")"); //<<",angle="<<entity->angle
+//DONE.LogDebug: MYDBG("getLife()@Script.cpp: player.Full_life="<<player.Full_life<<"," <<"player.m_lifeMaxWithoutMods="<<player.m_lifeMaxWithoutMods<<"," <<"player.lifePool.max="<<player.lifePool.max<<"," <<"cType="<<cType<<"," <<"ent="<<ent<<"," <<"name="<<name<<"," <<"offset="<<offset<<"," <<"entOverride="<<entOverride<<"," );
 
-MYDBG("INTERPOLATE(): strEntityToMove="<<strEntityToMove <<",strTarget="<<strTarget <<",entToMoveId="<<entToMove->idString() <<",entTargetId="<<(entTarget?entTarget->idString():"null") <<",posTarget="<< vec3fToStr(posTarget)<<",posFrom="<< vec3fToStr(posFrom)<<",fDistMax="<<fDistMax<<",posRequested="<< vec3fToStr(posRequested)<<",bLimitDist="<< bLimitDist<<",bAbsPosFrom="<<bAbsPosFrom <<",bPosTarget="<< bPosTarget<<",fContextDist="<< fContextDist);
+//DONE.LogDebug: MYDBG("INTERPOLATE(): strEntityToMove="<<strEntityToMove <<",strTarget="<<strTarget <<",entToMoveId="<<entToMove->idString() <<",entTargetId="<<(entTarget?entTarget->idString():"null") <<",posTarget="<< vec3fToStr(posTarget)<<",posFrom="<< vec3fToStr(posFrom)<<",fDistMax="<<fDistMax<<",posRequested="<< vec3fToStr(posRequested)<<",bLimitDist="<< bLimitDist<<",bAbsPosFrom="<<bAbsPosFrom <<",bPosTarget="<< bPosTarget<<",fContextDist="<< fContextDist);
 
-MYDBG("getLife()@Script.cpp: player.Full_life="<<player.Full_life<<"," <<"player.m_lifeMaxWithoutMods="<<player.m_lifeMaxWithoutMods<<"," <<"player.lifePool.max="<<player.lifePool.max<<"," <<"cType="<<cType<<"," <<"ent="<<ent<<"," <<"name="<<name<<"," <<"offset="<<offset<<"," <<"entOverride="<<entOverride<<"," );
+//DONE.LogDebug: MYDBG("DEGREES():(name="<<name<<",xyz="<<xyz<<",deg="<<degrees<<",fixedDeg="<<(*fcontent)<<",pitch="<<entity->angle.getPitch()<<",yaw="<<entity->angle.getYaw()<<",roll="<<entity->angle.getRoll()<<",Ppitch="<<player.angle.getPitch()<<",Pyaw="<<player.angle.getYaw()<<",Proll="<<player.angle.getRoll()<<",Cpitch="<<context.getEntity()->angle.getPitch()<<",Cyaw="<<context.getEntity()->angle.getYaw()<<",Croll="<<context.getEntity()->angle.getRoll()<<")"); //<<",angle="<<entity->angle
 
 
 ======================== etc

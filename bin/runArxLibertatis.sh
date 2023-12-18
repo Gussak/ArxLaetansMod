@@ -55,7 +55,7 @@ while true;do
     #acmdParams+=(--loadslot="$nNewestSaveIndex"); #this doesnt seem to work?
     acmdParams+=(--loadsave "$strNewestSaveFile");
   fi
-  acmd=(./arx "${acmdParams[@]}" "$@")
+  acmd=(nemiver --use-launch-terminal ./arx "${acmdParams[@]}" "$@")
 
   export ARX_LIMIT_SHADOWBLOB_FOR_VERTEXES=9
 

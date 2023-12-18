@@ -611,37 +611,37 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 	
 	Set £LootingInventory ^lootinventory
 	if(£LootingInventory != "none") { //dynamically patch inventories
-		Set -r "~£LootingInventory~" §HoloLootPatchOther §HoloLootPatchDone
+		Set -r £LootingInventory §HoloLootPatchOther §HoloLootPatchDone
 		if(§HoloLootPatchOther == 0) { //each item has a weight
-			Set -ri "~£LootingInventory~" §HoloAdd "rune"
+			Set -ri £LootingInventory §HoloAdd "rune"
 			Mul §HoloAdd 36
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Set -ri "~£LootingInventory~" §HoloAdd "ring"
+			Set -ri £LootingInventory §HoloAdd "ring"
 			Mul §HoloAdd 18
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Set -ri "~£LootingInventory~" §HoloAdd "scroll"
+			Set -ri £LootingInventory §HoloAdd "scroll"
 			Mul §HoloAdd 12
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Set -ri "~£LootingInventory~" §HoloAdd "potion"
+			Set -ri £LootingInventory §HoloAdd "potion"
 			Mul §HoloAdd 6
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
 			//todo other magic items could add 4
 			
-			Set -ri "~£LootingInventory~" §HoloAdd "bottle"
+			Set -ri £LootingInventory §HoloAdd "bottle"
 			Mul §HoloAdd 2
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
 			Add §HoloAddTotal ^rnd_1
 			
 			if(§HoloAddTotal > 0) {
-				Inventory AddMulti -e "~£LootingInventory~" "magic/hologram/hologram" §HoloAddTotal
+				Inventory AddMulti -e £LootingInventory "magic/hologram/hologram" §HoloAddTotal
 			}
 			
-			Set -w "~£LootingInventory~" §HoloLootPatchDone 1
+			Set -w £LootingInventory §HoloLootPatchDone 1
 		}
 	}
 	
@@ -839,7 +839,7 @@ ON COMBINE {
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	Set -r "~£OtherToCombineWithMe~" §FUNCmorphUpgrade_otherQuality §Quality
+	Set -r £OtherToCombineWithMe §FUNCmorphUpgrade_otherQuality §Quality
 	GoSub FUNCmorphUpgrade
 	
 	DESTROY £OtherToCombineWithMe
@@ -1302,6 +1302,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Div §Quality 10
 			Div §Quality  2
 		}
+		
 		if(§Identified == 1) {
 			if(§Quality >= 5) Set £ItemQuality "pristine+"
 			if(§Quality == 4) Set £ItemQuality "superior+"
@@ -1674,7 +1675,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set @testDegreesYh   ^degreesy_~^hover_5001~
 		Set @testDegreesZh   ^degreesz_~^hover_5001~ //some potions are inclined a bit
 		Set @testDegreesYtoh ^degreesyto_~^hover_5001~
-    //just crashes... if(§HoverLifeTmp > 0) USEMESH -e "~£HoverEnt~" "movable\\npc_gore\\npc_gore" //todoRM 
+    //just crashes... if(§HoverLifeTmp > 0) USEMESH -e £HoverEnt "movable\\npc_gore\\npc_gore" //todoRM 
     //nothing happens if(§HoverLifeTmp > 0) SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£HoverEnt~" //todoRM
 		GoSub FUNCshowlocals
 	}
@@ -2219,18 +2220,18 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
     //if(§FUNCMindControl_HoverExtraCount == 1) {
     if(or(£FUNCMindControl_HoverEntAttackedByMain == "" || ^life_~£FUNCMindControl_HoverEntAttackedByMain~ == 0)) {
       Set £FUNCMindControl_HoverEntAttackedByMain "~£FUNCMindControl_HoverEntTmp~"
-      SetTarget   -e ~£FUNCMindControl_HoverEntMain~ -a "~£FUNCMindControl_HoverEntAttackedByMain~"
-      Behavior    -e ~£FUNCMindControl_HoverEntMain~ -f MOVE_TO
-      Weapon      -e ~£FUNCMindControl_HoverEntMain~ ON
-      SetMoveMode -e ~£FUNCMindControl_HoverEntMain~ RUN
+      SetTarget   -e £FUNCMindControl_HoverEntMain -a "~£FUNCMindControl_HoverEntAttackedByMain~"
+      Behavior    -e £FUNCMindControl_HoverEntMain -f MOVE_TO
+      Weapon      -e £FUNCMindControl_HoverEntMain ON
+      SetMoveMode -e £FUNCMindControl_HoverEntMain RUN
     }
     
     //SendEvent -nr CALL_HELP 1500 "" //they will seek for the player, now player can aim them too
     
-    SetTarget   -e ~£FUNCMindControl_HoverEntTmp~ -a "~£FUNCMindControl_HoverEntMain~"
-    Behavior    -e ~£FUNCMindControl_HoverEntTmp~ -f MOVE_TO
-    Weapon      -e ~£FUNCMindControl_HoverEntTmp~ ON
-    SetMoveMode -e ~£FUNCMindControl_HoverEntTmp~ RUN
+    SetTarget   -e £FUNCMindControl_HoverEntTmp -a "~£FUNCMindControl_HoverEntMain~"
+    Behavior    -e £FUNCMindControl_HoverEntTmp -f MOVE_TO
+    Weapon      -e £FUNCMindControl_HoverEntTmp ON
+    SetMoveMode -e £FUNCMindControl_HoverEntTmp RUN
     
     if(^life_~£FUNCMindControl_HoverEntAttackedByMain~ == 0) {
       GoSub FUNCbreakDeviceDelayed
@@ -2269,7 +2270,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Destroy "~£FUNCMindControl_SpawnFoeLastID~"
 		
 		//Destroy "~£FUNCMindControl_HoverEntTmp~" //TODO will lose any items on it right? how to drop its items on floor? or could just change NPC mesh to "movable\\npc_gore\\npc_gore" and keep inventory stuff there! //destoying the npc is unsafe anyway, may destroy something that is game breaking...
-		//just crashes... USEMESH -e "~£FUNCMindControl_HoverEntTmp~" "movable\\npc_gore\\npc_gore"
+		//just crashes... USEMESH -e £FUNCMindControl_HoverEntTmp "movable\\npc_gore\\npc_gore"
 		//nothing happens SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCMindControl_HoverEntTmp~"
 		timerTFUNCMindControlKillSpawn off
 	}
