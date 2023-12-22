@@ -113,8 +113,8 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3
 Added Remainder arithmetic operation  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CmdInventoryAddAtOtherEntity  
-Inventory command can now add items to other entities  
-so we can now dynamically patch NPCs, no need to edit/override .asl files  
+inventory command can now add items to other entities   
+so we can now dynamically patch NPCs, no need to edit/override .asl files for this.   
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2  
 Added ^degrees... variables  
