@@ -1420,10 +1420,16 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £IconPrevious £Icon
 	
 	Set £Icon "~£IconBasename~"
-	if(§Quality >= 4) Set £Icon "~£Icon~MK2"
-	Set £Icon "~£Icon~[icon]"
-	
-	if(£IconPrevious != £Icon)	TWEAK ICON "~£Icon~"
+	if(£Icon == "void") { //TODO this crashes the game if void. The crash error could show the script context line column stack too.
+		Set £ScriptDebug________________Errors "~£ScriptDebug________________Errors~:£IconBasename was empty (void);"
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub to_callstack_debug_conditional_breakpoint
+	} else {
+		if(§Quality >= 4) Set £Icon "~£Icon~MK2"
+		Set £Icon "~£Icon~[icon]"
+		
+		if(£IconPrevious != £Icon)	TWEAK ICON "~£Icon~"
+	}
 	
 	//INPUT: [§FUNCupdateIcon_force]
 	//if (£Icon == "") Set §FUNCupdateIcon_force 1
@@ -2606,8 +2612,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(£AncientDeviceMode == "AncientBox") {
 		Set £FUNCcfgSkin_simple "Hologram.tiny.index4000.box" GoSub FUNCcfgSkin
 		SET_PRICE 50
-		PlayerStackSize 50 
-		TWEAK ICON "AncientBox[icon]"
+		PlayerStackSize 50
+		Set £IconBasename "AncientBox"
 		if(§Identified == 1) {
 			Set £FUNCnameUpdate_NameBase "Ancient Box (OFF)" 
 		} else {
@@ -2618,7 +2624,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set FUNCcfgSkin "Hologram.tiny.index4000.boxConfigOptions" GoSub FUNCcfgSkin
 		SET_PRICE 13
 		PlayerStackSize 1
-		TWEAK ICON "AncientConfigOptions[icon]"
+		Set £IconBasename "AncientConfigOptions"
 		Set £FUNCnameUpdate_NameBase "Ancient Device Config Options" //keep always readable!
 	} }
 	
@@ -2713,3 +2719,4 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCshowlocals_force 0 //default for next call
 	RETURN
 }
+>>to_callstack_debug_conditional_breakpoint { showvars GoSub callstack_debug_conditional_breakpoint RETURN } >>callstack_debug_conditional_breakpoint { RETURN }
