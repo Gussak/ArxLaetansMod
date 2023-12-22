@@ -97,17 +97,17 @@ High poly dropped items' models create a very dark ugly shadow.
 This patch limits the amount of shadows for them still using strided().  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_NewVarFPS  
-New variable ^fps to get the frame rate
+New variable ^fps to get the frame rate  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_Interpolate2  
 Interpolate command  
-Interpolate an entity near a target  
+Interpolate an entity near a target. No need to expand their IDs.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LifeOfOtherEnt  
 new ^life_<entityID> ^lifemax_<entityID> ^lifemodmax_<entityID>  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_InInventory  
-new ^ininventory returns entity id
+new ^ininventory returns entity id   
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
 Added Remainder arithmetic operation  
@@ -136,7 +136,7 @@ New command: dropitem Can drop one or all items of any entity inventory where it
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
 PS.: These are tests and may not be working yet or may just be useless:  
-/PR_UsemeshOtherEnt command 'usemesh' now accepts other entityID to apply it  
+/PR_UsemeshOtherEnt command 'usemesh' now accepts other entityID to apply it. No need to expand the ID.  
 /PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now. no need to expand the ID  
 /PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget. No need to expand their IDs.  
 /PR_SaveLoadConsoleHistory just saves and loads for now, no proper integration yet...   
