@@ -6,7 +6,7 @@ if [[ -z "$strFlRelativeBase" ]];then
 fi
 
 strFl1="$(ls -1 "ArxLibertatis.1of3wayCmp."*".github/$strFlRelativeBase")" #top main development branch, with everything mixed
-strFl2="$(ls -1 "ArxLibertatis.2of3wayCmp."*".github/$strFlRelativeBase")" #development branch in a commit previous to the PR ones
+strFl2="$(ls -1 "ArxLibertatis.2of3wayCmp."*".github/$strFlRelativeBase")" #development branch in a commit previous to the PR ones #TODO RO?
 strFl3="$(ls -1 "ArxLibertatis.3of3wayCmp."*".github/$strFlRelativeBase")" #PR to copy changes to
 
 if [[ ! -f "$strFl1" ]];then echoc -p "invalid strFl1='$strFl1'";exit 1;fi
