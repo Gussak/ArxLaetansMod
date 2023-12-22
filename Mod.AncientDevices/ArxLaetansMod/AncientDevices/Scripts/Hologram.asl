@@ -1017,6 +1017,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>FUNCconfigOptionHighlight {
 	//INPUT: <§FUNCconfigOptionHighlight_index>
+	if(§FUNCconfigOptionHighlight_index < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	Set £FUNCconfigOptions_mode "show"
 	
 	if(§FUNCconfigOptionHighlight_indexPrevious > -1) {
@@ -1029,6 +1031,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub CFUNCconfigOptionUpdate
 	
 	Set §FUNCconfigOptionHighlight_indexPrevious §FUNCconfigOptionHighlight_index
+	
+	Set §FUNCconfigOptionHighlight_index -1 //set to invalid, so next call requires it being set
 	RETURN
 }
 >>FUNCconfigOptions {
@@ -1054,6 +1058,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>CFUNCconfigOptionUpdate {
 	//INPUT: <@CFUNCconfigOptionUpdate_check>
+	if(@CFUNCconfigOptionUpdate_check < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	Set §FUNCconfigOptions_index @CFUNCconfigOptionUpdate_check
 	// trunc will get the index. if identical, means disabled: ex.: disabled: 33.0 == 33, enabled: 33.1 != 33
 	if(@CFUNCconfigOptionUpdate_check == §FUNCconfigOptions_index) { //.0 means disabled
@@ -1061,14 +1067,19 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	} else { //.1 means enabled
 		GoSub CFUNCconfigOptionEnable
 	}
+	
+	Set @CFUNCconfigOptionUpdate_check -1 //set invalid to be required on next call
+	RETURN
 }
 >>CFUNCconfigOptionToggle {
 	//INPUT: <@CFUNCconfigOptionToggle_check>
-	//OUTPUT: <@CFUNCconfigOptionToggle_set_OUTPUT>
+	if(@CFUNCconfigOptionToggle_check < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	//OUTPUT: @CFUNCconfigOptionToggle_set_OUTPUT
 	Set §CFUNCconfigOptionToggle_trunc @CFUNCconfigOptionToggle_check
-	Sub @CFUNCconfigOptionToggle_check §CFUNCconfigOptionToggle_trunc
+	Sub @CFUNCconfigOptionToggle_check §CFUNCconfigOptionToggle_trunc //if enabled will result in 0.1
 	Set @CFUNCconfigOptionToggle_set_OUTPUT §CFUNCconfigOptionToggle_trunc //disable (the below if fails so..)
 	if(@CFUNCconfigOptionToggle_check == 0.0)	Add @CFUNCconfigOptionToggle_set_OUTPUT 0.1 //enable
+	Set @CFUNCconfigOptionToggle_check -1 //set invalid to req on next call
 	RETURN
 }
 >>CFUNCconfigOptionEnable {
@@ -1165,7 +1176,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 
 >>TFUNCMakeNPCsHostile { GoSub FUNCMakeNPCsHostile ACCEPT } >>FUNCMakeNPCsHostile  {
-	//INPUT: §iFUNCMakeNPCsHostile_range
+	//INPUT: [§iFUNCMakeNPCsHostile_range]
 	
 	//FAIL: Set ^sender PLAYER ; SendEvent -nr Hit §iFUNCMakeNPCsHostile_range "0.01 summoned" //hits every NPC (-n is default) in 3000 range for 0.01 damage and tells it was the player (summoned sets ^sender to player)
 	//FAIL: SendEvent -nr AGGRESSION §iFUNCMakeNPCsHostile_range "" //what params to use here??? // this just make them shake but wont become hostile
@@ -1205,6 +1216,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>TFUNCbreakDeviceDelayed { GoSub FUNCbreakDeviceDelayed ACCEPT } >>FUNCbreakDeviceDelayed {
 	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayer]
 	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis]
+	
 	SetGroup "DeviceTechBroken"
 	//GoSub FUNCshockPlayer
 	
@@ -1423,15 +1435,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set £Icon "~£IconBasename~"
 	if(£Icon == "void") { //TODO this crashes the game if void. The crash error could show the script context line column stack too.
-		Set £ScriptDebug________________Errors "~£ScriptDebug________________Errors~:£IconBasename was empty (void);"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
-		GoSub to_callstack_debug_conditional_breakpoint
-	} else {
-		if(§Quality >= 4) Set £Icon "~£Icon~MK2"
-		Set £Icon "~£Icon~[icon]"
-		
-		if(£IconPrevious != £Icon)	TWEAK ICON "~£Icon~"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
+	
+	if(§Quality >= 4) Set £Icon "~£Icon~MK2"
+	Set £Icon "~£Icon~[icon]"
+	
+	if(£IconPrevious != £Icon)	TWEAK ICON "~£Icon~"
 	
 	//INPUT: [§FUNCupdateIcon_force]
 	//if (£Icon == "") Set §FUNCupdateIcon_force 1
@@ -1495,7 +1505,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 
 >>TFUNCtrapAttack { GoSub FUNCtrapAttack ACCEPT } >>FUNCtrapAttack {
-	//INPUT: <§FUNCtrapAttack_TimeoutMillis>
+	//INPUT: [§FUNCtrapAttack_TimeoutMillis]
 	//INPUT: [§FUNCtrapAttack_TrapMode]: 0=explosion(default) 1=projectile/targetPlayer
 	
 	//TODORM //INPUT: <§FUNCtrapAttack_TrapTimeSec>: in seconds (not milis)
@@ -1623,7 +1633,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCparalysePlayer { GoSub FUNCparalysePlayer ACCEPT } >>FUNCparalysePlayer {
-	//INPUT: @FUNCparalysePlayer_Millis
+	//INPUT: [@FUNCparalysePlayer_Millis]
 	
 	//Set @FUNCparalysePlayer_Resist 100	Dec @FUNCparalysePlayer_Resist @AncientTechSkill //calc resist percent
 	//Mul @FUNCparalysePlayer_Millis @FUNCparalysePlayer_Resist //lower the delay by the percent
@@ -2090,6 +2100,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 >>TFUNCseekTarget { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget {
 	//INPUT: <init||seek?£FUNCseekTarget_callFuncWhenTargetFound>
+	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//INPUT: [£FUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
 	//OUTPUT: £FUNCseekTarget_TargetFoundEnt_OUTPUT
 	if(£FUNCseekTarget_targetCheck == "init") {
@@ -2114,6 +2125,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {
 	//INPUT: <£CFUNCFlyMeToTarget_callFuncWhenTargetReached>
+	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
 	
 	if(and(^life_~£FUNCseekTarget_HoverEnt~ > 0 && ^dist_~£FUNCseekTarget_HoverEnt~ > §TeleDistEndTele)) {
@@ -2333,6 +2345,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>FUNCkillNPC {
 	//INPUT: <£FUNCkillNPC_target>
+	if(^life_~£FUNCkillNPC_target~ <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
 	if(§FUNCkillNPC_destroyCorpse == 1) {
 		//TODO destroy the corpse and spawn gore
@@ -2353,6 +2366,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>TFUNCcalcInterpolateTeleStepDist1s { GoSub FUNCcalcInterpolateTeleStepDist1s ACCEPT } >>FUNCcalcInterpolateTeleStepDist1s {
 	// calculates the distance that must be displaced per frame to complete the total distance in 1 second
 	//INPUT:  <@FUNCcalcInterpolateTeleStepDist1s_Init>
+	if(@FUNCcalcInterpolateTeleStepDist1s_Init <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//OUTPUT: @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
 	
 	//GoSub FUNCcalcFrameMilis()	Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis_OUTPUT //will take 1s to fly to any distance
@@ -2364,6 +2378,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	// cleanup
 	//UnSet @TFUNCcalcInterpolateTeleStepDist1s_tmpTeleSteps
+	Set @FUNCcalcInterpolateTeleStepDist1s_Init -1 //init invalid to req b4 next call
 	RETURN
 }
 >>TFUNCMindControl { GoSub FUNCMindControl ACCEPT } >>FUNCMindControl {
@@ -2471,6 +2486,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 >>TFUNCmorphUpgrade { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade  {
 	//INPUT: <§FUNCmorphUpgrade_otherQuality>
+	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	Set §AncientDeviceTriggerStep 0
 	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
 	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
@@ -2598,10 +2615,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		GoSub FUNCshowlocals
 	}
 	
+	Set §FUNCmorphUpgrade_otherQuality -1 //init invalid to req b4 next call
 	RETURN
 }
 >>FUNCcfgSkin {
 	//INPUT: <£FUNCcfgSkin_simple>
+	if(not("Hologram" IsIn £FUNCcfgSkin_simple)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "~£FUNCcfgSkin_simple~"
 	TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "~£FUNCcfgSkin_simple~"
 	TWEAK SKIN "Hologram.tiny.index4000.boxLandMine"       "~£FUNCcfgSkin_simple~"
@@ -2610,7 +2629,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>TFUNCcfgAncientDevice { GoSub FUNCcfgAncientDevice ACCEPT } >>FUNCcfgAncientDevice {
-	//INPUT: 
+	//INPUT: <£AncientDeviceMode>
+	if(or(£AncientDeviceMode == "void" || £AncientDeviceMode == "")) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	if(£AncientDeviceMode == "AncientBox") {
 		Set £FUNCcfgSkin_simple "Hologram.tiny.index4000.box" GoSub FUNCcfgSkin
 		SET_PRICE 50
@@ -2633,6 +2654,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
 	
+	Set £AncientDeviceMode ""
 	RETURN
 }
 >>TFUNCcfgHologram { GoSub FUNCcfgHologram ACCEPT } >>FUNCcfgHologram  {
@@ -2721,4 +2743,4 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCshowlocals_force 0 //default for next call
 	RETURN
 }
->>to_callstack_debug_conditional_breakpoint { showvars GoSub callstack_debug_conditional_breakpoint RETURN } >>callstack_debug_conditional_breakpoint { RETURN }
+>>FUNCCustomCmdsB4DbgBreakpoint { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint { RETURN }
