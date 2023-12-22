@@ -817,6 +817,8 @@ ON COMBINE {
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
 			GoSub FUNCupdateIcon
+			
+			DESTROY £OtherToCombineWithMe
 		}
 		ACCEPT
 	}
@@ -1243,8 +1245,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	
 	//timerTrapBreakDestroyAutoDrop -m 1 1500 DropItem player "~^me~"
-	timerTrapBreakDestroyAutoDrop -m 1 1500 GoSub FUNCshockPlayer //this drops it
-	timerTrapBreakDestroyAutoDrop -m 0 3000 GoSub FUNCshockPlayer //this also warns the player
+	timerTrapBreakDestroyAutoDrop -m 1 1500 GoTo TFUNCshockPlayer //this drops it
+	timerTrapBreakDestroyAutoDrop -m 0 3000 GoTo TFUNCshockPlayer //this also warns the player
 	
 	GoSub FUNCshowlocals
 	//reset to default b4 next call
@@ -1364,9 +1366,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		
 		if ( §Quality >= 4 ) {
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "~£FUNCnameUpdate_NameFinal_OUTPUT~ MK2+" 
+				Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ MK2+" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "~£FUNCnameUpdate_NameFinal_OUTPUT~ Gradus Duo+" 
+				Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Gradus Duo+" 
 			}
 		}
 		GoSub FUNCupdateIcon
