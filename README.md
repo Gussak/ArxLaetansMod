@@ -76,8 +76,11 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_NthRoot
 NthRoot var <any root value>
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
-The command Set now has extra options  
-Set can now read from and write to other entities, also can get a value from an array and the item count from any entity inventory.  
+The command Set now has extra options    
+Set can now read from and write to other entities (no need to expand their unique IDs).    
+It also can get a value from a string containing an array.    
+It can get the count of one item from any entity inventory.   
+It can get an array of "item count ..." from any inventory.   
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CmdLootInventory  
 new ^lootinventory if another entity inventory is being looted, this will return it's id  
