@@ -40,13 +40,13 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 ***These below are possibly ready. They were cleaned and prepared for a PR:***  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
-Logical Operators for "if" command  
-and(... && ... && ...) //only accepts '&&' or ','  
-or(... || ... || ...) //only accepts '||' or ','  
-!and(... && ... && ...)  
-!or(... || ... || ...)  
-and nesting: if(and(... && !or(... || ... || and(... , ... , ...)) && ...))  
-where '...' are the existing comparisons that use == != >= <= > <  
+Logical Operators for "if" command   
+and(... && ... && ...) //only accepts '&&' or ','   
+or(... || ... || ...) //only accepts '||' or ','   
+not(and(... && ... && ...))    
+not(or(... || ... || ...))      
+and nesting: if(and(... && not(or(... || ... || and(... , ... , ...))) && ...))     
+where '...' are the existing comparisons that use == != >= <= > < or the ones with words     
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
 Debug Line and Column Info  
