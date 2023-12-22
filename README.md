@@ -138,7 +138,7 @@ Obs.: other PR_.* branches may not be ready yet, may contain backup/untested com
 PS.: These are tests and are not working yet or may just be useless:  
 /PR_UsemeshOtherEnt command 'usemesh' now accepts other entityID to apply it  
 /PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now  
-/PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget  
+/PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget. No need to expand their IDs.  
 
 ___
 
