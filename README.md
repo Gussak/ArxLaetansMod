@@ -135,10 +135,11 @@ New command: dropitem Can drop one or all items of any entity inventory where it
 
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
-PS.: These are tests and are not working yet or may just be useless:  
+PS.: These are tests and may not be working yet or may just be useless:  
 /PR_UsemeshOtherEnt command 'usemesh' now accepts other entityID to apply it  
-/PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now  
+/PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now. no need to expand the ID  
 /PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget. No need to expand their IDs.  
+/PR_SaveLoadConsoleHistory just saves and loads for now, no proper integration yet...   
 
 ___
 
