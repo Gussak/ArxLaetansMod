@@ -1437,6 +1437,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(£Icon == "void") { //TODO this crashes the game if void. The crash error could show the script context line column stack too.
 		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
+	//GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO TEST RM
 	
 	if(§Quality >= 4) Set £Icon "~£Icon~MK2"
 	Set £Icon "~£Icon~[icon]"
