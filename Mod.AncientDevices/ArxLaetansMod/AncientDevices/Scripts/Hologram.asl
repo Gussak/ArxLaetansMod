@@ -147,12 +147,14 @@ ON INIT {
 	//timerSkinUnidentified  -m 1 50 TWEAK SKIN "Hologram.skybox.index2000.DocIdentified" "Hologram.skybox.index2000.DocUnidentified"
 	//timerSkinGrenClear     -m 1 50 TWEAK SKIN "Hologram.tiny.index4000.grenade"         "Hologram.tiny.index4000.grenade.Clear"
 	//timerSkinGrenGlowClear -m 1 50 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"     "Hologram.tiny.index4000.grenadeGlow.Clear"
-	timerInitDefaults -m 1 50 GoTo TFUNCinitDefaults
+	timerInitDefaults -m 1 50 GoTo TFUNCinitDefaults //this is not granted..
+	GoSub FUNCinitDefaults
 	
 	ACCEPT
 }
 
 ON IDENTIFY { //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
+	if(兌nitDefaultsDone != 1) GoSub FUNCinitDefaults
 	
 	GoSub FUNChoverInfo
 	if(ｘncientDeviceMode == "ConfigOptions")	GoSub FUNCconfigOptionHover
@@ -189,6 +191,8 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 }
 
 ON INVENTORYUSE {
+	if(兌nitDefaultsDone != 1) GoSub FUNCinitDefaults
+	
 	if (^amount > 1) {
 		SPEAK -p [player_no] NOP
 		ACCEPT //this must not be a stack of items
@@ -614,6 +618,8 @@ ON INVENTORYUSE {
 
 //>>FUNCisnInvOrFloor
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
+	if(兌nitDefaultsDone != 1) GoSub FUNCinitDefaults
+	
 	Set δaaaDebugScriptStackAndLog "On Main:"
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
@@ -744,6 +750,8 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 }
 
 ON CUSTOM { //this is the receiving end of the transmission
+	if(兌nitDefaultsDone != 1) GoSub FUNCinitDefaults
+	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	
 	// ^$param<i> ωtring, ^&param<i> @number, ^#param<i> 告nt
@@ -767,24 +775,26 @@ ON CUSTOM { //this is the receiving end of the transmission
 }
 
 ON COMBINE {
+	if(兌nitDefaultsDone != 1) GoSub FUNCinitDefaults
+	
 	Set ｚlassMe ^class_~^me~ //SELF
-	Set ΜtherToCombineWithMe ^$PARAM1 // is the one that you double click
-	Set ΜtherClass ^class_~ΜtherToCombineWithMe~ //OTHER
+	Set ΜtherEntIdToCombineWithMe ^$PARAM1 // is the one that you double click
+	Set ΜtherClass ^class_~ΜtherEntIdToCombineWithMe~ //OTHER
 	
 	UnSet ΠcriptDebugCombineFailReason
 	Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
 	
 	///////////////////// combine with other classes ///////////////////////
 	
-	if (or(ΜtherToCombineWithMe ISCLASS "wall_block" || ΜtherToCombineWithMe ISCLASS "bone" || ΜtherToCombineWithMe ISCLASS "jail_stone")) { //add anything that can smash it but these are enough. This is not a combine actually, is more like an action. this can break a stack!
+	if (or(ΜtherEntIdToCombineWithMe ISCLASS "wall_block" || ΜtherEntIdToCombineWithMe ISCLASS "bone" || ΜtherEntIdToCombineWithMe ISCLASS "jail_stone")) { //add anything that can smash it but these are enough. This is not a combine actually, is more like an action. this can break a stack!
 		GoSub FUNCbreakDeviceDelayed
 		ACCEPT
 	}
 	
 	///////////////////// ancient devices only ///////////////////////
 	
-	// check other (ΜtherToCombineWithMe is the one that you double click)
-	//if (not(and(ΜtherToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
+	// check other (ΜtherEntIdToCombineWithMe is the one that you double click)
+	//if (not(and(ΜtherEntIdToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
 		//SPEAK -p [player_no] NOP
 		//Set ΠcriptDebugCombineFailReason "Other:Not:Class:Hologram"
 		//Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
@@ -797,14 +807,16 @@ ON COMBINE {
 		ACCEPT
 	}
 	
-	Set -r ΜtherToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode //	Set -rw ^me ΜtherToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode
+	//Set ΠcriptDebugCombineFailReason "Test:ｘncientDeviceMode=~ｘncientDeviceMode~;"
+	Set -r ΜtherEntIdToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode //	Set -rw ^me ΜtherEntIdToCombineWithMe ΜtherAncientDeviceMode ｘncientDeviceMode
+	if(or(ΜtherAncientDeviceMode == "" || ｘncientDeviceMode == ""))	GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(and(ΜtherAncientDeviceMode == ｘncientDeviceMode && ｘncientDeviceMode != "AncientBox")) { //this is to increase quality, least for the cheapest
 		if(助seMax >= 80) { //quality 4+
 			SPEAK -p [player_no] NOP
 			Set ΠcriptDebugCombineFailReason "Quality:Already:MK2"
 			Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
 		} else {
-			Set -r ΜtherToCombineWithMe 別therUseMax 助seMax
+			Set -r ΜtherEntIdToCombineWithMe 別therUseMax 助seMax
 			if(別therUseMax > 助seMax) {
 				Set 助seMaxImprove 助seMax
 				Set 助seMax 別therUseMax
@@ -818,7 +830,7 @@ ON COMBINE {
 			GoSub FUNCnameUpdate
 			GoSub FUNCupdateIcon
 			
-			DESTROY ΜtherToCombineWithMe
+			DESTROY ΜtherEntIdToCombineWithMe
 		}
 		ACCEPT
 	}
@@ -837,7 +849,7 @@ ON COMBINE {
 		ACCEPT
 	}
 	
-	if (ΜtherToCombineWithMe !isgroup "DeviceTechBasic") {
+	if (ΜtherEntIdToCombineWithMe !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
 		Set ΠcriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic:Aka_hologram"
 		Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
@@ -879,10 +891,10 @@ ON COMBINE {
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	Set -r ΜtherToCombineWithMe 佝UNCmorphUpgrade_otherQuality 利uality
+	Set -r ΜtherEntIdToCombineWithMe 佝UNCmorphUpgrade_otherQuality 利uality
 	GoSub FUNCmorphUpgrade
 	
-	DESTROY ΜtherToCombineWithMe
+	DESTROY ΜtherEntIdToCombineWithMe
 	
 	Set 佝UNCshowlocals_force 1	GoSub FUNCshowlocals
 	ACCEPT
@@ -1122,6 +1134,8 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 //}
 
 >>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
+	if(兌nitDefaultsDone == 1) RETURN
+	
 	Set ｘncientDeviceMode "AncientBox"
 	
 	Set ΓUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
@@ -1143,7 +1157,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//TOKEN_AUTOPATCH_CfgOptDefaults_BEGIN
 	
 	Set 助seMax 5
-	Inc 助seMax ^rnd_110
+	Add 助seMax ^rnd_110
 	
 	Set 刨eekTargetDistance 5001
 	Set 劫eleDistEndTele 200 //if player is above the item on the floor, it will be 177 dist. The dist of the item on the floor to a goblin is 67 btw. Must be above these.
@@ -1169,6 +1183,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Collision ON //nothing happens when thrown?
 	Damager -eu 3 //doesnt damage NPCs when thrown?
 	
+	Set 兌nitDefaultsDone 1
 	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;FUNCinitDefaults"
 	GoSub FUNCshowlocals
 	
@@ -2350,6 +2365,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//INPUT: [佝UNCkillNPC_destroyCorpse]
 	if(佝UNCkillNPC_destroyCorpse == 1) {
 		//TODO destroy the corpse and spawn gore
+		Set -mr ΓUNCkillNPC_target ΘilledNPCinvList2D *
 		DropItem "~ΓUNCkillNPC_target~" all
 	}
 	DoDamage -fmlcgewsao "~ΓUNCkillNPC_target~" 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
@@ -2655,7 +2671,6 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
 	
-	Set ｘncientDeviceMode ""
 	RETURN
 }
 >>TFUNCcfgHologram { GoSub FUNCcfgHologram ACCEPT } >>FUNCcfgHologram  {
