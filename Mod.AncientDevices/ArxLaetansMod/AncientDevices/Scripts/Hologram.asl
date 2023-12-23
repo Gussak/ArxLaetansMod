@@ -154,7 +154,7 @@ ON INIT {
 }
 
 ON IDENTIFY { //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
-	if(§InitDefaultsDone != 1) GoSub FUNCinitDefaults
+	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	GoSub FUNChoverInfo
 	if(£AncientDeviceMode == "ConfigOptions")	GoSub FUNCconfigOptionHover
@@ -191,7 +191,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 }
 
 ON INVENTORYUSE {
-	if(§InitDefaultsDone != 1) GoSub FUNCinitDefaults
+	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) {
 		SPEAK -p [player_no] NOP
@@ -618,7 +618,7 @@ ON INVENTORYUSE {
 
 //>>FUNCisnInvOrFloor
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
-	if(§InitDefaultsDone != 1) GoSub FUNCinitDefaults
+	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £_aaaDebugScriptStackAndLog "On Main:"
 	
@@ -750,7 +750,7 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 }
 
 ON CUSTOM { //this is the receiving end of the transmission
-	if(§InitDefaultsDone != 1) GoSub FUNCinitDefaults
+	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
 	
@@ -775,7 +775,7 @@ ON CUSTOM { //this is the receiving end of the transmission
 }
 
 ON COMBINE {
-	if(§InitDefaultsDone != 1) GoSub FUNCinitDefaults
+	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £ClassMe ^class_~^me~ //SELF
 	Set £OtherEntIdToCombineWithMe ^$PARAM1 // is the one that you double click
@@ -823,7 +823,7 @@ ON COMBINE {
 			} else {
 				Set §UseMaxImprove §OtherUseMax
 			}
-			Div §UseMaxImprove 5
+			Div §UseMaxImprove 5 //just +20% of lowest quality
 			Add §UseMax §UseMaxImprove
 			
 			GoSub FUNCupdateUses
@@ -1134,7 +1134,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 //}
 
 >>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
-	if(§InitDefaultsDone == 1) RETURN
+	if(§InitDefaultsDone > 0) RETURN
 	
 	Set £AncientDeviceMode "AncientBox"
 	
@@ -1183,7 +1183,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Collision ON //nothing happens when thrown?
 	Damager -eu 3 //doesnt damage NPCs when thrown?
 	
-	Set §InitDefaultsDone 1
+	++ §InitDefaultsDone
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCinitDefaults"
 	GoSub FUNCshowlocals
 	
