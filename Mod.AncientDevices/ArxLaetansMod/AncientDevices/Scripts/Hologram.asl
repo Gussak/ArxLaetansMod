@@ -1133,7 +1133,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//RETURN
 //}
 
->>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
+>>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults { //DO NOT CALL FROM "ON INIT" or every item on the stack will have the same random values!!! :(
 	if(§InitDefaultsDone > 0) RETURN
 	if (^amount > 1) RETURN //this must not be a stack of items to prevent identical random values!
 	
