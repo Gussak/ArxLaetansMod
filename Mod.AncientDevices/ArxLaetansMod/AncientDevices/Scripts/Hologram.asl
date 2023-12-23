@@ -153,6 +153,12 @@ ON INIT {
 	ACCEPT
 }
 
+ON CLONE { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
+	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
+	ACCEPT
+}
+
 ON IDENTIFY { //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
@@ -1856,22 +1862,25 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £testString "foo" //dont change!
 	
 	// OK means can appear on the £ScriptDebug________________Tests. WRONG means it should not have appeared.
-	
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A1=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A2=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A3=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A4=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	// test without block delimiters { }
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A11=ok"
+	else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo1"))
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;A12=WRONG"
 	if(and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))
@@ -1882,66 +1891,74 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	// not(!)
 	if(not(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b11=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(not(and(@testFloat == 1.5 && §testInt == 7 && £testString != "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b12=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(not(and(@testFloat == 1.5 && §testInt != 7 && £testString == "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b13=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(not(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))) {
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;b14=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	// or nor
 	if(or(@testFloat == 1.5 , §testInt == 7 , £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c1=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(not(or(@testFloat == 1.5 || §testInt != 7 || £testString == "foo1"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c2=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(not(or(@testFloat != 1.5 || §testInt == 7 || £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c3b=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;c4=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e1=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(not(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e1b=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e2=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e2b=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(and(@testFloat != 1.5 && §testInt == 7 && £testString == "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e3=wrong"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(not(and(@testFloat == 1.5 && §testInt == 7 && £testString == "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e3b=wrong"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e4=wrong"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	if(not(or(@testFloat == 1.5 || §testInt != 7 || £testString != "foo"))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;e4b=wrong"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	
 	// nesting and multiline conditions
 	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1a=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(or(
 		@testFloat != 1.5 || 
 		§testInt   != 7   || 
@@ -1949,7 +1966,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b2=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(not(or(
 		@testFloat != 1.5 || 
 		§testInt != 7     || 
@@ -1957,6 +1974,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
 	))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b3=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	//todo review below, not working yet
 	if(or(
@@ -1967,7 +1985,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(or(
 		@testFloat != 1.5 ||
 		§testInt   != 7   ||
@@ -1984,9 +2002,10 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			£testString == "foo" ))
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2b=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||      not(and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo"))     )  ){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	
 	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_begin"
@@ -2004,7 +2023,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3b=ok"
-	}
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_3"
 	if(
 		or(
@@ -2020,6 +2039,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	
 	//Set @test1 1.0
