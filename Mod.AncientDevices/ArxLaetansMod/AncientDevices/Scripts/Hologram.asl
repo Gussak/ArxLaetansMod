@@ -147,8 +147,8 @@ ON INIT {
 	//timerSkinUnidentified  -m 1 50 TWEAK SKIN "Hologram.skybox.index2000.DocIdentified" "Hologram.skybox.index2000.DocUnidentified"
 	//timerSkinGrenClear     -m 1 50 TWEAK SKIN "Hologram.tiny.index4000.grenade"         "Hologram.tiny.index4000.grenade.Clear"
 	//timerSkinGrenGlowClear -m 1 50 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"     "Hologram.tiny.index4000.grenadeGlow.Clear"
-	timerInitDefaults -m 1 50 GoTo TFUNCinitDefaults //this is not granted..
-	GoSub FUNCinitDefaults
+	//timerInitDefaults -m 1 50 GoTo TFUNCinitDefaults //this is not granted..
+	//GoSub FUNCinitDefaults
 	
 	ACCEPT
 }
@@ -819,12 +819,12 @@ ON COMBINE {
 			Set -r ΜtherEntIdToCombineWithMe 別therUseMax 助seMax
 			if(別therUseMax > 助seMax) {
 				Set 助seMaxImprove 助seMax
-				Set 助seMax 別therUseMax
+				Set 助seMax 別therUseMax	Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;822;~助seMax~"
 			} else {
 				Set 助seMaxImprove 別therUseMax
 			}
 			Div 助seMaxImprove 5 //just +20% of lowest quality
-			Add 助seMax 助seMaxImprove
+			Add 助seMax 助seMaxImprove	Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;827;~助seMax~"
 			
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
@@ -1135,6 +1135,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 >>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults {
 	if(兌nitDefaultsDone > 0) RETURN
+	if (^amount > 1) RETURN //this must not be a stack of items to prevent identical random values!
 	
 	Set ｘncientDeviceMode "AncientBox"
 	
@@ -1156,8 +1157,31 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(&G_HologCfgOpt_DebugTests == 0) Set &G_HologCfgOpt_DebugTests 22.0
 	//TOKEN_AUTOPATCH_CfgOptDefaults_BEGIN
 	
-	Set 助seMax 5
-	Add 助seMax ^rnd_110
+	Set 冶axUseMax 115
+	//if(&G_HologRnd < 冶axUseMax) {
+		//Set &G_HologRnd ^rnd_99999
+	//} else {
+		//Set &G_HologRnd ^rnd_~&G_HologRnd~
+	//}
+	//Set 助seMax &G_HologRnd
+	////Set 助seMax ^arxseconds //^arxtime //raw time
+	//Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;~助seMax~"
+	//Mod 助seMax 冶axUseMax
+	//Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;~助seMax~"
+	//if(助seMax < 5) Set 助seMax 5
+	////Add 助seMax 5 //minimum
+	//Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;~助seMax~;...;~^arxtime~;~^arxtime~"
+	////Set 助seMax 5	Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;1159;~助seMax~"
+	////Add 助seMax ^random_110	Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;1160;~助seMax~"
+	////Set ΑbgTmpUseMax "~ΑbgTmpUseMax~;1160;~^rnd_110~;~^rnd_110~;~^rnd_110~;~^rnd_110~;~^rnd_110~" //random is predictive and is giving the same exact values everytime I reload the game ... :/
+	////Set ΑbgTmpUseMax2 "~ΑbgTmpUseMax2~;1162;~^random_110~;~^random_110~;~^random_110~;~^random_110~;~^random_110~" //random is predictive and is giving the same exact values everytime I reload the game ... :/
+	//Set ΑbgTmpUseMax2 "~ΑbgTmpUseMax2~;~^me~;~^random_110~;~^random_110~;~^random_110~;~^random_110~;~^random_110~" //random is predictive and is giving the same exact values everytime I reload the game ... :/
+	//if(#G_HologRnd < 冶axUseMax) Set #G_HologRnd 99999
+	//Sub #G_HologRnd ^rnd_~冶axUseMax~
+	//Set 助seMax #G_HologRnd
+	//Mod 助seMax 冶axUseMax
+	Set 助seMax ^rnd_~冶axUseMax~
+	if(助seMax < 5) Set 助seMax 5
 	
 	Set 刨eekTargetDistance 5001
 	Set 劫eleDistEndTele 200 //if player is above the item on the floor, it will be 177 dist. The dist of the item on the floor to a goblin is 67 btw. Must be above these.
@@ -1184,8 +1208,8 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Damager -eu 3 //doesnt damage NPCs when thrown?
 	
 	++ 兌nitDefaultsDone
-	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;FUNCinitDefaults"
-	GoSub FUNCshowlocals
+	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;FUNCinitDefaults:~^me~"
+	Set 佝UNCshowlocals_force 1 GoSub FUNCshowlocals
 	
 	RETURN
 }
@@ -1418,7 +1442,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Mod 吱econds 60
 			// as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
 			if(兌dentified == 1) {
-				Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,吩ours~:~%02d,吮inutes~:~%02d,吱econds~" 
+				Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,吩ours~:~%02d,吮inutes~:~%02d,吱econds~ raw:~^arxtime~" 
 			} else {
 				Set ΖtemConditionDesc "~ΖtemConditionDesc~(0x~%X,兌temConditionPercent~% 0x~%X,助seCount~/0x~%X,助seMax~ Reliquum 0x~%X,助seRemain~) RT:0x~%X,^gamedays~day(s) 0x~%02X,吩ours~:0x~%02X,吮inutes~:0x~%02X,吱econds~" 
 			}
