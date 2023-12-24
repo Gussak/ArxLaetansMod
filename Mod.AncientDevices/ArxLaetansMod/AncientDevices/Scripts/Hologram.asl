@@ -622,8 +622,26 @@ ON INVENTORYUSE {
 	ACCEPT
 }
 
+>>FUNCtestCallStack1 {
+	GoSub FUNCtestCallStack2
+	RETURN
+}
+>>FUNCtestCallStack2 {
+	GoSub FUNCtestCallStack3
+	RETURN
+}
+>>FUNCtestCallStack3 {
+	GoSub FUNCtestCallStack4
+	RETURN
+}
+>>FUNCtestCallStack4 {
+	showvars //showlocals
+	RETURN
+}
+
 //>>FUNCisnInvOrFloor
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
+	GoSub FUNCtestCallStack1
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £_aaaDebugScriptStackAndLog "On Main:"
@@ -835,6 +853,7 @@ ON COMBINE {
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
 			GoSub FUNCupdateIcon
+			GoSub FUNCupdateSignalStrengthRequirement
 			
 			DESTROY £OtherEntIdToCombineWithMe
 		}
@@ -1192,9 +1211,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §SeekTargetDistance 5001
 	Set §TeleDistEndTele 200 //if player is above the item on the floor, it will be 177 dist. The dist of the item on the floor to a goblin is 67 btw. Must be above these.
 	
-	// signal
-	Set £SignalMode "Working"
-	Set #SignalModeChangeTime 0
+	//////////////////// signal
+	if(#G_HologCfg_InitGlobalsDone == 0) {
+		Set $G_Holog_SignalMode "NoSignal" //initially None with 0 delay below, will instantly become working mode the first time player sees it
+		Set #G_Holog_SignalModeChangeTime 0
+	}
+	
+	GoSub FUNCupdateSignalStrengthRequirement
 	
 	Set §SignalDistBase 1000 //SED_TOKEN_MOD_CFG
 	
@@ -1214,8 +1237,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Damager -eu 3 //doesnt damage NPCs when thrown?
 	
 	++ §InitDefaultsDone
+	++ #G_HologCfg_InitGlobalsDone
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCinitDefaults:~^me~"
-	Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
+	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 	
 	RETURN
 }
@@ -1436,9 +1460,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
 			if(§Identified == 1) {
-				Set £SignalStrInfo "~£SignalStrInfo~(req ~%.1f,@SignalStrengthReq~, now is ~§SignalStrengthTrunc~% for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req ~%.1f,@SignalStrengthReq~%, here is ~§SignalStrengthTrunc~%, ~$G_Holog_SignalMode~ for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			} else {
-				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@SignalStrengthReq~, now is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@SignalStrengthReq~, here is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			}
 			Set §hours   ^gamehours
 			Mod §hours 24
@@ -1705,28 +1729,28 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//Set @testCallStack 1 2 //TODORM
 	
 	// reset to recalc
-	Set @RepeaterSignalStrength 0 //0.0 to 100.0
-	Set @SignalStrength 0         //0.0 to 100.0
-	Set §SignalStrengthTrunc 0   //  0 to 100
-	Set @SignalStrLvl 0           //0.0 to 10.0
+	Set @RepeaterSignalStrength 0.0 //0.0 to 100.0
+	Set @SignalStrength 0.0         //0.0 to 100.0
+	Set §SignalStrengthTrunc 0      //  0 to 100
+	Set @SignalStrLvl 0.0           //0.0 to 10.0
 	
 	// no signal for some short realtime. This means the global ancient energy transmitter is failing or getting interference.
 	Set §DEBUGgameseconds ^gameseconds
-	Set §SignalModeChangeDelay #SignalModeChangeTime
+	Set §SignalModeChangeDelay #G_Holog_SignalModeChangeTime
 	Dec §SignalModeChangeDelay ^gameseconds
-	if(£SignalMode == "Working"){
-		if(^gameseconds > #SignalModeChangeTime){
-			Set £SignalMode "None" //configures the no signal delay below
-			Set #SignalModeChangeTime  ^gameseconds
-			Inc #SignalModeChangeTime  ^rnd_300 //up to
+	if($G_Holog_SignalMode == "Working"){
+		if(^gameseconds > #G_Holog_SignalModeChangeTime){
+			Set $G_Holog_SignalMode "NoSignal" //configures the no signal delay below
+			Set #G_Holog_SignalModeChangeTime  ^gameseconds
+			Inc #G_Holog_SignalModeChangeTime  ^rnd_300 //up to
 			RETURN
 		}
-	} else { if(£SignalMode == "None"){
-		if(^gameseconds > #SignalModeChangeTime){
-			Set £SignalMode "Working" //configures the working signal delay below
-			Set #SignalModeChangeTime  ^gameseconds
-			Inc #SignalModeChangeTime  900 //from
-			Inc #SignalModeChangeTime  ^rnd_900 //up to
+	} else { if($G_Holog_SignalMode == "NoSignal"){
+		if(^gameseconds > #G_Holog_SignalModeChangeTime){
+			Set $G_Holog_SignalMode "Working" //configures the working signal delay below
+			Set #G_Holog_SignalModeChangeTime  ^gameseconds
+			Inc #G_Holog_SignalModeChangeTime  900 //from
+			Inc #G_Holog_SignalModeChangeTime  ^rnd_900 //up to
 			RETURN
 		}
 		RETURN
@@ -1755,14 +1779,15 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set @AncientGlobalTransmitterSignalDist ^dist_{0,0,0} //could be anywhere, if  I create a bunker map with it, then it will have a proper location 
 	}
 	
-	// signal strength based on deterministic but difficultly previsible cubic regions
-	Set §NoSignalRegion ^locationx_player
-	Inc §NoSignalRegion ^locationz_player
+	// no signal regions are like squared columns
+	Set §NoSignalRegion ^locationx_~^me~
+	Inc §NoSignalRegion ^locationz_~^me~
 	Mod §NoSignalRegion §SignalDistBase
+	// signal strength based on deterministic but difficultly previsible cubic regions
 	if(§NoSignalRegion >= §SignalDistMin) {
 		Set @SignalStrength ^locationx_~^me~
 		Inc @SignalStrength ^locationy_~^me~
-		if (^inPlayerInventory == 1) Inc @SignalStrength 90 //if at player inventory, items are 90 dist from ground (based on tests above). Could just use ^locationy_player tho.
+		if (^inPlayerInventory == 1) Inc @SignalStrength 90 //if at player inventory, items are 90 dist from ground (based on tests above). Could just use ^locationy_player tho instead of ^locationy_~^me~. This is important because when placing the item on the floor it will then have almost the same value.
 		Inc @SignalStrength ^locationz_~^me~
 		
 		if(§SignalRepeater == 0) {
@@ -2283,8 +2308,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 					if(§Quality >= 4) { // high quality wont trigger with innofensive rats
 						Set £FLM_OnTopEntClass ^class_~£FLM_OnTopEntId~
 						if(£FLM_OnTopEntClass == "rat") {
-							Set §FLM_OnTopLife 0 //for safety
-							GoTo LOOP_FLM_ChkNPC
+							Set §FLM_OnTopLife 0
+							Set £FLM_OnTopEntId ""
 						}
 					}
 				}
@@ -2693,12 +2718,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Set £IconBasename "AncientSniperBullet"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
-		} } } } } } }
+		} } } } } } } }
 		
 		if(§AncientDeviceTriggerStep == 1) {
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
 			GoSub FUNCupdateIcon
+			GoSub FUNCupdateSignalStrengthRequirement
 
 			if( £AncientDeviceMode != "HologramMode" ) SET_SHADOW ON //because hologram emits light
 		}
@@ -2785,16 +2811,19 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//OUTPUT: §FUNCchkSignalStrenghCheck_IsAcceptable
 	Set §FUNCchkSignalStrenghCheck_IsAcceptable 0
 	
-	Set @SignalStrengthReq 0
-	if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReq  1
-	if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReq  1
-	if(£AncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReq  0 //keep 0!
-	if(£AncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReq  5 //can randomly be dangerous
-	if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReq 30 //can instakill
-	if(£AncientDeviceMode == "LandMine"      ) Set @SignalStrengthReq 75 //can instakill, easy to use
-	if(£AncientDeviceMode == "MindControl"   ) Set @SignalStrengthReq 20 //
-	if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReq 40 //instakills and travels
-	if(£AncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReq 50 //instakills, safe to use
+	//Set @SignalStrengthReqBase 0
+	//// dont use too high values cuz of Mul below
+	//if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReqBase  1
+	//if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReqBase  1
+	//if(£AncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReqBase  0 //keep 0!
+	//if(£AncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReqBase  5 //can randomly be dangerous
+	//if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReqBase 30 //can instakill
+	//if(£AncientDeviceMode == "LandMine"      ) Set @SignalStrengthReqBase 75 //can instakill, easy to use
+	//if(£AncientDeviceMode == "MindControl"   ) Set @SignalStrengthReqBase 20 //
+	//if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReqBase 40 //instakills and travels
+	//if(£AncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReqBase 50 //instakills, safe to use
+	
+	Set @SignalStrengthReq @SignalStrengthReqBase
 	if(§Quality >= 4) {
 		Mul @SignalStrengthReq 1.666
 		if(@SignalStrengthReq > 95) Set @SignalStrengthReq 95
@@ -2837,3 +2866,17 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCCustomCmdsB4DbgBreakpoint { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint { RETURN }
+>>FUNCupdateSignalStrengthRequirement {
+	Set @SignalStrengthReqBase 0
+	// dont use too high values cuz of Mul below
+	if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReqBase  1
+	if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReqBase  1
+	if(£AncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReqBase  0 //keep 0!
+	if(£AncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReqBase  5 //can randomly be dangerous
+	if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReqBase 30 //can instakill
+	if(£AncientDeviceMode == "LandMine"      ) Set @SignalStrengthReqBase 75 //can instakill, easy to use
+	if(£AncientDeviceMode == "MindControl"   ) Set @SignalStrengthReqBase 20 //
+	if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReqBase 40 //instakills and travels
+	if(£AncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReqBase 50 //instakills, safe to use
+	RETURN
+}

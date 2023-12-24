@@ -23,48 +23,50 @@ strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
 mkdir -vp "`dirname "$strFlLog"`"
 
 while true;do
-  : ${bBuildB4Run:=true} #help
-  if $bBuildB4Run;then 
-    cd "$strPathIni"
-    while ! ./buildArxLibertatis.sh;do echoc -w "fix the code and retry";done;
-  fi
-  
-  if [[ ! -f "$strPathRun/arx" ]];then
-    cd "$strPathIni"
-    cd ..
-    secOverrideMultiLayerMountPoint.sh ArxLibertatis
-  fi
+	: ${bBuildB4Run:=true} #help
+	if $bBuildB4Run;then 
+		cd "$strPathIni"
+		if echoc -q "build it now?@Dy";then
+			while ! ./buildArxLibertatis.sh;do echoc -w "fix the code and retry";done;
+		fi
+	fi
+	
+	if [[ ! -f "$strPathRun/arx" ]];then
+		cd "$strPathIni"
+		cd ..
+		secOverrideMultiLayerMountPoint.sh ArxLibertatis
+	fi
 
-  cd "$strPathRun"
-  
-  function FUNCsaveList() { 
-      find "$HOME/.local/share/arx/save" -iname "gsave.sav" -exec ls --full-time '{}' \; |sort -k6; 
-  }
-  FUNCsaveList
-  nNewestSaveIndex=$((10#`FUNCsaveList |tail -n 1 |sed -r 's@.*/save(....)/.*@\1@'`))&&:;
+	cd "$strPathRun"
+	
+	function FUNCsaveList() { 
+			find "$HOME/.local/share/arx/save" -iname "gsave.sav" -exec ls --full-time '{}' \; |sort -k6; 
+	}
+	FUNCsaveList
+	nNewestSaveIndex=$((10#`FUNCsaveList |tail -n 1 |sed -r 's@.*/save(....)/.*@\1@'`))&&:;
 
-  echoc --info "On Nemiver create a breakpoint to function: @rDebugBreakpoint "
-  acmdParams=(
-    --data-dir="../Arx Fatalis" #TODOA could just place data*.pak at libertatis path? or on a layer?
-    #--debug="warn,error,debug" #TODOA this works???
-    #--debug="debug,info,console,warning,error,critical"
-    --debug="debug"
-    --debug-gl
-  );
-  strNewestSaveFile="`FUNCsaveList |tail -n 1 |sed -r "s@.*($HOME/.*)@\1@"`"
-  if [[ -n "$nNewestSaveIndex" ]] && echoc -t 6 -q "load newest savegame $nNewestSaveIndex ($strNewestSaveFile)?@Dy";then
-    #acmdParams+=(--loadslot="$nNewestSaveIndex"); #this doesnt seem to work?
-    acmdParams+=(--loadsave "$strNewestSaveFile");
-  fi
-  acmd=(nemiver --use-launch-terminal ./arx "${acmdParams[@]}" "$@")
+	echoc --info "On Nemiver create a breakpoint to function: @rDebugBreakpoint "
+	acmdParams=(
+		--data-dir="../Arx Fatalis" #TODOA could just place data*.pak at libertatis path? or on a layer?
+		#--debug="warn,error,debug" #TODOA this works???
+		#--debug="debug,info,console,warning,error,critical"
+		--debug="debug"
+		--debug-gl
+	);
+	strNewestSaveFile="`FUNCsaveList |tail -n 1 |sed -r "s@.*($HOME/.*)@\1@"`"
+	if [[ -n "$nNewestSaveIndex" ]] && echoc -t 6 -q "load newest savegame $nNewestSaveIndex ($strNewestSaveFile)?@Dy";then
+		#acmdParams+=(--loadslot="$nNewestSaveIndex"); #this doesnt seem to work?
+		acmdParams+=(--loadsave "$strNewestSaveFile");
+	fi
+	acmd=(nemiver --use-launch-terminal ./arx "${acmdParams[@]}" "$@")
 
-  export ARX_LIMIT_SHADOWBLOB_FOR_VERTEXES=9
+	export ARX_LIMIT_SHADOWBLOB_FOR_VERTEXES=9
 
-  #./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
-  echoc --info "EXEC: ${acmd[@]}"
-  ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest
-  rxvt -geometry 100x1 -e tail -F "$strFlLog"&disown #rxvt wont stack with xterm windows group on ubuntu windows docks
-  unbuffer "${acmd[@]}" 2>&1 |tee "$strFlLog"
-  
-  echoc -w "re-run"
+	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
+	echoc --info "EXEC: ${acmd[@]}"
+	ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest
+	rxvt -geometry 100x1 -e tail -F "$strFlLog"&disown #rxvt wont stack with xterm windows group on ubuntu windows docks
+	unbuffer "${acmd[@]}" 2>&1 |tee "$strFlLog"
+	
+	echoc -w "re-run"
 done
