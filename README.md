@@ -57,7 +57,9 @@ logs with more details for mod developers
   warnings will show GoTo/GoSub call stack.  
   showlocals and showvars will also show event and params, and the GoTo/GoSub call stack.  
   the script call stack now shows position, line and collumn from where each call was made.  
-  Extra: a debug breakpoint can be triggered from a script function that contains 'debugbreakpoint' in it's name.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DebugBreakPointFromScriptCall  
+  a debug breakpoint can be triggered from a script condition calling a function that contains 'debugbreakpoint' in it's name.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 QOL: new control (default key 'N') to combine items w/o having to double click

@@ -1448,7 +1448,7 @@ ON InventoryOut { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Mod 吱econds 60
 			// as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
 			if(兌dentified == 1) {
-				Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,吩ours~:~%02d,吮inutes~:~%02d,吱econds~ raw:~^arxtime~" 
+				Set ΖtemConditionDesc "~ΖtemConditionDesc~(~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~) RT:~^gamedays~day(s) ~%02d,吩ours~:~%02d,吮inutes~:~%02d,吱econds~(~^arxtime~)" 
 			} else {
 				Set ΖtemConditionDesc "~ΖtemConditionDesc~(0x~%X,兌temConditionPercent~% 0x~%X,助seCount~/0x~%X,助seMax~ Reliquum 0x~%X,助seRemain~) RT:0x~%X,^gamedays~day(s) 0x~%02X,吩ours~:0x~%02X,吮inutes~:0x~%02X,吱econds~" 
 			}
