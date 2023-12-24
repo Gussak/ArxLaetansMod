@@ -1,0 +1,41 @@
+Script CallStack, line and column: logs will show more details for mod developers
+
+-  Warnings will show GoTo/GoSub call stack.  
+-  Showlocals and showvars will also show event and params, and the GoTo/GoSub call stack.  
+-  The script call stack now shows position, line and collumn from where each call was made (the column may not match your text editor as each tab on it may count as more than one column).
+
+It now looks like (on the log it is all in a single line. I placed '\' just to be easier to read here) ex.:  
+```
+[I] ScriptedInterface:239 Local variables for hologram_0020 \
+at Event on identify sent from player at GoTo/GoSub callStack \
+funcinitdefaults[p=10777,l=163,c=50]/funcshowlocals[p=55550,l=1218,c=49]/, \
+[Position 134966, Line 2829, Column 83]:
+```
+
+To test it:  
+```
+>>FUNCtestCallStack1 {
+	GoSub FUNCtestCallStack2
+	RETURN
+}
+>>FUNCtestCallStack2 {
+	GoSub FUNCtestCallStack3
+	RETURN
+}
+>>FUNCtestCallStack3 {
+	GoSub FUNCtestCallStack4
+	RETURN
+}
+>>FUNCtestCallStack4 {
+	showvars //showlocals
+	RETURN
+}
+On Main {
+	GoSub FUNCtestCallStack1
+	ACCEPT
+}
+```
+
+Obs.: I have many other PR_... branches, some are WIP but most are ready.  
+If someone likes any of them, feel free to merge it in your own branch, test, improve etc. and create a pull request instead of me :).
+There are also many usage examples and tests on the Hologram.asl script at my ArxLaetansMod (but it depends on my fully merged dev branch).
