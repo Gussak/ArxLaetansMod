@@ -168,6 +168,15 @@ attractor SELF 10 300 //hologram blackhole test
 //DONE.LogDebug: MYDBG("DEGREES():(name="<<name<<",xyz="<<xyz<<",deg="<<degrees<<",fixedDeg="<<(*fcontent)<<",pitch="<<entity->angle.getPitch()<<",yaw="<<entity->angle.getYaw()<<",roll="<<entity->angle.getRoll()<<",Ppitch="<<player.angle.getPitch()<<",Pyaw="<<player.angle.getYaw()<<",Proll="<<player.angle.getRoll()<<",Cpitch="<<context.getEntity()->angle.getPitch()<<",Cyaw="<<context.getEntity()->angle.getYaw()<<",Croll="<<context.getEntity()->angle.getRoll()<<")"); //<<",angle="<<entity->angle
 
 
+#ifdef ARX_DEBUG
+#pragma GCC push_options
+#pragma GCC optimize ("O0") //required to let the breakpoints work properly
+#endif
+//code to place breakpoints
+#ifdef ARX_DEBUG
+#pragma GCC pop_options
+#endif
+
 ======================== etc
 
 class ShowCallStackCommand : public Command {

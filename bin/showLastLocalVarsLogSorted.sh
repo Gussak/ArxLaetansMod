@@ -8,7 +8,7 @@ astrSecCmd=(
 	-e 's".*Global variables:"0&"'
 	-e 's"^#" 1 &"' 
 	-e 's"^&" 2 &"' 
-	-e 's"^$" 3 &"' 
+	-e 's"^\$" 3 &"' 
 	-e 's"^\^" 4 &"' 
 	
 	-e 's".*Local variables for"5&"'

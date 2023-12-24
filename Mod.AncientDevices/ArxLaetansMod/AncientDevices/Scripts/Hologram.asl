@@ -1953,60 +1953,71 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	
 	// nesting and multiline conditions
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7))){
+	if(or( @testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt == 7); )){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1a=ok"
 	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
-	if(or(@testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7) || not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo")))){
+	
+	if( or( @testFloat != 1.5 || §testInt != 7 || and(£testString == "foo" && §testInt != 7); || not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo");) ) ){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b=ok"
 	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	if(or(
 		@testFloat != 1.5 || 
 		§testInt   != 7   || 
-		and(£testString == "foo" && §testInt != 7) ||
-		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
+		and(£testString == "foo" && §testInt != 7); ||
+		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo");)
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b2=ok"
 	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	if(not(or(
 		@testFloat != 1.5 || 
 		§testInt != 7     || 
-		and(£testString == "foo" && §testInt != 7) ||
-		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo"))
+		and(£testString == "foo" && §testInt != 7); ||
+		not(or(@testFloat != 1.5 || §testInt != 7 || £testString != "foo");)
 	))){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d1b3=WRONG"
 		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
+	
 	//todo review below, not working yet
 	if(or(
 		@testFloat != 1.5 ||
 		§testInt   != 7   ||
-		and(£testString == "foo" && §testInt != 7) ||
-		not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||
-		not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo"))
+		and(£testString == "foo" && §testInt != 7); ||
+		not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo");) ||
+		not(and(@testFloat == 1.5 , §testInt != 7 , £testString == "foo");)
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2=ok"
 	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
+
 	if(or(
 		@testFloat != 1.5 ||
-		§testInt   != 7   ||
-		and(
-			£testString == "foo" &&
-			§testInt != 7       
-		) ||      
-		not(or(
-			@testFloat != 1.5 || §testInt != 7 || £testString == "foo"
-		)) ||
-		not(and(
-			@testFloat == 1.5 , 
-			§testInt != 7 , 
-			£testString == "foo" ))
+		§testInt   != 7   ||         //
+		and(£testString == "foa" && §testInt == 7); || //"foa" is wrong, used like that to help debug only here
+		not(or (@testFloat != 1.5 || §testInt == 7 || £testString == "fob");) || //"fob" is wrong, used like that to help debug only here
+		not(and(@testFloat == 1.5  , §testInt == 7  , £testString == "foc");) //this ends up as true //"foc" is wrong, used like that to help debug only here
 	)){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2b=ok"
 	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
-	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ) ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||      not(and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo"))     )  ){
-		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3=WRONG"
-		GoSub FUNCCustomCmdsB4DbgBreakpoint
-	}
+	
+	if(or(
+		@testFloat != 1.5 ||
+		§testInt   != 7   ||
+		and( //nice comment
+			£testString == "foo" &&
+			§testInt != 7       
+		); ||      
+		not(or( //nicier comment
+			@testFloat != 1.5 || §testInt != 7 || £testString == "foo"
+		);) ||
+		not(and(
+			@testFloat == 1.5 , 
+			§testInt != 7 , 
+			£testString == "foo" );)
+	)){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d2c=ok"
+	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_begin"
 	if(
@@ -2017,13 +2028,35 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 						£testString == "foo"
 						&&
 						§testInt != 7
-				) ||
-				not(or(  @testFloat != 1.5 || §testInt != 7 || £testString == "foo" )) ||
-				not(and( @testFloat == 1.5  , §testInt != 7  , £testString == "foo" ))
+				); ||
+				not(or(  @testFloat != 1.5 || §testInt != 7 || £testString == "foo" );) ||
+				not(and( @testFloat == 1.5  , §testInt != 7  , £testString == "foo" );)
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3b=ok"
 	} else GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
+	if(or(      @testFloat != 1.5 ||       §testInt != 7    ||       and(        £testString == "foo"         &&         §testInt != 7       ); ||      not(or(@testFloat != 1.5 || §testInt != 7 || £testString == "foo");) ||      not(and(@testFloat == 1.5 , §testInt == 7 , £testString == "foo");) )){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3c2=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
+	}
+	if(
+		or(
+				@testFloat != 1.5 ||
+				§testInt   != 7   ||
+				and(
+						£testString == "foa"
+						&&
+						§testInt == 7
+				); ||
+				not(or(  @testFloat != 1.5 || §testInt == 7 || £testString == "fob" );) ||
+				not(and( @testFloat == 1.5  , §testInt == 7  , £testString == "foo" );)
+		);
+	){
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d3c3=WRONG"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
+	}
+	
 	//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Multiline_LogicOper_3"
 	if(
 		or(
@@ -2033,9 +2066,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 						£testString == "foo"
 						&&
 						§testInt != 7
-				) ||
-				not(or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo")) ||
-				not(and(@testFloat == 1.5  , §testInt == 7  , £testString == "foo"))
+				); ||
+				not(or( @testFloat != 1.5 || §testInt != 7 || £testString == "foo");) ||
+				not(and(@testFloat == 1.5  , §testInt == 7  , £testString == "foo");)
 		)
 	){
 		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;d4=WRONG"
