@@ -40,13 +40,13 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 ***These below are possibly ready. They were cleaned and prepared for a PR:***  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
-Logical Operators for "if" command   
-and(... && ... && ...) //only accepts '&&' or ','   
-or(... || ... || ...) //only accepts '||' or ','   
-not(and(... && ... && ...))    
-not(or(... || ... || ...))      
-and nesting: if(and(... && not(or(... || ... || and(... , ... , ...))) && ...))     
-where '...' are the existing comparisons that use == != >= <= > < or the ones with words     
+Logical Operators for "if" command  
+and(... && ... && ...) //only accepts '&&' or ','  
+or(... || ... || ...) //only accepts '||' or ','  
+not(and(... && ... && ...))  
+not(or(... || ... || ...))  
+and nesting: if(and(... && not(or( ... || ... || and(... , ... , ...); );) && ...);)  
+where '...' are the existing comparisons that use == != >= <= > < or the ones with words  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
 Debug Line and Column Info  
@@ -54,8 +54,10 @@ Terminal log will show line and column where the problem happened.
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_WarnMsgShowsGotoGosubCallStack  
 logs with more details for mod developers  
-  warnings will show GoTo/GoSub call stack  
-  showlocals and showvars will also show event and params, and the GoTo/GoSub call stack  
+  warnings will show GoTo/GoSub call stack.  
+  showlocals and showvars will also show event and params, and the GoTo/GoSub call stack.  
+  the script call stack now shows position, line and collumn from where each call was made.  
+  Extra: a debug breakpoint can be triggered from a script function that contains 'debugbreakpoint' in it's name.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 QOL: new control (default key 'N') to combine items w/o having to double click
@@ -76,11 +78,12 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_NthRoot
 NthRoot var <any root value>
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
-The command Set now has extra options    
-Set can now read from and write to other entities (no need to expand their unique IDs).    
-It also can get a value from a string containing an array.    
-It can get the count of one item from any entity inventory.   
-It can get an array of "item count ..." from any inventory.   
+The command Set now has extra options  
+Set can now -r read from and -w write to other entities (no need to expand their unique IDs).  
+It also can get a value from a string containing an array at specified index: -a  
+It can get the count of one item from any entity inventory: -i  
+It can get an array of items from any inventory: -l  
+It can get a 2D array of "item count item count..." from any inventory: -m  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CmdLootInventory  
 new ^lootinventory if another entity inventory is being looted, this will return it's id  
