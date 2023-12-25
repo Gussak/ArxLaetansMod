@@ -2474,7 +2474,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		//TODO destroy the corpse and spawn gore
 		Spawn Item "movable\\npc_gore\\npc_gore" "~£FUNCkillNPC_target~"
 		Set £FUNCkillNPC_gore ^last_spawned
-		(Move -e £FUNCkillNPC_gore 0 15 0)	(Rotate -ae £FUNCkillNPC_gore 90 90 90) //TODO fix the model instead? this is to fix gore that is too high and inclined a bit
+		(Move -e £FUNCkillNPC_gore 0 25 0)	(Rotate -ae £FUNCkillNPC_gore 0 0 5) //TODO fix the model instead? this is to fix gore that is too high and inclined a bit
 		Set -mr £FUNCkillNPC_target £KilledNPCinvList2D * //this is mainly to show on the log
 		DropItem -e £FUNCkillNPC_target all
 	}
