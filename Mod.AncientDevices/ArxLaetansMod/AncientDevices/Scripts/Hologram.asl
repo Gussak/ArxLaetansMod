@@ -641,7 +641,7 @@ ON INVENTORYUSE {
 
 //>>FUNCisnInvOrFloor
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
-	GoSub FUNCtestCallStack1
+	//GoSub FUNCtestCallStack1 //test for PR_WarnMsgShowsGotoGosubCallStack
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £_aaaDebugScriptStackAndLog "On Main:"
