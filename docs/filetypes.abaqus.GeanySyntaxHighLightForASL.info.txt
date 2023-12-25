@@ -1,3 +1,0 @@
-Geany 1.38 on ubuntu22.04 doesnt seem to recognize new filetypes like filetype.asl (right? or is there some way to let it work?), so we have to replace existing one, I chose abaqus (that I have no idea what is).
-copy filetypes.abaqus to ~/.config/geany/filedefs/filetypes.abaqus
-edit ~/.config/geany/filetype_extensions.conf to: Abaqus=*.asl;*.ASL;

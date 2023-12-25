@@ -45,7 +45,7 @@ while true;do
 	FUNCsaveList
 	nNewestSaveIndex=$((10#`FUNCsaveList |tail -n 1 |sed -r 's@.*/save(....)/.*@\1@'`))&&:;
 
-	echoc --info "On Nemiver create a breakpoint to function: @rDebugBreakpoint "
+	echoc --info "On Nemiver create a breakpoint to function: @rDebugBreakpoint or src/script/ScriptUtils.cpp 466"
 	acmdParams=(
 		--data-dir="../Arx Fatalis" #TODOA could just place data*.pak at libertatis path? or on a layer?
 		#--debug="warn,error,debug" #TODOA this works???

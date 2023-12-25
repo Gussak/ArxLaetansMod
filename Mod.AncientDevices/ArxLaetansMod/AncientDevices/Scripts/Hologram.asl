@@ -74,11 +74,11 @@
 // when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
 //  an easy trick to have both is have a TFUNC call the FUNC ex.:
 //  timerTFUNCdoSomething -m 1 333 GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
-//  >>TFUNCdoSomething {
+//  >>TFUNCdoSomething() {
 //    GoSub FUNCdoSomething
 //    ACCEPT
 //  }
-//  >>FUNCdoSomething { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
+//  >>FUNCdoSomething() { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
 //    RETURN
 //  }
 // Obs.: a CFUNC (child function) is not meant to be called directly. call it only by it's related func
@@ -86,13 +86,14 @@
 // LC_ALL=C sed -i.bkp2 -r -e 's@(timer.*)([ \t]*GoSub)( *)(FUNC)@\1 GoTo\3T\4@' Hologram.asl #fixes timers to use TFUNC...
 // LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
 // export LC_ALL=C;egrep "GoTo" -wia Hologram.asl |egrep -via "timer|loop" #check if GoTo is being used by something else than a timer or a loop
+// LC_ALL=C sed -i.bkp -r -e 's@(>>)([T]*FUNC[0-9a-zA-Z_]*)@>>\2()@gi' Hologram.asl # this will add () at the end of every function, so it will be recognized as a symbol by geany and will show up as function on the symbols tab!
 
 //	//LOOPS: for/while, how to easily implement them:
 //	//Obs.: loop control/index vars are only required to be unique when nesting them.
 //	//Obs.: arrays always end with empty "" string when iterating thru them
 //	//Obs.: GoTo targets always have to be unique on the whole script
 //	//Obs.: the implementation can be further simplified, see the working code for LOOP_FLM_ChkNPC
-//	>>FUNCtst { //FUNCtst is the context example, could be the name of an event like LOOP_MAIN_...
+//	>>FUNCtst() { //FUNCtst is the context example, could be the name of an event like LOOP_MAIN_...
 //		>>LOOP_FUNCtst_ShortDescription_BEGIN
 //			// do something useful
 //			if(...) GoTo LOOP_FUNCtst_ShortDescription_BEGIN //continue
@@ -622,24 +623,24 @@ ON INVENTORYUSE {
 	ACCEPT
 }
 
->>FUNCtestCallStack1 {
+>>FUNCtestCallStack1() {
 	GoSub FUNCtestCallStack2
 	RETURN
 }
->>FUNCtestCallStack2 {
+>>FUNCtestCallStack2() {
 	GoSub FUNCtestCallStack3
 	RETURN
 }
->>FUNCtestCallStack3 {
+>>FUNCtestCallStack3() {
 	GoSub FUNCtestCallStack4
 	RETURN
 }
->>FUNCtestCallStack4 {
+>>FUNCtestCallStack4() {
 	showvars //showlocals
 	RETURN
 }
 
-//>>FUNCisnInvOrFloor
+//>>FUNCisnInvOrFloor()
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
 	//GoSub FUNCtestCallStack1 //test for PR_WarnMsgShowsGotoGosubCallStack
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
@@ -853,7 +854,7 @@ ON COMBINE {
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
 			GoSub FUNCupdateIcon
-			GoSub FUNCupdateSignalStrengthRequirement
+			GoSub FUNCsignalStrenghUpdateRequirement
 			
 			DESTROY £OtherEntIdToCombineWithMe
 		}
@@ -951,7 +952,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//ACCEPT
 //}
 
->>TFUNCaimPlayerCastLightning { GoSub FUNCaimPlayerCastLightning ACCEPT } >>FUNCaimPlayerCastLightning { //TODO this doesnt work well when called from a timer, why?
+>>TFUNCaimPlayerCastLightning() { GoSub FUNCaimPlayerCastLightning ACCEPT } >>FUNCaimPlayerCastLightning() { //TODO this doesnt work well when called from a timer, why?
 	//ifVisible PLAYER { //use for fireball too? //this doesnt work for objects?
 		Set §RotateYBkp §RotateY //bkp auto rotate angle speed
 		Set §RotateY 0 //this stops the rotation (but may not stop for enough time tho to let the lightning work properly)
@@ -965,7 +966,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN //to return to wherever it needs?
 }
 
->>TFUNCMalfunction { GoSub FUNCMalfunction ACCEPT } >>FUNCMalfunction {
+>>TFUNCMalfunction() { GoSub FUNCMalfunction ACCEPT } >>FUNCMalfunction() {
 	Set §SfxRnd ^rnd_3
 	if (§SfxRnd == 0) play "SFX_electric"
 	if (§SfxRnd == 1) play "sfx_spark"
@@ -973,7 +974,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCChangeSkyBox { GoSub FUNCChangeSkyBox ACCEPT } >>FUNCChangeSkyBox {
+>>TFUNCChangeSkyBox() { GoSub FUNCChangeSkyBox ACCEPT } >>FUNCChangeSkyBox() {
 	RANDOM 50 { // skybox cubemap mode
 		if (§SkyMode == 1) { //was UVSphere, so hide it
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;From UVSphere to CubeMap"
@@ -1011,7 +1012,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>FUNCconfigOptionHover {
+>>FUNCconfigOptionHover() {
 	// X degrees from 74.9 (downest) to 301 (upperest)
 	// Each face has 11 options.
 	// Top and bottom faces can only provide access to half the options looking upwards, so we will use just 5 and the limit to the center one.
@@ -1052,7 +1053,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCconfigOptionHighlight_index §CfgOptIndex GoSub FUNCconfigOptionHighlight
 	RETURN
 }
->>FUNCconfigOptionHighlight {
+>>FUNCconfigOptionHighlight() {
 	//INPUT: <§FUNCconfigOptionHighlight_index>
 	if(§FUNCconfigOptionHighlight_index < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
@@ -1072,7 +1073,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCconfigOptionHighlight_index -1 //set to invalid, so next call requires it being set
 	RETURN
 }
->>FUNCconfigOptions {
+>>FUNCconfigOptions() {
 	//INPUT: [£FUNCconfigOptions_mode] values: "hide" "show"
 	if(£FUNCconfigOptions_mode == "hide") {
 		TWEAK SKIN "Hologram.ConfigOptions"	"Hologram.ConfigOptions.Clear"
@@ -1158,7 +1159,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//RETURN
 //}
 
->>TFUNCinitDefaults { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults { //DO NOT CALL FROM "ON INIT" or every item on the stack will have the same random values!!! :(
+>>TFUNCinitDefaults() { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults() { //DO NOT CALL FROM "ON INIT" or every item on the stack will have the same random values!!! :(
 	if(§InitDefaultsDone > 0) RETURN
 	if (^amount > 1) RETURN //this must not be a stack of items to prevent identical random values!
 	
@@ -1217,7 +1218,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set #G_Holog_SignalModeChangeTime 0
 	}
 	
-	GoSub FUNCupdateSignalStrengthRequirement
+	GoSub FUNCsignalStrenghUpdateRequirement
 	
 	Set §SignalDistBase 1000 //SED_TOKEN_MOD_CFG
 	
@@ -1244,7 +1245,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCMakeNPCsHostile { GoSub FUNCMakeNPCsHostile ACCEPT } >>FUNCMakeNPCsHostile  {
+>>TFUNCMakeNPCsHostile() { GoSub FUNCMakeNPCsHostile ACCEPT } >>FUNCMakeNPCsHostile()  {
 	//INPUT: [§iFUNCMakeNPCsHostile_range]
 	
 	//FAIL: Set ^sender PLAYER ; SendEvent -nr Hit §iFUNCMakeNPCsHostile_range "0.01 summoned" //hits every NPC (-n is default) in 3000 range for 0.01 damage and tells it was the player (summoned sets ^sender to player)
@@ -1262,7 +1263,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCshockPlayer { GoSub FUNCshockPlayer ACCEPT } >>FUNCshockPlayer {
+>>TFUNCshockPlayer() { GoSub FUNCshockPlayer ACCEPT } >>FUNCshockPlayer() {
 	if (^inPlayerInventory == 1) { 
 		DropItem player "~^me~"
 		//PLAY "sfx_lightning_loop"
@@ -1282,7 +1283,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCbreakDeviceDelayed { GoSub FUNCbreakDeviceDelayed ACCEPT } >>FUNCbreakDeviceDelayed {
+>>TFUNCbreakDeviceDelayed() { GoSub FUNCbreakDeviceDelayed ACCEPT } >>FUNCbreakDeviceDelayed() {
 	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayer]
 	//INPUT: [§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis]
 	
@@ -1336,7 +1337,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCupdateUses { GoSub FUNCupdateUses ACCEPT } >>FUNCupdateUses {
+>>TFUNCupdateUses() { GoSub FUNCupdateUses ACCEPT } >>FUNCupdateUses() {
 	Set §UseRemain §UseMax
 	Dec §UseRemain §UseCount
 	//DO NOT CALL: GoSub FUNCnameUpdate
@@ -1344,7 +1345,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCnameUpdate { GoSub FUNCnameUpdate ACCEPT } >>FUNCnameUpdate {
+>>TFUNCnameUpdate() { GoSub FUNCnameUpdate ACCEPT } >>FUNCnameUpdate() {
 	// if not identified, words will be in latin or messed up letters order
 	//OUTPUT: £FUNCnameUpdate_NameFinal_OUTPUT
 	//if(§Identified == 0) ACCEPT //the player is still not sure about what is going on
@@ -1499,7 +1500,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCshowlocals
 }
 
->>FUNCupdateIcon {
+>>FUNCupdateIcon() {
 	Set £IconPrevious £Icon
 	
 	Set £Icon "~£IconBasename~"
@@ -1532,7 +1533,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCcalcAncientTechSkill { GoSub FUNCcalcAncientTechSkill ACCEPT } >>FUNCcalcAncientTechSkill {
+>>TFUNCcalcAncientTechSkill() { GoSub FUNCcalcAncientTechSkill ACCEPT } >>FUNCcalcAncientTechSkill() {
 	Set @AncientTechSkill ^PLAYER_SKILL_MECANISM
 	Add @AncientTechSkill ^PLAYER_SKILL_OBJECT_KNOWLEDGE
 	Add @AncientTechSkill ^PLAYER_SKILL_INTUITION
@@ -1546,7 +1547,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCskillCheckAncientTech { GoSub FUNCskillCheckAncientTech ACCEPT } >>FUNCskillCheckAncientTech { //checks the technical skill like in a percent base. 
+>>TFUNCskillCheckAncientTech() { GoSub FUNCskillCheckAncientTech ACCEPT } >>FUNCskillCheckAncientTech() { //checks the technical skill like in a percent base. 
 	//INPUTS:
 	//OUTPUTS:
 	//  §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
@@ -1574,7 +1575,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCtrapAttack { GoSub FUNCtrapAttack ACCEPT } >>FUNCtrapAttack {
+>>TFUNCtrapAttack() { GoSub FUNCtrapAttack ACCEPT } >>FUNCtrapAttack() {
 	//INPUT: [§FUNCtrapAttack_TimeoutMillis]
 	//INPUT: [§FUNCtrapAttack_TrapMode]: 0=explosion(default) 1=projectile/targetPlayer
 	
@@ -1644,8 +1645,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCchkAndAttackExplosion { GoSub FUNCchkAndAttackExplosion ACCEPT } >>FUNCchkAndAttackExplosion {
-	GoSub FUNCchkSignalStrenghCheck	if(§FUNCchkSignalStrenghCheck_IsAcceptable == 1) {
+>>TFUNCchkAndAttackExplosion() { GoSub FUNCchkAndAttackExplosion ACCEPT } >>FUNCchkAndAttackExplosion() {
+	GoSub FUNCsignalStrenghCheck	if(§FUNCsignalStrenghCheck_IsAcceptable == 1) {
 		Set §TmpTrapKind ^rnd_5
 		if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl explosion  SELF
 		if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl fire_field SELF
@@ -1658,9 +1659,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCchkAndAttackProjectile { GoSub FUNCchkAndAttackProjectile ACCEPT } >>FUNCchkAndAttackProjectile {
+>>TFUNCchkAndAttackProjectile() { GoSub FUNCchkAndAttackProjectile ACCEPT } >>FUNCchkAndAttackProjectile() {
 	//if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
-	GoSub FUNCchkSignalStrenghCheck	if(§FUNCchkSignalStrenghCheck_IsAcceptable == 1) {
+	GoSub FUNCsignalStrenghCheck	if(§FUNCsignalStrenghCheck_IsAcceptable == 1) {
 		Set §TmpTrapKind ^rnd_6
 		if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl FIREBALL              PLAYER
 		if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl FIRE_PROJECTILE       PLAYER
@@ -1677,7 +1678,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNChideHologramPartsPermanently { GoSub FUNChideHologramPartsPermanently ACCEPT } >>FUNChideHologramPartsPermanently {
+>>TFUNChideHologramPartsPermanently() { GoSub FUNChideHologramPartsPermanently ACCEPT } >>FUNChideHologramPartsPermanently() {
 	// clean unnecessary skins from this item only:
 	//TODO? just replace by a HoloGrenade.ftl, will also help lower this script size and Hologram.ftl overlapping things in blender (not a big deal tho..)
 	TWEAK SKIN "Hologram.ousidenoise" "alpha"
@@ -1694,7 +1695,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCparalyseIfPlayerNearby { GoSub FUNCparalyseIfPlayerNearby ACCEPT } >>FUNCparalyseIfPlayerNearby {
+>>TFUNCparalyseIfPlayerNearby() { GoSub FUNCparalyseIfPlayerNearby ACCEPT } >>FUNCparalyseIfPlayerNearby() {
 	if ( ^#PlayerDist < 500 ) {
 		Set @FUNCparalysePlayer_Millis 1000
 		Inc @FUNCparalysePlayer_Millis ^rnd_2000
@@ -1702,7 +1703,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
->>TFUNCparalysePlayer { GoSub FUNCparalysePlayer ACCEPT } >>FUNCparalysePlayer {
+>>TFUNCparalysePlayer() { GoSub FUNCparalysePlayer ACCEPT } >>FUNCparalysePlayer() {
 	//INPUT: [@FUNCparalysePlayer_Millis]
 	
 	//Set @FUNCparalysePlayer_Resist 100	Dec @FUNCparalysePlayer_Resist @AncientTechSkill //calc resist percent
@@ -1719,13 +1720,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCDestroySelfSafely { GoSub FUNCDestroySelfSafely ACCEPT } >>FUNCDestroySelfSafely {
+>>TFUNCDestroySelfSafely() { GoSub FUNCDestroySelfSafely ACCEPT } >>FUNCDestroySelfSafely() {
 	PLAY -s //stops sounds started with -i flag
 	DESTROY SELF
 	RETURN
 }
 
->>TFUNCcalcSignalStrength { GoSub FUNCcalcSignalStrength ACCEPT } >>FUNCcalcSignalStrength { //this is meant to be independent from magic skills so instead of ^spelllevel to cast spells, use @SignalStrLvl
+>>TFUNCcalcSignalStrength() { GoSub FUNCcalcSignalStrength ACCEPT } >>FUNCcalcSignalStrength() { //this is meant to be independent from magic skills so instead of ^spelllevel to cast spells, use @SignalStrLvl
 	//Set @testCallStack 1 2 //TODORM
 	
 	// reset to recalc
@@ -1832,7 +1833,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 
 //////////////////////////// TESTS /////////////////////////////
->>TFUNChoverInfo { GoSub FUNChoverInfo ACCEPT } >>FUNChoverInfo {
+>>TFUNChoverInfo() { GoSub FUNChoverInfo ACCEPT } >>FUNChoverInfo() {
 	GoSub FUNCshowlocals
 	Set £HoverEnt ^hover_~§SeekTargetDistance~
 	if(£HoverEnt != "none") {
@@ -1850,7 +1851,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCtestArithmetics { GoSub FUNCtestArithmetics ACCEPT } >>FUNCtestArithmetics {
+>>TFUNCtestArithmetics() { GoSub FUNCtestArithmetics ACCEPT } >>FUNCtestArithmetics() {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestArithmetics"
 	Set @testAriFloat 2
 	Set §testAriInt 2
@@ -1866,7 +1867,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
->>TFUNCtestPrintfFormats { GoSub FUNCtestPrintfFormats ACCEPT } >>FUNCtestPrintfFormats {
+>>TFUNCtestPrintfFormats() { GoSub FUNCtestPrintfFormats ACCEPT } >>FUNCtestPrintfFormats() {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestPrintfFormats"
 	Set @testFloat 78.12345
 	Set §testInt 513
@@ -1879,7 +1880,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
->>TFUNCtestLogicOperators { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators {
+>>TFUNCtestLogicOperators() { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators() {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestLogicOperators"
 	
 	Set @testFloat 1.5 //dont change!
@@ -2119,7 +2120,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
->>TFUNCtestDistAbsPos { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos {
+>>TFUNCtestDistAbsPos() { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos() {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCdistAbsPos"
 	// distance to absolute locations
 	Set §testDistAbsolute ^dist_{0,0,0}
@@ -2134,7 +2135,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
->>TFUNCtestElseIf { GoSub FUNCtestElseIf ACCEPT } >>FUNCtestElseIf {
+>>TFUNCtestElseIf() { GoSub FUNCtestElseIf ACCEPT } >>FUNCtestElseIf() {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestElseIf"
 	++ §test
 	if ( §test == 1 ) {
@@ -2152,7 +2153,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCshowlocals
 	RETURN
 }
->>TFUNCtestDegrees { GoSub FUNCtestDegrees ACCEPT } >>FUNCtestDegrees {
+>>TFUNCtestDegrees() { GoSub FUNCtestDegrees ACCEPT } >>FUNCtestDegrees() {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestDegrees"
 	
 	Set @testDegreesXp ^degreesx_player
@@ -2172,7 +2173,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
->>TFUNCtests { GoSub FUNCtests ACCEPT } >>FUNCtests {
+>>TFUNCtests() { GoSub FUNCtests ACCEPT } >>FUNCtests() {
 	//GoSub FUNCtestDegrees showlocals
 	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
 		//TODO put this on CircularOptionChoser
@@ -2216,7 +2217,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCseekTarget { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget {
+>>TFUNCseekTarget() { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget() {
 	//INPUT: <init||seek?£FUNCseekTarget_callFuncWhenTargetFound>
 	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//INPUT: [£FUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
@@ -2270,7 +2271,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @CFUNCFlyMeToTarget_flySpeed 1.0 //reset b4 next call
 	RETURN
 }
->>TFUNCSniperBullet { GoSub FUNCSniperBullet ACCEPT } >>FUNCSniperBullet {
+>>TFUNCSniperBullet() { GoSub FUNCSniperBullet ACCEPT } >>FUNCSniperBullet() {
 	//INPUT: [§FUNCSniperBullet_stop]
 	if(§FUNCSniperBullet_stop == 0){
 		if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
@@ -2291,7 +2292,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCSniperBullet_stop 0 //reset b4 next call
 	RETURN
 }
->>TFUNCLandMine { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine {
+>>TFUNCLandMine() { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine() {
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
 	if(@SignalStrength < 15) ACCEPT //minimum requirement to function
 	Set @LandMineTriggerRange 50
@@ -2307,7 +2308,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 				if(§FLM_OnTopLife > 0) {
 					if(§Quality >= 4) { // high quality wont trigger with innofensive rats
 						Set £FLM_OnTopEntClass ^class_~£FLM_OnTopEntId~
-						if(£FLM_OnTopEntClass == "rat") {
+						if(£FLM_OnTopEntClass == "rat_base") { //should be any npc that is never a threat
 							Set §FLM_OnTopLife 0
 							Set £FLM_OnTopEntId ""
 						}
@@ -2333,7 +2334,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
->>TFUNCteleportToAndKillNPC { GoSub FUNCteleportToAndKillNPC ACCEPT } >>FUNCteleportToAndKillNPC {
+>>TFUNCteleportToAndKillNPC() { GoSub FUNCteleportToAndKillNPC ACCEPT } >>FUNCteleportToAndKillNPC() {
 	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
 	Set £FUNCteleportToAndKillNPC_HoverEnt ^hover_~§SeekTargetDistance~
@@ -2362,7 +2363,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
->>TFUNCteleportToAndKillNPC_flyMeToNPC { GoSub FUNCteleportToAndKillNPC_flyMeToNPC ACCEPT } >>FUNCteleportToAndKillNPC_flyMeToNPC {
+>>TFUNCteleportToAndKillNPC_flyMeToNPC() { GoSub FUNCteleportToAndKillNPC_flyMeToNPC ACCEPT } >>FUNCteleportToAndKillNPC_flyMeToNPC() {
 	if(^life_~£FUNCteleportToAndKillNPC_HoverEnt~ > 0) {
 		//the idea is to be unsafe positioning over npc location as it will be destroyed
 		if(@TeleMeStepDist == 0) {
@@ -2386,7 +2387,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	GoSub FUNCshowlocals()
 	RETURN
 }
->>TFUNCteleportToAndKillNPC_flyPlayerToMe { GoSub FUNCteleportToAndKillNPC_flyPlayerToMe() ACCEPT } >>FUNCteleportToAndKillNPC_flyPlayerToMe {
+>>TFUNCteleportToAndKillNPC_flyPlayerToMe() { GoSub FUNCteleportToAndKillNPC_flyPlayerToMe() ACCEPT } >>FUNCteleportToAndKillNPC_flyPlayerToMe() {
 	//if(§TeleSteps == 0) {
 	//if(@TelePlayerDistInit == 0) {
 	if(@TelePlayerStepDist == 0) {
@@ -2461,7 +2462,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	RETURN
 }
->>FUNCkillNPC {
+>>FUNCkillNPC() {
 	//INPUT: <£FUNCkillNPC_target>
 	if(^life_~£FUNCkillNPC_target~ <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
@@ -2474,7 +2475,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCkillNPC_destroyCorpse 0 //reset before next call if it has no params
 	RETURN
 }
->>TFUNCcalcFrameMilis { GoSub FUNCcalcFrameMilis ACCEPT } >>FUNCcalcFrameMilis {
+>>TFUNCcalcFrameMilis() { GoSub FUNCcalcFrameMilis ACCEPT } >>FUNCcalcFrameMilis() {
 	//OUTPUT: FUNCcalcFrameMilis_FrameMilis_OUTPUT how long does one frame take in millis
 	Set @FPS ^fps
 	Set §FUNCcalcFrameMilis_FrameMilis_OUTPUT 1000 //1s
@@ -2482,7 +2483,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(§FUNCcalcFrameMilis_FrameMilis_OUTPUT < 1) Set §FUNCcalcFrameMilis_FrameMilis_OUTPUT 1
 	RETURN
 }
->>TFUNCcalcInterpolateTeleStepDist1s { GoSub FUNCcalcInterpolateTeleStepDist1s ACCEPT } >>FUNCcalcInterpolateTeleStepDist1s {
+>>TFUNCcalcInterpolateTeleStepDist1s() { GoSub FUNCcalcInterpolateTeleStepDist1s ACCEPT } >>FUNCcalcInterpolateTeleStepDist1s() {
 	// calculates the distance that must be displaced per frame to complete the total distance in 1 second
 	//INPUT:  <@FUNCcalcInterpolateTeleStepDist1s_Init>
 	if(@FUNCcalcInterpolateTeleStepDist1s_Init <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
@@ -2500,7 +2501,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @FUNCcalcInterpolateTeleStepDist1s_Init -1 //init invalid to req b4 next call
 	RETURN
 }
->>TFUNCMindControl { GoSub FUNCMindControl ACCEPT } >>FUNCMindControl {
+>>TFUNCMindControl() { GoSub FUNCMindControl ACCEPT } >>FUNCMindControl() {
   // this works like a frenzied NPC
   
   //TODO goblin_base.asl: settarget -a ~othergoblinnearby~; BEHAVIOR -f MOVE_TO;  WEAPON ON; SETMOVEMODE RUN; Aim the first goblin, aim the second, the 1st attacks the 2nd and vice versa. then: sendevent call_help to the 2nd, that will make them look for the player, then keep aiming on them, they will then attack the 1st!
@@ -2565,7 +2566,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
->>TFUNCMindControlKillSpawn { GoSub FUNCMindControlKillSpawn ACCEPT } >>FUNCMindControlKillSpawn  {
+>>TFUNCMindControlKillSpawn() { GoSub FUNCMindControlKillSpawn ACCEPT } >>FUNCMindControlKillSpawn()  {
 	//teleport "~£FUNCMindControl_HoverEntTmp~" //should be enough to force bat attack the npc as it dont fly..
 	interpolate "~£FUNCMindControl_SpawnFoeLastID~" "~£FUNCMindControl_HoverEntTmp~" 0.1
 	if(^life_~£FUNCMindControl_HoverEntTmp~ <= 0){
@@ -2579,7 +2580,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
-//>>FUNCMindControlSpawnFoeTrick { Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCMindControl" 
+//>>FUNCMindControlSpawnFoeTrick() { Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCMindControl" 
 	//Set £FUNCMindControl_HoverEnt "~^hover_5001~"
 	//Set §HoverLife ^life_~£FUNCMindControl_HoverEnt~
 	//if(and(£FUNCMindControl_HoverEnt != "none" && §HoverLife > 0)) {
@@ -2603,7 +2604,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//RETURN
 //}
 
->>TFUNCmorphUpgrade { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade  {
+>>TFUNCmorphUpgrade() { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade()  {
 	//INPUT: <§FUNCmorphUpgrade_otherQuality>
 	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
@@ -2724,7 +2725,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			GoSub FUNCupdateUses
 			GoSub FUNCnameUpdate
 			GoSub FUNCupdateIcon
-			GoSub FUNCupdateSignalStrengthRequirement
+			GoSub FUNCsignalStrenghUpdateRequirement
 
 			if( £AncientDeviceMode != "HologramMode" ) SET_SHADOW ON //because hologram emits light
 		}
@@ -2738,7 +2739,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCmorphUpgrade_otherQuality -1 //init invalid to req b4 next call
 	RETURN
 }
->>FUNCcfgSkin {
+>>FUNCcfgSkin() {
 	//INPUT: <£FUNCcfgSkin_simple>
 	if(not("Hologram" IsIn £FUNCcfgSkin_simple)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "~£FUNCcfgSkin_simple~"
@@ -2748,7 +2749,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	TWEAK SKIN "Hologram.tiny.index4000.boxMindControl"    "~£FUNCcfgSkin_simple~"
 	RETURN
 }
->>TFUNCcfgAncientDevice { GoSub FUNCcfgAncientDevice ACCEPT } >>FUNCcfgAncientDevice {
+>>TFUNCcfgAncientDevice() { GoSub FUNCcfgAncientDevice ACCEPT } >>FUNCcfgAncientDevice() {
 	//INPUT: <£AncientDeviceMode>
 	if(or(£AncientDeviceMode == "void" || £AncientDeviceMode == "")) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
@@ -2776,7 +2777,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	RETURN
 }
->>TFUNCcfgHologram { GoSub FUNCcfgHologram ACCEPT } >>FUNCcfgHologram  {
+>>TFUNCcfgHologram() { GoSub FUNCcfgHologram ACCEPT } >>FUNCcfgHologram()  {
 	Set £AncientDeviceMode "HologramMode"
 	
 	if (§UseCount == 0) { //no uses will still be showing the doc so we know it is still to show the doc. this prevents changing if already showing a nice landscape
@@ -2807,21 +2808,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	RETURN
 }
->>FUNCchkSignalStrenghCheck {
-	//OUTPUT: §FUNCchkSignalStrenghCheck_IsAcceptable
-	Set §FUNCchkSignalStrenghCheck_IsAcceptable 0
-	
-	//Set @SignalStrengthReqBase 0
-	//// dont use too high values cuz of Mul below
-	//if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReqBase  1
-	//if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReqBase  1
-	//if(£AncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReqBase  0 //keep 0!
-	//if(£AncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReqBase  5 //can randomly be dangerous
-	//if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReqBase 30 //can instakill
-	//if(£AncientDeviceMode == "LandMine"      ) Set @SignalStrengthReqBase 75 //can instakill, easy to use
-	//if(£AncientDeviceMode == "MindControl"   ) Set @SignalStrengthReqBase 20 //
-	//if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReqBase 40 //instakills and travels
-	//if(£AncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReqBase 50 //instakills, safe to use
+>>FUNCsignalStrenghCheck() {
+	//OUTPUT: §FUNCsignalStrenghCheck_IsAcceptable
+	Set §FUNCsignalStrenghCheck_IsAcceptable 0
 	
 	Set @SignalStrengthReq @SignalStrengthReqBase
 	if(§Quality >= 4) {
@@ -2829,13 +2818,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		if(@SignalStrengthReq > 95) Set @SignalStrengthReq 95
 	}
 	
-	if(@SignalStrength >= @SignalStrengthReq) Set §FUNCchkSignalStrenghCheck_IsAcceptable 1
+	if(@SignalStrength >= @SignalStrengthReq) Set §FUNCsignalStrenghCheck_IsAcceptable 1
 	RETURN
 }
->>TFUNCblinkGlow { GoSub FUNCblinkGlow ACCEPT } >>FUNCblinkGlow {
+>>TFUNCblinkGlow() { GoSub FUNCblinkGlow ACCEPT } >>FUNCblinkGlow() {
 	//PARAMS: §FUNCblinkGlow_times
-	GoSub FUNCchkSignalStrenghCheck
-	if(and(§FUNCblinkGlow_times >= 0 && §FUNCchkSignalStrenghCheck_IsAcceptable == 1)){
+	GoSub FUNCsignalStrenghCheck
+	if(and(§FUNCblinkGlow_times >= 0 && §FUNCsignalStrenghCheck_IsAcceptable == 1)){
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 		//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
 		timerTrapGlowBlinkOff -m §FUNCblinkGlow_times  901 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear" //901 will last 100 times til it matches multiple of 1000 below
@@ -2848,12 +2837,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	RETURN
 }
-//>>FUNCconfigOptionChk {
+//>>FUNCconfigOptionChk() {
 	////INPUT: <@FUNCconfigOptionChk_chk>
 	//Set §FUNCconfigOptionChk_chkTrunc @FUNCconfigOptionChk_chk
 	//RETURN
 //}
->>TFUNCshowlocals { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
+>>TFUNCshowlocals() { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
 	//INPUT: [§FUNCshowlocals_force]
 	if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) showlocals
 	//if(§FUNCshowlocals_force >= 1){
@@ -2865,8 +2854,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCshowlocals_force 0 //default for next call
 	RETURN
 }
->>FUNCCustomCmdsB4DbgBreakpoint { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint { RETURN }
->>FUNCupdateSignalStrengthRequirement {
+>>FUNCCustomCmdsB4DbgBreakpoint() { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint() { RETURN }
+>>FUNCsignalStrenghUpdateRequirement() {
 	Set @SignalStrengthReqBase 0
 	// dont use too high values cuz of Mul below
 	if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReqBase  1
@@ -2878,5 +2867,6 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(£AncientDeviceMode == "MindControl"   ) Set @SignalStrengthReqBase 20 //
 	if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReqBase 40 //instakills and travels
 	if(£AncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReqBase 50 //instakills, safe to use
+	GoTo FUNCsignalStrenghCheck
 	RETURN
 }

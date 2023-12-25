@@ -1,0 +1,6 @@
+Geany 1.38 on ubuntu22.04 doesnt seem to recognize new filetypes like filetype.asl (right? or is there some way to let it work?)
+
+So we have to replace existing one, I chose filetype "D" (that I have no idea what is but it will recognize symbols and make it easy to jump to functions!).
+
+copy filetypes.d to ~/.config/geany/filedefs/filetypes.d
+edit ~/.config/geany/filetype_extensions.conf to: D=*.asl;*.ASL;

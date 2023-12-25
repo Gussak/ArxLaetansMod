@@ -41,12 +41,13 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 Logical Operators for "if" command  
-and(... && ... && ...) //only accepts '&&' or ','  
-or(... || ... || ...) //only accepts '||' or ','  
+and(... && ... && ...) //only accepts '&&' or ',' and if nesting needs to end with ';'  
+or(... || ... || ...) //only accepts '||' or ',' and if nesting needs to end with ';'  
 not(and(... && ... && ...))  
 not(or(... || ... || ...))  
 and nesting: if(and(... && not(or( ... || ... || and(... , ... , ...); );) && ...);)  
 where '...' are the existing comparisons that use == != >= <= > < or the ones with words  
+they can also be multiline and each line can have a comment!  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
 Debug Line and Column Info  

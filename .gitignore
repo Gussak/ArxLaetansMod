@@ -16,6 +16,7 @@
 
 !docs
 !docs/*.txt
+!docs/filetypes.d
 !docs/WikiPatches/
 !docs/WikiPatches/Script/
 !docs/WikiPatches/Script/*.md
