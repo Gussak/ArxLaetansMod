@@ -46,7 +46,10 @@ cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything
 #make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 : ${iMaxCores:=0} #help if the cpu is overheating, set this to 1. set to 0 to auto detect max cores.
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi
-astrMakeCmd=(make -j "$iMaxCores" -e CPPFLAGS=-O0) #-O0 is important to let line breakpoints work in debuggers
+astrMakeCmd=(make -j "$iMaxCores")
+if echoc -q "check coding style for warnings?";then
+	"${astrMakeCmd[@]}" style
+fi
 #does not work :( astrMakeCmd+=(-e CPPFLAGS=-O0) #-O0 is important to let line breakpoints work in debuggers
 if echoc -t 3 -q "do not remake it all, just touch the files? (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
   astrMakeCmd+=(--touch)
