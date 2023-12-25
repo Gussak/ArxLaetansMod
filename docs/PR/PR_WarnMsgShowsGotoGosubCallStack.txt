@@ -5,12 +5,9 @@ logs will show more details for mod developers:
 - The script call stack now shows position, line and collumn from where each call was made  
 Obs.: the column may not match your text editor as each tab on it may count as more than one column  
 
-It now looks like (on the log it is all in a single line. I placed '\' just to be easier to read here) ex.:  
+It now looks like ex.:  
 ```
-[I] ScriptedInterface:239 Local variables for hologram_0020 \
-at Event on identify sent from player at GoTo/GoSub callStack \
-funcinitdefaults[p=10777,l=163,c=50]/funcshowlocals[p=55550,l=1218,c=49]/, \
-[Position 134966, Line 2829, Column 83]:
+[I] ScriptedInterface:257 Local variables for hologram_0004 at Event on main at GoTo/GoSub callStack functestcallstack1[p=30508,l=644,c=25] -> functestcallstack2[p=30175,l=626,c=25] -> functestcallstack3[p=30238,l=630,c=25] -> functestcallstack4[p=30301,l=634,c=25], [Position 30348, Line 638, Column 9]:
 ```
 
 To test it:  
