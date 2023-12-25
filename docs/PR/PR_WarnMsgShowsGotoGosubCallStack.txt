@@ -37,6 +37,6 @@ On Main {
 <details>
   <summary>Obs.: about my other PR... branches</summary>
 Obs.: I have many other PR_... branches, some are WIP but most are ready.  
-If someone likes any of them, feel free to merge it in your own branch, test, improve etc. and create a pull request instead of me :).
+If someone likes any of them, feel free to merge it in your own branch, test, improve etc. and create a pull request here instead of me :).
 There are also many usage examples and tests on the Hologram.asl script at my ArxLaetansMod (but it depends on my fully merged dev branch).
 </details>
