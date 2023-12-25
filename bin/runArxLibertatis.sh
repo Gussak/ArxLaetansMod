@@ -26,7 +26,7 @@ while true;do
 	: ${bBuildB4Run:=true} #help
 	if $bBuildB4Run;then 
 		cd "$strPathIni"
-		if echoc -q "build it now?@Dy";then
+		if echoc -q -t 9 "re-build it?@Dy";then
 			while ! ./buildArxLibertatis.sh;do echoc -w "fix the code and retry";done;
 		fi
 	fi

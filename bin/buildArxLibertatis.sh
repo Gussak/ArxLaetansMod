@@ -47,7 +47,7 @@ cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything
 : ${iMaxCores:=0} #help if the cpu is overheating, set this to 1. set to 0 to auto detect max cores.
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi
 astrMakeCmd=(make -j "$iMaxCores")
-if echoc -q "check coding style for warnings?";then
+if echoc -q -t 9 "check coding style for warnings?";then
 	"${astrMakeCmd[@]}" style
 fi
 #does not work :( astrMakeCmd+=(-e CPPFLAGS=-O0) #-O0 is important to let line breakpoints work in debuggers

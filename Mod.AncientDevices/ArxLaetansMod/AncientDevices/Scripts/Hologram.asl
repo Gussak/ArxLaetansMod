@@ -1265,7 +1265,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 
 >>TFUNCshockPlayer () { GoSub FUNCshockPlayer ACCEPT } >>FUNCshockPlayer () {
 	if (^inPlayerInventory == 1) { 
-		DropItem player "~^me~"
+		DropItem -e player "~^me~"
 		//PLAY "sfx_lightning_loop"
 		//dodamage -l player 1
 	}
@@ -1326,7 +1326,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		timerTrapBreakDestroyParalyze -m 1 §TmpBreakDestroyMilis GoTo TFUNCparalyseIfPlayerNearby //the trap tried to capture the player
 	}
 	
-	//timerTrapBreakDestroyAutoDrop -m 1 1500 DropItem player "~^me~"
+	//timerTrapBreakDestroyAutoDrop -m 1 1500 DropItem -e player "~^me~"
 	timerTrapBreakDestroyAutoDrop -m 1 1500 GoTo TFUNCshockPlayer //this drops it
 	timerTrapBreakDestroyAutoDrop -m 0 3000 GoTo TFUNCshockPlayer //this also warns the player
 	
@@ -2341,8 +2341,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCteleportToAndKillNPC_HoverLife ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
 	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §FUNCteleportToAndKillNPC_HoverLife > 0)) {
 		//timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
-		DropItem player "~^me~" //or wont be able to calc the distance from it to the player 
-		Set §MeY ^dist_player	Div §MeY 2	Mul §MeY -1	Move 0 §MeY 0 //to not fly from the floor position, to look better
+		DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
+		(Set §MeY ^dist_player)	(Div §MeY 2)	(Mul §MeY -1)	(Move 0 §MeY 0) //to not fly from the floor position, to look better
 		
 		SetInteractivity None
 		
@@ -2352,7 +2352,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		//timerTeleportPlayer    -m 1 100 teleport -p "~£FUNCteleportToAndKillNPC_HoverEnt~"
 		//timerTFUNCteleportToAndKillNPC_flyPlayerToMe -m 0 50 GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe
 		//TODO explode npc in gore dismembering
-    //timerTeleportDropNPCItems     -m 1 2000 DropItem "~£FUNCteleportToAndKillNPC_HoverEnt~" all
+    //timerTeleportDropNPCItems     -m 1 2000 DropItem -e "~£FUNCteleportToAndKillNPC_HoverEnt~" all
     ////nothing happens: timerTeleportKillNPC -m 1 300 SPAWN ITEM "movable\\npc_gore\\npc_gore" "~£FUNCteleportToAndKillNPC_HoverEnt~"
     //timerTeleportDamageAndKillNPC -m 1 2100 DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999
     //timerTeleportDestroyNPC       -m 1 2200 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
@@ -2442,7 +2442,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			//timerTeleDmgPlayer -m 1 50 DoDamage -l player @TeleDmgPlayer
 			DoDamage -l player @TeleDmgPlayer
 			
-			//DropItem "~£FUNCteleportToAndKillNPC_HoverEnt~" all
+			//DropItem -e "~£FUNCteleportToAndKillNPC_HoverEnt~" all
 			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
 			Set §FUNCkillNPC_destroyCorpse 1	Set £FUNCkillNPC_target £FUNCteleportToAndKillNPC_HoverEnt	GoSub FUNCkillNPC
 			//timerTeleDestroyNPC -m 1 50 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
@@ -2450,7 +2450,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			//Weapon -e player ON //doesnt work on player?
 			Set §FUNCbreakDeviceDelayed_ParalyzePlayer 1	GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
 			
-			interpolate player "~^me~" 0.0 //one last step to be precise
+			Collision -e player disable
+			timerTFUNCteleportToAndKillNPC_flyPlayerToMe_LastInterpolate -m 1 200 interpolate player "~^me~" 0.0 //one last step to be precise
+			timerTFUNCteleportToAndKillNPC_flyPlayerToMe_CollisionEnable -m 1 200 Collision -e player enable
 			timerTFUNCteleportToAndKillNPC_flyPlayerToMe off
 		}
 	}
@@ -2464,14 +2466,25 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>FUNCkillNPC () {
 	//INPUT: <£FUNCkillNPC_target>
-	if(^life_~£FUNCkillNPC_target~ <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
+	
+	if(^life_~£FUNCkillNPC_target~ <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+	
 	if(§FUNCkillNPC_destroyCorpse == 1) {
 		//TODO destroy the corpse and spawn gore
-		Set -mr £FUNCkillNPC_target £KilledNPCinvList2D *
-		DropItem "~£FUNCkillNPC_target~" all
+		Spawn Item "movable\\npc_gore\\npc_gore" "~£FUNCkillNPC_target~"
+		Set £FUNCkillNPC_gore ^last_spawned
+		//Move -e £FUNCkillNPC_gore 0 20 0 //to fix gore that is too high and inclined a bit
+		Rotate -ae £FUNCkillNPC_gore 0 0 0
+		Set -mr £FUNCkillNPC_target £KilledNPCinvList2D * //this is mainly to show on the log
+		DropItem -e £FUNCkillNPC_target all
 	}
-	DoDamage -fmlcgewsao "~£FUNCkillNPC_target~" 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
+	
+	DoDamage -fmlcgewsao £FUNCkillNPC_target 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
+	if(§FUNCkillNPC_destroyCorpse == 1) timerFUNCkillNPC -m 1 50 Destroy £FUNCkillNPC_target //on next frame to avoid other quest/data sync problems probably
+	
+	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
+	
 	Set §FUNCkillNPC_destroyCorpse 0 //reset before next call if it has no params
 	RETURN
 }
