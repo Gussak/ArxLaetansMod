@@ -623,26 +623,8 @@ ON INVENTORYUSE {
 	ACCEPT
 }
 
->>FUNCtestCallStack1 () {
-	GoSub FUNCtestCallStack2
-	RETURN
-}
->>FUNCtestCallStack2 () {
-	GoSub FUNCtestCallStack3
-	RETURN
-}
->>FUNCtestCallStack3 () {
-	GoSub FUNCtestCallStack4
-	RETURN
-}
->>FUNCtestCallStack4 () {
-	showvars //showlocals
-	RETURN
-}
-
 //>>FUNCisnInvOrFloor ()
 On Main { //HeartBeat happens once per second apparently (but may be less often?)
-	//GoSub FUNCtestCallStack1 //test for PR_WarnMsgShowsGotoGosubCallStack
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £_aaaDebugScriptStackAndLog "On Main:"
@@ -2173,6 +2155,29 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §testsPerformed
 	RETURN
 }
+>>FUNCtestCallStack1 () {
+	GoSub FUNCtestCallStack2
+	RETURN
+}
+>>FUNCtestCallStack2 () {
+	GoSub FUNCtestCallStack3
+	RETURN
+}
+>>FUNCtestCallStack3 () {
+	GoSub FUNCtestCallStack4
+	RETURN
+}
+>>FUNCtestCallStack4 () {
+	++ §testsPerformed
+	showvars //showlocals
+	RETURN
+}
+>>FUNCtestCalcNesting () {
+	Set @testCalcNesting 3.71
+	Set @testCalcNesting [ - 7.126 + [ @testCalcNesting ^ [ 1 / 3 ] ] * 32 % [ 2 ^ 2 ] ]
+	++ §testsPerformed
+	RETURN
+}
 >>TFUNCtests () { GoSub FUNCtests ACCEPT } >>FUNCtests () {
 	//GoSub FUNCtestDegrees showlocals
 	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
@@ -2200,16 +2205,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £ScriptDebug________________Tests "FUNCtests"
 		Set §testsPerformed 0
 		GoSub FUNCtestDistAbsPos
-		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestPrintfFormats
-		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestElseIf
-		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestDegrees
-		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestArithmetics
-		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 		GoSub FUNCtestLogicOperators
+		GoSub FUNCtestCallStack1 //test for PR_WarnMsgShowsGotoGosubCallStack
+		GoSub FUNCtestCalcNesting
 		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 	}
 	 
