@@ -128,7 +128,7 @@ only degrees, also for pitch x and roll z now
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2  
 ^dist_ variable now can use an absolute location as target  
-ex.: ^dist_{8000.25,7800.44,8500.32}  
+ex.: ^dist_\[8000.25,7800.44,8500.32\]  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3  
 added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity  
