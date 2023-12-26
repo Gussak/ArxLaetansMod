@@ -1777,7 +1777,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		//} }
 		Set @RepeaterSignalDist ^dist_~£RepeaterStrongestDeployedID~ //nearest (but could be all within 3000 range and receive the strongest signal)
 	} else {
-		Set @AncientGlobalTransmitterSignalDist ^dist_{0,0,0} //could be anywhere, if  I create a bunker map with it, then it will have a proper location 
+		Set @AncientGlobalTransmitterSignalDist ^dist_[0,0,0] //could be anywhere, if  I create a bunker map with it, then it will have a proper location 
 	}
 	
 	// no signal regions are like squared columns
@@ -2123,14 +2123,14 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>TFUNCtestDistAbsPos () { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos () {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCdistAbsPos"
 	// distance to absolute locations
-	Set §testDistAbsolute ^dist_{0,0,0}
-	Set @testDistAbsolute2 ^dist_{1000.123,2000.56,3000}
+	Set §testDistAbsolute ^dist_[0,0,0]
+	Set @testDistAbsolute2 ^dist_[1000.123,2000.56,3000]
 	Set §testAbsX 5000
 	Set @testAbsY 500.45
 	Set @testAbsZ 500.45
-	Set @testDistAbsolute3  ^dist_{~§testAbsX~,~@testAbsY~,~§testAbsZ~}
-	Set §testDistAbsolute4  ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
-	Set @testDistAbsolute4b ^dist_{~^locationx_player~,~^locationy_player~,~^locationz_player~}
+	Set @testDistAbsolute3  ^dist_[~§testAbsX~,~@testAbsY~,~§testAbsZ~]
+	Set §testDistAbsolute4  ^dist_[~^locationx_player~,~^locationy_player~,~^locationz_player~]
+	Set @testDistAbsolute4b ^dist_[~^locationx_player~,~^locationy_player~,~^locationz_player~]
 	//Set @testDistAbsolute4b ^dist_"{~^locationx_player~,~^locationy_player~,~^locationz_player~}" //rm tests the warn msg with line and column about unexpected "
 	++ §testsPerformed
 	RETURN
