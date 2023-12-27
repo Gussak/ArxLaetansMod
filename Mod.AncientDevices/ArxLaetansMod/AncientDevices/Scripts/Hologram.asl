@@ -2174,7 +2174,16 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>FUNCtestCalcNesting () {
 	Set @testCalcNesting 3.71
-	Set @testCalcNesting [ - 7.126 + [ @testCalcNesting ^ [ 1 / 3 ] ] * 32 % [ 2 ^ 2 ] ]
+	Set @testCalcNesting [ - 7.126 + [ [ @testCalcNesting ^ [ 1 / 3 ] ] * 32 ] % [ 2 ^ 2 ] ] //should be 2,412320834, check in gnome-calculator: int(-7,126+((3,71^(1/3))*32)) mod (2^2) ; but wont give float result there as remainder requires integer in calculators, so put this there: -7,126+((3,71^(1/3))*32) ; here std::fmod() is used!
+	Set @testCalcNesting2 [ 
+		- 7.126 //test multiline and comment
+		+ [ 
+				[ 
+					@testCalcNesting ^ [ 1 / 3 ] ] 
+					* // testing..
+					32 
+				] % [ 2 ^ 2 ] 
+		]
 	++ §testsPerformed
 	RETURN
 }
