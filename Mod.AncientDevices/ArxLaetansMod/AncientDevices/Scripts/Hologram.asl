@@ -2173,13 +2173,21 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCtestCalcNesting () {
-	Set @testCalcNesting 3.71
-	Set @testCalcNesting [ - 7.126 + [ [ @testCalcNesting ^ [ 1 / 3 ] ] * 32 ] % [ 2 ^ 2 ] ] //should be 2,412320834, check in gnome-calculator: int(-7,126+((3,71^(1/3))*32)) mod (2^2) ; but wont give float result there as remainder requires integer in calculators, so put this there: -7,126+((3,71^(1/3))*32) ; here std::fmod() is used!
-	Set @testCalcNesting2 [ 
-		- 7.126 //test multiline and comment
+	Set @testCalcVar 3.71
+	Calc @testCalcNesting10 [ -7.126 ]
+	Calc @testCalcNesting20 [ -7.126 - 6 ]
+	Calc @testCalcNesting30 [ -7.126 + 6 ]
+	Calc @testCalcNesting40 [ 8.5 / 2 ]
+	Calc @testCalcNesting50 [ 8.5 * 2 ]
+	Calc @testCalcNesting60 [ 10 ^ 2 ]
+	Calc @testCalcNesting70 [ 2 ^ 0.5 ]
+	Calc @testCalcNesting75 [ 2 ^ [ 1 / 2 ] ]
+	Calc @testCalcNesting80 [ -7.126 + [ [ @testCalcVar ^ [ 1 / 3 ] ] * 32 ] % [ 2 ^ 2 ] ] //should be 2,412320834, check in gnome-calculator: int(-7,126+((3,71^(1/3))*32)) mod (2^2) ; but wont give float result there as remainder requires integer in calculators, so put this there: -7,126+((3,71^(1/3))*32) ; here std::fmod() is used!
+	Calc @testCalcNesting90 [ 
+		-7.126 //test multiline and comment
 		+ [ 
 				[ 
-					@testCalcNesting ^ [ 1 / 3 ] ] 
+					@testCalcVar ^ [ 1 / 3 ] ] 
 					* // testing..
 					32 
 				] % [ 2 ^ 2 ] 
