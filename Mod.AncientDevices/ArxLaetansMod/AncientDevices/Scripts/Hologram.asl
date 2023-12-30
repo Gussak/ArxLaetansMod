@@ -1847,6 +1847,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testAriFloat2 2
 	Pow @testAriFloat2 3 //8
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestArithmetics"
 	RETURN
 }
 >>TFUNCtestPrintfFormats () { GoSub FUNCtestPrintfFormats ACCEPT } >>FUNCtestPrintfFormats () {
@@ -1860,6 +1861,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;decimalAlignRight:~%8d,§testInt~"
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;string='~%10s,£testString~'"
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestPrintfFormats"
 	RETURN
 }
 >>TFUNCtestLogicOperators () { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators () {
@@ -2098,8 +2100,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 <= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:D"
 	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:E"
 	
-	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;Logic_operators_test_ended"
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestLogicOperators"
 	RETURN
 }
 >>TFUNCtestDistAbsPos () { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos () {
@@ -2115,6 +2117,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testDistAbsolute4b ^dist_[~^locationx_player~,~^locationy_player~,~^locationz_player~]
 	//Set @testDistAbsolute4b ^dist_"{~^locationx_player~,~^locationy_player~,~^locationz_player~}" //rm tests the warn msg with line and column about unexpected "
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestDistAbsPos"
 	RETURN
 }
 >>TFUNCtestElseIf () { GoSub FUNCtestElseIf ACCEPT } >>FUNCtestElseIf () {
@@ -2132,6 +2135,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £work "~£work~;~§test~:okElse"
 	}  }  }
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestElseIf"
 	GoSub FUNCshowlocals
 	RETURN
 }
@@ -2153,6 +2157,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testDegreesYp2  ^degrees_player
 	
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestDegrees"
 	RETURN
 }
 >>FUNCtestCallStack1 () {
@@ -2168,6 +2173,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCtestCallStack4 () {
+	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCallStack4"
 	++ §testsPerformed
 	showvars //showlocals
 	RETURN
@@ -2193,6 +2199,24 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 				] % [ 2 ^ 2 ] 
 		]
 	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCalcNesting"
+	RETURN
+}
+>>FUNCtestAsk () {
+	Set £TestAsk "123 abc"
+	ask "test or not?" £TestAsk
+	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, FUNCtestAsk"
+	RETURN
+}
+>>FUNCtestModOverride () {
+	//create this cfg file and paste test.mod.override.holog there: 
+	//  ArxLibertatis/mods/modloadorder.cfg
+	//create this mod file, place this function test.mod.override.holog there and change the "original" text to something else:
+	//  ArxLibertatis/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+	Set £TestModOverride "original" //change this on the overrider !
+	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
 	RETURN
 }
 >>TFUNCtests () { GoSub FUNCtests ACCEPT } >>FUNCtests () {
@@ -2221,6 +2245,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		
 		Set £ScriptDebug________________Tests "FUNCtests"
 		Set §testsPerformed 0
+		Set §testsEnded 0
+		Set £TestsCompleted ""
 		GoSub FUNCtestDistAbsPos
 		GoSub FUNCtestPrintfFormats
 		GoSub FUNCtestElseIf
@@ -2229,6 +2255,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		GoSub FUNCtestLogicOperators
 		GoSub FUNCtestCallStack1 //test for PR_WarnMsgShowsGotoGosubCallStack
 		GoSub FUNCtestCalcNesting
+		GoSub FUNCtestAsk
+		GoSub FUNCtestModOverride
+		Set §testsEnded 1
 		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 	}
 	 

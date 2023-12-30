@@ -43,6 +43,20 @@
 !tools/interim/HowTo.interim.ImportExportFtl.txt
 !tools/interim/SPECIALTX_ORIGIN.png
 
+!tests/
+!tests/ScriptsOverridingAndPatching/
+!tests/ScriptsOverridingAndPatching/readme.txt
+!tests/ScriptsOverridingAndPatching/mods/
+!tests/ScriptsOverridingAndPatching/mods/modloadorder.cfg
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/hologram/
+!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+
 # Mod AncientDevices: find Mod.AncientDevices -type d |sed -r 's@^(.*)@!\1\n!\1/*@'
 !Mod.AncientDevices
 !Mod.AncientDevices/*
