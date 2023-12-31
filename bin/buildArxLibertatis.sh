@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+source <(secinit)
+
 set -eEu
 
 set -x
@@ -42,7 +44,9 @@ if ! dpkg -s qtbase5-dev >/dev/null;then
   exit 1;
 fi
 
+#export SET_OPTIMIZATION_FLAGS=OFF #TODO this works?
 cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+sed -i.`SECFUNCdtFmt --filename`.bkp -r 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' "./CMakeCache.txt" #at build folder
 #make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 : ${iMaxCores:=0} #help if the cpu is overheating, set this to 1. set to 0 to auto detect max cores.
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi

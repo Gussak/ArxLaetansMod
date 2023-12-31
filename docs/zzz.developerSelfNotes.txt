@@ -7,6 +7,26 @@ addxp 70000 //to help on dev testing things lvl 8
 collision <enable> //for chairs other things that could be used to step over?
 collision true
 
+inventory addmulti magic/hologram/hologram 50 inventory addmulti weapons/bone_weap/bone_weap 10 inventory addmulti provisions/torch/torch 20 inventory addmulti magic/potion2begreen/potion2begreen 10 inventory addmulti magic/potion2beorange/potion2beorange 10 inventory addmulti magic/potion2beblue/potion2beblue 10 inventory addmulti magic/potion2bepurple/potion2bepurple 10 inventory addmulti magic/potion2bewhite/potion2bewhite 10 inventory addmulti magic/potion_green/potion_green 10 inventory addmulti magic/potion_mana/potion_mana 10 inventory addmulti magic/potion_invisible/potion_invisible 10 inventory addmulti magic/potion_life/potion_life 10 inventory addmulti magic/potion_purple/potion_purple 10 inventory add provisions/backpack/backpack inventory addmulti provisions/bottle_water/bottle_water 10 inventory addmulti provisions/bottle_wine/bottle_wine 10 inventory addmulti provisions/bottle_blood/bottle_blood 10 
+
+inventory addmulti magic/hologram/hologram 50  
+inventory addmulti weapons/bone_weap/bone_weap 10 
+inventory addmulti provisions/torch/torch 20 
+inventory addmulti magic/potion2begreen/potion2begreen 10 
+inventory addmulti magic/potion2beorange/potion2beorange 10 
+inventory addmulti magic/potion2beblue/potion2beblue 10 
+inventory addmulti magic/potion2bepurple/potion2bepurple 10 
+inventory addmulti magic/potion2bewhite/potion2bewhite 10 
+inventory addmulti magic/potion_green/potion_green 10 
+inventory addmulti magic/potion_mana/potion_mana 10 
+inventory addmulti magic/potion_invisible/potion_invisible 10 
+inventory addmulti magic/potion_life/potion_life 10 
+inventory addmulti magic/potion_purple/potion_purple 10 
+inventory add provisions/backpack/backpack 
+inventory addmulti provisions/bottle_water/bottle_water 10 
+inventory addmulti provisions/bottle_wine/bottle_wine 10 
+inventory addmulti provisions/bottle_blood/bottle_blood 10 
+
 addxp 7000
 inventory add magic/hologram/hologram
 inventory addmulti magic/hologram/hologram 50
