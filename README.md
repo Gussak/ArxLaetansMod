@@ -48,6 +48,20 @@ not(or(... || ... || ...))
 and nesting: if(and(... && not(or( ... || ... || and(... , ... , ...); );) && ...);)  
 where '...' are the existing comparisons that use == != >= <= > < or the ones with words  
 they can also be multiline and each line can have a comment!  
+PS.: the hologram.asl has many tests for this.  
+
+https://github.com/Gussak/ArxLibertatis/compare/PR_ModdingScriptsWithLoadOrder  
+Modding .asl scripts with load order  
+Prepend an override to GoTo/GoSub calls or events into existing .asl scripts while following a mod load order.  
+So it is now possible to just apply minor changes instead of having to override full scripts.
+WIP: apply diff code patches to .asl scripts  
+Obs.: tests can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching  
+
+https://github.com/Gussak/ArxLibertatis/compare/PR_CalcCommand  
+new Calc command that can nest calculations also in multi-lines with comments  
+ex.: \[ ... + ... - \[ ... % ... \] / ... * ... % ... ^ ... \]  
+Obs.: the branches about remainder, power and nthroot are here too.  
+PS.: the hologram.asl has some tests for this.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
 Debug Line and Column Info  
