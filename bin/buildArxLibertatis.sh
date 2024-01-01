@@ -19,7 +19,6 @@ source <(secinit)
 
 set -eEu
 
-set -x
 cd ArxLibertatis.github
 pwd
 mkdir -vp build && cd build

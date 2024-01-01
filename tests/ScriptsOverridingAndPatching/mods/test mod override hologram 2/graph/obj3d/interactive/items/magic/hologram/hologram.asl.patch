@@ -6,7 +6,7 @@ index 77a8f86..3d2b924 100644
  	RETURN
  }
  >>FUNCtestModPatch () {
--	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
+-	Set £TestModPatch "patched3" //change to "patched" at the diff's patch file !
 +	Set £TestModPatch "patched2" //change to "patched" at the diff's patch file !
  	++ §testsPerformed
  	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
