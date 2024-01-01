@@ -51,12 +51,13 @@ they can also be multiline and each line can have a comment!
 PS.: the hologram.asl has many tests for this.  
 
 https://github.com/Gussak/ArxLibertatis/compare/PR_ModdingScriptsWithLoadOrder  
-for modding .asl scripts with load order.  
-1) Prepend an override to GoTo/GoSub calls or events into existing .asl scripts while following a mod load order.  
-2) Auto-patches a script using the patch command line from a diff file.  
+Mod .asl scripts with load order.  
+1) Auto-patches a script using the patch command line from a diff file.  
+2) Prepend an override to GoTo/GoSub calls or events into existing .asl scripts while following a mod load order.  
 So it is now possible to just apply minor changes instead of having to override full scripts.  
-Env var ARX_MODDING=1 grants changes to .asl and mod files will be detected, otherwise cached modded files prevails.  
-Obs.: tests can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching  
+Set environment variable ARX_MODDING=1 to grant changes to .asl and mod files will be detected everytime, otherwise cached modded files prevails.  
+  
+Obs.: tests for the above PR, for now can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching
 
 https://github.com/Gussak/ArxLibertatis/compare/PR_CalcCommand  
 new Calc command that can nest calculations also in multi-lines with comments  
