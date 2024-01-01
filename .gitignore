@@ -45,6 +45,7 @@
 
 !tests/
 !tests/ScriptsOverridingAndPatching/
+!tests/ScriptsOverridingAndPatching/newLogLooksLike.txt
 !tests/ScriptsOverridingAndPatching/readme.txt
 !tests/ScriptsOverridingAndPatching/mods/
 !tests/ScriptsOverridingAndPatching/mods/modloadorder.cfg

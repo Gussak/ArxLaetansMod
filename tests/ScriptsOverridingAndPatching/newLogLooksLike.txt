@@ -1,0 +1,28 @@
+[I] Script:2200          Modding mode (1): developer mode always re-patch and re-apply overrides
+
+[I] Script:2226          Mod load order file found: mods/modloadorder.cfg
+[I] Script:2231           ├─ Mod: test mod override hologram 1
+[I] Script:2231           ├─ Mod: test mod override hologram 3
+[I] Script:2231           ├─ Mod: test mod override hologram 2
+[I] Script:2234           └─ Ended collecting mod load order.
+
+[I] Script:2256          Modding script file: graph/obj3d/interactive/items/magic/hologram/hologram.asl
+
+[I] Script:2273          ├─ Mod: fixed patch to lower case at: "mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
+patching file modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl
+[I] Script:2297          ├─ Mod: applied patch: "mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
+[I] Script:2318          ├─ Mod: applied overrides: "mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl"
+
+[I] Script:2273          ├─ Mod: fixed patch to lower case at: "mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
+patching file modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl
+Hunk #1 succeeded at 2231 (offset 11 lines).
+[I] Script:2297          ├─ Mod: applied patch: "mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
+[I] Script:2318          ├─ Mod: applied overrides: "mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl"
+
+[I] Script:2273          ├─ Mod: fixed patch to lower case at: "mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
+patching file modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl
+Hunk #1 succeeded at 2242 (offset 22 lines).
+[I] Script:2297          ├─ Mod: applied patch: "mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
+[I] Script:2318          ├─ Mod: applied overrides: "mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl"
+
+[I] Script:2325          └─ Mod: dump result of 3 applied overrides and 3 applied patches at: "modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl"
