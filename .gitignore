@@ -48,14 +48,33 @@
 !tests/ScriptsOverridingAndPatching/readme.txt
 !tests/ScriptsOverridingAndPatching/mods/
 !tests/ScriptsOverridingAndPatching/mods/modloadorder.cfg
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/hologram/
-!tests/ScriptsOverridingAndPatching/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch
 
 # Mod AncientDevices: find Mod.AncientDevices -type d |sed -r 's@^(.*)@!\1\n!\1/*@'
 !Mod.AncientDevices/

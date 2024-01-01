@@ -1,0 +1,13 @@
+diff --git a/hologram.asl b/hologram.asl
+index 77a8f86..3d2b924 100644
+--- a/hologram.asl
++++ b/hologram.asl
+@@ -2220,7 +2220,7 @@ ON InventoryOut { Set 
+ 	RETURN
+ }
+ >>FUNCtestModPatch () {
+-	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
++	Set £TestModPatch "patched2" //change to "patched" at the diff's patch file !
+ 	++ §testsPerformed
+ 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
+ 	RETURN
