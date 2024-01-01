@@ -2219,6 +2219,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
 	RETURN
 }
+>>FUNCtestModPatch () {
+	Set £TestModPatch "original" //change to "patched" the diff's patch file !
+	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
+	RETURN
+}
 >>TFUNCtests () { GoSub FUNCtests ACCEPT } >>FUNCtests () {
 	//GoSub FUNCtestDegrees showlocals
 	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
@@ -2257,6 +2263,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		GoSub FUNCtestCalcNesting
 		GoSub FUNCtestAsk
 		GoSub FUNCtestModOverride
+		GoSub FUNCtestModPatch
 		Set §testsEnded 1
 		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
 	}
