@@ -9,19 +9,14 @@
 [I] Script:2256          Modding script file: graph/obj3d/interactive/items/magic/hologram/hologram.asl
 
 [I] Script:2273          ├─ Mod: fixed patch to lower case at: "mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
-patching file modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl
 [I] Script:2297          ├─ Mod: applied patch: "mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
 [I] Script:2318          ├─ Mod: applied overrides: "mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl"
 
 [I] Script:2273          ├─ Mod: fixed patch to lower case at: "mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
-patching file modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl
-Hunk #1 succeeded at 2231 (offset 11 lines).
 [I] Script:2297          ├─ Mod: applied patch: "mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
 [I] Script:2318          ├─ Mod: applied overrides: "mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl"
 
 [I] Script:2273          ├─ Mod: fixed patch to lower case at: "mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
-patching file modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl
-Hunk #1 succeeded at 2242 (offset 22 lines).
 [I] Script:2297          ├─ Mod: applied patch: "mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patchlowercase.patch"
 [I] Script:2318          ├─ Mod: applied overrides: "mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl"
 
