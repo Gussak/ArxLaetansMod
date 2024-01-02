@@ -1764,9 +1764,10 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	}
 	
 	// no signal regions are like squared columns
-	Set §NoSignalRegion ^locationx_~^me~
-	Inc §NoSignalRegion ^locationz_~^me~
-	Mod §NoSignalRegion §SignalDistBase
+	//Set §NoSignalRegion ^locationx_~^me~
+	//Inc §NoSignalRegion ^locationz_~^me~
+	//Mod §NoSignalRegion §SignalDistBase
+	Calc §NoSignalRegion [ [ ^locationx_~^me~ + ^locationz_~^me~ ] % §SignalDistBase ]
 	// signal strength based on deterministic but difficultly previsible cubic regions
 	if(§NoSignalRegion >= §SignalDistMin) {
 		Set @SignalStrength ^locationx_~^me~
@@ -1778,6 +1779,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			// less cubic/less previsible (this alone would be like spheric regions btw)
 			Inc @SignalStrength @AncientGlobalTransmitterSignalDist
 		}
+		//TODOA ternary ifElse: Calc @SignalStrength [ ^locationx_~^me~ + ^locationy_~^me~ + [ ^inPlayerInventory == 1 ? 90 : 0 ] + ^locationz_~^me~ + [ §SignalRepeater == 0 ? @AncientGlobalTransmitterSignalDist : 0 ] ]
 	}
 	
 	// stronger signal wins
