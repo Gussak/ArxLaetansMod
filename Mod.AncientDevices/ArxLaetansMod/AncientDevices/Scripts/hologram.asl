@@ -155,6 +155,7 @@ ON INIT {
 }
 
 ON CLONE { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
+	Set £TestClone "SENDER:~^sender~, ME:~^me~"
 	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	ACCEPT
