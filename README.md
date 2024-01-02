@@ -28,7 +28,7 @@ These branches are meant to create pull requests to main Arx Libertatis project.
 
 They may all be already merged into ForArxLaetansMod branch after they are working properly and will (probably) be required for new mods I create here.  
 
-If you want you can improve them and/or also create a pull request at Arx Libertatis from these branches instead of me.  
+If you want you can improve them and/or also create a pull request (every 2nd link) at Arx Libertatis from these branches instead of me (if unable, it means there is a PR there already for that branch).  
 
 Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
 
@@ -40,6 +40,7 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 ***These below are possibly ready. They were cleaned and prepared for a PR:***  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LogicalOperators2  
 Logical Operators for "if" command  
 and(... && ... && ...) //only accepts '&&' or ',' and if nesting needs to end with ';'  
 or(... || ... || ...) //only accepts '||' or ',' and if nesting needs to end with ';'  
@@ -50,7 +51,8 @@ where '...' are the existing comparisons that use == != >= <= > < or the ones wi
 they can also be multiline and each line can have a comment!  
 PS.: the hologram.asl has many tests for this.  
 
-https://github.com/Gussak/ArxLibertatis/compare/PR_ModdingScriptsWithLoadOrder  
+https://github.com/Gussak/ArxLibertatis/tree/PR_ModdingScriptsWithLoadOrder  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_ModdingScriptsWithLoadOrder  
 Mod .asl scripts with load order.  
 1) Auto-patches a script using the patch command line from a diff file.  
 2) Prepend an override to GoTo/GoSub calls or events into existing .asl scripts while following a mod load order.  
@@ -59,44 +61,55 @@ Set environment variable ARX_MODDING=1 to grant changes to .asl and mod files wi
   
 Obs.: tests for the above PR, for now can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching
 
-https://github.com/Gussak/ArxLibertatis/compare/PR_CalcCommand  
+https://github.com/Gussak/ArxLibertatis/tree/PR_CalcCommand  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_CalcCommand  
 new Calc command that can nest calculations also in multi-lines with comments  
 ex.: \[ ... + ... - \[ ... % ... \] / ... * ... % ... ^ ... \]  
 Obs.: the branches about remainder, power and nthroot are here too.  
 PS.: the hologram.asl has some tests for this.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugLineColumnInfo2  
 Debug Line and Column Info  
 Terminal log will show line and column where the problem happened.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_WarnMsgShowsGotoGosubCallStack  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_WarnMsgShowsGotoGosubCallStack  
 logs with more details for mod developers  
   warnings will show GoTo/GoSub call stack.  
   showlocals and showvars will also show event and params, and the GoTo/GoSub call stack.  
   the script call stack now shows position, line and collumn from where each call was made.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugBreakPointFromScriptCall  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugBreakPointFromScriptCall  
   a debug breakpoint can be triggered from a script condition calling a function that contains 'debugbreakpoint' in it's name.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLcombineItemsKey  
 QOL: new control (default key 'N') to combine items w/o having to double click
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_TakeAllItemsKey  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_TakeAllItemsKey  
 QOL: new Key to TakeAllItems from g_secondaryInventoryHud without having to aim the mouse on the tiny button there.
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLUnstackItemsKey  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLUnstackItemsKey  
 QOL: New unstak key to unstack one item from the stack in the current inventory.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_IncAddDecSub  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_IncAddDecSub  
 QOL: can use Inc or Add now. Can use Dec or Sub now.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_Pow  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_Pow  
 Pow var exponent  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_NthRoot  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_NthRoot  
 NthRoot var <any root value>
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
 The command Set now has extra options  
 Set can now -r read from and -w write to other entities (no need to expand their unique IDs).  
 It also can get a value from a string containing an array at specified index: -a  
@@ -105,54 +118,69 @@ It can get an array of items from any inventory: -l
 It can get a 2D array of "item count item count..." from any inventory: -m  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CmdLootInventory  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_CmdLootInventory  
 new ^lootinventory if another entity inventory is being looted, this will return it's id  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_objOnTopExtraBoundary  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_objOnTopExtraBoundary  
 ^$objontop_<extraBoundaryXZ> can check for a larger area above the entity  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_FormatString3  
 Format expanded variables thru printf syntax  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LimitShadowBlobs  
 src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
 High poly dropped items' models create a very dark ugly shadow.  
 This patch limits the amount of shadows for them still using strided().  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_NewVarFPS  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_NewVarFPS  
 New variable ^fps to get the frame rate  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_Interpolate2  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_Interpolate2  
 Interpolate command  
 Interpolate an entity near a target. No need to expand their IDs.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LifeOfOtherEnt  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LifeOfOtherEnt  
 new ^life_<entityID> ^lifemax_<entityID> ^lifemodmax_<entityID>  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_InInventory  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_InInventory  
 new ^ininventory returns entity id   
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_RemainderOperation3  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_RemainderOperation3  
 Added Remainder arithmetic operation  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CmdInventoryAddAtOtherEntity  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_CmdInventoryAddAtOtherEntity  
 inventory command can now add items to other entities   
 so we can now dynamically patch NPCs, no need to edit/override .asl files for this.   
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DegreesVariables2  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DegreesVariables2  
 Added ^degrees... variables  
 only degrees, also for pitch x and roll z now  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DistanceToLocation2  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DistanceToLocation2  
 ^dist_ variable now can use an absolute location as target  
 ex.: ^dist_\[8000.25,7800.44,8500.32\]  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LocationVariables3  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LocationVariables3  
 added ^locationx_ ^locationy_ ^locationz_ to get absolute position of any entity  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_HoverFar  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_HoverFar  
 ^hover_<dist> returns any entity at most at specified distance.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DropItems  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DropItems  
 New command: dropitem Can drop one or all items of any entity inventory where it is or in front of the player.  
 
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
