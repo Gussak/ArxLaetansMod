@@ -37,7 +37,7 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 .  
 .  
 .  
-***These below are possibly ready. They were cleaned and prepared for a PR:***  
+***Most breanches below are ready (a few are WIP tho). They were cleaned and prepared for a PR:***  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LogicalOperators2  
