@@ -182,13 +182,19 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_DropItems
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DropItems  
 New command: dropitem Can drop one or all items of any entity inventory where it is or in front of the player.  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_SaveLoadConsoleHistory  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_SaveLoadConsoleHistory  
+Load and append console commands to consolehistory.txt  
+load the full consolehistory.txt file when the console is first opened (lazy)  
+and append every new entry to it  
+the file is located at fs::getUserDir()  
+
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
 PS.: These are tests and may not be working yet or may just be useless:  
 /PR_UsemeshOtherEnt command 'usemesh' now accepts other entityID to apply it. No need to expand the ID.  
 /PR_WeaponCmdOtherEnt weapon command accepts an entity to apply it now. no need to expand the ID  
 /PR_CmtAtOtherEnt_Behavior_Setmovemode_Settarget Let other entities be set by these commands: behavior, setmovemode, settarget. No need to expand their IDs.  
-/PR_SaveLoadConsoleHistory just saves and loads for now, no proper integration yet...   
 
 ___
 
