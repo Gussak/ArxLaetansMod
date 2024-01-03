@@ -2293,11 +2293,12 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Set £FUNCseekTarget_TargetFoundEnt_OUTPUT £FUNCseekTarget_HoverEnt
 			GoSub "~£FUNCseekTarget_callFuncWhenTargetFound~"
 		}
+		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 	} else {
 	if(£FUNCseekTarget_targetCheck == "stop") {
+		Set £FUNCseekTarget_targetCheck "init" //reset b4 next call
 		timerTFUNCseekTarget off
 	} } }
-	Set £FUNCseekTarget_targetCheck "init" //reset b4 next call
 	RETURN
 }
 >>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {
