@@ -39,6 +39,15 @@ Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.
 .  
 ***Most breanches below are ready (a few are WIP tho). They were cleaned and prepared for a PR:***  
 
+https://github.com/Gussak/ArxLibertatis/tree/PR_ModdingScriptsWithLoadOrder  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_ModdingScriptsWithLoadOrder  
+Mod .asl scripts with load order.  
+1st - Auto-patches a script using the patch command line from a diff file.  
+2nd - Prepend an override to GoTo/GoSub calls or events into existing .asl scripts while following a mod load order.  
+So it is now possible to just apply minor changes instead of having to override full scripts.  
+Set environment variable ARX_MODDING=1 to grant changes to .asl and mod files will be detected everytime, otherwise cached modded files prevails.  
+Obs.: tests for the above PR, for now can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LogicalOperators2  
 Logical Operators for "if" command  
@@ -50,16 +59,6 @@ and nesting: if(and(... && not(or( ... || ... || and(... , ... , ...); );) && ..
 where '...' are the existing comparisons that use == != >= <= > < or the ones with words  
 they can also be multiline and each line can have a comment!  
 PS.: the hologram.asl has many tests for this.  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_ModdingScriptsWithLoadOrder  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_ModdingScriptsWithLoadOrder  
-Mod .asl scripts with load order.  
-1) Auto-patches a script using the patch command line from a diff file.  
-2) Prepend an override to GoTo/GoSub calls or events into existing .asl scripts while following a mod load order.  
-So it is now possible to just apply minor changes instead of having to override full scripts.  
-Set environment variable ARX_MODDING=1 to grant changes to .asl and mod files will be detected everytime, otherwise cached modded files prevails.  
-  
-Obs.: tests for the above PR, for now can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CalcCommand  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_CalcCommand  
@@ -102,11 +101,11 @@ QOL: can use Inc or Add now. Can use Dec or Sub now.
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_Pow  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_Pow  
-Pow var exponent  
+Power of var to <exponent>  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_NthRoot  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_NthRoot  
-NthRoot var <any root value>
+NthRoot of var to <anyRootValue>
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_SetOtherEntityVar_GetArrayValAtIndex_GetItemCountFromInv  
