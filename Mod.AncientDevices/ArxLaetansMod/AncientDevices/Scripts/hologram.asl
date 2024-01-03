@@ -2275,7 +2275,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 
->>TFUNCseekTarget () { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget () {
+>>TFUNCseekTarget () { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget () { //TODO re-use this for mindcontrol and teleport
 	//INPUT: <init||seek?£FUNCseekTarget_callFuncWhenTargetFound>
 	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//INPUT: [£FUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
@@ -2284,6 +2284,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £FUNCseekTarget_TargetFoundEnt_OUTPUT ""
 		Set £FUNCseekTarget_targetCheck "seek"
 		timerTFUNCseekTarget -m 0 333 GoTo TFUNCseekTarget
+		//GoSub FUNCCustomCmdsB4DbgBreakpoint //TODOABCDE RM
 	} else {
 	if(£FUNCseekTarget_targetCheck == "seek") {
 		Set £FUNCseekTarget_HoverEnt ^hover_~§SeekTargetDistance~
@@ -2298,10 +2299,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	if(£FUNCseekTarget_targetCheck == "stop") {
 		Set £FUNCseekTarget_targetCheck "init" //reset b4 next call
 		timerTFUNCseekTarget off
+	} else {
+		Set £ERROR_FUNCseekTarget "invalid £FUNCseekTarget_targetCheck='~£FUNCseekTarget_targetCheck~'"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	} } }
 	RETURN
 }
->>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {
+>>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {  //TODO re-use this for mindcontrol and teleport
 	//INPUT: <£CFUNCFlyMeToTarget_callFuncWhenTargetReached>
 	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
@@ -2336,11 +2340,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
 			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCSniperBullet"
 			Set £FUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
-			GoSub FUNCseekTarget
+			Set £FUNCseekTarget_targetCheck "init"	GoSub FUNCseekTarget
 		} else {
-			Set £FUNCkillNPC £FUNCseekTarget_TargetFoundEnt_OUTPUT	GoSub FUNCkillNPC
+			Set £FUNCkillNPC_target £FUNCseekTarget_TargetFoundEnt_OUTPUT	GoSub FUNCkillNPC
 			GoSub FUNCbreakDeviceDelayed
-			Set §FUNCSniperBullet_stop 1
+			Set §FUNCSniperBullet_stop 1 //will just auto stop see below 
 		}
 	}
 	
@@ -2527,7 +2531,14 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//INPUT: <£FUNCkillNPC_target>
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
 	
-	if(^life_~£FUNCkillNPC_target~ <= 0) GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+	if(£FUNCkillNPC_target == "") {
+		Set £ERROR_FUNCkillNPC "£FUNCkillNPC_target='' was not set"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint
+	}
+	if(^life_~£FUNCkillNPC_target~ <= 0) {
+		Set £ERROR_FUNCkillNPC "£FUNCkillNPC_target='~£FUNCkillNPC_target~' life is <= 0"
+		GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+	}
 	
 	if(§FUNCkillNPC_destroyCorpse == 1) {
 		//TODO destroy the corpse and spawn gore
@@ -2543,7 +2554,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
 	
-	Set §FUNCkillNPC_destroyCorpse 0 //reset before next call if it has no params
+	//reset before next call if it has no params
+	Set §FUNCkillNPC_destroyCorpse 0 
+	Set £FUNCkillNPC_target ""
 	RETURN
 }
 >>TFUNCcalcFrameMilis () { GoSub FUNCcalcFrameMilis ACCEPT } >>FUNCcalcFrameMilis () {
@@ -2925,7 +2938,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §FUNCshowlocals_force 0 //default for next call
 	RETURN
 }
->>FUNCCustomCmdsB4DbgBreakpoint () { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint () { RETURN }
+>>FUNCCustomCmdsB4DbgBreakpoint () { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp line 466 at DebugBreakpoint() { ... iDbgBrkPCount++ ... }
 >>FUNCsignalStrenghUpdateRequirement () {
 	Set @SignalStrengthReqBase 0
 	// dont use too high values cuz of Mul below
