@@ -154,6 +154,14 @@ ON INIT {
 	ACCEPT
 }
 
+on movementdetected {
+	Set @posmex ^locationx_~^me~
+	Set @posmey ^locationy_~^me~
+	Set @posmez ^locationz_~^me~
+	Set £TestMovementdetected "~£TestMovementdetected~, SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
+	ACCEPT
+}
+
 ON CLONE { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
 	Set £TestClone "SENDER:~^sender~, ME:~^me~"
 	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
