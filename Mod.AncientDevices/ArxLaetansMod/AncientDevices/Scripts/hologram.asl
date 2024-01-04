@@ -199,6 +199,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 }
 
 ON INVENTORYUSE {
+	Set £DebugMessage "~£DebugMessage~ test break point \n yes works to stop the engine and system popup! "	GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO RM
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) {

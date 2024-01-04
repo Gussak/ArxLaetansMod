@@ -64,6 +64,8 @@ while true;do
 
 	export ARX_LIMIT_SHADOWBLOB_FOR_VERTEXES=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
+	export ARX_ScriptErrorPopupCommand="yad --title=\"%title\" --text=\"%text\""
+	export ARX_ScriptCodeEditor="geany \"%file\":%line"
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
