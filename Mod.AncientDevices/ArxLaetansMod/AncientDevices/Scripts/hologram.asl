@@ -154,7 +154,7 @@ ON INIT {
 	ACCEPT
 }
 
-on movementdetected {
+ON MovementDetected {
 	Set @posmex ^locationx_~^me~
 	Set @posmey ^locationy_~^me~
 	Set @posmez ^locationz_~^me~
@@ -162,7 +162,7 @@ on movementdetected {
 	ACCEPT
 }
 
-ON CLONE { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
+ON Clone { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
 	Set £TestClone "SENDER:~^sender~, ME:~^me~"
 	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
@@ -207,7 +207,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 }
 
 ON INVENTORYUSE {
-	Set £DebugMessage "~£DebugMessage~ test break point \n yes works to stop the engine and system popup! "	GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO RM
+	//Set £DebugMessage "~£DebugMessage~ test break point \n yes works to stop the engine and system popup! "	GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO RM
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) {
@@ -2212,6 +2212,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCallStack4"
 	++ §testsPerformed
 	showvars //showlocals
+	Set £DebugMessage "~£DebugMessage~ test break point in deep call stack.\n yes works to stop the engine by creating a system popup!"	GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO RM?
 	RETURN
 }
 >>FUNCtestAsk () {
