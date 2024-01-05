@@ -2212,7 +2212,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCallStack4"
 	++ §testsPerformed
 	showvars //showlocals
-	Set £DebugMessage "~£DebugMessage~ test break point in deep call stack.\n yes works to stop the engine by creating a system popup!"	GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO RM?
+	//Set £DebugMessage "~£DebugMessage~ test break point in deep call stack.\n yes works to stop the engine by creating a system popup!"	GoSub FUNCCustomCmdsB4DbgBreakpoint // keep commented
 	RETURN
 }
 >>FUNCtestAsk () {
