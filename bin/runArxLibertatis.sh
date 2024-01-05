@@ -27,7 +27,11 @@ while true;do
 	if $bBuildB4Run;then 
 		cd "$strPathIni"
 		if echoc -q -t 9 "re-build it?@Dy";then
-			while ! ./buildArxLibertatis.sh;do echoc -w "fix the code and retry";done;
+			export bRetryingBuild=false #detected by buildArxLibertatis.sh
+			while ! ./buildArxLibertatis.sh;do 
+				echoc -w "fix the code and retry";
+				bRetryingBuild=true
+			done;
 		fi
 	fi
 	
@@ -64,8 +68,10 @@ while true;do
 
 	export ARX_LIMIT_SHADOWBLOB_FOR_VERTEXES=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
-	export ARX_ScriptErrorPopupCommand="yad --title=\"%title\" --text=\"%text\""
-	export ARX_ScriptCodeEditor="geany \"%file\":%line"
+	#export ARX_ScriptErrorPopupCommand="yad --title=\"%{title}\" --text=\"%{message}\" --form --field=\"%{details}\":LBL --scroll --on-top --center"
+	#export ARX_ScriptCodeEditorCommand="geany \"%{file}\":%{line}"
+	export ARX_ScriptErrorPopupCommand='yad --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center'
+	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
