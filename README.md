@@ -83,7 +83,12 @@ logs with more details for mod developers
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_DebugBreakPointFromScriptCall  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugBreakPointFromScriptCall  
-  a debug breakpoint can be triggered from a script condition calling a function that contains 'debugbreakpoint' in it's name.  
+A debug breakpoint can be triggered from a script condition calling a function that contains 'debugbreakpoint' in it's name  
+This also contains:  
+ user custom command can be run  
+ user custom command to open system dialog popup  
+ all the code about line and column where the asl script is being executed  
+ string applyTokenAt()  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLcombineItemsKey  

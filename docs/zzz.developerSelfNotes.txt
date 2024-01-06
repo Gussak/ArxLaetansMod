@@ -97,7 +97,7 @@ inventory playeradd movable/broken_bottle/broken_bottle
 ================================ CPP quick helpers, delete before pull request
 
 #include <iostream>
-#define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
+#define MYDBG(x) std::cout << "_MyDbg_: " << x << "\n" //replace with LogDebug later
 MYDBG(anyVar<<","<<anything<<anythinElse);
 
 ================================ show missing PR_ from readme.md
