@@ -4,6 +4,8 @@ egrep "[#]help" "$0"
 
 source <(secinit)
 
+strWhat="ArxLaetans"
+
 : ${bCompiledMode:=false} #help
 
 : ${strBPath:="ArxLaetansMod.github"} #help
@@ -26,16 +28,17 @@ done
 declare -p astrFindRegexFileList |tr '[' '\n'
 IFS=$'\n' read -d '' -r -a astrFileList < <(find "${strBPath}/" "${astrFindRegexFileList[@]}")&&:
 
-: ${strFileFilter:=""} #help to backup only text files, try strFileFilter=".*[.](txt|asl|info|md|sh|py|cfg|patch|d)"
+: ${strFileFilter:=""} #help to backup only text files, try strFileFilter=".*[.](txt|asl|info|md|sh|py|cfg|patch|d)$"
 if [[ -n "${strFileFilter}" ]];then
 	echoc --info "applying filter strFileFilter='$strFileFilter'"
 	astrFileListTmp=("${astrFileList[@]}")
 	astrFileList=()
 	for strFile in "${astrFileListTmp[@]}";do
-		if [[ "$strFile" ~= ${strFileFilter} ]];then
-			astrFileList+="${strFile}"
+		if [[ "$strFile" =~ ${strFileFilter} ]];then
+			astrFileList+=("${strFile}")
 		fi
 	done
+	strWhat+="_TextFiles"
 fi
 declare -p astrFileList |tr '[' '\n'
 
@@ -43,7 +46,6 @@ echoc --info "creating tar"
 
 strBranch="$(cd "${strBPath}";git branch |egrep "^[*]" |cut -f2 -d' ')"
 
-strWhat="ArxLaetans"
 astrTarParams=(
 	#--exclude="${strBPath}/build/CMakeFiles"
 	#--exclude="${strBPath}/build"
