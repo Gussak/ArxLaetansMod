@@ -1,5 +1,7 @@
 ///////////// HOW TO PROPERLY IMPLEMENT 'ELSE IF' ? /////////////////
 
+// a simplified (or complete, you choose) version of this could go to https://wiki.arx-libertatis.org/Script:else , but I am having trouble to format what is here to show up there w/o errors. So if there is some converter, tell me. Or if you would like to prepare it by yourself, feel free to do it :)
+
 // when 'if' condition fails, it will skip it's own block/commandLine AND WILL CONSUME the 'else' just after!
 // when 'else' is executed, it will skip the next block/commandLine just after it.
 // so, when 'if' condition succeeds, it will execute it's own block/command and will also let the 'else' just after to be executed too (what skips it's own block/commandLine, see above).
