@@ -13,7 +13,7 @@ Extract each compressed package you want (and the respective setup package from 
 Obs.: The setup package is important to create compatibility with Arx Fatalis/Libertatis and to keep the models work independent. As they are CC-BY they can be re-used and adapted to work elsewhere too if you want.  
 
 My new mods' scripts found here will probably not fully work unless you merge/compile this branch:  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod  
-or the newest (that may be unstable or just broken as may contain WIP and backup commits):  
+or the newest (that may be unstable or just broken as may contain WIP and backup commits that were not compiled yet):  
 https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST (or TEST2 ...)  
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
@@ -30,9 +30,11 @@ They may all be already merged into ForArxLaetansMod branch after they are worki
 
 If you want you can improve them and/or also create a pull request (every 2nd link) at Arx Libertatis from these branches instead of me (if unable, it means there is a PR there already for that branch).  
 
+If some PR_ branch does not compile, the missing parts will all be at https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST (or TEST2 ...). It is too many branches to keep updated (I use 3-way meld compare, with the cmp3way.sh script, to split from that branch into PR_ branches and it requires some time to complete).
+
 Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
 
-Obs.: it was all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
+Obs.: it may have been all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
   
 .  
 .  
