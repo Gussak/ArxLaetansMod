@@ -41,7 +41,9 @@ Obs.: it may have been all compiled to c++20 on ubuntu22.04 with qtbase5-dev pac
 .  
 ***Most breanches below are ready (a few are WIP tho). They were cleaned and prepared for a PR:***  
 
-***NEW END USER FEATURES:***
+___
+
+## NEW END USER FEATURES:
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLcombineItemsKey  
@@ -55,7 +57,7 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_QOLUnstackItemsKey
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLUnstackItemsKey  
 QOL: New unstak key to unstack one item from the stack in the current inventory.  
 
-***NEW CORE FEATURES LIKE PERFORMANCE:***
+## NEW CORE FEATURES LIKE PERFORMANCE:
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_CallSeekPerformance  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_CallSeekPerformance  
@@ -68,7 +70,7 @@ src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models
 High poly dropped items' models create a very dark ugly shadow.  
 This patch limits the amount of shadows for them still using strided().  
 
-***NEW MOD DEVELOPMENT FEATURES:***
+## NEW MOD DEVELOPMENT FEATURES:
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_ModdingScriptsWithLoadOrder  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_ModdingScriptsWithLoadOrder  
@@ -107,7 +109,7 @@ load the full consolehistory.txt file when the console is first opened (lazy)
 and append every new entry to it  
 the file is located at fs::getUserDir()  
 
-***NEW SCRIPT CODING FEATURES:***
+## NEW SCRIPT CODING FEATURES:
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LogicalOperators2  
@@ -209,7 +211,7 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_DropItems
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DropItems  
 New command: dropitem Can drop one or all items of any entity inventory where it is or in front of the player.  
 
-***ETC:***
+## ETC:
 
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
@@ -226,7 +228,7 @@ The licenses are inside each compressed package.
 
 ___
 
-# __DevelopmentEnvironment__  
+# Development Environment  
 
 These models were prepared using these linux scripts (that may run on windows cygwin but were only tested on linux ubuntu 22.04, so I suggest using a VirtualMachine with minimal linux on it):  
 
@@ -262,7 +264,7 @@ Lower all textures resolution on the current folder:
 
 ___
 
-# __Mod Merging (or mixing with overriding priorities) Suggestion__  
+# Mod Merging (or mixing with overriding priorities) Suggestion  
 
 Suggestion: Instead of overwriting exiting files with mods' ones, I use mergerfs thru `secOverrideMultiLayerMountPoint.sh ArxLibertatis`, but you can just run something like (btw, all folders and files must be readonly only least the write layer) ex.:  
 ```
@@ -295,7 +297,7 @@ Obs.: this is not a recommended layer sort order, this is just an example as I h
 
 ___
 
-# __Issues/Todo__  
+# Issues/Todo  
 	
  - TODO: material names like sM=@Origin can be used to configure special groups in the json file. probably sM=@HIT_10 with tiny transparen SPECIALTX_HIT_10.png, will help a lot on the script to prepare the section on .json file before converting to .ftl. This can also be used to prepare these sections when replacing door models and other models too I guess. To configure it in blender, the isolated part of the mesh must have 3 vertexes and one face, so the material can be set to it. After that, just snap all 3 vertexes to the same position (place the 3d cursor there first).   
  - TODO: put a vertex/face amount check on the script, it should not go too much beyond 2000 vertexes per ftl model ISSUE: if there are many high poly objects on the view sight, it will degrade the FPS. TODO:WIP: do more cleanup on the existing models' meshes while keeping visual quality.     
@@ -306,6 +308,6 @@ ___
 updating forked branches:  
   github.com/Gussak/ArxLibertatis/compare/insanity...arx-insanity:ArxLibertatis:insanity  
   
-# __Done__  
+## __Done__  
 
  - DONE at PR_LimitShadowBlobs: TODO: fix the dropped items' shadows, they are too big and too dark not matching replaced models' shadows.  
