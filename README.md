@@ -18,6 +18,8 @@ https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST (or TEST2 ...
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
 
+PS.: it is WIP, not ready for release, and I have only tested it in one other machine, but that test may have happened before I made updates here. So, if something is not working, open an issue.
+
 ___
 
 # __PULL Request Branches:__  
