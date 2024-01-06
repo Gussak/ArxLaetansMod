@@ -41,6 +41,35 @@ Obs.: it may have been all compiled to c++20 on ubuntu22.04 with qtbase5-dev pac
 .  
 ***Most breanches below are ready (a few are WIP tho). They were cleaned and prepared for a PR:***  
 
+***NEW END USER FEATURES:***
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLcombineItemsKey  
+QOL: new control (default key 'N') to combine items w/o having to double click
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_TakeAllItemsKey  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_TakeAllItemsKey  
+QOL: new Key to TakeAllItems from g_secondaryInventoryHud without having to aim the mouse on the tiny button there.
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_QOLUnstackItemsKey  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLUnstackItemsKey  
+QOL: New unstak key to unstack one item from the stack in the current inventory.  
+
+***NEW CORE FEATURES LIKE PERFORMANCE:***
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_CallSeekPerformance  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_CallSeekPerformance  
+GoTo/GoSub call seek performance improvement:  
+Creates a sorted cache map (that considers overrides) and avoids seeking them on every call.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LimitShadowBlobs  
+src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
+High poly dropped items' models create a very dark ugly shadow.  
+This patch limits the amount of shadows for them still using strided().  
+
+***NEW MOD DEVELOPMENT FEATURES:***
+
 https://github.com/Gussak/ArxLibertatis/tree/PR_ModdingScriptsWithLoadOrder  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_ModdingScriptsWithLoadOrder  
 Mod .asl scripts with load order.  
@@ -49,6 +78,36 @@ Mod .asl scripts with load order.
 So it is now possible to just apply minor changes instead of having to override full scripts.  
 Set environment variable ARX_MODDING=1 to grant changes to .asl and mod files will be detected everytime, otherwise cached modded files prevails.  
 Obs.: tests for the above PR, for now can be found at: https://github.com/Gussak/ArxLaetansMod/tree/main/tests/ScriptsOverridingAndPatching
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugLineColumnInfo2  
+Debug Line and Column Info  
+Terminal log will show line and column of the .asl script where the problem happened.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_WarnMsgShowsGotoGosubCallStack  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_WarnMsgShowsGotoGosubCallStack  
+logs with more details for mod developers  
+  warnings will show GoTo/GoSub call stack.  
+  showlocals and showvars will also show event and params, and the GoTo/GoSub call stack.  
+  the script call stack now shows position, line and collumn from where each call was made.  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_DebugBreakPointFromScriptCall  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugBreakPointFromScriptCall  
+A debug breakpoint can be triggered from a script condition calling a function that contains 'debugbreakpoint' in it's name  
+This also contains:  
+ user custom command can be run  
+ user custom command to open system dialog popup  
+ all the code about line and column where the asl script is being executed  
+ string applyTokenAt()  
+
+https://github.com/Gussak/ArxLibertatis/tree/PR_SaveLoadConsoleHistory  
+https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_SaveLoadConsoleHistory  
+Load and append console commands to consolehistory.txt  
+load the full consolehistory.txt file when the console is first opened (lazy)  
+and append every new entry to it  
+the file is located at fs::getUserDir()  
+
+***NEW SCRIPT CODING FEATURES:***
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_LogicalOperators2  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LogicalOperators2  
@@ -68,39 +127,6 @@ new Calc command that can nest calculations also in multi-lines with comments
 ex.: \[ ... + ... - \[ ... % ... \] / ... * ... % ... ^ ... \]  
 Obs.: the branches about remainder, power and nthroot are here too.  
 PS.: the hologram.asl has some tests for this.  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_DebugLineColumnInfo2  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugLineColumnInfo2  
-Debug Line and Column Info  
-Terminal log will show line and column where the problem happened.  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_WarnMsgShowsGotoGosubCallStack  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_WarnMsgShowsGotoGosubCallStack  
-logs with more details for mod developers  
-  warnings will show GoTo/GoSub call stack.  
-  showlocals and showvars will also show event and params, and the GoTo/GoSub call stack.  
-  the script call stack now shows position, line and collumn from where each call was made.  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_DebugBreakPointFromScriptCall  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DebugBreakPointFromScriptCall  
-A debug breakpoint can be triggered from a script condition calling a function that contains 'debugbreakpoint' in it's name  
-This also contains:  
- user custom command can be run  
- user custom command to open system dialog popup  
- all the code about line and column where the asl script is being executed  
- string applyTokenAt()  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_QOLcombineItemsKey  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLcombineItemsKey  
-QOL: new control (default key 'N') to combine items w/o having to double click
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_TakeAllItemsKey  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_TakeAllItemsKey  
-QOL: new Key to TakeAllItems from g_secondaryInventoryHud without having to aim the mouse on the tiny button there.
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_QOLUnstackItemsKey  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_QOLUnstackItemsKey  
-QOL: New unstak key to unstack one item from the stack in the current inventory.  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_IncAddDecSub  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_IncAddDecSub  
@@ -134,12 +160,6 @@ https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_ob
 https://github.com/Gussak/ArxLibertatis/tree/PR_FormatString3  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_FormatString3  
 Format expanded variables thru printf syntax  
-
-https://github.com/Gussak/ArxLibertatis/tree/PR_LimitShadowBlobs  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_LimitShadowBlobs  
-src/graphics/effects/BlobShadow.cpp: limit blob shadows for high poly models  
-High poly dropped items' models create a very dark ugly shadow.  
-This patch limits the amount of shadows for them still using strided().  
 
 https://github.com/Gussak/ArxLibertatis/tree/PR_NewVarFPS  
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_NewVarFPS  
@@ -189,12 +209,7 @@ https://github.com/Gussak/ArxLibertatis/tree/PR_DropItems
 https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_DropItems  
 New command: dropitem Can drop one or all items of any entity inventory where it is or in front of the player.  
 
-https://github.com/Gussak/ArxLibertatis/tree/PR_SaveLoadConsoleHistory  
-https://github.com/arx/ArxLibertatis/compare/master...Gussak:ArxLibertatis:PR_SaveLoadConsoleHistory  
-Load and append console commands to consolehistory.txt  
-load the full consolehistory.txt file when the console is first opened (lazy)  
-and append every new entry to it  
-the file is located at fs::getUserDir()  
+***ETC:***
 
 Obs.: other PR_.* branches may not be ready yet, may contain backup/untested commits, complicated code and loads of unecessary comments and commented dead code.  
 
