@@ -1,3 +1,6 @@
+*.sbkp
+
+# uncomment below to have a strict filter. Comment to detect changes to new files that are still not at the strict filters below
 *
 
 # project files
