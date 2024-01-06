@@ -30,11 +30,19 @@ They may all be already merged into ForArxLaetansMod branch after they are worki
 
 If you want you can improve them and/or also create a pull request (every 2nd link) at Arx Libertatis from these branches instead of me (if unable, it means there is a PR there already for that branch).  
 
-If some PR_ branch does not compile, the missing parts will all be at https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST (or TEST2 ...). It is too many branches to keep updated (I use 3-way meld compare, with the cmp3way.sh script, to split from that branch into PR_ branches and it requires some time to complete).
+**IMPORTANT**:  
+It is too many branches already for me to have time to keep them all ready for a PR to main repo.  
+As it is becoming overly complex, I will mainly work at my newest TEST branch from now on.  
+If you like something it will probably be only working there at:  
+  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST2 (or TEST3 ..., the newest one)  
 
-Obs.: The wiki patches are at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
+Obs.: Tip: I use 3-way meld compare, with the cmp3way.sh script, to split from that branch into PR_ branches.
 
-Obs.: it may have been all compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
+Obs.: If some PR_ branch does not compile, the missing parts or fixes will all be at my newest TEST branch.  
+
+Obs.: The new wiki patches may be at https://github.com/Gussak/ArxLaetansMod/tree/main/docs/WikiPatches (read them raw).  
+
+Obs.: The branches (if I had time to test them) were compiled to c++20 on ubuntu22.04 with qtbase5-dev package.  
   
 .  
 .  
