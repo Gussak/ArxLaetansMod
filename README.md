@@ -12,9 +12,10 @@ Extract each compressed package you want (and the respective setup package from 
 
 Obs.: The setup package is important to create compatibility with Arx Fatalis/Libertatis and to keep the models work independent. As they are CC-BY they can be re-used and adapted to work elsewhere too if you want.  
 
-My new mods' scripts found here will probably not fully work unless you merge/compile this branch:  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod  
-or the newest (that may be unstable or just broken as may contain WIP and backup commits that were not compiled yet):  
-https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST (or TEST2 ...)  
+My new mods' scripts found here will probably not fully work unless you merge/compile this branch:  
+  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod  
+or the newest (that was compiled and tested but not extensively and may be unstable):  
+  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST2 (or TEST3 ...)  
 
 TODO:OBS.: windows .bat files to create windows file links are WIP and still needs testing. createWindowsLinks.bat is not ready yet.  
 
@@ -37,6 +38,8 @@ It is too many branches already for me to have time to keep them all ready for a
 As it is becoming overly complex, I will mainly work at my newest TEST branch from now on.  
 If you like something it will probably be only working there at:  
   https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST2 (or TEST3 ..., the newest one)  
+Btw, the sketch code branches are not compiled yet, and have mainly ideas, like:
+  https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_SketchCode_Tmp1   
 
 Obs.: Tip: I use 3-way meld compare, with the cmp3way.sh script, to split from that branch into PR_ branches.
 
