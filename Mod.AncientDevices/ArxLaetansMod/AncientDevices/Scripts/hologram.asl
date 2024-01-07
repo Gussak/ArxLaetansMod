@@ -2234,9 +2234,24 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCtestModPatch () {
-	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
+	Set £TestModPatch "original" //this shall be different at the patch diff file !
 	++ §testsPerformed
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
+	RETURN
+}
+>>FUNCtestSwapMultilineComment () {
+/* this test WRONG lines with less than 2 chars available to be fixed:
+
+1
+this tests a WRONG closure with code after it */ Set @TestError 1.23
+	
+	/* the trick is: comment this line with //, it will enable "a" section and disable "b" section
+	Set £TestSwapMultilineComment "a"
+	/*/ 
+	Set £TestSwapMultilineComment "b"
+	//*/
+	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, FUNCtestSwapMultilineComment"
 	RETURN
 }
 >>TFUNCtests () { GoSub FUNCtests ACCEPT } >>FUNCtests () {
