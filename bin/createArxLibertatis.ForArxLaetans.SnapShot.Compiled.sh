@@ -1,5 +1,8 @@
 #!/bin/bash
 
+if ! which secinit;then 
+	PATH="$PATH:$HOME/ScriptEchoColor/ScriptEchoColor/bin"
+fi
 source <(secinit)
 
 bCompiledMode=true ./createArxLibertatis.ForArxLaetans.SnapShot.sh

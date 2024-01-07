@@ -2,6 +2,9 @@
 
 egrep "[#]help" "$0"
 
+if ! which secinit;then 
+	PATH="$PATH:$HOME/ScriptEchoColor/ScriptEchoColor/bin"
+fi
 source <(secinit)
 
 : ${bCompiledMode:=false} #help
@@ -22,7 +25,7 @@ else
 		--exclude="${strBPath}/.git"
 	)
 fi
-strFlBN="${strBPath}.ForArxLaetansMod.${strWhat}.Branch_${strBranch}.SnapShot.`SECFUNCdtFmt --filename`"
+strFlBN="${strBPath}.ForArxLaetansMod.${strWhat}.Branch_${strBranch}.SnapShot.$(SECFUNCdtFmt --filename)"
 
 tar "${astrTarParams[@]}" -vcf "${strFlBN}.tar" "${strBPath}/"*
 

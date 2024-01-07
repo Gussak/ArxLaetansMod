@@ -2,6 +2,9 @@
 
 egrep "[#]help" "$0"
 
+if ! which secinit;then 
+	PATH="$PATH:$HOME/ScriptEchoColor/ScriptEchoColor/bin"
+fi
 source <(secinit)
 
 strWhat="ArxLaetans"
