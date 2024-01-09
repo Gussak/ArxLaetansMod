@@ -2234,7 +2234,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCtestModPatch () {
-	Set £TestModPatch "original" //this shall be different at the patch diff file !
+	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
 	++ §testsPerformed
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
 	RETURN
