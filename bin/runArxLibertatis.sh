@@ -66,12 +66,11 @@ while true;do
 	fi
 	acmd=(nemiver --use-launch-terminal ./arx "${acmdParams[@]}" "$@")
 
-	export ARX_LIMIT_SHADOWBLOB_FOR_VERTEXES=9
+	export ARX_LimitShadowBlobsForVertexes=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
-	#export ARX_ScriptErrorPopupCommand="yad --title=\"%{title}\" --text=\"%{message}\" --form --field=\"%{details}\":LBL --scroll --on-top --center"
-	#export ARX_ScriptCodeEditorCommand="geany \"%{file}\":%{line}"
 	export ARX_ScriptErrorPopupCommand='yad --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center'
 	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
+	#export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"

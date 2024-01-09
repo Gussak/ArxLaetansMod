@@ -49,6 +49,7 @@ if ! dpkg -s qtbase5-dev >/dev/null;then
 fi
 
 #export SET_OPTIMIZATION_FLAGS=OFF #TODO this works?
+egrep "SET_OPTIMIZATION_FLAGS:BOOL=" ./CMakeCache.txt
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	sed -i.`SECFUNCdtFmt --filename`.bkp -r 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' "./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
