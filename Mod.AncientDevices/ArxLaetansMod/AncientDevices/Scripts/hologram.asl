@@ -2240,10 +2240,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCtestSwapMultilineComment () {
-/* this test WRONG lines with less than 2 chars available to be fixed:
-
-1
-this tests a WRONG closure with code after it */ Set @TestError 1.23
+/* this test WRONG lines with less than 2 chars available to be fixed: put an empty line and another with 1 char only.
+12
+13
+this tests a WRONG closure with code after it (put some comment after the closure, or hit del to bring the one below) */
+	Set @TestError 1.23
 	
 	/* the trick is: comment this line with //, it will enable "a" section and disable "b" section
 	Set £TestSwapMultilineComment "a"

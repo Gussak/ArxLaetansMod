@@ -70,7 +70,7 @@ while true;do
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
 	export ARX_ScriptErrorPopupCommand='yad --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center'
 	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
-	#export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
+	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
