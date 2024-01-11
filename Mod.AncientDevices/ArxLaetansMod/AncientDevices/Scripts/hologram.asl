@@ -164,7 +164,7 @@ ON MovementDetected {
 
 ON Clone { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
 	Set £TestClone "SENDER:~^sender~, ME:~^me~"
-	GoSub -p FUNCshowlocals "£filter=TestClone §force=1"
+	GoSub -p FUNCshowlocals £filter=TestClone §force=1 ;
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	ACCEPT
 }
@@ -193,7 +193,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 			
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Identified_Now"
 			
-			GoSub -p FUNCshowlocals "£filter=.*(identified|stack).* §force=1"
+			GoSub -p FUNCshowlocals "£filter=.*(identified|stack).*" §force=1 ;
 		}
 	} else {
 		if (^#timer2 == 0) StartTimer timer2
@@ -292,12 +292,12 @@ ON INVENTORYUSE {
 			//Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			timerLandMineDetectNearbyNPC -m 0 50 GoTo TFUNCLandMine
-			GoSub -p FUNCblinkGlow "§times=0"
+			GoSub -p FUNCblinkGlow §times=0 ;
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
 			//Set §Scale 100 SetScale §Scale
 			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow "§times=-1"
+			GoSub -p FUNCblinkGlow §times=-1 ;
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -306,11 +306,11 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 // activate
 			timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
-			GoSub -p FUNCblinkGlow "§times=0"
+			GoSub -p FUNCblinkGlow §times=0 ;
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerTFUNCteleportToAndKillNPC off
 			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow "§times=-1"
+			GoSub -p FUNCblinkGlow §times=-1 ;
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -319,11 +319,11 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2
 			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
-			GoSub -p FUNCblinkGlow "§times=0"
+			GoSub -p FUNCblinkGlow §times=0 ;
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerMindControlDetectHoverNPC off
 			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow "§times=-1"
+			GoSub -p FUNCblinkGlow §times=-1 ;
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -332,11 +332,11 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2
 			GoSub FUNCSniperBullet
-			GoSub -p FUNCblinkGlow "§times=0"
+			GoSub -p FUNCblinkGlow §times=0 ;
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			GoSub -p FUNCSniperBullet "§stop=1"
+			GoSub -p FUNCSniperBullet §stop=1 ;
 			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow "§times=-1"
+			GoSub -p FUNCblinkGlow §times=-1 ;
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -354,7 +354,7 @@ ON INVENTORYUSE {
 	if(£AncientDeviceMode != "HologramMode") {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Unrecognized:£AncientDeviceMode='~£AncientDeviceMode~'"
 		SPEAK -p [player_no] NOP
-		GoSub -p FUNCshowlocals "§force=1 £filter=.*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*"
+		GoSub -p FUNCshowlocals §force=1 "£filter=.*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
 		ACCEPT
 	}
 	
@@ -800,7 +800,7 @@ ON COMBINE {
 	Set £OtherClass ^class_~£OtherEntIdToCombineWithMe~ //OTHER
 	
 	UnSet £ScriptDebugCombineFailReason
-	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
+	GoSub -p FUNCshowlocals §force=1 ;
 	
 	///////////////////// combine with other classes ///////////////////////
 	
@@ -815,13 +815,13 @@ ON COMBINE {
 	//if (not(and(£OtherEntIdToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Other:Not:Class:Hologram"
-		//Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		//GoSub -p FUNCshowlocals §force=1 ;
 		//ACCEPT
 	//}
 	if(£ClassMe != £OtherClass) {  //only combine if same kind
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Class:Differs"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	
@@ -832,7 +832,7 @@ ON COMBINE {
 		if(§UseMax >= 80) { //quality 4+
 			SPEAK -p [player_no] NOP
 			Set £ScriptDebugCombineFailReason "Quality:Already:MK2"
-			Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+			GoSub -p FUNCshowlocals §force=1 ;
 		} else {
 			Set -r £OtherEntIdToCombineWithMe §OtherUseMax §UseMax
 			if(§OtherUseMax > §UseMax) {
@@ -857,28 +857,28 @@ ON COMBINE {
 	if(£OtherAncientDeviceMode != "AncientBox") { //this is for upgrading/morphing the item
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Other:Not:AncientBox"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	
 	if (^me isgroup "Special") { //TODO the special objects could create other crafting trees tho
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Me:Is:Special"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	
 	if (£OtherEntIdToCombineWithMe !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic:Aka_hologram"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	
 	if(£AncientDeviceMode == "SniperBullet") { //SYNC_WITH_LAST_COMBINE sync with last/max combine option
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	
@@ -892,19 +892,19 @@ ON COMBINE {
 	if (^amount > 1) { //this must not be a stack of items
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:IsStack"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	if (§Identified == 0) {
 		SPEAK -p [player_not_skilled_enough] NOP
 		Set £ScriptDebugCombineFailReason "Self:NotIdentified"
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 		ACCEPT
 	}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
-		//Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		//GoSub -p FUNCshowlocals §force=1 ;
 		//ACCEPT
 	//}
 	
@@ -915,7 +915,7 @@ ON COMBINE {
 	
 	DESTROY £OtherEntIdToCombineWithMe
 	
-	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+	GoSub -p FUNCshowlocals §force=1 ;
 	ACCEPT
 }
 
@@ -1043,7 +1043,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	} else {
 	if(@CfgOptHoverY > 270 && @CfgOptHoverY < 360) {
 	}	} } }
-	Set §FUNCconfigOptionHighlight_index §CfgOptIndex GoSub FUNCconfigOptionHighlight
+	GoSub -p FUNCconfigOptionHighlight §index=~§CfgOptIndex~ ;
 	RETURN
 }
 >>FUNCconfigOptionHighlight () {
@@ -1078,9 +1078,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		TWEAK SKIN "Hologram.ConfigOptions.Clear" "Hologram.ConfigOptions"
 		
 		//TOKEN_AUTOPATCH_UpdateCfgOpt_BEGIN
-		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_ClassFocus GoSub CFUNCconfigOptionUpdate
-		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_DebugTests GoSub CFUNCconfigOptionUpdate
-		Set @CFUNCconfigOptionUpdate_check &G_HologCfgOpt_ShowLocals GoSub CFUNCconfigOptionUpdate
+		GoSub -p CFUNCconfigOptionUpdate @check=&G_HologCfgOpt_ClassFocus ;
+		GoSub -p CFUNCconfigOptionUpdate @check=&G_HologCfgOpt_DebugTests ;
+		GoSub -p CFUNCconfigOptionUpdate @check=&G_HologCfgOpt_ShowLocals ;
 		//TOKEN_AUTOPATCH_UpdateCfgOpt_END
 	} }
 	
@@ -1158,7 +1158,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set £AncientDeviceMode "AncientBox"
 	
-	Set £FUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
+	GoSub -p FUNCconfigOptions "£mode=hide" ;
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
 	TWEAK SKIN "Hologram.tiny.index4000.grenade"					"Hologram.tiny.index4000.grenade.Clear"
 	TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"			"Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -1233,7 +1233,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	++ §InitDefaultsDone
 	++ #G_HologCfg_InitGlobalsDone
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCinitDefaults:~^me~"
-	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+	GoSub -p FUNCshowlocals §force=1 ;
 	
 	RETURN
 }
@@ -2213,7 +2213,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCallStack4"
 	++ §testsPerformed
 	//showvars //showlocals
-	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+	GoSub -p FUNCshowlocals §force=1 ;
 	//Set £DebugMessage "~£DebugMessage~ test break point in deep call stack.\n yes works to stop the engine by creating a system popup!"	GoSub FUNCCustomCmdsB4DbgBreakpoint // keep commented
 	RETURN
 }
@@ -2296,7 +2296,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		GoSub FUNCtestModOverride
 		GoSub FUNCtestModPatch
 		Set §testsEnded 1
-		Set §FUNCshowlocals_force 1 GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 	}
 	 
 	GoSub FUNCshowlocals
@@ -2322,7 +2322,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			Set £FUNCseekTarget_TargetFoundEnt_OUTPUT £FUNCseekTarget_HoverEnt
 			GoSub "~£FUNCseekTarget_callFuncWhenTargetFound~"
 		}
-		Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals §force=1 ;
 	} else {
 	if(£FUNCseekTarget_targetCheck == "stop") {
 		Set £FUNCseekTarget_targetCheck "init" //reset b4 next call
@@ -2368,16 +2368,16 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
 			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCSniperBullet"
 			Set £FUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
-			Set £FUNCseekTarget_targetCheck "init"	GoSub FUNCseekTarget
+			GoSub -p FUNCseekTarget "£targetCheck=init" ;
 		} else {
-			Set £FUNCkillNPC_target £FUNCseekTarget_TargetFoundEnt_OUTPUT	GoSub FUNCkillNPC
+			GoSub -p FUNCkillNPC "£target=£FUNCseekTarget_TargetFoundEnt_OUTPUT" ;
 			GoSub FUNCbreakDeviceDelayed
 			Set §FUNCSniperBullet_stop 1 //will just auto stop see below 
 		}
 	}
 	
 	if(§FUNCSniperBullet_stop == 1){
-		Set £FUNCseekTarget_targetCheck "stop"	GoSub FUNCseekTarget
+		GoSub -p FUNCseekTarget "£targetCheck=stop" ;
 	}
 	
 	Set §FUNCSniperBullet_stop 0 //reset b4 next call
@@ -2535,11 +2535,12 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			
 			//DropItem -e "~£FUNCteleportToAndKillNPC_HoverEnt~" all
 			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
-			Set §FUNCkillNPC_destroyCorpse 1	Set £FUNCkillNPC_target £FUNCteleportToAndKillNPC_HoverEnt	GoSub FUNCkillNPC
+			GoSub -p FUNCkillNPC §destroyCorpse=1 "£target=£FUNCteleportToAndKillNPC_HoverEnt" ;
+			
 			//timerTeleDestroyNPC -m 1 50 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
 			
 			//Weapon -e player ON //doesnt work on player?
-			Set §FUNCbreakDeviceDelayed_ParalyzePlayer 1	GoSub FUNCbreakDeviceDelayed //only after everything else have completed! this takes a long time to finish breaking it
+			GoSub -p FUNCbreakDeviceDelayed §ParalyzePlayer=1 ; //only after everything else have completed! this takes a long time to finish breaking it
 			
 			Collision -e player disable
 			timerTFUNCteleportToAndKillNPC_flyPlayerToMe_LastInterpolate -m 1 200 interpolate player "~^me~" 0.0 //one last step to be precise
@@ -2580,7 +2581,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	DoDamage -fmlcgewsao £FUNCkillNPC_target 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
 	if(§FUNCkillNPC_destroyCorpse == 1) timerFUNCkillNPC -m 1 50 Destroy £FUNCkillNPC_target //on next frame to avoid other quest/data sync problems probably
 	
-	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals //keep here
+	GoSub -p FUNCshowlocals §force=1 ; //keep here
 	
 	//reset before next call if it has no params
 	Set §FUNCkillNPC_destroyCorpse 0 
@@ -2740,13 +2741,13 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			//PlayerStackSize 1
 		} else { 
 		if ( £AncientDeviceMode == "SignalRepeater" ) { Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
-			Set £FUNCconfigOptions_mode "show" GoSub FUNCconfigOptions
+			GoSub -p FUNCconfigOptions "£mode=show" ;
 			SetGroup "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
 			RETURN //because this is not a normal tool
 		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
 		if ( £AncientDeviceMode == "ConfigOptions" ) { Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
-			Set £FUNCconfigOptions_mode "hide" GoSub FUNCconfigOptions
+			GoSub -p FUNCconfigOptions "£mode=hide" ;
 			SetGroup -r "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
@@ -2866,7 +2867,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	if(or(£AncientDeviceMode == "void" || £AncientDeviceMode == "")) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(£AncientDeviceMode == "AncientBox") {
-		Set £FUNCcfgSkin_simple "Hologram.tiny.index4000.box" GoSub FUNCcfgSkin
+		GoSub -p FUNCcfgSkin "£simple=Hologram.tiny.index4000.box" ;
 		SET_PRICE 50
 		PlayerStackSize 50
 		Set £IconBasename "AncientBox"
@@ -2877,7 +2878,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		}
 	} else {
 	if(£AncientDeviceMode == "ConfigOptions") {
-		Set FUNCcfgSkin "Hologram.tiny.index4000.boxConfigOptions" GoSub FUNCcfgSkin
+		GoSub -p FUNCcfgSkin "£simple=Hologram.tiny.index4000.boxConfigOptions" ;
 		SET_PRICE 13
 		PlayerStackSize 1
 		Set £IconBasename "AncientConfigOptions"
