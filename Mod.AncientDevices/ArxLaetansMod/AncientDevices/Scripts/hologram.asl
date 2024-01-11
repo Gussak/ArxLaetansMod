@@ -193,7 +193,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 			
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Identified_Now"
 			
-			GoSub FUNCshowlocals
+			GoSub -p FUNCshowlocals "£filter=.*(identified|stack).* §force=1"
 		}
 	} else {
 		if (^#timer2 == 0) StartTimer timer2
@@ -292,12 +292,12 @@ ON INVENTORYUSE {
 			//Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			timerLandMineDetectNearbyNPC -m 0 50 GoTo TFUNCLandMine
-			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=0"
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
 			//Set §Scale 100 SetScale §Scale
 			Set §AncientDeviceTriggerStep 1  //stop
-			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=-1"
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -306,11 +306,11 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2 // activate
 			timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
-			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=0"
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerTFUNCteleportToAndKillNPC off
 			Set §AncientDeviceTriggerStep 1  //stop
-			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=-1"
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -319,11 +319,11 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2
 			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
-			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=0"
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerMindControlDetectHoverNPC off
 			Set §AncientDeviceTriggerStep 1  //stop
-			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=-1"
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -332,11 +332,11 @@ ON INVENTORYUSE {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2
 			GoSub FUNCSniperBullet
-			Set §FUNCblinkGlow_times 0 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=0"
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			Set §FUNCSniperBullet_stop 1	GoSub FUNCSniperBullet
+			GoSub -p FUNCSniperBullet "§stop=1"
 			Set §AncientDeviceTriggerStep 1  //stop
-			Set §FUNCblinkGlow_times -1 GoSub FUNCblinkGlow
+			GoSub -p FUNCblinkGlow "§times=-1"
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -354,7 +354,7 @@ ON INVENTORYUSE {
 	if(£AncientDeviceMode != "HologramMode") {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Unrecognized:£AncientDeviceMode='~£AncientDeviceMode~'"
 		SPEAK -p [player_no] NOP
-		GoSub FUNCshowlocals
+		GoSub -p FUNCshowlocals "§force=1 £filter=.*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*"
 		ACCEPT
 	}
 	
@@ -2957,11 +2957,14 @@ this tests a WRONG closure with code after it (put some comment after the closur
 >>TFUNCshowlocals () { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals ()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
 	//INPUT: [§FUNCshowlocals_force]
 	//INPUT: [£FUNCshowlocals_filter]
-	//Set §FUNCshowlocals_force 0 //UNCOMMENT_ON_RELEASE , override to force release show nothing. the end user needs to comment this line
+	if(and(£FUNCshowlocals_filter == "" && §FUNCshowlocals_force < 3)) { // only allow force if filter is set, or if force is high >=3
+		Set §FUNCshowlocals_force 0
+	}
+	//Set §FUNCshowlocals_force 0 //UNCOMMENT_ON_RELEASE as even with filters, this is about debugging the script. override to force release show nothing. the end user needs to comment this line
 	if(§FUNCshowlocals_force >= 2) {
-		showvars
+		showvars -f £FUNCshowlocals_filter
 	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) {
-		showlocals -f test
+		showlocals -f £FUNCshowlocals_filter
 	}	}
 	//if(§FUNCshowlocals_force >= 1){
 		//showlocals
