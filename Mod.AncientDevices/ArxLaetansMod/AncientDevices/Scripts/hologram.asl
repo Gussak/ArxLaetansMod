@@ -164,7 +164,7 @@ ON MovementDetected {
 
 ON Clone { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
 	Set £TestClone "SENDER:~^sender~, ME:~^me~"
-	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
+	GoSub -p FUNCshowlocals "£filter=TestClone §force=1"
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	ACCEPT
 }
@@ -2956,11 +2956,12 @@ this tests a WRONG closure with code after it (put some comment after the closur
 //}
 >>TFUNCshowlocals () { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals ()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
 	//INPUT: [§FUNCshowlocals_force]
-	Set §FUNCshowlocals_force 0 //UNCOMMENT_ON_RELEASE , override to force release show nothing. the end user needs to comment this line
+	//INPUT: [£FUNCshowlocals_filter]
+	//Set §FUNCshowlocals_force 0 //UNCOMMENT_ON_RELEASE , override to force release show nothing. the end user needs to comment this line
 	if(§FUNCshowlocals_force >= 2) {
 		showvars
 	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) {
-		showlocals
+		showlocals -f test
 	}	}
 	//if(§FUNCshowlocals_force >= 1){
 		//showlocals
@@ -2968,7 +2969,10 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	//if(#FUNCshowlocals_enabled >= 1){
 		//showlocals
 	//} }
-	Set §FUNCshowlocals_force 0 //default for next call
+	
+	//defaults for next call
+	Set §FUNCshowlocals_force 0
+	Set £FUNCshowlocals_filter ""
 	RETURN
 }
 >>FUNCCustomCmdsB4DbgBreakpoint () { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp line 466 at DebugBreakpoint() { ... iDbgBrkPCount++ ... }
