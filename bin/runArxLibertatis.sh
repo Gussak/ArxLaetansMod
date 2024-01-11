@@ -26,8 +26,9 @@ while true;do
 	: ${bBuildB4Run:=true} #help
 	if $bBuildB4Run;then 
 		cd "$strPathIni"
-		if echoc -q -t 9 "re-build it?@Dy";then
-			export bRetryingBuild=false #detected by buildArxLibertatis.sh
+		: ${bRetryingBuild:=false}; export bRetryingBuild #detected by buildArxLibertatis.sh
+		fQuestionDelay=9;if $bRetryingBuild;then fQuestionDelay=0.01;fi
+		if echoc -q -t ${fQuestionDelay} "re-build it?@Dy";then
 			while ! ./buildArxLibertatis.sh;do 
 				echoc -w "fix the code and retry";
 				bRetryingBuild=true

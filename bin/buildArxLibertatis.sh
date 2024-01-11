@@ -19,10 +19,8 @@ source <(secinit)
 
 set -eEu
 
-: ${bRetryingBuild:=false} #help
-declare -p bRetryingBuild
-fQuestionDelay=9
-if $bRetryingBuild;then fQuestionDelay=0.01;fi
+: ${bRetryingBuild:=false}; declare -p bRetryingBuild #help
+fQuestionDelay=9;if $bRetryingBuild;then fQuestionDelay=0.01;fi
 
 cd ArxLibertatis.github
 pwd

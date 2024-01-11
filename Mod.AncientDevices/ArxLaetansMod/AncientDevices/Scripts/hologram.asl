@@ -605,7 +605,7 @@ ON INVENTORYUSE {
 		GoSub FUNCupdateUses
 		GoSub FUNCnameUpdate
 		
-		showvars
+		//showvars
 		GoSub FUNCshowlocals //last to be easier to read on log
 		ACCEPT
 	}
@@ -2212,7 +2212,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>FUNCtestCallStack4 () {
 	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCallStack4"
 	++ §testsPerformed
-	showvars //showlocals
+	//showvars //showlocals
+	Set §FUNCshowlocals_force 1	GoSub FUNCshowlocals
 	//Set £DebugMessage "~£DebugMessage~ test break point in deep call stack.\n yes works to stop the engine by creating a system popup!"	GoSub FUNCCustomCmdsB4DbgBreakpoint // keep commented
 	RETURN
 }
@@ -2955,7 +2956,12 @@ this tests a WRONG closure with code after it (put some comment after the closur
 //}
 >>TFUNCshowlocals () { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals ()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
 	//INPUT: [§FUNCshowlocals_force]
-	if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) showlocals
+	Set §FUNCshowlocals_force 0 //UNCOMMENT_ON_RELEASE , override to force release show nothing. the end user needs to comment this line
+	if(§FUNCshowlocals_force >= 2) {
+		showvars
+	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) {
+		showlocals
+	}	}
 	//if(§FUNCshowlocals_force >= 1){
 		//showlocals
 	//} else {
