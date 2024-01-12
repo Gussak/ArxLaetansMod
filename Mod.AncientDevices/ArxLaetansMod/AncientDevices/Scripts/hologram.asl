@@ -110,7 +110,7 @@
 //
 // //simplified array loop. Code the conditions to end the loop and easily surround them with 'not(or())'.
 //	Set §FUNCtst_index 0	>>LOOP_FUNCtst_iterArray1_a
-//		Set -a £FUNCtst_entry "~£FUNCtst_array1~" §FUNCtst_index
+//		Set -a £FUNCtst_entry §FUNCtst_index "~£FUNCtst_array1~"
 //		// do something
 //	++ §FUNCtst_index	if(not(or(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == ""))) GoTo LOOP_FUNCtst_iterArray1_a
 
@@ -414,13 +414,14 @@ ON INVENTORYUSE {
 		
 		TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.box.Clear"
 		
-		//Set §UseMax 5
-		//Inc §UseMax ^rnd_110
-		//GoSub FUNCcalcAncientTechSkill
-		//Inc §UseMax @AncientTechSkill
-		//Set §UseRemain §UseMax
-		Set §UseHologramDestructionStart §UseMax
-		Mul §UseHologramDestructionStart 0.95
+		////Set §UseMax 5
+		////Inc §UseMax ^rnd_110
+		////GoSub FUNCcalcAncientTechSkill
+		////Inc §UseMax @AncientTechSkill
+		////Set §UseRemain §UseMax
+		//Set §UseHologramDestructionStart §UseMax
+		//Mul §UseHologramDestructionStart 0.95
+		Calc §UseHologramDestructionStart [ §UseMax * 0.95 ]
 		
 		SET_SHADOW OFF
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;30"
@@ -527,8 +528,9 @@ ON INVENTORYUSE {
 		GoSub FUNCskillCheckAncientTech
 		RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
 			//PLAY "potion_mana"
-			Set @IncMana @SignalStrLvl
-			Inc @IncMana @FUNCskillCheckAncientTech_addBonus_OUTPUT
+			//Set @IncMana @SignalStrLvl
+			//Inc @IncMana @FUNCskillCheckAncientTech_addBonus_OUTPUT
+			Calc @IncMana [ @SignalStrLvl + @FUNCskillCheckAncientTech_addBonus_OUTPUT ]
 			if ( §Identified > 0 ) Mul @IncMana 1.5
 			SpecialFX MANA @IncMana
 			//TODO play some sound that is not drinking or some visual effect like happens with healing
@@ -539,8 +541,9 @@ ON INVENTORYUSE {
 		GoSub FUNCskillCheckAncientTech
 		RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
 			//SpecialFX HEAL @SignalStrLvl
-			Set @IncHP @SignalStrLvl
-			Inc @IncHP @FUNCskillCheckAncientTech_addBonus_OUTPUT
+			//Set @IncHP @SignalStrLvl
+			//Inc @IncHP @FUNCskillCheckAncientTech_addBonus_OUTPUT
+			Calc @IncHP [ @SignalStrLvl + @FUNCskillCheckAncientTech_addBonus_OUTPUT ]
 			if ( §Identified > 0 ) Mul @IncHP 1.5
 			SPELLCAST -msf @IncHP HEAL PLAYER
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;HEAL"
@@ -650,25 +653,28 @@ On Main { //HeartBeat happens once per second apparently (but may be less often?
 	if(£LootingInventory != "none") { //dynamically patch inventories
 		Set -r £LootingInventory §HoloLootPatchOther §HoloLootPatchDone
 		if(§HoloLootPatchOther == 0) { //each item has a weight
-			Set -ri £LootingInventory §HoloAdd "rune"
+			//Set -ri £LootingInventory §HoloAdd "rune"
+			Set §HoloAddTotal 0
+			
+			Inventory GetItemCount -e £LootingInventory §HoloAdd "rune"
 			Mul §HoloAdd 36
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Set -ri £LootingInventory §HoloAdd "ring"
+			Inventory GetItemCount -e £LootingInventory §HoloAdd "ring"
 			Mul §HoloAdd 18
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Set -ri £LootingInventory §HoloAdd "scroll"
+			Inventory GetItemCount -e £LootingInventory §HoloAdd "scroll"
 			Mul §HoloAdd 12
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
-			Set -ri £LootingInventory §HoloAdd "potion"
+			Inventory GetItemCount -e £LootingInventory §HoloAdd "potion"
 			Mul §HoloAdd 6
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
 			//todo other magic items could add 4
 			
-			Set -ri £LootingInventory §HoloAdd "bottle"
+			Inventory GetItemCount -e £LootingInventory §HoloAdd "bottle"
 			Mul §HoloAdd 2
 			Add §HoloAddTotal ^rnd_~§HoloAdd~
 			
@@ -1218,9 +1224,9 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set §SignalDistHalf §SignalDistBase
 	Div §SignalDistHalf 2
 	
-	Set §SignalDistMin §SignalDistBase
-	Mul §SignalDistMin 0.25
-	
+	//Set §SignalDistMin §SignalDistBase
+	//Mul §SignalDistMin 0.25
+	Calc §SignalDistMin [ §SignalDistBase * 0.25 ]
 	
 	//Set §IdentifyObjectKnowledgeRequirement 35
 	Set §UseCount 0
@@ -1297,9 +1303,10 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	SpecialFX FIERY
 	SPEAK -p [player_picklock_failed] NOP //TODO expectedly just a sound about failure and not about picklocking..
 	//SPEAK -p [player_wrong] NOP //TODO expectedly just a sound about failure
-	Set §TmpBreakDestroyMilis §DefaultTrapTimeoutMillis
-	//Mul §TmpBreakDestroyMilis 5000
-	Inc §TmpBreakDestroyMilis ^rnd_10000
+	//Set §TmpBreakDestroyMilis §DefaultTrapTimeoutMillis
+	////Mul §TmpBreakDestroyMilis 5000
+	//Inc §TmpBreakDestroyMilis ^rnd_10000
+	Calc §TmpBreakDestroyMilis [ §DefaultTrapTimeoutMillis + ^rnd_10000 ]
 	timerTrapBreakDestroySafely -m 1 §TmpBreakDestroyMilis GoTo TFUNCDestroySelfSafely //to give time to let the player examine it a bit
 	if(§FUNCbreakDeviceDelayed_ParalyzePlayer == 1) {
 		//Set @FUNCparalysePlayer_Millis 100
@@ -1363,24 +1370,29 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		//else { if ( @ItemCondition >= 0.40 ) { Set £ItemConditionDesc "average"   }
 		//else { if ( @ItemCondition >= 0.20 ) { Set £ItemConditionDesc "bad"       }
 		//else {                               Set £ItemConditionDesc "critical"    } } } }
-		Set @ItemConditionSureTmp @ItemCondition
-		Mul @ItemConditionSureTmp 10 //0-10
-		Div @ItemConditionSureTmp  2 //0-5
+		//Set @ItemConditionSureTmp @ItemCondition
+		//Mul @ItemConditionSureTmp 10 //0-10
+		//Div @ItemConditionSureTmp  2 //0-5
+		Calc @ItemConditionSureTmp [ @ItemCondition * 10 / 2 ]
 		Set §ItemConditionSure @ItemConditionSureTmp //trunc
 		if(§Identified == 1) {
-			if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "perfect"
-			if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "excellent"
-			if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "good"
-			if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "average"
-			if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
-			if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
+			//if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "perfect"
+			//if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "excellent"
+			//if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "good"
+			//if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "average"
+			//if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
+			//if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
+			//Set -a £ItemConditionDesc §ItemConditionSure "Perfect Excellent Good Average Bad Critical"
+			Set -v £ItemConditionDesc §ItemConditionSure Critical Bad Average Good Excellent Perfect ;
 		} else {
-			if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "etcerpf" //messy
-			if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "ntexlecel" //messy
-			if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "bonae" //latin
-			if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "gearave" //messy
-			if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "malae" //latin
-			if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "discrimine" //latin
+			//if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "etcerpf" //messy
+			//if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "ntexlecel" //messy
+			//if ( §ItemConditionSure == 3 ) Set £ItemConditionDesc "bonae" //latin
+			//if ( §ItemConditionSure == 2 ) Set £ItemConditionDesc "gearave" //messy
+			//if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "malae" //latin
+			//if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "discrimine" //latin
+			//                                            latin      latin messy   latin messy     messy
+			Set -v £ItemConditionDesc §ItemConditionSure discrimine malae gearave bonae ntexlecel etcerpf ;
 		}
 		
 		Set §SignalStrSure §SignalStrengthTrunc
@@ -2393,7 +2405,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		Set §FLM_OnTopLife 0
 		
 		Set §LoopIndex 0	>>LOOP_FLM_ChkNPC
-			Set -a £FLM_OnTopEntId "~£FLM_OnTopEntList~" §LoopIndex
+			Set -a £FLM_OnTopEntId §LoopIndex "~£FLM_OnTopEntList~"
 			if(£FLM_OnTopEntId != "") {
 				Set §FLM_OnTopLife ^life_~£FLM_OnTopEntId~
 				if(§FLM_OnTopLife > 0) {
@@ -2574,7 +2586,8 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		Spawn Item "movable\\npc_gore\\npc_gore" "~£FUNCkillNPC_target~"
 		Set £FUNCkillNPC_gore ^last_spawned
 		(Move -e £FUNCkillNPC_gore 0 25 0)	(Rotate -ae £FUNCkillNPC_gore 0 0 5) //TODO fix the model instead? this is to fix gore that is too high and inclined a bit
-		Set -mr £FUNCkillNPC_target £KilledNPCinvList2D * //this is mainly to show on the log
+		//Set -mr £FUNCkillNPC_target £KilledNPCinvList2D * //this is mainly to show on the log
+		Inventory GetItemCountList -e £FUNCkillNPC_target £KilledNPCinvList2D *
 		DropItem -e £FUNCkillNPC_target all
 	}
 	
