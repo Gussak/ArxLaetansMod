@@ -255,9 +255,10 @@ ON INVENTORYUSE {
 				
 				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
 				
-				Set §FUNCblinkGlow_times §FUNCtrapAttack_TimeoutMillis
-				Div §FUNCblinkGlow_times 1000
-				GoSub FUNCblinkGlow
+				//Set §FUNCblinkGlow_times §FUNCtrapAttack_TimeoutMillis
+				//Div §FUNCblinkGlow_times 1000
+				Calc §calcTimes [ §FUNCtrapAttack_TimeoutMillis / 1000 ]
+				GoSub -p FUNCblinkGlow §times=§calcTimes ;
 				
 				//timerTrapVanish     -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
 				//timerTrapVanishGlow -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -312,6 +313,7 @@ ON INVENTORYUSE {
 			Set §AncientDeviceTriggerStep 1  //stop
 			GoSub -p FUNCblinkGlow §times=-1 ;
 		} }
+		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -325,19 +327,21 @@ ON INVENTORYUSE {
 			Set §AncientDeviceTriggerStep 1  //stop
 			GoSub -p FUNCblinkGlow §times=-1 ;
 		} }
+		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
-		if ( §AncientDeviceTriggerStep == 1 ) {
-			Set §AncientDeviceTriggerStep 2
-			GoSub FUNCSniperBullet
-			GoSub -p FUNCblinkGlow §times=0 ;
-		} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			GoSub -p FUNCSniperBullet §stop=1 ;
-			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow §times=-1 ;
-		} }
+		//if ( §AncientDeviceTriggerStep == 1 ) {
+			//Set §AncientDeviceTriggerStep 2
+			//GoSub -p FUNCDetectAndReachTarget £mode=detect £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
+			//GoSub -p FUNCblinkGlow §times=0 ;
+		//} else { if ( §AncientDeviceTriggerStep == 2 ) {
+			//GoSub -p FUNCDetectAndReachTarget £mode=stop ;
+			//GoSub -p FUNCblinkGlow §times=-1 ;
+			//Set §AncientDeviceTriggerStep 1  //stop
+		//} }
+		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} } } } }
@@ -2332,9 +2336,11 @@ this tests a WRONG closure with code after it (put some comment after the closur
 
 >>TFUNCseekTarget () { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget () { //TODO re-use this for mindcontrol and teleport
 	//INPUT: <init||seek?£FUNCseekTarget_callFuncWhenTargetFound>
-	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	//INPUT: [£FUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
 	//OUTPUT: £FUNCseekTarget_TargetFoundEnt_OUTPUT
+	
+	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
 	if(£FUNCseekTarget_targetCheck == "init") {
 		Set £FUNCseekTarget_TargetFoundEnt_OUTPUT ""
 		Set £FUNCseekTarget_targetCheck "seek"
@@ -2347,7 +2353,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		if(and(£FUNCseekTarget_HoverEnt != "none" && §FUNCseekTarget_HoverLife > 0)) {
 			Set £FUNCseekTarget_targetCheck "stop"
 			Set £FUNCseekTarget_TargetFoundEnt_OUTPUT £FUNCseekTarget_HoverEnt
-			GoSub "~£FUNCseekTarget_callFuncWhenTargetFound~"
+			GoSub -p "~£FUNCseekTarget_callFuncWhenTargetFound~" £target=£FUNCseekTarget_HoverEnt ;
 		}
 		GoSub -p FUNCshowlocals §force=1 ;
 	} else {
@@ -2368,6 +2374,13 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	if(and(^life_~£FUNCseekTarget_HoverEnt~ > 0 && ^dist_~£FUNCseekTarget_HoverEnt~ > §TeleDistEndTele)) {
 		//the idea is to be unsafe positioning over npc location as it will be destroyed
 		if(@TeleMeStepDist == 0) { //initialize
+			if(^inInventory == "player") {
+				DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
+				Calc §MeY [ ^dist_player / 2 * -1 ]
+				Move 0 §MeY 0 //to not fly from the floor position, to look better
+			}
+			SetInteractivity None
+			
 			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTarget_HoverEnt~
 			GoSub FUNCcalcInterpolateTeleStepDist1s()
 			Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
@@ -2380,36 +2393,64 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			timerTCFUNCFlyMeToTarget -m 0 §TeleTimerFlyMilis GoTo TCFUNCFlyMeToTarget
 		}
 		interpolate -s "~^me~" "~£FUNCseekTarget_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
-	} else {
+	} else { // last step
 		interpolate "~^me~" "~£FUNCseekTarget_HoverEnt~" 0.0 //one last step to be precise
 		timerTCFUNCFlyMeToTarget off
-		GoSub "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~"
+		GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £target=£FUNCseekTarget_HoverEnt ;
 	}
 	
 	Set @CFUNCFlyMeToTarget_flySpeed 1.0 //reset b4 next call
 	RETURN
 }
->>TFUNCSniperBullet () { GoSub FUNCSniperBullet ACCEPT } >>FUNCSniperBullet () {
-	//INPUT: [§FUNCSniperBullet_stop]
-	if(§FUNCSniperBullet_stop == 0){
-		if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
-			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCSniperBullet"
-			Set £FUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
-			GoSub -p FUNCseekTarget "£targetCheck=init" ;
-		} else {
-			GoSub -p FUNCkillNPC "£target=£FUNCseekTarget_TargetFoundEnt_OUTPUT" ;
+>>TFUNCDetectAndReachTarget () { GoSub FUNCDetectAndReachTarget ACCEPT } >>FUNCDetectAndReachTarget () {
+	//INPUT: <£FUNCDetectAndReachTarget_mode>
+	//INPUT: <£FUNCDetectAndReachTarget_callFuncWhenTargetReached>
+	//INPUT: [£FUNCDetectAndReachTarget_target]
+	if(£FUNCDetectAndReachTarget_mode == "void") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
+	if(£FUNCDetectAndReachTarget_mode == "detect"){
+		if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+		
+		//if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
+		if(£FUNCDetectAndReachTarget_target == "void") {
+			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTarget
+			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
+			//Set £FUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
+			// this will keep tring to find a target.
+			GoSub -p FUNCseekTarget "£targetCheck=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
+		} else { // here is reached when called by CFUNCFlyMeToTarget
+			//GoSub -p FUNCkillNPC "£target=£FUNCseekTarget_TargetFoundEnt_OUTPUT" ;
+			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£target=£FUNCDetectAndReachTarget_target" ;
 			GoSub FUNCbreakDeviceDelayed
-			Set §FUNCSniperBullet_stop 1 //will just auto stop see below 
+			Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
 		}
 	}
+	//if(£FUNCDetectAndReachTarget_mode == "detect") {
+		//if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+		//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget"
+		//GoSub -p FUNCseekTarget "£targetCheck=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
+	//}
 	
-	if(§FUNCSniperBullet_stop == 1){
+	if(£FUNCDetectAndReachTarget_mode == "stop") {
 		GoSub -p FUNCseekTarget "£targetCheck=stop" ;
+		
+		//reset b4 next call
+		Set £FUNCDetectAndReachTarget_mode "void"
+		Set £FUNCDetectAndReachTarget_callFuncWhenTargetReached "void"
+		Set £FUNCDetectAndReachTarget_target "void"
 	}
 	
-	Set §FUNCSniperBullet_stop 0 //reset b4 next call
 	RETURN
 }
+>>CFUNCSniperBulletAtTarget () {
+	// INPUT <£CFUNCSniperBulletAtTarget_target> will be set at FUNCDetectAndReachTarget
+	if(£CFUNCSniperBulletAtTarget_target == "void") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	GoSub -p FUNCkillNPC "£target=£CFUNCSniperBulletAtTarget_target" ;
+	//reset b4 next call
+	Set £CFUNCSniperBulletAtTarget_target "void"
+	RETURN
+}
+
 >>TFUNCLandMine () { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine () {
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
 	if(@SignalStrength < 15) ACCEPT //minimum requirement to function
@@ -2449,6 +2490,23 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			
 			GoSub FUNCshowlocals
 		}
+	}
+	RETURN
+}
+>>CFUNCTeleportPlayerToTarget () {
+	//INPUT: <£CFUNCTeleportPlayerToTarget_target>
+	Set §CFUNCTeleportPlayerToTarget_HoverLife ^life_~£CFUNCTeleportPlayerToTarget_target~
+	if(§CFUNCTeleportPlayerToTarget_HoverLife > 0) {
+		//if(^inInventory == "player") {
+			//DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
+			//Calc §MeY [ ^dist_player / 2 * -1 ]
+			//Move 0 §MeY 0 //to not fly from the floor position, to look better
+		//}
+		//SetInteractivity None
+		
+		GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
+		timerTFUNCteleportToAndKillNPC_flyMeToNPC -m 0 §TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe
+		//TODO explode npc in gore dismembering, may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	}
 	RETURN
 }
@@ -3016,7 +3074,14 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	Set £FUNCshowlocals_filter ""
 	RETURN
 }
->>FUNCCustomCmdsB4DbgBreakpoint () { showvars GoSub FUNCDebugBreakpoint RETURN } >>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp line 466 at DebugBreakpoint() { ... iDbgBrkPCount++ ... }
+>>FUNCCustomCmdsB4DbgBreakpoint () { 
+	//INPUT: [£FUNCCustomCmdsB4DbgBreakpoint_DbgMsg]
+	Set £DebugMessage £FUNCCustomCmdsB4DbgBreakpoint_DbgMsg // £DebugMessage is detected by ScriptUtils.cpp::DebugBreakpoint()
+	showvars
+	GoSub FUNCDebugBreakpoint
+	RETURN
+}
+>>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp::DebugBreakpoint() at iDbgBrkPCount++
 >>FUNCsignalStrenghUpdateRequirement () {
 	Set @SignalStrengthReqBase 0
 	// dont use too high values cuz of Mul below
@@ -3030,5 +3095,32 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	if(£AncientDeviceMode == "Teleport"      ) Set @SignalStrengthReqBase 40 //instakills and travels
 	if(£AncientDeviceMode == "SniperBullet"  ) Set @SignalStrengthReqBase 50 //instakills, safe to use
 	GoTo FUNCsignalStrenghCheck
+	RETURN
+}
+
+>>FUNCAncientDeviceActivationToggle () {
+	//INPUT: <£FUNCAncientDeviceActivationToggle_Mode>
+	//INPUT: <£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached>
+	//INPUT: [£FUNCAncientDeviceActivationToggle_Step] the step can be forced
+	if(not("FUNC" IsIn £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
+	if ( §FUNCAncientDeviceActivationToggle_Step == 1 ) { // stopped or stand-by
+		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
+			GoSub -p FUNCDetectAndReachTarget £mode=detect £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
+		} else {
+			GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
+		}
+		GoSub -p FUNCblinkGlow §times=0 ;
+		Set §FUNCAncientDeviceActivationToggle_Step 2
+	} else { if ( §FUNCAncientDeviceActivationToggle_Step == 2 ) { // active
+		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
+			GoSub -p FUNCDetectAndReachTarget £mode=stop ;
+		}
+		GoSub -p FUNCblinkGlow §times=-1 ;
+		Set §FUNCAncientDeviceActivationToggle_Step 1
+		// cleanup b4 next call
+		Set £FUNCAncientDeviceActivationToggle_Mode "void"
+		Set £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached "void"
+	} }
 	RETURN
 }
