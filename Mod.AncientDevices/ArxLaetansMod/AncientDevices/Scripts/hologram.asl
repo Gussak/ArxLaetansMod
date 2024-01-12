@@ -1383,7 +1383,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			//if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "bad"
 			//if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "critical"
 			//Set -a £ItemConditionDesc §ItemConditionSure "Perfect Excellent Good Average Bad Critical"
-			Set -v £ItemConditionDesc §ItemConditionSure Critical Bad Average Good Excellent Perfect ;
+			Set -v £ItemConditionDesc §ItemConditionSure "Critical" "Bad" "Average" "Good" "Excellent" "Perfect" ;
 		} else {
 			//if ( §ItemConditionSure == 5 ) Set £ItemConditionDesc "etcerpf" //messy
 			//if ( §ItemConditionSure == 4 ) Set £ItemConditionDesc "ntexlecel" //messy
@@ -1392,7 +1392,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			//if ( §ItemConditionSure == 1 ) Set £ItemConditionDesc "malae" //latin
 			//if ( §ItemConditionSure == 0 ) Set £ItemConditionDesc "discrimine" //latin
 			//                                            latin      latin messy   latin messy     messy
-			Set -v £ItemConditionDesc §ItemConditionSure discrimine malae gearave bonae ntexlecel etcerpf ;
+			Set -v £ItemConditionDesc §ItemConditionSure "discrimine" "malae" "gearave" "bonae" "ntexlecel" "etcerpf" ;
 		}
 		
 		Set §SignalStrSure §SignalStrengthTrunc
@@ -1401,22 +1401,26 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		if(§SignalStrengthTrunc == 0) Set §SignalStrSure 0
 		if(§SignalStrengthTrunc >= 95) Set §SignalStrSure 4
 		if(§Identified == 1) {
-			if(§SignalStrSure == 0) Set £SignalStrInfo "none"
-			if(§SignalStrSure == 1) Set £SignalStrInfo "bad"
-			if(§SignalStrSure == 2) Set £SignalStrInfo "good"
-			if(§SignalStrSure == 3) Set £SignalStrInfo "strong"
-			if(§SignalStrSure == 4) Set £SignalStrInfo "excellent"
+			//if(§SignalStrSure == 0) Set £SignalStrInfo "none"
+			//if(§SignalStrSure == 1) Set £SignalStrInfo "bad"
+			//if(§SignalStrSure == 2) Set £SignalStrInfo "good"
+			//if(§SignalStrSure == 3) Set £SignalStrInfo "strong"
+			//if(§SignalStrSure == 4) Set £SignalStrInfo "excellent"
+			Set -v £SignalStrInfo §SignalStrSure "None" "Bad" "Good" "Strong" "Excellent" ;
 		} else {
-			if(§SignalStrSure == 0) Set £SignalStrInfo "nullum" //latin
-			if(§SignalStrSure == 1) Set £SignalStrInfo "malae" //latin
-			if(§SignalStrSure == 2) Set £SignalStrInfo "bonae" //latin
-			if(§SignalStrSure == 3) Set £SignalStrInfo "fortis" //latin
-			if(§SignalStrSure == 4) Set £SignalStrInfo "ntexlecel" //messy
+			//if(§SignalStrSure == 0) Set £SignalStrInfo "nullum" //latin
+			//if(§SignalStrSure == 1) Set £SignalStrInfo "malae" //latin
+			//if(§SignalStrSure == 2) Set £SignalStrInfo "bonae" //latin
+			//if(§SignalStrSure == 3) Set £SignalStrInfo "fortis" //latin
+			//if(§SignalStrSure == 4) Set £SignalStrInfo "ntexlecel" //messy
+			//                                    latin    latin   latin   latin    messy
+			Set -v £SignalStrInfo §SignalStrSure "Nullum" "Malae" "Bonae" "Fortis" "Ntexlecel" ;
 		}
 		
 		// perc
-		Set @ItemConditionTmp @ItemCondition
-		Mul @ItemConditionTmp 100
+		//Set @ItemConditionTmp @ItemCondition
+		//Mul @ItemConditionTmp 100
+		Calc @ItemConditionTmp [ @ItemCondition * 100 ]
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;*100=~@ItemCondition~"
 		Set §ItemConditionPercent @ItemConditionTmp //trunc
 		
@@ -1470,12 +1474,15 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			} else {
 				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@SignalStrengthReq~, here is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			}
-			Set §hours   ^gamehours
-			Mod §hours 24
-			Set §minutes ^gameminutes
-			Mod §minutes 60
-			Set §seconds ^gameseconds
-			Mod §seconds 60
+			//Set §hours   ^gamehours
+			//Mod §hours 24
+			Calc §hours [ ^gamehours % 24 ]
+			//Set §minutes ^gameminutes
+			//Mod §minutes 60
+			Calc §minutes [ ^gameminutes % 60 ]
+			//Set §seconds ^gameseconds
+			//Mod §seconds 60
+			Calc §seconds [ ^gameseconds % 60 ]
 			// as day/night is based in quest stages and (I believe) they do not update the global time g_gameTime value, these would be incoherent to show as GameTime GT:^arxdays ^arxtime_hours ^arxtime_minutes ^arxtime_seconds. So will show only real time.
 			if(§Identified == 1) {
 				Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,§hours~:~%02d,§minutes~:~%02d,§seconds~(~^arxtime~)" 
@@ -1792,14 +1799,15 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Calc §NoSignalRegion [ [ ^locationx_~^me~ + ^locationz_~^me~ ] % §SignalDistBase ]
 	// signal strength based on deterministic but difficultly previsible cubic regions
 	if(§NoSignalRegion >= §SignalDistMin) {
-		Set @SignalStrength ^locationx_~^me~
-		Inc @SignalStrength ^locationy_~^me~
+		//Set @SignalStrength ^locationx_~^me~
+		//Inc @SignalStrength ^locationy_~^me~
+		Calc @SignalStrength [ ^locationx_~^me~ + ^locationy_~^me~ + ^locationz_~^me~ ]
 		if (^inPlayerInventory == 1) Inc @SignalStrength 90 //if at player inventory, items are 90 dist from ground (based on tests above). Could just use ^locationy_player tho instead of ^locationy_~^me~. This is important because when placing the item on the floor it will then have almost the same value.
-		Inc @SignalStrength ^locationz_~^me~
+		//Inc @SignalStrength ^locationz_~^me~
 		
 		if(§SignalRepeater == 0) {
 			// less cubic/less previsible (this alone would be like spheric regions btw)
-			Inc @SignalStrength @AncientGlobalTransmitterSignalDist
+			Add @SignalStrength @AncientGlobalTransmitterSignalDist
 		}
 		//TODOA ternary ifElse: Calc @SignalStrength [ ^locationx_~^me~ + ^locationy_~^me~ + [ ^inPlayerInventory == 1 ? 90 : 0 ] + ^locationz_~^me~ + [ §SignalRepeater == 0 ? @AncientGlobalTransmitterSignalDist : 0 ] ]
 	}
@@ -1812,29 +1820,36 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		// means from 0 to §SignalDistHalf then from §SignalDistHalf to 0 as the player moves around. Ex.: if max dist is 1000, it will be from 0 to 500 and from 500 to 0, then from 0 to 500 again...
 		Mod @SignalStrength §SignalDistBase //remainder
 		if (@SignalStrength > §SignalDistHalf) {
-			Dec @SignalStrength §SignalDistHalf
-			Mul @SignalStrength -1
-			Inc @SignalStrength §SignalDistHalf
+			//Dec @SignalStrength §SignalDistHalf
+			//Mul @SignalStrength -1
+			//Inc @SignalStrength §SignalDistHalf
+			Calc @SignalStrength [ [ @SignalStrength - §SignalDistHalf ] * -1 + §SignalDistHalf ]
 		}
 	} else {
 		Set @RepeaterSignalHere @SignalStrength //100% reference
 		// percent from max distance
-		Set @RepeaterSignalDistPerc @RepeaterSignalDist 
-		Div @RepeaterSignalDistPerc 3000 //perc from 0.0to1.0
+		//Set @RepeaterSignalDistPerc @RepeaterSignalDist 
+		//Div @RepeaterSignalDistPerc 3000 //perc from 0.0to1.0
+		Calc @RepeaterSignalDistPerc [ @RepeaterSignalDist / 3000 ] //perc from 0.0to1.0
 		// if near, the value will be small so the final signal strength will be high
-		Set @SignalStrength 1.0
-		Dec @SignalStrength @RepeaterSignalDistPerc
-		// from 0.0 to 100.0
-		Mul @SignalStrength 100
+		//Set @SignalStrength 1.0
+		//Dec @SignalStrength @RepeaterSignalDistPerc
+		//// from 0.0 to 100.0
+		//Mul @SignalStrength 100
+		Calc @SignalStrength [ [ 1.0 - @RepeaterSignalDistPerc ] * 100 ] // from 0.0 to 100.0
 	}
 	
 	// percent and signal level
-	Div @SignalStrength §SignalDistHalf //converts to a percent from 0.0 to 1.0
-	Mul @SignalStrength 100 //0.0 to 100.0
+	//Div @SignalStrength §SignalDistHalf //converts to a percent from 0.0 to 1.0
+	//Mul @SignalStrength 100 //0.0 to 100.0
+	Calc @SignalStrength [ 
+		@SignalStrength / §SignalDistHalf //converts to a percent from 0.0 to 1.0
+		* 100 ] //0.0 to 100.0
 	Set §SignalStrengthTrunc @SignalStrength //trunc 0 to 100
 	// to use instead of ^spelllevel
-	Set @SignalStrLvl @SignalStrength
-	Div @SignalStrLvl 10 //0-10 like spell cast level would be
+	//Set @SignalStrLvl @SignalStrength
+	//Div @SignalStrLvl 10 //0-10 like spell cast level would be
+	Calc @SignalStrLvl [ @SignalStrength / 10 ] //0-10 like spell cast level would be
 	
 	RETURN
 }
@@ -2445,7 +2460,9 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	if(and(£FUNCteleportToAndKillNPC_HoverEnt != "none" && §FUNCteleportToAndKillNPC_HoverLife > 0)) {
 		//timerTeleportSelf    -m 0 50 teleport "~£FUNCteleportToAndKillNPC_HoverEnt~"
 		DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
-		(Set §MeY ^dist_player)	(Div §MeY 2)	(Mul §MeY -1)	(Move 0 §MeY 0) //to not fly from the floor position, to look better
+		//(Set §MeY ^dist_player)	(Div §MeY 2)	(Mul §MeY -1)	(Move 0 §MeY 0) //to not fly from the floor position, to look better
+		Calc §MeY [ ^dist_player / 2 * -1 ]
+		Move 0 §MeY 0 //to not fly from the floor position, to look better
 		
 		SetInteractivity None
 		
@@ -2472,8 +2489,9 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		if(@TeleMeStepDist == 0) {
 			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCteleportToAndKillNPC_HoverEnt~
 			GoSub FUNCcalcInterpolateTeleStepDist1s()
-			Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
-			Mul @TeleMeStepDist 0.33 //this will make it take 3 times longer to travel, is more challenging
+			//Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
+			//Mul @TeleMeStepDist 0.33 //this will make it take 3 times longer to travel, is more challenging
+			Calc @TeleMeStepDist [ @FUNCcalcInterpolateTeleStepDist1s_OUTPUT * 0.33 ] //this will make it take 3 times longer to travel, is more challenging
 		}
 		interpolate -s "~^me~" "~£FUNCteleportToAndKillNPC_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 	} else {
@@ -2503,8 +2521,9 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		//this will take 20 frames and is not based in time, TODO make it fly based in time, must use the FPS to calc it. or make it fly in a fixed speed/distance
 		Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_player
 		GoSub FUNCcalcInterpolateTeleStepDist1s()
-		Set @TelePlayerStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
-		Mul @TelePlayerStepDist 3 //this will make the player teleport feels more like a teleport while still having some cool flying
+		//Set @TelePlayerStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
+		//Mul @TelePlayerStepDist 3 //this will make the player teleport feels more like a teleport while still having some cool flying
+		Calc @TelePlayerStepDist [ @FUNCcalcInterpolateTeleStepDist1s_OUTPUT * 3 ]  //this will make the player teleport feels more like a teleport while still having some cool flying
 		//GoSub FUNCcalcFrameMilis Set §TeleSteps §FUNCcalcFrameMilis_FrameMilis_OUTPUT //will take 1s to fly to any distance
 		//Set @TelePlayerStepDist @TelePlayerDistInit
 		//Div @TelePlayerStepDist §TeleSteps
@@ -2532,13 +2551,18 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 0
 			Set @TeleDmgPlayer ^life_~£FUNCteleportToAndKillNPC_HoverEnt~
 			if(@TeleDmgPlayer >= ^life_player) {
-				Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis @TeleDmgPlayer
-				Dec §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis ^life_player
+				//Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis @TeleDmgPlayer
+				//Dec §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis ^life_player
+				Calc §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis [ @TeleDmgPlayer - ^life_player ]
 				if(§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis == 0) ++ §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
-				Mul §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 1000 //to milis
-				Div §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 10 //10% of extra life only
-				Set @TeleDmgPlayer ^life_player
-				Dec @TeleDmgPlayer 0.5 //barely alive
+				//Mul §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 1000 //to milis
+				//Div §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 10 //10% of extra life only
+				Calc §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis [ 
+					§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis * 1000 // to milis
+					/ 10 ] // 10% of extra life only
+				//Set @TeleDmgPlayer ^life_player
+				//Dec @TeleDmgPlayer 0.5 //barely alive
+				Set @TeleDmgPlayer [ ^life_player - 0.5 ] //barely alive
 			}
 			//Mul @TeleDmgPlayer 0.95
 			//if(@TeleDmgPlayer > 1) Dec @TeleDmgPlayer 1
