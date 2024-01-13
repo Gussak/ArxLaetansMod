@@ -316,6 +316,7 @@ ON INVENTORYUSE {
 			//Set §AncientDeviceTriggerStep 1  //stop
 			//GoSub -p FUNCblinkGlow §times=-1 ;
 		//} }
+		Set @CFUNCFlyMeToTarget_flySpeed 0.5 //takes 2s
 		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -335,6 +336,7 @@ ON INVENTORYUSE {
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
+		Set @CFUNCFlyMeToTarget_flySpeed 3.0 //takes 0.33s
 		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -2267,8 +2269,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 }
 >>FUNCtestSwapMultilineComment () {
 /* this test WRONG lines with less than 2 chars available to be fixed: put an empty line and another with 1 char only.
-12
-13
+
+1
 this tests a WRONG closure with code after it (put some comment after the closure, or hit del to bring the one below) */
 	Set @TestError 1.23
 	
@@ -2352,7 +2354,8 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		GoSub -p FUNCshowlocals §force=1 ;
 	} else {
 	if(£FUNCseekTarget_targetCheck == "stop") {
-		Set £FUNCseekTarget_targetCheck "init" //reset b4 next call
+		//reset b4 next call
+		Set £FUNCseekTarget_targetCheck "init"
 		timerTFUNCseekTarget off
 	} else {
 		Set £ERROR_FUNCseekTarget "invalid £FUNCseekTarget_targetCheck='~£FUNCseekTarget_targetCheck~'"
@@ -2664,6 +2667,9 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	}
 	if(^life_~£FUNCkillNPC_target~ <= 0) {
 		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=WARN: target='~£FUNCkillNPC_target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+	}
+	if(£FUNCkillNPC_target == "void") {
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£filter=.*" "£DbgMsg=ERROR: target='~£FUNCkillNPC_target~'" ;
 	}
 	
 	if(§FUNCkillNPC_destroyCorpse == 1) {
