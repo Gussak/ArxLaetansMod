@@ -1,136 +1,141 @@
+/*
 ///////////////////////////////////////////
 // by Gussak (https://github.com/Gussak) //
 ///////////////////////////////////////////
-
-////////////////// Developer DOC /////////////////
-// Activating the hologram while looking max upwards will toggle showlocals.
-// Activating the hologram while looking max downwards will run tests for new code once.
-
-/////////////////// User DOC //////////////
-// AncientBox can only become SignalRepeater when activating the initial box device in the inventory. Also to revert.
-// Combining any quality AncientBox with a low quality AncientDevice may break it. Combining any quality AncientBox with a high quality+ AncientDevice will always upgrade it. So, the second, or the target of the combination must be of quality+. Also, if you double click on a quality+ and combine it with a low quality, you may lose both! TODO: find a way to detect the quality of the PARAM1 item for combine.
-// Bones and stones can be used to destroy AncientDevices if you want.
-// Ancient Teleport will damage and paralize you randomly, less if you are highly skilled in AncientTechSkill.
-// Signal strength is useful to position yourself to get better results when using it.
-// Quality useful to chose wich one to keep or to combine to have better results when crafting.
-// Condition is useful to hold your hand to avoid destroying the device.
-// While unidentified, words will be in latin or messed up letters order, and numbers will be in hexadecimal.
-
-/////////////////// Global Timers dev track:
-//starttimer timer1 //^#timer1 used ON MAIN
-//starttimer timer2 //^#timer2 used ON IDENTIFY
-//starttimer timer3 //^#timer3
-//starttimer timer4 //^#timer4
-
-//////////////////////////////////////
-// ON RELEASE: comment lines with //COMMENT_ON_RELEASE
-
+__
+//////////////// Developer DOC /////////////////
+ Activating the hologram while looking max upwards will toggle showlocals.
+ Activating the hologram while looking max downwards will run tests for new code once.
+__
+///////////////// User DOC //////////////
+ AncientBox can only become SignalRepeater when activating the initial box device in the inventory. Also to revert.
+ Combining any quality AncientBox with a low quality AncientDevice may break it. Combining any quality AncientBox with a high quality+ AncientDevice will always upgrade it. So, the second, or the target of the combination must be of quality+. Also, if you double click on a quality+ and combine it with a low quality, you may lose both! TODO: find a way to detect the quality of the PARAM1 item for combine.
+ Bones and stones can be used to destroy AncientDevices if you want.
+ Ancient Teleport will damage and paralize you randomly, less if you are highly skilled in AncientTechSkill.
+ Signal strength is useful to position yourself to get better results when using it.
+ Quality useful to chose wich one to keep or to combine to have better results when crafting.
+ Condition is useful to hold your hand to avoid destroying the device.
+ While unidentified, words will be in latin or messed up letters order, and numbers will be in hexadecimal.
+__
+///////////////// Global Timers dev track:
+starttimer timer1 //^#timer1 used ON MAIN
+starttimer timer2 //^#timer2 used ON IDENTIFY
+starttimer timer3 //^#timer3
+starttimer timer4 //^#timer4
+__
 ////////////////////////////////////
-// Obs.: If you just downloaded it from github, this file may need to have all 0xC2 chars (from before £ §) removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
-
-///////////////// DEV HELP: term cmds //////////////
-//clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
-//clear;LC_ALL=C egrep 'torch.*' --include="*.asl" --include="*.ASL" -iRIaho * |sort -u
-//clear;LC_ALL=C egrep 'angle' --include="*.h" --include="*.cpp" -iRnI *
-
-////////////////// CPP EASY HELP /////////////////////
-// #include <iostream>
-// #define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
-// MYDBG(anyVar<<","<<anything<<anythinElse);
-
-///////////////// DEV TIPS: /////////////////
-// UnSet all vars beggining with _tmp to cleanup the showlocals log and to avoid var name clashes outside a function (despite them all are global to the script, better just prefix them all with the func name ...)
-
-// ALWAYS use this: inventory add magic/hologram/hologram ; after any changes and ALWAYS work with a freshly instantiated item, othewise the log will show many things that are inconsistent.
-
-// clear;LC_ALL=C egrep 'player_skill[^ ]*' --include="*.asl" --include="*.ASL" -iRIaho |tr -d '~\r\t"' |sort -u
-//^PLAYER_SKILL_CASTING
-//^PLAYER_SKILL_CLOSE_COMBAT
-//^PLAYER_SKILL_DEFENSE
-//^PLAYER_SKILL_INTUITION
-//^PLAYER_SKILL_MECANISM
-//^PLAYER_SKILL_OBJECT_KNOWLEDGE
-//^PLAYER_SKILL_PROJECTILE
-//^PLAYER_SKILL_STEALTH
-// 
-//^PLAYER_ATTRIBUTE_CONSTITUTION
-//^PLAYER_ATTRIBUTE_DEXTERITY
-//^PLAYER_ATTRIBUTE_MENTAL
-//^PLAYER_ATTRIBUTE_STRENGTH
-
-//on inventories init, this configures the generic scroll into specific spell and level:
-// INVENTORY ADD "magic\\scroll_generic\\scroll_generic"
-// SENDEVENT -ir TRANSMUTE 1 "8 SPEED" //the 1 distance means apparently items inside the container being ON INIT or ON INITEND
-// SENDEVENT -ir CUSTOM 1000 "SomeCustomString ~§SomeVar1~ ~§SomeVar2~ ~§SomeVar3~ ~§SomeVar4~ ~§SomeVar5~" // there is no limit for the number of parameters and types, so anything can be communicated between entities, nice! Just collect them with the correct type: ^$param<i> string, ^&param<i> number, ^#param<i> int
-
-//Set §TestInt2 @TestFloat2 //it will always trunc do 1.9999 will become 1
-
-//code IFs carefully with spaces: if ( §bHologramInitialized == 1 ) { //as this if(§bHologramInitialized==1){ will result in true even if §bHologramInitialized is not set...
-
-//Do NOT unset vars used in timers! it will break them!!! ex.: timerTrapDestroy 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely  //do not UnSet §TmpTrapDestroyTime
-
-//apparently items can only stack if they have the exact same name and/or icon?
-
-// when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
-//  an easy trick to have both is have a TFUNC call the FUNC ex.:
-//  timerTFUNCdoSomething -m 1 333 GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
-//  >>TFUNCdoSomething () {
-//    GoSub FUNCdoSomething
-//    ACCEPT
-//  }
-//  >>FUNCdoSomething () { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
-//    RETURN
-//  }
-// Obs.: a CFUNC (child function) is not meant to be called directly. call it only by it's related func
-// LC_ALL=C sed -i.bkp -r -e 's@^(>>)(FUNC[^ ]*)@>>T\2 { GoSub \2 ACCEPT } >>\2 @' Hologram.asl #creates the TFUNC...
-// LC_ALL=C sed -i.bkp2 -r -e 's@(timer.*)([ \t]*GoSub)( *)(FUNC)@\1 GoTo\3T\4@' Hologram.asl #fixes timers to use TFUNC...
-// LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
-// export LC_ALL=C;egrep "GoTo" -wia Hologram.asl |egrep -via "timer|loop" #check if GoTo is being used by something else than a timer or a loop
-// LC_ALL=C sed -i.bkp -r -e 's@(>>)([T]*FUNC[0-9a-zA-Z_]*)@>>\2 ()@gi' Hologram.asl # this will add " ()" at the end of every function, so it will be recognized as a symbol by geany and will show up as function on the symbols tab!
-
-//	//LOOPS: for/while, how to easily implement them:
-//	//Obs.: loop control/index vars are only required to be unique when nesting them.
-//	//Obs.: arrays always end with empty "" string when iterating thru them
-//	//Obs.: GoTo targets always have to be unique on the whole script
-//	//Obs.: the implementation can be further simplified, see the working code for LOOP_FLM_ChkNPC
-//	>>FUNCtst () { //FUNCtst is the context example, could be the name of an event like LOOP_MAIN_...
-//		>>LOOP_FUNCtst_ShortDescription_BEGIN
-//			// do something useful
-//			if(...) GoTo LOOP_FUNCtst_ShortDescription_BEGIN //continue
-//			if(...) GoTo LOOP_FUNCtst_ShortDescription_END //break
-//			GoTo LOOP_FUNCtst_ShortDescription_BEGIN //next iteration LAST THING ON THE LOOP!
-//		>>LOOP_FUNCtst_ShortDescription_END
-//		RETURN
-//	}
-//
-// //simplified count loop starting in 0 index
-//	Set §FUNCtst_index 0	>>LOOP_FUNCtst_lookForSmtng
-//		//do something
-//	++ §FUNCtst_index	if(§FUNCtst_index < 10) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC
-//
-// //simplified array loop. Code the conditions to end the loop and easily surround them with 'not(or())'.
-//	Set §FUNCtst_index 0	>>LOOP_FUNCtst_iterArray1_a
-//		Set -a £FUNCtst_entry §FUNCtst_index "~£FUNCtst_array1~"
-//		// do something
-//	++ §FUNCtst_index	if(not(or(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == ""))) GoTo LOOP_FUNCtst_iterArray1_a
-
-
-//////////////////////////////// TODO LIST: /////////////////////////
-///// <><><> /////PRIORITY:HIGH (low difficulty also)
-//TODO contextualizeDocModDesc: These Ancient Devices were found in collapsed ancient bunkers of a long lost and extremelly technologically advanced civilization. They are powered by an external energy source that, for some reason, is less effective or turns off when these devices are nearby strong foes and bosses. //TODO all or most of these ancient tech gets disabled near them
-///// <><> /////PRIORITY:MEDIUM
-//TODO box icon grey if unidentified. cyan when identified.
-//TODO grenade icon and texture dark when inactive, red (current) when activated.
-//TODO create a signal repeater item that can be placed in a high signal stregth place and repeats that signal str to 1000to3000 dist from it (depending on player ancientdev skill that will set it's initial quality). code at FUNCcalcSignalStrength
-//TODO x8 buttons CircularOptionChoser: place on ground, rotate it to 0 degrees, diff player yaw to it, on activate will highlight the chosen button.
-//TODO at 75 ancientskill, player can chose what targeted spell will be cast. at 100, what explosion will happen. using the CircularOptionChoser x8 buttons
-///// <> /////PRIORITY:LOW
-//TODO teleportArrow stack 10
-//TODO grenade+hologram=teleportArrow (insta-kill any foe and teleport the player there)
-//TODO teleportArrow+hologram=mindControl (undetectable, and frenzy foe against his friends)
-//TODO some cleanup? there are some redundant "function" calls like to FUNCMakeNPCsHostile
-//TODO sometimes the avatar will speak "they are dead, all dead" when activating the hologram to change the landscape, but... it could be considered contextualized about the ancient civilization that vanished ;)
-//TODO `PLAY -ilp "~£SkyBoxCurrentUVS~.wav"` requires ".wav" as it removes any extension before re-adding the .wav so somename.index1 would become "somename.wav" and not "somename.index1.wav" and was failing. I think the src cpp code should only remove extension if it is ".wav" or other sound format, and not everything after the last dot "."
+ ON RELEASE: comment lines with //COMMENT_ON_RELEASE
+__
+//////////////////////////////////
+ Obs.: If you just downloaded it from github, this file may need to have all 0xC2 chars (from before £ §) removed or it will not work. I cant find yet a way to force iso-8859-15 while editing it directly on github, it seems to always become utf-8 there.
+__
+/////////////// DEV HELP: term cmds //////////////
+clear;LC_ALL=C egrep 'torch'   --include="*.asl" --include="*.ASL" -iRnIa  *
+clear;LC_ALL=C egrep 'torch.*' --include="*.asl" --include="*.ASL" -iRIaho * |sort -u
+clear;LC_ALL=C egrep 'angle' --include="*.h" --include="*.cpp" -iRnI *
+__
+//////////////// CPP EASY HELP /////////////////////
+ #include <iostream>
+ #define MYDBG(x) std::cout << "___MySimpleDbg___: " << x << "\n"
+ MYDBG(anyVar<<","<<anything<<anythinElse);
+__
+/////////////// MOD DEV (.asl) TIPS: /////////////////
+ a string var that is not set will be comparable only to empty "": if(£test == "") ok
+ a string var that is not set will be expanded always to "void", so while "~£test~" expands to void, if(£test == "void") will FAIL!!!
+__
+ UnSet all vars beggining with _tmp to cleanup the showlocals log and to avoid var name clashes outside a function (despite them all are global to the script, better just prefix them all with the func name ...)
+__
+ ALWAYS use this: inventory add magic/hologram/hologram ; after any changes and ALWAYS work with a freshly instantiated item, othewise the log will show many things that are inconsistent.
+__
+ clear;LC_ALL=C egrep 'player_skill[^ ]*' --include="*.asl" --include="*.ASL" -iRIaho |tr -d '~\r\t"' |sort -u
+^PLAYER_SKILL_CASTING
+^PLAYER_SKILL_CLOSE_COMBAT
+^PLAYER_SKILL_DEFENSE
+^PLAYER_SKILL_INTUITION
+^PLAYER_SKILL_MECANISM
+^PLAYER_SKILL_OBJECT_KNOWLEDGE
+^PLAYER_SKILL_PROJECTILE
+^PLAYER_SKILL_STEALTH
+__
+^PLAYER_ATTRIBUTE_CONSTITUTION
+^PLAYER_ATTRIBUTE_DEXTERITY
+^PLAYER_ATTRIBUTE_MENTAL
+^PLAYER_ATTRIBUTE_STRENGTH
+__
+on inventories init, this configures the generic scroll into specific spell and level:
+ INVENTORY ADD "magic\\scroll_generic\\scroll_generic"
+ SENDEVENT -ir TRANSMUTE 1 "8 SPEED" //the 1 distance means apparently items inside the container being ON INIT or ON INITEND
+ SENDEVENT -ir CUSTOM 1000 "SomeCustomString ~§SomeVar1~ ~§SomeVar2~ ~§SomeVar3~ ~§SomeVar4~ ~§SomeVar5~" // there is no limit for the number of parameters and types, so anything can be communicated between entities, nice! Just collect them with the correct type: ^$param<i> string, ^&param<i> number, ^#param<i> int
+__
+Set §TestInt2 @TestFloat2 //it will always trunc do 1.9999 will become 1
+__
+code IFs carefully with spaces: if ( §bHologramInitialized == 1 ) { //as this if(§bHologramInitialized==1){ will result in true even if §bHologramInitialized is not set...
+__
+Do NOT unset vars used in timers! it will break them!!! ex.: timerTrapDestroy 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely  //do not UnSet §TmpTrapDestroyTime
+__
+apparently items can only stack if they have the exact same name and/or icon?
+__
+ when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
+  an easy trick to have both is have a TFUNC call the FUNC ex.:
+  timerTFUNCdoSomething -m 1 333 GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
+  >>TFUNCdoSomething () {
+    GoSub FUNCdoSomething
+    ACCEPT
+  }
+  >>FUNCdoSomething () { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
+    RETURN
+  }
+ Obs.: a CFUNC (child function) is not meant to be called directly. call it only by it's related func
+ LC_ALL=C sed -i.bkp -r -e 's@^(>>)(FUNC[^ ]*)@>>T\2 { GoSub \2 ACCEPT } >>\2 @' Hologram.asl #creates the TFUNC...
+ LC_ALL=C sed -i.bkp2 -r -e 's@(timer.*)([ \t]*GoSub)( *)(FUNC)@\1 GoTo\3T\4@' Hologram.asl #fixes timers to use TFUNC...
+ LC_ALL=C egrep "timer.*GoSub" -ia #check if all timers use GoTo now
+ export LC_ALL=C;egrep "GoTo" -wia Hologram.asl |egrep -via "timer|loop" #check if GoTo is being used by something else than a timer or a loop
+ LC_ALL=C sed -i.bkp -r -e 's@(>>)([T]*FUNC[0-9a-zA-Z_]*)@>>\2 ()@gi' Hologram.asl # this will add " ()" at the end of every function, so it will be recognized as a symbol by geany and will show up as function on the symbols tab!
+__
+	//LOOPS: for/while, how to easily implement them:
+	//Obs.: loop control/index vars are only required to be unique when nesting them.
+	//Obs.: arrays always end with empty "" string when iterating thru them
+	//Obs.: GoTo targets always have to be unique on the whole script
+	//Obs.: the implementation can be further simplified, see the working code for LOOP_FLM_ChkNPC
+	>>FUNCtst () { //FUNCtst is the context example, could be the name of an event like LOOP_MAIN_...
+		>>LOOP_FUNCtst_ShortDescription_BEGIN
+			// do something useful
+			if(...) GoTo LOOP_FUNCtst_ShortDescription_BEGIN //continue
+			if(...) GoTo LOOP_FUNCtst_ShortDescription_END //break
+			GoTo LOOP_FUNCtst_ShortDescription_BEGIN //next iteration LAST THING ON THE LOOP!
+		>>LOOP_FUNCtst_ShortDescription_END
+		RETURN
+	}
+__
+ //simplified count loop starting in 0 index
+	Set §FUNCtst_index 0	>>LOOP_FUNCtst_lookForSmtng
+		//do something
+	++ §FUNCtst_index	if(§FUNCtst_index < 10) GoTo LOOP_FUNCLandMine_CheckIfAliveNPC
+__
+ //simplified array loop. Code the conditions to end the loop and easily surround them with 'not(or())'.
+	Set §FUNCtst_index 0	>>LOOP_FUNCtst_iterArray1_a
+		Set -a £FUNCtst_entry §FUNCtst_index "~£FUNCtst_array1~"
+		// do something
+	++ §FUNCtst_index	if(not(or(§FUNCtst_endLoopCondition > 0 || £FUNCtst_entry == ""))) GoTo LOOP_FUNCtst_iterArray1_a
+__
+__
+////////////////////////////// TODO LIST: /////////////////////////
+/// <><><> /////PRIORITY:HIGH (low difficulty also)
+TODO contextualizeDocModDesc: These Ancient Devices were found in collapsed ancient bunkers of a long lost and extremelly technologically advanced civilization. They are powered by an external energy source that, for some reason, is less effective or turns off when these devices are nearby strong foes and bosses. //TODO all or most of these ancient tech gets disabled near them
+/// <><> /////PRIORITY:MEDIUM
+TODO box icon grey if unidentified. cyan when identified.
+TODO grenade icon and texture dark when inactive, red (current) when activated.
+TODO create a signal repeater item that can be placed in a high signal stregth place and repeats that signal str to 1000to3000 dist from it (depending on player ancientdev skill that will set it's initial quality). code at FUNCcalcSignalStrength
+TODO x8 buttons CircularOptionChoser: place on ground, rotate it to 0 degrees, diff player yaw to it, on activate will highlight the chosen button.
+TODO at 75 ancientskill, player can chose what targeted spell will be cast. at 100, what explosion will happen. using the CircularOptionChoser x8 buttons
+/// <> /////PRIORITY:LOW
+TODO teleportArrow stack 10
+TODO grenade+hologram=teleportArrow (insta-kill any foe and teleport the player there)
+TODO teleportArrow+hologram=mindControl (undetectable, and frenzy foe against his friends)
+TODO some cleanup? there are some redundant "function" calls like to FUNCMakeNPCsHostile
+TODO sometimes the avatar will speak "they are dead, all dead" when activating the hologram to change the landscape, but... it could be considered contextualized about the ancient civilization that vanished ;)
+TODO `PLAY -ilp "~£SkyBoxCurrentUVS~.wav"` requires ".wav" as it removes any extension before re-adding the .wav so somename.index1 would become "somename.wav" and not "somename.index1.wav" and was failing. I think the src cpp code should only remove extension if it is ".wav" or other sound format, and not everything after the last dot "."
+*/
 
 ON INIT {
 	SetName "Ancient Box (unidentified)"
@@ -207,8 +212,6 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 }
 
 ON INVENTORYUSE {
-	//Set £DebugMessage "~£DebugMessage~ test break point \n yes works to stop the engine and system popup! "	GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO RM
-	GoSub FUNCtestCallStack1 //TODO RM
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) {
@@ -304,16 +307,16 @@ ON INVENTORYUSE {
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "Teleport" ) {
-		if ( §AncientDeviceTriggerStep == 1 ) {
-			Set §AncientDeviceTriggerStep 2 // activate
-			timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
-			GoSub -p FUNCblinkGlow §times=0 ;
-		} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			timerTFUNCteleportToAndKillNPC off
-			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow §times=-1 ;
-		} }
-		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
+		//if ( §AncientDeviceTriggerStep == 1 ) {
+			//Set §AncientDeviceTriggerStep 2 // activate
+			//timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
+			//GoSub -p FUNCblinkGlow §times=0 ;
+		//} else { if ( §AncientDeviceTriggerStep == 2 ) {
+			//timerTFUNCteleportToAndKillNPC off
+			//Set §AncientDeviceTriggerStep 1  //stop
+			//GoSub -p FUNCblinkGlow §times=-1 ;
+		//} }
+		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -332,15 +335,6 @@ ON INVENTORYUSE {
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
-		//if ( §AncientDeviceTriggerStep == 1 ) {
-			//Set §AncientDeviceTriggerStep 2
-			//GoSub -p FUNCDetectAndReachTarget £mode=detect £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
-			//GoSub -p FUNCblinkGlow §times=0 ;
-		//} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			//GoSub -p FUNCDetectAndReachTarget £mode=stop ;
-			//GoSub -p FUNCblinkGlow §times=-1 ;
-			//Set §AncientDeviceTriggerStep 1  //stop
-		//} }
 		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -837,7 +831,7 @@ ON COMBINE {
 	
 	//Set £ScriptDebugCombineFailReason "Test:£AncientDeviceMode=~£AncientDeviceMode~;"
 	Set -r £OtherEntIdToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode //	Set -rw ^me £OtherEntIdToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode
-	if(or(£OtherAncientDeviceMode == "" || £AncientDeviceMode == ""))	GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(or(£OtherAncientDeviceMode == "" || £AncientDeviceMode == ""))	GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid ancient device modes to combine '~£OtherAncientDeviceMode~' '~£AncientDeviceMode~'" ;
 	if(and(£OtherAncientDeviceMode == £AncientDeviceMode && £AncientDeviceMode != "AncientBox")) { //this is to increase quality, least for the cheapest
 		if(§UseMax >= 80) { //quality 4+
 			SPEAK -p [player_no] NOP
@@ -1468,8 +1462,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		}
 		GoSub FUNCupdateIcon
 		
+		if(§AncientDeviceTriggerStep == 1){
+			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Stand-by)."
+		}
 		if(§AncientDeviceTriggerStep == 2){
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (ACTIVE)."
+			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (ACTIVE!!!)."
 		}
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
@@ -1519,11 +1516,8 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 >>FUNCupdateIcon () {
 	Set £IconPrevious £Icon
 	
+	if(£IconBasename == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
 	Set £Icon "~£IconBasename~"
-	if(£Icon == "void") { //TODO this crashes the game if void. The crash error could show the script context line column stack too.
-		GoSub FUNCCustomCmdsB4DbgBreakpoint
-	}
-	//GoSub FUNCCustomCmdsB4DbgBreakpoint //TODO TEST RM
 	
 	if(§Quality >= 4) Set £Icon "~£Icon~MK2"
 	Set £Icon "~£Icon~[icon]"
@@ -2280,7 +2274,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	
 	/* the trick is: comment this line with //, it will enable "a" section and disable "b" section
 	Set £TestSwapMultilineComment "a"
-	/*/ 
+	/*/
 	Set £TestSwapMultilineComment "b"
 	//*/
 	++ §testsPerformed
@@ -2339,7 +2333,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	//INPUT: [£FUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
 	//OUTPUT: £FUNCseekTarget_TargetFoundEnt_OUTPUT
 	
-	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid call to ~£FUNCseekTarget_callFuncWhenTargetFound~" ;
 	
 	if(£FUNCseekTarget_targetCheck == "init") {
 		Set £FUNCseekTarget_TargetFoundEnt_OUTPUT ""
@@ -2368,51 +2362,62 @@ this tests a WRONG closure with code after it (put some comment after the closur
 }
 >>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {  //TODO re-use this for mindcontrol and teleport
 	//INPUT: <£CFUNCFlyMeToTarget_callFuncWhenTargetReached>
-	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid call set ~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" ;
 	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
+	if(@CFUNCFlyMeToTarget_flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid flySpeed ~@CFUNCFlyMeToTarget_flySpeed~" ;
 	
-	if(and(^life_~£FUNCseekTarget_HoverEnt~ > 0 && ^dist_~£FUNCseekTarget_HoverEnt~ > §TeleDistEndTele)) {
-		//the idea is to be unsafe positioning over npc location as it will be destroyed
-		if(@TeleMeStepDist == 0) { //initialize
-			if(^inInventory == "player") {
-				DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
-				Calc §MeY [ ^dist_player / 2 * -1 ]
-				Move 0 §MeY 0 //to not fly from the floor position, to look better
+	if(^life_~£FUNCseekTarget_HoverEnt~ > 0) {
+		if(^dist_~£FUNCseekTarget_HoverEnt~ > §TeleDistEndTele) {
+			//the idea is to be unsafe positioning over npc location as it will be destroyed
+			if(@TeleMeStepDist == 0) { //initialize
+				if(^inInventory == "player") {
+					DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
+					Calc §MeY [ ^dist_player / 2 * -1 ]
+					Move 0 §MeY 0 //to not fly from the floor position, to look better
+				}
+				SetInteractivity None
+				
+				Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTarget_HoverEnt~
+				GoSub FUNCcalcInterpolateTeleStepDist1s()
+				Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
+				
+				if(and(@CFUNCFlyMeToTarget_flySpeed > 0.0 && @CFUNCFlyMeToTarget_flySpeed != 1.0)) {
+					Mul @TeleMeStepDist @CFUNCFlyMeToTarget_flySpeed // < 1.0 takes longer to travel
+				}
+				
+				GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
+				timerTCFUNCFlyMeToTarget -m 0 §TeleTimerFlyMilis GoTo TCFUNCFlyMeToTarget
 			}
-			SetInteractivity None
-			
-			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTarget_HoverEnt~
-			GoSub FUNCcalcInterpolateTeleStepDist1s()
-			Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
-			
-			if(and(@CFUNCFlyMeToTarget_flySpeed > 0.0 && @CFUNCFlyMeToTarget_flySpeed != 1.0)) {
-				Mul @TeleMeStepDist @CFUNCFlyMeToTarget_flySpeed // < 1.0 takes longer to travel
-			}
-			
-			GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
-			timerTCFUNCFlyMeToTarget -m 0 §TeleTimerFlyMilis GoTo TCFUNCFlyMeToTarget
+			interpolate -s "~^me~" "~£FUNCseekTarget_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
+		} else { // last step
+			interpolate "~^me~" "~£FUNCseekTarget_HoverEnt~" 0.0 //one last step to be precise
+			GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £target=£FUNCseekTarget_HoverEnt ;
+			Set £CFUNCFlyMeToTarget_do "off"
 		}
-		interpolate -s "~^me~" "~£FUNCseekTarget_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
-	} else { // last step
-		interpolate "~^me~" "~£FUNCseekTarget_HoverEnt~" 0.0 //one last step to be precise
-		timerTCFUNCFlyMeToTarget off
-		GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £target=£FUNCseekTarget_HoverEnt ;
+	} else {
+		Set £CFUNCFlyMeToTarget_do "off"
 	}
 	
-	Set @CFUNCFlyMeToTarget_flySpeed 1.0 //reset b4 next call
+	if(£CFUNCFlyMeToTarget_do == "off") {
+		timerTCFUNCFlyMeToTarget off
+		//reset b4 next call
+		Set @CFUNCFlyMeToTarget_flySpeed 1.0
+		Set £CFUNCFlyMeToTarget_do "on"
+	}
+	
 	RETURN
 }
 >>TFUNCDetectAndReachTarget () { GoSub FUNCDetectAndReachTarget ACCEPT } >>FUNCDetectAndReachTarget () {
 	//INPUT: <£FUNCDetectAndReachTarget_mode>
 	//INPUT: <£FUNCDetectAndReachTarget_callFuncWhenTargetReached>
 	//INPUT: [£FUNCDetectAndReachTarget_target]
-	if(£FUNCDetectAndReachTarget_mode == "void") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(£FUNCDetectAndReachTarget_mode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(£FUNCDetectAndReachTarget_mode == "detect"){
 		if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 		
 		//if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
-		if(£FUNCDetectAndReachTarget_target == "void") {
+		if(£FUNCDetectAndReachTarget_target == "") {
 			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTarget
 			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
 			//Set £FUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
@@ -2435,19 +2440,19 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		GoSub -p FUNCseekTarget "£targetCheck=stop" ;
 		
 		//reset b4 next call
-		Set £FUNCDetectAndReachTarget_mode "void"
-		Set £FUNCDetectAndReachTarget_callFuncWhenTargetReached "void"
-		Set £FUNCDetectAndReachTarget_target "void"
+		Set £FUNCDetectAndReachTarget_mode ""
+		Set £FUNCDetectAndReachTarget_callFuncWhenTargetReached ""
+		Set £FUNCDetectAndReachTarget_target ""
 	}
 	
 	RETURN
 }
 >>CFUNCSniperBulletAtTarget () {
 	// INPUT <£CFUNCSniperBulletAtTarget_target> will be set at FUNCDetectAndReachTarget
-	if(£CFUNCSniperBulletAtTarget_target == "void") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(£CFUNCSniperBulletAtTarget_target == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
 	GoSub -p FUNCkillNPC "£target=£CFUNCSniperBulletAtTarget_target" ;
 	//reset b4 next call
-	Set £CFUNCSniperBulletAtTarget_target "void"
+	Set £CFUNCSniperBulletAtTarget_target ""
 	RETURN
 }
 
@@ -2655,12 +2660,10 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
 	
 	if(£FUNCkillNPC_target == "") {
-		Set £ERROR_FUNCkillNPC "£FUNCkillNPC_target='' was not set"
-		GoSub FUNCCustomCmdsB4DbgBreakpoint
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=ERROR: target was not set" ;
 	}
 	if(^life_~£FUNCkillNPC_target~ <= 0) {
-		Set £ERROR_FUNCkillNPC "£FUNCkillNPC_target='~£FUNCkillNPC_target~' life is <= 0"
-		GoSub FUNCCustomCmdsB4DbgBreakpoint //npc can be dead already tho... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=WARN: target='~£FUNCkillNPC_target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	}
 	
 	if(§FUNCkillNPC_destroyCorpse == 1) {
@@ -2959,7 +2962,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 }
 >>TFUNCcfgAncientDevice () { GoSub FUNCcfgAncientDevice ACCEPT } >>FUNCcfgAncientDevice () {
 	//INPUT: <£AncientDeviceMode>
-	if(or(£AncientDeviceMode == "void" || £AncientDeviceMode == "")) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(£AncientDeviceMode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(£AncientDeviceMode == "AncientBox") {
 		GoSub -p FUNCcfgSkin "£simple=Hologram.tiny.index4000.box" ;
@@ -3076,9 +3079,51 @@ this tests a WRONG closure with code after it (put some comment after the closur
 }
 >>FUNCCustomCmdsB4DbgBreakpoint () { 
 	//INPUT: [£FUNCCustomCmdsB4DbgBreakpoint_DbgMsg]
-	Set £DebugMessage £FUNCCustomCmdsB4DbgBreakpoint_DbgMsg // £DebugMessage is detected by ScriptUtils.cpp::DebugBreakpoint()
-	showvars
+	//INPUT: [£FUNCCustomCmdsB4DbgBreakpoint_filter] use ".*" regex to show all
+	
+	if(£FUNCCustomCmdsB4DbgBreakpoint_DbgMsg != "") {
+		Set £DebugMessage £FUNCCustomCmdsB4DbgBreakpoint_DbgMsg // £DebugMessage is detected by ScriptUtils.cpp::DebugBreakpoint()
+	} else {
+		Set £DebugMessage "(no helpful info was set)"
+	}
+	
+	/*
+	Set £FUNCCustomCmdsB4DbgBreakpoint_test1 "eita"
+	Set £FUNCCustomCmdsB4DbgBreakpoint_test2 £FUNCCustomCmdsB4DbgBreakpoint_filter
+	if(£FUNCCustomCmdsB4DbgBreakpoint_test2 == "void") {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_test5 "test 2 is void"
+	} else {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_test5 "test 2 is NOT void"
+	}
+	if(£FUNCCustomCmdsB4DbgBreakpoint_test3 == "void") {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_test6 "test 3 is void"
+	} else {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_test6 "test 3 is NOT void, test 3 is '~£FUNCCustomCmdsB4DbgBreakpoint_test3~'"
+	}
+	Set £FUNCCustomCmdsB4DbgBreakpoint_test3 "~£FUNCCustomCmdsB4DbgBreakpoint_filter~"
+	if(£FUNCCustomCmdsB4DbgBreakpoint_test4 == "") {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_test8 "test 4 is EMPTY ''"
+	} else {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_test8 "test 4 is NOT '', test 4 is '~£FUNCCustomCmdsB4DbgBreakpoint_test4~'"
+	}
+	Set £FUNCCustomCmdsB4DbgBreakpoint_test4 ~£FUNCCustomCmdsB4DbgBreakpoint_filter~
+	showlocals -f "FUNCCustomCmdsB4DbgBreakpoint"
+	*/
+	if(£FUNCCustomCmdsB4DbgBreakpoint_filter == "") {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_filter ^debugcalledfrom_1
+	} else {
+		Set £FUNCCustomCmdsB4DbgBreakpoint_filter "~£FUNCCustomCmdsB4DbgBreakpoint_filter~|~^debugcalledfrom_1~"
+	}
+	
+	Set £FUNCCustomCmdsB4DbgBreakpoint_filter "~£FUNCCustomCmdsB4DbgBreakpoint_filter~|~^debugcalledfrom_0~" // show also this func stuff
+	
+	showvars -f "~£FUNCCustomCmdsB4DbgBreakpoint_filter~"
+	
 	GoSub FUNCDebugBreakpoint
+	
+	//reset to defaults b4 next call
+	Set £FUNCCustomCmdsB4DbgBreakpoint_DbgMsg ""
+	Set £FUNCCustomCmdsB4DbgBreakpoint_filter ""
 	RETURN
 }
 >>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp::DebugBreakpoint() at iDbgBrkPCount++
@@ -3101,26 +3146,28 @@ this tests a WRONG closure with code after it (put some comment after the closur
 >>FUNCAncientDeviceActivationToggle () {
 	//INPUT: <£FUNCAncientDeviceActivationToggle_Mode>
 	//INPUT: <£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached>
-	//INPUT: [£FUNCAncientDeviceActivationToggle_Step] the step can be forced
 	if(not("FUNC" IsIn £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
-	if ( §FUNCAncientDeviceActivationToggle_Step == 1 ) { // stopped or stand-by
+	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by
 		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
 			GoSub -p FUNCDetectAndReachTarget £mode=detect £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
 		} else {
 			GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
 		}
 		GoSub -p FUNCblinkGlow §times=0 ;
-		Set §FUNCAncientDeviceActivationToggle_Step 2
-	} else { if ( §FUNCAncientDeviceActivationToggle_Step == 2 ) { // active
+		Set §AncientDeviceTriggerStep 2
+	} else { if ( §AncientDeviceTriggerStep == 2 ) { // active
 		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
 			GoSub -p FUNCDetectAndReachTarget £mode=stop ;
 		}
 		GoSub -p FUNCblinkGlow §times=-1 ;
-		Set §FUNCAncientDeviceActivationToggle_Step 1
+		Set §AncientDeviceTriggerStep 1
 		// cleanup b4 next call
-		Set £FUNCAncientDeviceActivationToggle_Mode "void"
-		Set £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached "void"
+		Set £FUNCAncientDeviceActivationToggle_Mode ""
+		Set £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ""
 	} }
+	
+	GoSub -p FUNCshowlocals £filter=FUNCAncientDeviceActivationToggle §force=1 ;
+	
 	RETURN
 }

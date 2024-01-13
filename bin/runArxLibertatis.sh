@@ -23,6 +23,8 @@ strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
 mkdir -vp "`dirname "$strFlLog"`"
 
 while true;do
+	: ${bClear:=false} #help
+	if $bClear;then clear;fi
 	: ${bBuildB4Run:=true} #help
 	if $bBuildB4Run;then 
 		cd "$strPathIni"
@@ -69,7 +71,7 @@ while true;do
 
 	export ARX_LimitShadowBlobsForVertexes=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
-	export ARX_ScriptErrorPopupCommand='yad --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center'
+	export ARX_ScriptErrorPopupCommand='yad --no-markup --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center'
 	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
 	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 
