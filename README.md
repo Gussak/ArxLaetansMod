@@ -35,10 +35,10 @@ If you want you can improve them and/or also create a pull request (every 2nd li
 
 **IMPORTANT**:  
 It is too many branches already for me to have time to keep them all ready for a PR to main repo.  
-As it is becoming overly complex, I will mainly work at my newest TEST branch from now on.  
+As it is becoming overly complex, I will mainly work at my newest TEST branch from now on, this means the TEST branch may have updates to some other PR branch that you like; so if you would like to create such PR or merge it in your fork, I can update the PR branch with the news from the TEST branch, just open an issue; or you can do it yourself, then open a PR to my PR branch, thx! :)  
 If you like something it will probably be only working there at:  
   https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_TEST2 (or TEST3 ..., the newest one)  
-Btw, the sketch code branches are not compiled yet, and have mainly ideas, like:
+Btw, the sketch code branches are not compiled yet (or just broken after compilation), and have mainly ideas, like:
   https://github.com/Gussak/ArxLibertatis/tree/ForArxLaetansMod_SketchCode_Tmp1   
 
 Obs.: Tip: I use 3-way meld compare, with the cmp3way.sh script, to split from that branch into PR_ branches.
