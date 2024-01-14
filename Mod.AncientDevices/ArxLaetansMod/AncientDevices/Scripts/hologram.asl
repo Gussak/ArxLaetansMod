@@ -77,12 +77,13 @@ apparently items can only stack if they have the exact same name and/or icon?
 __
  when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
   an easy trick to have both is have a TFUNC call the FUNC ex.:
-  timerTFUNCdoSomething -m 1 333 GoTo TFUNCdoSomething //a Timer called Function will be prefixed with TFUNC
+  timerTFUNCdoSomething -m 1 333 GoTo -p TFUNCdoSomething £mode=init ; //a Timer called Function will be prefixed with TFUNC
   >>TFUNCdoSomething () {
-    GoSub FUNCdoSomething
+    GoSub -p FUNCdoSomething £mode=£TFUNCdoSomething_mode ; //every automatic param must be forwarded, it will become £FUNCdoSomething_mode
     ACCEPT
   }
   >>FUNCdoSomething () { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
+    if(£FUNCdoSomething_mode == "init") Set £state "happy!"
     RETURN
   }
  Obs.: a CFUNC (child function) is not meant to be called directly. call it only by it's related func
@@ -198,7 +199,7 @@ ON IDENTIFY { //this is called (apparently every frame) when the player hovers t
 			
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Identified_Now"
 			
-			GoSub -p FUNCshowlocals "£filter=.*(identified|stack).*" §force=1 ;
+			GoSub -p FUNCshowlocals £filter=".*(identified|stack).*" §force=1 ;
 		}
 	} else {
 		if (^#timer2 == 0) StartTimer timer2
@@ -354,7 +355,7 @@ ON INVENTORYUSE {
 	if(£AncientDeviceMode != "HologramMode") {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Unrecognized:£AncientDeviceMode='~£AncientDeviceMode~'"
 		SPEAK -p [player_no] NOP
-		GoSub -p FUNCshowlocals §force=1 "£filter=.*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
+		GoSub -p FUNCshowlocals §force=1 £filter=".*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
 		ACCEPT
 	}
 	
@@ -833,7 +834,7 @@ ON COMBINE {
 	
 	//Set £ScriptDebugCombineFailReason "Test:£AncientDeviceMode=~£AncientDeviceMode~;"
 	Set -r £OtherEntIdToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode //	Set -rw ^me £OtherEntIdToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode
-	if(or(£OtherAncientDeviceMode == "" || £AncientDeviceMode == ""))	GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid ancient device modes to combine '~£OtherAncientDeviceMode~' '~£AncientDeviceMode~'" ;
+	if(or(£OtherAncientDeviceMode == "" || £AncientDeviceMode == ""))	GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR:invalid ancient device modes to combine '~£OtherAncientDeviceMode~' '~£AncientDeviceMode~'" ;
 	if(and(£OtherAncientDeviceMode == £AncientDeviceMode && £AncientDeviceMode != "AncientBox")) { //this is to increase quality, least for the cheapest
 		if(§UseMax >= 80) { //quality 4+
 			SPEAK -p [player_no] NOP
@@ -1164,7 +1165,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	
 	Set £AncientDeviceMode "AncientBox"
 	
-	GoSub -p FUNCconfigOptions "£mode=hide" ;
+	GoSub -p FUNCconfigOptions £mode="hide" ;
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
 	TWEAK SKIN "Hologram.tiny.index4000.grenade"					"Hologram.tiny.index4000.grenade.Clear"
 	TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"			"Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -1468,7 +1469,11 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Stand-by)."
 		}
 		if(§AncientDeviceTriggerStep == 2){
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (ACTIVE!!!)."
+			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ .+!ACTIVE!+."
+		}
+		
+		if(£FUNCseekTargetLoop_HoverEnt != "" && £FUNCseekTargetLoop_HoverEnt != "void") {
+			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop_HoverEnt~,~§FUNCseekTargetLoop_HoverLife~hp)."
 		}
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
@@ -1887,7 +1892,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testAriFloat2 2
 	Pow @testAriFloat2 3 //8
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestArithmetics"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>FUNCtestCalcNesting () {
@@ -1911,7 +1916,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 				] % [ 2 ^ 2 ] 
 		]
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCalcNesting"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>TFUNCtestPrintfFormats () { GoSub FUNCtestPrintfFormats ACCEPT } >>FUNCtestPrintfFormats () {
@@ -1925,7 +1930,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;decimalAlignRight:~%8d,§testInt~"
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;string='~%10s,£testString~'"
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestPrintfFormats"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>TFUNCtestLogicOperators () { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators () {
@@ -2165,7 +2170,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:E"
 	
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestLogicOperators"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>TFUNCtestDistAbsPos () { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos () {
@@ -2181,7 +2186,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testDistAbsolute4b ^dist_[~^locationx_player~,~^locationy_player~,~^locationz_player~]
 	//Set @testDistAbsolute4b ^dist_"{~^locationx_player~,~^locationy_player~,~^locationz_player~}" //rm tests the warn msg with line and column about unexpected "
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestDistAbsPos"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>TFUNCtestElseIf () { GoSub FUNCtestElseIf ACCEPT } >>FUNCtestElseIf () {
@@ -2199,7 +2204,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 		Set £work "~£work~;~§test~:okElse"
 	}  }  }
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestElseIf"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	GoSub FUNCshowlocals
 	RETURN
 }
@@ -2221,7 +2226,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set @testDegreesYp2  ^degrees_player
 	
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, TFUNCtestDegrees"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>FUNCtestCallStack1 () {
@@ -2237,7 +2242,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	RETURN
 }
 >>FUNCtestCallStack4 () {
-	Set £TestsCompleted "~£TestsCompleted~, FUNCtestCallStack4"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	++ §testsPerformed
 	//showvars //showlocals
 	GoSub -p FUNCshowlocals §force=1 ;
@@ -2248,7 +2253,7 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	Set £TestAsk "123 abc"
 	ask "test or not?" £TestAsk
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, FUNCtestAsk"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>FUNCtestModOverride () {
@@ -2258,13 +2263,13 @@ ON InventoryOut { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happe
 	//  ArxLibertatis/mods/test.mod.override.holog/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
 	Set £TestModOverride "original" //change this on the overrider !
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>FUNCtestModPatch () {
 	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, FUNCtestModOverride"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>FUNCtestSwapMultilineComment () {
@@ -2280,7 +2285,13 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	Set £TestSwapMultilineComment "b"
 	//*/
 	++ §testsPerformed
-	Set £TestsCompleted "~£TestsCompleted~, FUNCtestSwapMultilineComment"
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
+	RETURN
+}
+>>FUNCtestStrParam () {
+	GoSub -p FUNCshowlocals £filter="~^debugcalledfrom_1~" §force=1 ;
+	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
 >>TFUNCtests () { GoSub FUNCtests ACCEPT } >>FUNCtests () {
@@ -2322,6 +2333,8 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		GoSub FUNCtestAsk
 		GoSub FUNCtestModOverride
 		GoSub FUNCtestModPatch
+		GoSub -p FUNCtestStrParam £test="a b" £simple2=AsDf £simple="hologram.tiny.index4000.boxconfigoptions" £filter=".*(identified|stack).*" §force=1 ;
+		
 		Set §testsEnded 1
 		GoSub -p FUNCshowlocals §force=1 ;
 	}
@@ -2330,47 +2343,48 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	RETURN
 }
 
->>TFUNCseekTarget () { GoSub FUNCseekTarget ACCEPT } >>FUNCseekTarget () { //TODO re-use this for mindcontrol and teleport
-	//INPUT: <init||seek?£FUNCseekTarget_callFuncWhenTargetFound>
-	//INPUT: [£FUNCseekTarget_targetCheck] CHK set to 2 to stop the timer
-	//OUTPUT: £FUNCseekTarget_TargetFoundEnt_OUTPUT
+>>TFUNCseekTargetLoop () { GoSub FUNCseekTargetLoop ACCEPT } >>FUNCseekTargetLoop () {
+	//INPUT: <£FUNCseekTargetLoop_mode>
+	//INPUT: [£FUNCseekTargetLoop_callFuncWhenTargetFound]
+	//OUTPUT: £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT
+	if(not("FUNC" IsIn £FUNCseekTargetLoop_callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid call to ~£FUNCseekTargetLoop_callFuncWhenTargetFound~" ;
 	
-	if(not("FUNC" IsIn £FUNCseekTarget_callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid call to ~£FUNCseekTarget_callFuncWhenTargetFound~" ;
-	
-	if(£FUNCseekTarget_targetCheck == "init") {
-		Set £FUNCseekTarget_TargetFoundEnt_OUTPUT ""
-		Set £FUNCseekTarget_targetCheck "seek"
-		timerTFUNCseekTarget -m 0 333 GoTo TFUNCseekTarget
-		//GoSub FUNCCustomCmdsB4DbgBreakpoint //TODOABCDE RM
+	if(£FUNCseekTargetLoop_mode == "init") {
+		Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT ""
+		Set £FUNCseekTargetLoop_mode "seek"
+		timerTFUNCseekTargetLoop -m 0 333 GoTo TFUNCseekTargetLoop
+		GoSub -p FUNCshowlocals §force=1 ;
 	} else {
-	if(£FUNCseekTarget_targetCheck == "seek") {
-		Set £FUNCseekTarget_HoverEnt ^hover_~§SeekTargetDistance~
-		Set §FUNCseekTarget_HoverLife ^life_~£FUNCseekTarget_HoverEnt~
-		if(and(£FUNCseekTarget_HoverEnt != "none" && §FUNCseekTarget_HoverLife > 0)) {
-			Set £FUNCseekTarget_targetCheck "stop"
-			Set £FUNCseekTarget_TargetFoundEnt_OUTPUT £FUNCseekTarget_HoverEnt
-			GoSub -p "~£FUNCseekTarget_callFuncWhenTargetFound~" £target=£FUNCseekTarget_HoverEnt ;
+	if(£FUNCseekTargetLoop_mode == "seek") {
+		Set £FUNCseekTargetLoop_HoverEnt ^hover_~§SeekTargetDistance~
+		Set §FUNCseekTargetLoop_HoverLife ^life_~£FUNCseekTargetLoop_HoverEnt~
+		if(and(£FUNCseekTargetLoop_HoverEnt != "none" && §FUNCseekTargetLoop_HoverLife > 0)) {
+			Set £FUNCseekTargetLoop_mode "stop"
+			Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT £FUNCseekTargetLoop_HoverEnt
+			if(£FUNCseekTargetLoop_callFuncWhenTargetFound != "") {
+				GoSub -p "~£FUNCseekTargetLoop_callFuncWhenTargetFound~" £target=£FUNCseekTargetLoop_HoverEnt ;
+			}
 		}
 		GoSub -p FUNCshowlocals §force=1 ;
 	} else {
-	if(£FUNCseekTarget_targetCheck == "stop") {
+	if(£FUNCseekTargetLoop_mode == "stop") {
 		//reset b4 next call
-		Set £FUNCseekTarget_targetCheck "init"
-		timerTFUNCseekTarget off
+		Set £FUNCseekTargetLoop_mode ""
+		Set £FUNCseekTargetLoop_callFuncWhenTargetFound ""
+		timerTFUNCseekTargetLoop off
 	} else {
-		Set £ERROR_FUNCseekTarget "invalid £FUNCseekTarget_targetCheck='~£FUNCseekTarget_targetCheck~'"
-		GoSub FUNCCustomCmdsB4DbgBreakpoint
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid £mode='~£FUNCseekTargetLoop_mode~'" ;
 	} } }
 	RETURN
 }
->>TCFUNCFlyMeToTarget { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget {  //TODO re-use this for mindcontrol and teleport
+>>TCFUNCFlyMeToTarget () { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget () {  //TODO re-use this for mindcontrol and teleport
 	//INPUT: <£CFUNCFlyMeToTarget_callFuncWhenTargetReached>
-	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid call set ~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" ;
 	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
-	if(@CFUNCFlyMeToTarget_flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid flySpeed ~@CFUNCFlyMeToTarget_flySpeed~" ;
+	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid call set ~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" ;
+	if(@CFUNCFlyMeToTarget_flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid flySpeed ~@CFUNCFlyMeToTarget_flySpeed~" ;
 	
-	if(^life_~£FUNCseekTarget_HoverEnt~ > 0) {
-		if(^dist_~£FUNCseekTarget_HoverEnt~ > §TeleDistEndTele) {
+	if(^life_~£FUNCseekTargetLoop_HoverEnt~ > 0) {
+		if(^dist_~£FUNCseekTargetLoop_HoverEnt~ > §TeleDistEndTele) {
 			//the idea is to be unsafe positioning over npc location as it will be destroyed
 			if(@TeleMeStepDist == 0) { //initialize
 				if(^inInventory == "player") {
@@ -2380,21 +2394,21 @@ this tests a WRONG closure with code after it (put some comment after the closur
 				}
 				SetInteractivity None
 				
-				Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTarget_HoverEnt~
+				Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTargetLoop_HoverEnt~
 				GoSub FUNCcalcInterpolateTeleStepDist1s()
 				Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
 				
 				if(and(@CFUNCFlyMeToTarget_flySpeed > 0.0 && @CFUNCFlyMeToTarget_flySpeed != 1.0)) {
-					Mul @TeleMeStepDist @CFUNCFlyMeToTarget_flySpeed // < 1.0 takes longer to travel
+					Mul @TeleMeStepDist @CFUNCFlyMeToTarget_flySpeed // < 1.0 takes longer to travel. > 1.0 travel faster
 				}
 				
 				GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
 				timerTCFUNCFlyMeToTarget -m 0 §TeleTimerFlyMilis GoTo TCFUNCFlyMeToTarget
 			}
-			interpolate -s "~^me~" "~£FUNCseekTarget_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
+			interpolate -s "~^me~" "~£FUNCseekTargetLoop_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 		} else { // last step
-			interpolate "~^me~" "~£FUNCseekTarget_HoverEnt~" 0.0 //one last step to be precise
-			GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £target=£FUNCseekTarget_HoverEnt ;
+			interpolate "~^me~" "~£FUNCseekTargetLoop_HoverEnt~" 0.0 //one last step to be precise
+			GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £target=£FUNCseekTargetLoop_HoverEnt ;
 			Set £CFUNCFlyMeToTarget_do "off"
 		}
 	} else {
@@ -2411,36 +2425,28 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	RETURN
 }
 >>TFUNCDetectAndReachTarget () { GoSub FUNCDetectAndReachTarget ACCEPT } >>FUNCDetectAndReachTarget () {
+	// this is a control function that delegates to many other functions, but them all call back to here if needed
 	//INPUT: <£FUNCDetectAndReachTarget_mode>
 	//INPUT: <£FUNCDetectAndReachTarget_callFuncWhenTargetReached>
 	//INPUT: [£FUNCDetectAndReachTarget_target]
 	if(£FUNCDetectAndReachTarget_mode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
-	if(£FUNCDetectAndReachTarget_mode == "detect"){
-		if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
-		
-		//if(£FUNCseekTarget_TargetFoundEnt_OUTPUT == "") {
-		if(£FUNCDetectAndReachTarget_target == "") {
-			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTarget
-			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
-			//Set £FUNCseekTarget_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
-			// this will keep tring to find a target.
-			GoSub -p FUNCseekTarget "£targetCheck=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
-		} else { // here is reached when called by CFUNCFlyMeToTarget
-			//GoSub -p FUNCkillNPC "£target=£FUNCseekTarget_TargetFoundEnt_OUTPUT" ;
-			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£target=£FUNCDetectAndReachTarget_target" ;
-			GoSub FUNCbreakDeviceDelayed
-			Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
-		}
-	}
-	//if(£FUNCDetectAndReachTarget_mode == "detect") {
-		//if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
-		//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget"
-		//GoSub -p FUNCseekTarget "£targetCheck=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
-	//}
+	if(£FUNCDetectAndReachTarget_mode == "InitDetectTarget"){
+		GoSub -p FUNCseekTargetLoop £mode="init" £callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
+		Set £FUNCDetectAndReachTarget_mode "TargetAcquired"
+	} else { if(£FUNCDetectAndReachTarget_mode == "TargetAcquired") {
+		GoSub -p CFUNCFlyMeToTarget £target=£FUNCDetectAndReachTarget_target £callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
+		Set £FUNCDetectAndReachTarget_mode "DoWhenTargetReached"
+	} else { if(£FUNCDetectAndReachTarget_mode == "DoWhenTargetReached") {
+		GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" £target=£FUNCDetectAndReachTarget_target ;
+		GoSub FUNCbreakDeviceDelayed
+		Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
+	} } }
 	
 	if(£FUNCDetectAndReachTarget_mode == "stop") {
-		GoSub -p FUNCseekTarget "£targetCheck=stop" ;
+		timerTFUNCDetectAndReachTarget off //safety
+		GoSub -p FUNCseekTargetLoop £mode="stop" ;
 		
 		//reset b4 next call
 		Set £FUNCDetectAndReachTarget_mode ""
@@ -2450,10 +2456,52 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	
 	RETURN
 }
+/*
+>>TFUNCDetectAndReachTarget () { GoSub FUNCDetectAndReachTarget ACCEPT } >>FUNCDetectAndReachTarget () {
+	//INPUT: <£FUNCDetectAndReachTarget_mode>
+	//INPUT: <£FUNCDetectAndReachTarget_callFuncWhenTargetReached>
+	//INPUT: [£FUNCDetectAndReachTarget_target]
+	if(£FUNCDetectAndReachTarget_mode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	
+	if(£FUNCDetectAndReachTarget_mode == "detect"){
+		if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+		
+		//if(£FUNCseekTargetLoop_TargetFoundEnt_OUTPUT == "") {
+		if(£FUNCDetectAndReachTarget_target == "") {
+			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTargetLoop
+			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
+			//Set £FUNCseekTargetLoop_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
+			// this will keep tring to find a target.
+			GoSub -p FUNCseekTargetLoop "£mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
+		} else { // here is reached when called by CFUNCFlyMeToTarget
+			//GoSub -p FUNCkillNPC "£target=£FUNCseekTargetLoop_TargetFoundEnt_OUTPUT" ;
+			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£target=£FUNCDetectAndReachTarget_target" ;
+			GoSub FUNCbreakDeviceDelayed
+			Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
+		}
+	}
+	//if(£FUNCDetectAndReachTarget_mode == "detect") {
+		//if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+		//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget"
+		//GoSub -p FUNCseekTargetLoop "£mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
+	//}
+	
+	if(£FUNCDetectAndReachTarget_mode == "stop") {
+		GoSub -p FUNCseekTargetLoop "£mode=stop" ;
+		
+		//reset b4 next call
+		Set £FUNCDetectAndReachTarget_mode ""
+		Set £FUNCDetectAndReachTarget_callFuncWhenTargetReached ""
+		Set £FUNCDetectAndReachTarget_target ""
+	}
+	
+	RETURN
+}
+*/
 >>CFUNCSniperBulletAtTarget () {
 	// INPUT <£CFUNCSniperBulletAtTarget_target> will be set at FUNCDetectAndReachTarget
 	if(£CFUNCSniperBulletAtTarget_target == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
-	GoSub -p FUNCkillNPC "£target=£CFUNCSniperBulletAtTarget_target" ;
+	GoSub -p FUNCkillNPC £target=£CFUNCSniperBulletAtTarget_target ;
 	//reset b4 next call
 	Set £CFUNCSniperBulletAtTarget_target ""
 	RETURN
@@ -2637,7 +2685,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			
 			//DropItem -e "~£FUNCteleportToAndKillNPC_HoverEnt~" all
 			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
-			GoSub -p FUNCkillNPC §destroyCorpse=1 "£target=£FUNCteleportToAndKillNPC_HoverEnt" ;
+			GoSub -p FUNCkillNPC §destroyCorpse=1 £target=£FUNCteleportToAndKillNPC_HoverEnt ;
 			
 			//timerTeleDestroyNPC -m 1 50 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
 			
@@ -2663,13 +2711,13 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
 	
 	if(£FUNCkillNPC_target == "") {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=ERROR: target was not set" ;
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: target was not set" ;
 	}
 	if(^life_~£FUNCkillNPC_target~ <= 0) {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=WARN: target='~£FUNCkillNPC_target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="WARN: target='~£FUNCkillNPC_target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	}
-	if(£FUNCkillNPC_target == "void") {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£filter=.*" "£DbgMsg=ERROR: target='~£FUNCkillNPC_target~'" ;
+	if(£FUNCkillNPC_target == "void" || £FUNCkillNPC_target == "") {
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £filter=".*" £DbgMsg="ERROR: target='~£FUNCkillNPC_target~'" ;
 	}
 	
 	if(§FUNCkillNPC_destroyCorpse == 1) {
@@ -2845,13 +2893,13 @@ this tests a WRONG closure with code after it (put some comment after the closur
 			//PlayerStackSize 1
 		} else { 
 		if ( £AncientDeviceMode == "SignalRepeater" ) { Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions "£mode=show" ;
+			GoSub -p FUNCconfigOptions £mode="show" ;
 			SetGroup "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
 			RETURN //because this is not a normal tool
 		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
 		if ( £AncientDeviceMode == "ConfigOptions" ) { Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions "£mode=hide" ;
+			GoSub -p FUNCconfigOptions £mode="hide" ;
 			SetGroup -r "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
@@ -2971,7 +3019,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	if(£AncientDeviceMode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(£AncientDeviceMode == "AncientBox") {
-		GoSub -p FUNCcfgSkin "£simple=Hologram.tiny.index4000.box" ;
+		GoSub -p FUNCcfgSkin £simple="Hologram.tiny.index4000.box" ;
 		SET_PRICE 50
 		PlayerStackSize 50
 		Set £IconBasename "AncientBox"
@@ -2982,7 +3030,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		}
 	} else {
 	if(£AncientDeviceMode == "ConfigOptions") {
-		GoSub -p FUNCcfgSkin "£simple=Hologram.tiny.index4000.boxConfigOptions" ;
+		GoSub -p FUNCcfgSkin £simple="Hologram.tiny.index4000.boxConfigOptions" ;
 		SET_PRICE 13
 		PlayerStackSize 1
 		Set £IconBasename "AncientConfigOptions"
@@ -3071,12 +3119,6 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) {
 		showlocals -f £FUNCshowlocals_filter
 	}	}
-	//if(§FUNCshowlocals_force >= 1){
-		//showlocals
-	//} else {
-	//if(#FUNCshowlocals_enabled >= 1){
-		//showlocals
-	//} }
 	
 	//defaults for next call
 	Set §FUNCshowlocals_force 0
@@ -3093,28 +3135,6 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		Set £DebugMessage "(no helpful info was set)"
 	}
 	
-	/*
-	Set £FUNCCustomCmdsB4DbgBreakpoint_test1 "eita"
-	Set £FUNCCustomCmdsB4DbgBreakpoint_test2 £FUNCCustomCmdsB4DbgBreakpoint_filter
-	if(£FUNCCustomCmdsB4DbgBreakpoint_test2 == "void") {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_test5 "test 2 is void"
-	} else {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_test5 "test 2 is NOT void"
-	}
-	if(£FUNCCustomCmdsB4DbgBreakpoint_test3 == "void") {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_test6 "test 3 is void"
-	} else {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_test6 "test 3 is NOT void, test 3 is '~£FUNCCustomCmdsB4DbgBreakpoint_test3~'"
-	}
-	Set £FUNCCustomCmdsB4DbgBreakpoint_test3 "~£FUNCCustomCmdsB4DbgBreakpoint_filter~"
-	if(£FUNCCustomCmdsB4DbgBreakpoint_test4 == "") {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_test8 "test 4 is EMPTY ''"
-	} else {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_test8 "test 4 is NOT '', test 4 is '~£FUNCCustomCmdsB4DbgBreakpoint_test4~'"
-	}
-	Set £FUNCCustomCmdsB4DbgBreakpoint_test4 ~£FUNCCustomCmdsB4DbgBreakpoint_filter~
-	showlocals -f "FUNCCustomCmdsB4DbgBreakpoint"
-	*/
 	if(£FUNCCustomCmdsB4DbgBreakpoint_filter == "") {
 		Set £FUNCCustomCmdsB4DbgBreakpoint_filter ^debugcalledfrom_1
 	} else {
@@ -3156,9 +3176,9 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	
 	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by
 		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
-			GoSub -p FUNCDetectAndReachTarget £mode=detect £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
+			GoSub -p FUNCDetectAndReachTarget £mode=InitDetectTarget £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
 		} else {
-			GoSub -p FUNCCustomCmdsB4DbgBreakpoint "£DbgMsg=invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
+			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
 		}
 		GoSub -p FUNCblinkGlow §times=0 ;
 		Set §AncientDeviceTriggerStep 2
