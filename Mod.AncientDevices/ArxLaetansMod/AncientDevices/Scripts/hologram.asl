@@ -77,13 +77,13 @@ apparently items can only stack if they have the exact same name and/or icon?
 __
  when a timer calls a function, the function should end with ACCEPT and not RETURN, or the log may flood with errors from RETURN while having nothing in the call stack to return to!
   an easy trick to have both is have a TFUNC call the FUNC ex.:
-  timerTFUNCdoSomething -m 1 333 GoTo -p TFUNCdoSomething £mode=init ; //a Timer called Function will be prefixed with TFUNC
+  timerTFUNCdoSomething -m 1 333 GoTo -p TFUNCdoSomething £«mode=init ; //a Timer called Function will be prefixed with TFUNC
   >>TFUNCdoSomething () {
-    GoSub -p FUNCdoSomething £mode=£TFUNCdoSomething_mode ; //every automatic param must be forwarded, it will become £FUNCdoSomething_mode
+    GoSub -p FUNCdoSomething £»mode=£«mode ; // every automatic param must be forwarded, the var on the left of '=' will become £FUNCdoSomething«mode local var accessible from anywhere
     ACCEPT
   }
   >>FUNCdoSomething () { //now, this function can be called from anywhere with GoSub, and from timers with GoTo, w/o flooding the log with errors!
-    if(£FUNCdoSomething_mode == "init") Set £state "happy!"
+    if(£«mode == "init") Set £state "happy!"
     RETURN
   }
  Obs.: a CFUNC (child function) is not meant to be called directly. call it only by it's related func
@@ -121,6 +121,7 @@ __
 __
 __
 ////////////////////////////// TODO LIST: /////////////////////////
+some special chars for tests: ¢¥©ª«¬®¯°±º¹²³µ¶·«Þß•  §·tst §¯tst §°tst §¹tst §¹tst §«tst §«tst \xBB
 /// <><><> /////PRIORITY:HIGH (low difficulty also)
 TODO contextualizeDocModDesc: These Ancient Devices were found in collapsed ancient bunkers of a long lost and extremelly technologically advanced civilization. They are powered by an external energy source that, for some reason, is less effective or turns off when these devices are nearby strong foes and bosses. //TODO all or most of these ancient tech gets disabled near them
 /// <><> /////PRIORITY:MEDIUM
@@ -170,7 +171,7 @@ ON MovementDetected () {
 
 ON Clone () { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
 	Set £CloneInfo "SENDER:~^sender~, ME:~^me~"
-	GoSub -p FUNCshowlocals £filter=CloneInfo §force=1 ;
+	GoSub -p FUNCshowlocals £»filter=CloneInfo §»force=1 ;
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	ACCEPT
 }
@@ -199,7 +200,7 @@ ON IDENTIFY () { //this is called (apparently every frame) when the player hover
 			
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Identified_Now"
 			
-			GoSub -p FUNCshowlocals £filter=".*(identified|stack).*" §force=1 ;
+			GoSub -p FUNCshowlocals £»filter=".*(identified|stack).*" §»force=1 ;
 		}
 	} else {
 		if (^#timer2 == 0) StartTimer timer2
@@ -264,8 +265,8 @@ ON INVENTORYUSE () {
 				
 				//Set §FUNCblinkGlow_times §FUNCtrapAttack_TimeoutMillis
 				//Div §FUNCblinkGlow_times 1000
-				Calc §calcTimes [ §FUNCtrapAttack_TimeoutMillis / 1000 ]
-				GoSub -p FUNCblinkGlow §times=§calcTimes ;
+				Calc §«calcTimes [ §FUNCtrapAttack_TimeoutMillis / 1000 ]
+				GoSub -p FUNCblinkGlow §»times=§«calcTimes ;
 				
 				//timerTrapVanish     -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
 				//timerTrapVanishGlow -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -300,12 +301,12 @@ ON INVENTORYUSE () {
 			//Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			timerLandMineDetectNearbyNPC -m 0 50 GoTo TFUNCLandMine
-			GoSub -p FUNCblinkGlow §times=0 ;
+			GoSub -p FUNCblinkGlow §»times=0 ;
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerLandMineDetectNearbyNPC off 
 			//Set §Scale 100 SetScale §Scale
 			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow §times=-1 ;
+			GoSub -p FUNCblinkGlow §»times=-1 ;
 		} }
 		GoSub FUNCnameUpdate
 		ACCEPT
@@ -314,14 +315,14 @@ ON INVENTORYUSE () {
 		//if ( §AncientDeviceTriggerStep == 1 ) {
 			//Set §AncientDeviceTriggerStep 2 // activate
 			//timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
-			//GoSub -p FUNCblinkGlow §times=0 ;
+			//GoSub -p FUNCblinkGlow §»times=0 ;
 		//} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			//timerTFUNCteleportToAndKillNPC off
 			//Set §AncientDeviceTriggerStep 1  //stop
-			//GoSub -p FUNCblinkGlow §times=-1 ;
+			//GoSub -p FUNCblinkGlow §»times=-1 ;
 		//} }
 		Set @CFUNCFlyMeToTarget_flySpeed 0.5 //takes 2s
-		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -329,19 +330,19 @@ ON INVENTORYUSE () {
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			Set §AncientDeviceTriggerStep 2
 			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
-			GoSub -p FUNCblinkGlow §times=0 ;
+			GoSub -p FUNCblinkGlow §»times=0 ;
 		} else { if ( §AncientDeviceTriggerStep == 2 ) {
 			timerMindControlDetectHoverNPC off
 			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow §times=-1 ;
+			GoSub -p FUNCblinkGlow §»times=-1 ;
 		} }
-		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
+		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
 		Set @CFUNCFlyMeToTarget_flySpeed 3.0 //takes 0.33s
-		GoSub -p FUNCAncientDeviceActivationToggle £Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} } } } }
@@ -358,7 +359,7 @@ ON INVENTORYUSE () {
 	if(£AncientDeviceMode != "HologramMode") {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Unrecognized:£AncientDeviceMode='~£AncientDeviceMode~'"
 		SPEAK -p [player_no] NOP
-		GoSub -p FUNCshowlocals §force=1 £filter=".*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
+		GoSub -p FUNCshowlocals §»force=1 £»filter=".*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
 		ACCEPT
 	}
 	
@@ -810,7 +811,7 @@ ON COMBINE () {
 	Set £OtherClass ^class_~£OtherEntIdToCombineWithMe~ //OTHER
 	
 	UnSet £ScriptDebugCombineFailReason
-	GoSub -p FUNCshowlocals §force=1 ;
+	GoSub -p FUNCshowlocals §»force=1 ;
 	
 	///////////////////// combine with other classes ///////////////////////
 	
@@ -825,24 +826,24 @@ ON COMBINE () {
 	//if (not(and(£OtherEntIdToCombineWithMe ISCLASS "Hologram"))) { //only combine with these
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Other:Not:Class:Hologram"
-		//GoSub -p FUNCshowlocals §force=1 ;
+		//GoSub -p FUNCshowlocals §»force=1 ;
 		//ACCEPT
 	//}
 	if(£ClassMe != £OtherClass) {  //only combine if same kind
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Class:Differs"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	
 	//Set £ScriptDebugCombineFailReason "Test:£AncientDeviceMode=~£AncientDeviceMode~;"
 	Set -r £OtherEntIdToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode //	Set -rw ^me £OtherEntIdToCombineWithMe £OtherAncientDeviceMode £AncientDeviceMode
-	if(or(£OtherAncientDeviceMode == "" || £AncientDeviceMode == ""))	GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR:invalid ancient device modes to combine '~£OtherAncientDeviceMode~' '~£AncientDeviceMode~'" ;
+	if(or(£OtherAncientDeviceMode == "" || £AncientDeviceMode == ""))	GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR:invalid ancient device modes to combine '~£OtherAncientDeviceMode~' '~£AncientDeviceMode~'" ;
 	if(and(£OtherAncientDeviceMode == £AncientDeviceMode && £AncientDeviceMode != "AncientBox")) { //this is to increase quality, least for the cheapest
 		if(§UseMax >= 80) { //quality 4+
 			SPEAK -p [player_no] NOP
 			Set £ScriptDebugCombineFailReason "Quality:Already:MK2"
-			GoSub -p FUNCshowlocals §force=1 ;
+			GoSub -p FUNCshowlocals §»force=1 ;
 		} else {
 			Set -r £OtherEntIdToCombineWithMe §OtherUseMax §UseMax
 			if(§OtherUseMax > §UseMax) {
@@ -867,28 +868,28 @@ ON COMBINE () {
 	if(£OtherAncientDeviceMode != "AncientBox") { //this is for upgrading/morphing the item
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Other:Not:AncientBox"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	
 	if (^me isgroup "Special") { //TODO the special objects could create other crafting trees tho
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Me:Is:Special"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	
 	if (£OtherEntIdToCombineWithMe !isgroup "DeviceTechBasic") {
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Other:Not:Group:DeviceTechBasic:Aka_hologram"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	
 	if(£AncientDeviceMode == "SniperBullet") { //SYNC_WITH_LAST_COMBINE sync with last/max combine option
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:Limit_reached:Combine_options"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	
@@ -902,19 +903,19 @@ ON COMBINE () {
 	if (^amount > 1) { //this must not be a stack of items
 		SPEAK -p [player_no] NOP
 		Set £ScriptDebugCombineFailReason "Self:IsStack"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	if (§Identified == 0) {
 		SPEAK -p [player_not_skilled_enough] NOP
 		Set £ScriptDebugCombineFailReason "Self:NotIdentified"
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
-		//GoSub -p FUNCshowlocals §force=1 ;
+		//GoSub -p FUNCshowlocals §»force=1 ;
 		//ACCEPT
 	//}
 	
@@ -925,7 +926,7 @@ ON COMBINE () {
 	
 	DESTROY £OtherEntIdToCombineWithMe
 	
-	GoSub -p FUNCshowlocals §force=1 ;
+	GoSub -p FUNCshowlocals §»force=1 ;
 	ACCEPT
 }
 
@@ -1053,22 +1054,22 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	} else {
 	if(@CfgOptHoverY > 270 && @CfgOptHoverY < 360) {
 	}	} } }
-	GoSub -p FUNCconfigOptionHighlight §index=~§CfgOptIndex~ ;
+	GoSub -p FUNCconfigOptionHighlight §»index=~§CfgOptIndex~ ;
 	RETURN
 }
 >>FUNCconfigOptionHighlight () {
 	//INPUT: <§FUNCconfigOptionHighlight_index>
 	if(§FUNCconfigOptionHighlight_index < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
-	Set £FUNCconfigOptions_mode "show"
+	Set £FUNCconfigOptions«mode "show"
 	
 	if(§FUNCconfigOptionHighlight_indexPrevious > -1) {
-		//Set £FUNCconfigOptions_mode "hide"
-		Set §FUNCconfigOptions_index §FUNCconfigOptionHighlight_indexPrevious
+		//Set £FUNCconfigOptions«mode "hide"
+		Set §FUNCconfigOptions«index §FUNCconfigOptionHighlight_indexPrevious
 		GoSub CFUNCconfigOptionUpdate
 	}
 	
-	Set §FUNCconfigOptions_index §FUNCconfigOptionHighlight_index
+	Set §FUNCconfigOptions«index §FUNCconfigOptionHighlight_index
 	GoSub CFUNCconfigOptionUpdate
 	
 	Set §FUNCconfigOptionHighlight_indexPrevious §FUNCconfigOptionHighlight_index
@@ -1077,39 +1078,39 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>FUNCconfigOptions () {
-	//INPUT: [£FUNCconfigOptions_mode] values: "hide" "show"
-	if(£FUNCconfigOptions_mode == "hide") {
+	//INPUT: [£«mode] values: "hide" "show"
+	if(£«mode == "hide") {
 		TWEAK SKIN "Hologram.ConfigOptions"	"Hologram.ConfigOptions.Clear"
-		Set §FUNCconfigOptions_index 1 >>LOOP_FCO_ClearAll
+		Set §«index 1 >>LOOP_FCO_ClearAll
 			GoSub CFUNCconfigOptionHide
-		++ §FUNCconfigOptions_index if(§FUNCconfigOptions_index <= §ConfigOptions_maxIndex) GoTo LOOP_FCO_ClearAll
+		++ §«index if(§«index <= §ConfigOptions_maxIndex) GoTo LOOP_FCO_ClearAll
 	} else {
-	if(£FUNCconfigOptions_mode == "show") {
+	if(£«mode == "show") {
 		TWEAK SKIN "Hologram.ConfigOptions.Clear" "Hologram.ConfigOptions"
 		
 		//TOKEN_AUTOPATCH_UpdateCfgOpt_BEGIN
-		GoSub -p CFUNCconfigOptionUpdate @check=&G_HologCfgOpt_ClassFocus ;
-		GoSub -p CFUNCconfigOptionUpdate @check=&G_HologCfgOpt_DebugTests ;
-		GoSub -p CFUNCconfigOptionUpdate @check=&G_HologCfgOpt_ShowLocals ;
+		GoSub -p CFUNCconfigOptionUpdate @»check=&G_HologCfgOpt_ClassFocus ;
+		GoSub -p CFUNCconfigOptionUpdate @»check=&G_HologCfgOpt_DebugTests ;
+		GoSub -p CFUNCconfigOptionUpdate @»check=&G_HologCfgOpt_ShowLocals ;
 		//TOKEN_AUTOPATCH_UpdateCfgOpt_END
 	} }
 	
-	Set £FUNCconfigOptions_mode "hide" //default for next call
+	Set £«mode "hide" //default for next call
 	RETURN
 }
 >>CFUNCconfigOptionUpdate () {
-	//INPUT: <@CFUNCconfigOptionUpdate_check>
-	if(@CFUNCconfigOptionUpdate_check < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	//INPUT: <@«check>
+	if(@«check < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
-	Set §FUNCconfigOptions_index @CFUNCconfigOptionUpdate_check
+	Set §FUNCconfigOptions«index @«check
 	// trunc will get the index. if identical, means disabled: ex.: disabled: 33.0 == 33, enabled: 33.1 != 33
-	if(@CFUNCconfigOptionUpdate_check == §FUNCconfigOptions_index) { //.0 means disabled
+	if(@«check == §FUNCconfigOptions«index) { //.0 means disabled
 		GoSub CFUNCconfigOptionDisable
 	} else { //.1 means enabled
 		GoSub CFUNCconfigOptionEnable
 	}
 	
-	Set @CFUNCconfigOptionUpdate_check -1 //set invalid to be required on next call
+	Set @«check -1 //set invalid to be required on next call
 	RETURN
 }
 >>CFUNCconfigOptionToggle () {
@@ -1124,43 +1125,45 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>CFUNCconfigOptionEnable () {
-	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" 
+	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Enabled" 
 	RETURN
 }
 >>CFUNCconfigOptionDisable () {
-	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
 	RETURN
 }
 >>CFUNCconfigOptionHide () {
-	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-	if(§FUNCconfigOptions_index == §FUNCconfigOptions_HighlightIndex) {
-		TWEAK SKIN "Hologram.ConfigOptions.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-		TWEAK SKIN "Hologram.ConfigOptions.EnabledAndHighlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
+	TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
+	if(§FUNCconfigOptions«index == §FUNCconfigOptions_HighlightIndex) {
+		TWEAK SKIN "Hologram.ConfigOptions.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
+		TWEAK SKIN "Hologram.ConfigOptions.EnabledAndHighlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
 	}
 	RETURN
 }
-//>>CFUNCconfigOptions_Update () {
-	////INPUT: <§FUNCconfigOptions_index>
-	////INPUT: <£FUNCconfigOptions_mode>
-	//if(£FUNCconfigOptions_mode == "hide") { //mainly used to hide this skybox layer 
-		//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-		//if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions_index) {
-			//TWEAK SKIN "Hologram.ConfigOptions.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-			//TWEAK SKIN "Hologram.ConfigOptions.EnabledAndHighlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear"
-		//}
-	//} else {
-	//if(£FUNCconfigOptions_mode == "show") {
-		//if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions_index) {
-			//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.EnabledAndHighlight" 
-			//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" "Hologram.ConfigOptions.EnabledAndHighlight" 
-		//} else {
-			//TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions_index~.Enabled" 
-			//if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions_indexprevious todoa) {
-			//}
-		//}
-	//} }
-	//RETURN
-//}
+/*
+>>CFUNCconfigOptions_Update () {
+	//INPUT: <§FUNCconfigOptions«index>
+	//INPUT: <£FUNCconfigOptions«mode>
+	if(£FUNCconfigOptions«mode == "hide") { //mainly used to hide this skybox layer 
+		TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Enabled" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
+		if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions«index) {
+			TWEAK SKIN "Hologram.ConfigOptions.Highlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
+			TWEAK SKIN "Hologram.ConfigOptions.EnabledAndHighlight" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear"
+		}
+	} else {
+	if(£FUNCconfigOptions«mode == "show") {
+		if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions«index) {
+			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear" "Hologram.ConfigOptions.EnabledAndHighlight" 
+			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Enabled" "Hologram.ConfigOptions.EnabledAndHighlight" 
+		} else {
+			TWEAK SKIN "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Clear" "Hologram.ConfigOptions.index~%05d,§FUNCconfigOptions«index~.Enabled" 
+			if(§FUNCconfigOptions_HighlightIndex == §FUNCconfigOptions«indexprevious todoa) {
+			}
+		}
+	} }
+	RETURN
+}
+*/
 
 >>TFUNCinitDefaults () { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults () { //DO NOT CALL FROM "ON INIT" or every item on the stack will have the same random values!!! :(
 	if(§InitDefaultsDone > 0) RETURN
@@ -1168,7 +1171,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	Set £AncientDeviceMode "AncientBox"
 	
-	GoSub -p FUNCconfigOptions £mode="hide" ;
+	GoSub -p FUNCconfigOptions £»mode="hide" ;
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
 	TWEAK SKIN "Hologram.tiny.index4000.grenade"					"Hologram.tiny.index4000.grenade.Clear"
 	TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"			"Hologram.tiny.index4000.grenadeGlow.Clear"
@@ -1243,7 +1246,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	++ §InitDefaultsDone
 	++ #G_HologCfg_InitGlobalsDone
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;FUNCinitDefaults:~^me~"
-	GoSub -p FUNCshowlocals §force=1 ;
+	GoSub -p FUNCshowlocals §»force=1 ;
 	
 	RETURN
 }
@@ -1475,8 +1478,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ .+!ACTIVE!+."
 		}
 		
-		if(£FUNCseekTargetLoop_HoverEnt != "" && £FUNCseekTargetLoop_HoverEnt != "void") {
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop_HoverEnt~,~§FUNCseekTargetLoop_HoverLife~hp)."
+		if(£FUNCseekTargetLoop«HoverEnt != "" && £FUNCseekTargetLoop«HoverEnt != "void") {
+			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop«HoverEnt~,~§FUNCseekTargetLoop_HoverLife~hp)."
 		}
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
@@ -1885,25 +1888,25 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//INPUT: <£FUNCseekTargetLoop_mode>
 	//INPUT: [£FUNCseekTargetLoop_callFuncWhenTargetFound]
 	//OUTPUT: £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT
-	if(not("FUNC" IsIn £FUNCseekTargetLoop_callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid call to ~£FUNCseekTargetLoop_callFuncWhenTargetFound~" ;
+	if(not("FUNC" IsIn £FUNCseekTargetLoop_callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call to ~£FUNCseekTargetLoop_callFuncWhenTargetFound~" ;
 	
 	if(£FUNCseekTargetLoop_mode == "init") {
 		Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT ""
 		Set £FUNCseekTargetLoop_mode "seek"
 		timerTFUNCseekTargetLoop -m 0 333 GoTo TFUNCseekTargetLoop
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 	} else {
 	if(£FUNCseekTargetLoop_mode == "seek") {
-		Set £FUNCseekTargetLoop_HoverEnt ^hover_~§SeekTargetDistance~
-		Set §FUNCseekTargetLoop_HoverLife ^life_~£FUNCseekTargetLoop_HoverEnt~
-		if(and(£FUNCseekTargetLoop_HoverEnt != "none" && §FUNCseekTargetLoop_HoverLife > 0)) {
+		Set £«HoverEnt ^hover_~§SeekTargetDistance~
+		Set §FUNCseekTargetLoop_HoverLife ^life_~£«HoverEnt~
+		if(and(£«HoverEnt != "none" && §FUNCseekTargetLoop_HoverLife > 0)) {
 			Set £FUNCseekTargetLoop_mode "stop"
-			Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT £FUNCseekTargetLoop_HoverEnt
+			Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT £«HoverEnt
 			if(£FUNCseekTargetLoop_callFuncWhenTargetFound != "") {
-				GoSub -p "~£FUNCseekTargetLoop_callFuncWhenTargetFound~" £target=£FUNCseekTargetLoop_HoverEnt ;
+				GoSub -p "~£FUNCseekTargetLoop_callFuncWhenTargetFound~" £»target=£«HoverEnt ;
 			}
 		}
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals §»force=1 ;
 	} else {
 	if(£FUNCseekTargetLoop_mode == "stop") {
 		//reset b4 next call
@@ -1911,18 +1914,18 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		Set £FUNCseekTargetLoop_callFuncWhenTargetFound ""
 		timerTFUNCseekTargetLoop off
 	} else {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid £mode='~£FUNCseekTargetLoop_mode~'" ;
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £mode='~£FUNCseekTargetLoop_mode~'" ;
 	} } }
 	RETURN
 }
 >>TCFUNCFlyMeToTarget () { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget () {  //TODO re-use this for mindcontrol and teleport
 	//INPUT: <£CFUNCFlyMeToTarget_callFuncWhenTargetReached>
 	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
-	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid call set ~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" ;
-	if(@CFUNCFlyMeToTarget_flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid flySpeed ~@CFUNCFlyMeToTarget_flySpeed~" ;
+	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call set ~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" ;
+	if(@CFUNCFlyMeToTarget_flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid flySpeed ~@CFUNCFlyMeToTarget_flySpeed~" ;
 	
-	if(^life_~£FUNCseekTargetLoop_HoverEnt~ > 0) {
-		if(^dist_~£FUNCseekTargetLoop_HoverEnt~ > §TeleDistEndTele) {
+	if(^life_~£FUNCseekTargetLoop«HoverEnt~ > 0) {
+		if(^dist_~£FUNCseekTargetLoop«HoverEnt~ > §TeleDistEndTele) {
 			//the idea is to be unsafe positioning over npc location as it will be destroyed
 			if(@TeleMeStepDist == 0) { //initialize
 				if(^inInventory == "player") {
@@ -1932,7 +1935,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 				}
 				SetInteractivity None
 				
-				Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTargetLoop_HoverEnt~
+				Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCseekTargetLoop«HoverEnt~
 				GoSub FUNCcalcInterpolateTeleStepDist1s()
 				Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
 				
@@ -1943,10 +1946,10 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 				GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
 				timerTCFUNCFlyMeToTarget -m 0 §TeleTimerFlyMilis GoTo TCFUNCFlyMeToTarget
 			}
-			interpolate -s "~^me~" "~£FUNCseekTargetLoop_HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
+			interpolate -s "~^me~" "~£FUNCseekTargetLoop«HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 		} else { // last step
-			interpolate "~^me~" "~£FUNCseekTargetLoop_HoverEnt~" 0.0 //one last step to be precise
-			GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £target=£FUNCseekTargetLoop_HoverEnt ;
+			interpolate "~^me~" "~£FUNCseekTargetLoop«HoverEnt~" 0.0 //one last step to be precise
+			GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £»target=£FUNCseekTargetLoop«HoverEnt ;
 			Set £CFUNCFlyMeToTarget_do "off"
 		}
 	} else {
@@ -1971,20 +1974,20 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(£FUNCDetectAndReachTarget_mode == "InitDetectTarget"){
-		GoSub -p FUNCseekTargetLoop £mode="init" £callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
+		GoSub -p FUNCseekTargetLoop £»mode="init" £callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
 		Set £FUNCDetectAndReachTarget_mode "TargetAcquired"
 	} else { if(£FUNCDetectAndReachTarget_mode == "TargetAcquired") {
-		GoSub -p CFUNCFlyMeToTarget £target=£FUNCDetectAndReachTarget_target £callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
+		GoSub -p CFUNCFlyMeToTarget £»target=£FUNCDetectAndReachTarget_target £callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
 		Set £FUNCDetectAndReachTarget_mode "DoWhenTargetReached"
 	} else { if(£FUNCDetectAndReachTarget_mode == "DoWhenTargetReached") {
-		GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" £target=£FUNCDetectAndReachTarget_target ;
+		GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" £»target=£FUNCDetectAndReachTarget_target ;
 		GoSub FUNCbreakDeviceDelayed
 		Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
 	} } }
 	
 	if(£FUNCDetectAndReachTarget_mode == "stop") {
 		timerTFUNCDetectAndReachTarget off //safety
-		GoSub -p FUNCseekTargetLoop £mode="stop" ;
+		GoSub -p FUNCseekTargetLoop £»mode="stop" ;
 		
 		//reset b4 next call
 		Set £FUNCDetectAndReachTarget_mode ""
@@ -2010,10 +2013,10 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
 			//Set £FUNCseekTargetLoop_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
 			// this will keep tring to find a target.
-			GoSub -p FUNCseekTargetLoop "£mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
+			GoSub -p FUNCseekTargetLoop "£»mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
 		} else { // here is reached when called by CFUNCFlyMeToTarget
-			//GoSub -p FUNCkillNPC "£target=£FUNCseekTargetLoop_TargetFoundEnt_OUTPUT" ;
-			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£target=£FUNCDetectAndReachTarget_target" ;
+			//GoSub -p FUNCkillNPC "£»target=£FUNCseekTargetLoop_TargetFoundEnt_OUTPUT" ;
+			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£»target=£FUNCDetectAndReachTarget_target" ;
 			GoSub FUNCbreakDeviceDelayed
 			Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
 		}
@@ -2021,11 +2024,11 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//if(£FUNCDetectAndReachTarget_mode == "detect") {
 		//if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 		//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget"
-		//GoSub -p FUNCseekTargetLoop "£mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
+		//GoSub -p FUNCseekTargetLoop "£»mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
 	//}
 	
 	if(£FUNCDetectAndReachTarget_mode == "stop") {
-		GoSub -p FUNCseekTargetLoop "£mode=stop" ;
+		GoSub -p FUNCseekTargetLoop "£»mode=stop" ;
 		
 		//reset b4 next call
 		Set £FUNCDetectAndReachTarget_mode ""
@@ -2039,7 +2042,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 >>CFUNCSniperBulletAtTarget () {
 	// INPUT <£CFUNCSniperBulletAtTarget_target> will be set at FUNCDetectAndReachTarget
 	if(£CFUNCSniperBulletAtTarget_target == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
-	GoSub -p FUNCkillNPC £target=£CFUNCSniperBulletAtTarget_target ;
+	GoSub -p FUNCkillNPC £»target=£CFUNCSniperBulletAtTarget_target ;
 	//reset b4 next call
 	Set £CFUNCSniperBulletAtTarget_target ""
 	RETURN
@@ -2223,12 +2226,12 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			
 			//DropItem -e "~£FUNCteleportToAndKillNPC_HoverEnt~" all
 			//DoDamage -fmlcgewsao "~£FUNCteleportToAndKillNPC_HoverEnt~" 99999 //this is essential. Just destroying below wont kill it and it will remain in game invisible fighting other NPCs
-			GoSub -p FUNCkillNPC §destroyCorpse=1 £target=£FUNCteleportToAndKillNPC_HoverEnt ;
+			GoSub -p FUNCkillNPC §»destroyCorpse=1 £»target=£FUNCteleportToAndKillNPC_HoverEnt ;
 			
 			//timerTeleDestroyNPC -m 1 50 Destroy "~£FUNCteleportToAndKillNPC_HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
 			
 			//Weapon -e player ON //doesnt work on player?
-			GoSub -p FUNCbreakDeviceDelayed §ParalyzePlayer=1 ; //only after everything else have completed! this takes a long time to finish breaking it
+			GoSub -p FUNCbreakDeviceDelayed §»ParalyzePlayer=1 ; //only after everything else have completed! this takes a long time to finish breaking it
 			
 			Collision -e player disable
 			timerTFUNCteleportToAndKillNPC_flyPlayerToMe_LastInterpolate -m 1 200 interpolate player "~^me~" 0.0 //one last step to be precise
@@ -2249,13 +2252,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//INPUT: [§FUNCkillNPC_destroyCorpse]
 	
 	if(£FUNCkillNPC_target == "") {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: target was not set" ;
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: target was not set" ;
 	}
 	if(^life_~£FUNCkillNPC_target~ <= 0) {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="WARN: target='~£FUNCkillNPC_target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="WARN: target='~£FUNCkillNPC_target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	}
 	if(£FUNCkillNPC_target == "void" || £FUNCkillNPC_target == "") {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £filter=".*" £DbgMsg="ERROR: target='~£FUNCkillNPC_target~'" ;
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»filter=".*" £»DbgMsg="ERROR: target='~£FUNCkillNPC_target~'" ;
 	}
 	
 	if(§FUNCkillNPC_destroyCorpse == 1) {
@@ -2271,7 +2274,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	DoDamage -fmlcgewsao £FUNCkillNPC_target 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
 	if(§FUNCkillNPC_destroyCorpse == 1) timerFUNCkillNPC -m 1 50 Destroy £FUNCkillNPC_target //on next frame to avoid other quest/data sync problems probably
 	
-	GoSub -p FUNCshowlocals §force=1 ; //keep here
+	GoSub -p FUNCshowlocals §»force=1 ; //keep here
 	
 	//reset before next call if it has no params
 	Set §FUNCkillNPC_destroyCorpse 0 
@@ -2431,13 +2434,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			//PlayerStackSize 1
 		} else { 
 		if ( £AncientDeviceMode == "SignalRepeater" ) { Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions £mode="show" ;
+			GoSub -p FUNCconfigOptions £»mode="show" ;
 			SetGroup "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
 			RETURN //because this is not a normal tool
 		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
 		if ( £AncientDeviceMode == "ConfigOptions" ) { Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions £mode="hide" ;
+			GoSub -p FUNCconfigOptions £»mode="hide" ;
 			SetGroup -r "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
@@ -2557,7 +2560,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(£AncientDeviceMode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if(£AncientDeviceMode == "AncientBox") {
-		GoSub -p FUNCcfgSkin £simple="Hologram.tiny.index4000.box" ;
+		GoSub -p FUNCcfgSkin £»simple="Hologram.tiny.index4000.box" ;
 		SET_PRICE 50
 		PlayerStackSize 50
 		Set £IconBasename "AncientBox"
@@ -2568,7 +2571,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		}
 	} else {
 	if(£AncientDeviceMode == "ConfigOptions") {
-		GoSub -p FUNCcfgSkin £simple="Hologram.tiny.index4000.boxConfigOptions" ;
+		GoSub -p FUNCcfgSkin £»simple="Hologram.tiny.index4000.boxConfigOptions" ;
 		SET_PRICE 13
 		PlayerStackSize 1
 		Set £IconBasename "AncientConfigOptions"
@@ -2714,24 +2717,24 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by
 		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
-			GoSub -p FUNCDetectAndReachTarget £mode=InitDetectTarget £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
+			GoSub -p FUNCDetectAndReachTarget £»mode="InitDetectTarget" £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
 		} else {
-			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £DbgMsg="ERROR: invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
+			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
 		}
-		GoSub -p FUNCblinkGlow §times=0 ;
+		GoSub -p FUNCblinkGlow §»times=0 ;
 		Set §AncientDeviceTriggerStep 2
 	} else { if ( §AncientDeviceTriggerStep == 2 ) { // active
 		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
-			GoSub -p FUNCDetectAndReachTarget £mode=stop ;
+			GoSub -p FUNCDetectAndReachTarget £»mode="stop" ;
 		}
-		GoSub -p FUNCblinkGlow §times=-1 ;
+		GoSub -p FUNCblinkGlow §»times=-1 ;
 		Set §AncientDeviceTriggerStep 1
 		// cleanup b4 next call
 		Set £FUNCAncientDeviceActivationToggle_Mode ""
 		Set £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ""
 	} }
 	
-	GoSub -p FUNCshowlocals £filter=FUNCAncientDeviceActivationToggle §force=1 ;
+	GoSub -p FUNCshowlocals £»filter=FUNCAncientDeviceActivationToggle §»force=1 ;
 	
 	RETURN
 }
