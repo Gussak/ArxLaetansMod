@@ -121,7 +121,6 @@ __
 __
 __
 ////////////////////////////// TODO LIST: /////////////////////////
-some special chars for tests: ¢¥©ª«¬®¯°±º¹²³µ¶·«Þß•  §·tst §¯tst §°tst §¹tst §¹tst §«tst §«tst \xBB
 /// <><><> /////PRIORITY:HIGH (low difficulty also)
 TODO contextualizeDocModDesc: These Ancient Devices were found in collapsed ancient bunkers of a long lost and extremelly technologically advanced civilization. They are powered by an external energy source that, for some reason, is less effective or turns off when these devices are nearby strong foes and bosses. //TODO all or most of these ancient tech gets disabled near them
 /// <><> /////PRIORITY:MEDIUM
@@ -2736,5 +2735,12 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	GoSub -p FUNCshowlocals £»filter=FUNCAncientDeviceActivationToggle §»force=1 ;
 	
+	RETURN
+}
+
+>>FUNCmodPatch () { //keep here as patching only works on original/vanilla files
+	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
+	++ §testsPerformed
+	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }

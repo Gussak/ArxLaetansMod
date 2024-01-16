@@ -2,7 +2,7 @@ diff --git a/hologram.asl b/hologram.asl
 index 77a8f86..3d2b924 100644
 --- a/hologram.asl
 +++ b/hologram.asl
-@@ -225,6 +225,7 @@
+@@ -226,6 +226,7 @@
  	}
  
  	++ §OnInventoryUseCount //total activations just for debug

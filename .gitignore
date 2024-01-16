@@ -89,6 +89,20 @@
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/*
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Mods/
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Mods/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic/hologram
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic/hologram/*
 #!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/
 #!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/*
 #!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels/

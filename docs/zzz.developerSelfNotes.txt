@@ -100,6 +100,8 @@ inventory playeradd movable/broken_bottle/broken_bottle
 #define MYDBG(x) std::cout << "_MyDbg_: " << x << "\n" //replace with LogDebug later
 MYDBG(anyVar<<","<<anything<<anythinElse);
 
+if(textvar == "some condition"){platform::runUserCommand("yad");} //ex of simple force a conditional stop in case of too much difficulty with any debugger, then hit stop on the debugger
+
 ================================ show missing PR_ from readme.md
 (git branch -r && cat "../ArxLaetansMod.github/README.md" |sed 's@.*@&(atMD)@') |grep -o "/PR_.*" |sort -u
 
@@ -217,3 +219,9 @@ public:
 	}
 	
 };
+
+// create a simple and easy patch file ex.:
+git diff hologram.asl hologram.patchedForTests.asl >hologram.asl.patch
+
+
+some special chars for tests: £§¢¥©ª«¬®¯°±º¹²³µ¶·«Þß  §·tst §¯tst §°tst §¹tst §¹tst §«tst §«tst \xBB
