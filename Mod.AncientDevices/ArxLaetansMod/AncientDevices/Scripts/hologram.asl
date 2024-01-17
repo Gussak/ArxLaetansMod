@@ -170,7 +170,7 @@ ON MovementDetected () {
 
 ON Clone () { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
 	Set £CloneInfo "SENDER:~^sender~, ME:~^me~"
-	GoSub -p FUNCshowlocals £»filter=CloneInfo §»force=1 ;
+	GoSub -p FUNCshowlocals £»filter="CloneInfo" §»force=1 ;
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	ACCEPT
 }
@@ -262,8 +262,6 @@ ON INVENTORYUSE () {
 				
 				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
 				
-				//Set §FUNCblinkGlow_times §FUNCtrapAttack_TimeoutMillis
-				//Div §FUNCblinkGlow_times 1000
 				Calc §«calcTimes [ §FUNCtrapAttack_TimeoutMillis / 1000 ]
 				GoSub -p FUNCblinkGlow §»times=§«calcTimes ;
 				
@@ -321,7 +319,7 @@ ON INVENTORYUSE () {
 			//GoSub -p FUNCblinkGlow §»times=-1 ;
 		//} }
 		Set @CFUNCFlyMeToTarget_flySpeed 0.5 //takes 2s
-		GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -341,7 +339,7 @@ ON INVENTORYUSE () {
 	} else {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
 		Set @CFUNCFlyMeToTarget_flySpeed 3.0 //takes 0.33s
-		GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} } } } }
@@ -487,14 +485,16 @@ ON INVENTORYUSE () {
 	//it called the attention of some hostile creature, not related to player skill. no need to use any hiding/shadow value as the hologram emits light and will call attention anyway. Only would make sense in some closed room, but rats may find their way there too.
 	RANDOM 10 {
 		PLAY "sfx_lightning_loop"
-		//RANDOM 75 { 
+		RANDOM 75 { 
 			spawn npc "rat_base\\rat_base" SELF //player
 			INC §UseCount 20 //damage
 			INC §UseCount ^rnd_20
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;70.spawn rat"
 			Inc §UseBlockedMili ^rnd_15000
 			Set §Malfunction 1
-		//} else { //TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)! try the demon and the blue creature
+		} else {
+			//spawn npc "wrat_base\\wrat_base" player //too strong on low levels
+			//TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)! try the demon and the blue creature
 			////RANDOM 75 {
 				//spawn npc "dog\\dog" player //these dogs are friendly...
 				//Inc §UseBlockedMili 30000
@@ -509,6 +509,7 @@ ON INVENTORYUSE () {
 				//Set §Malfunction 1
 			////}
 		//}
+		}
 	}
 	
 	// warning to help the player wakeup 
@@ -1478,7 +1479,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		}
 		
 		if(£FUNCseekTargetLoop«HoverEnt != "" && £FUNCseekTargetLoop«HoverEnt != "void") {
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop«HoverEnt~,~§FUNCseekTargetLoop_HoverLife~hp)."
+			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop«HoverEnt~,~§FUNCseekTargetLoop«HoverLife~hp)."
 		}
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
@@ -1884,36 +1885,36 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>TFUNCseekTargetLoop () { GoSub FUNCseekTargetLoop ACCEPT } >>FUNCseekTargetLoop () {
-	//INPUT: <£FUNCseekTargetLoop_mode>
-	//INPUT: [£FUNCseekTargetLoop_callFuncWhenTargetFound]
-	//OUTPUT: £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT
-	if(not("FUNC" IsIn £FUNCseekTargetLoop_callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call to ~£FUNCseekTargetLoop_callFuncWhenTargetFound~" ;
+	//INPUT: <£«mode>
+	//INPUT: [£«callFuncWhenTargetFound]
+	//OUTPUT: £«TargetFoundEnt_OUTPUT
+	if(not("FUNC" IsIn £«callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call to ~£«callFuncWhenTargetFound~" ;
 	
-	if(£FUNCseekTargetLoop_mode == "init") {
-		Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT ""
-		Set £FUNCseekTargetLoop_mode "seek"
+	if(£«mode == "init") {
+		Set £«TargetFoundEnt_OUTPUT ""
+		Set £«mode "seek"
 		timerTFUNCseekTargetLoop -m 0 333 GoTo TFUNCseekTargetLoop
 		GoSub -p FUNCshowlocals §»force=1 ;
 	} else {
-	if(£FUNCseekTargetLoop_mode == "seek") {
+	if(£«mode == "seek") {
 		Set £«HoverEnt ^hover_~§SeekTargetDistance~
-		Set §FUNCseekTargetLoop_HoverLife ^life_~£«HoverEnt~
-		if(and(£«HoverEnt != "none" && §FUNCseekTargetLoop_HoverLife > 0)) {
-			Set £FUNCseekTargetLoop_mode "stop"
-			Set £FUNCseekTargetLoop_TargetFoundEnt_OUTPUT £«HoverEnt
-			if(£FUNCseekTargetLoop_callFuncWhenTargetFound != "") {
-				GoSub -p "~£FUNCseekTargetLoop_callFuncWhenTargetFound~" £»target=£«HoverEnt ;
+		Set §«HoverLife ^life_~£«HoverEnt~
+		if(and(£«HoverEnt != "none" && §«HoverLife > 0)) {
+			Set £«mode "stop"
+			Set £«TargetFoundEnt_OUTPUT £«HoverEnt
+			if(£«callFuncWhenTargetFound != "") {
+				GoSub -p "~£«callFuncWhenTargetFound~" £»target=£«HoverEnt ;
 			}
 		}
 		GoSub -p FUNCshowlocals §»force=1 ;
 	} else {
-	if(£FUNCseekTargetLoop_mode == "stop") {
+	if(£«mode == "stop") {
 		//reset b4 next call
-		Set £FUNCseekTargetLoop_mode ""
-		Set £FUNCseekTargetLoop_callFuncWhenTargetFound ""
+		Set £«mode ""
+		Set £«callFuncWhenTargetFound ""
 		timerTFUNCseekTargetLoop off
 	} else {
-		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £mode='~£FUNCseekTargetLoop_mode~'" ;
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £mode='~£«mode~'" ;
 	} } }
 	RETURN
 }
@@ -1966,32 +1967,32 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 >>TFUNCDetectAndReachTarget () { GoSub FUNCDetectAndReachTarget ACCEPT } >>FUNCDetectAndReachTarget () {
 	// this is a control function that delegates to many other functions, but them all call back to here if needed
-	//INPUT: <£FUNCDetectAndReachTarget_mode>
-	//INPUT: <£FUNCDetectAndReachTarget_callFuncWhenTargetReached>
-	//INPUT: [£FUNCDetectAndReachTarget_target]
-	if(£FUNCDetectAndReachTarget_mode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
-	if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	//INPUT: <£«mode>
+	//INPUT: <£«callFuncWhenTargetReached>
+	//INPUT: [£«target]
+	if(£«mode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
-	if(£FUNCDetectAndReachTarget_mode == "InitDetectTarget"){
-		GoSub -p FUNCseekTargetLoop £»mode="init" £callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
-		Set £FUNCDetectAndReachTarget_mode "TargetAcquired"
-	} else { if(£FUNCDetectAndReachTarget_mode == "TargetAcquired") {
-		GoSub -p CFUNCFlyMeToTarget £»target=£FUNCDetectAndReachTarget_target £callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
-		Set £FUNCDetectAndReachTarget_mode "DoWhenTargetReached"
-	} else { if(£FUNCDetectAndReachTarget_mode == "DoWhenTargetReached") {
-		GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" £»target=£FUNCDetectAndReachTarget_target ;
+	if(£«mode == "InitDetectTarget"){
+		GoSub -p FUNCseekTargetLoop £»mode="init" £»callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
+		Set £«mode "TargetAcquired"
+	} else { if(£«mode == "TargetAcquired") {
+		GoSub -p CFUNCFlyMeToTarget £»target=£«target £»callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
+		Set £«mode "DoWhenTargetReached"
+	} else { if(£«mode == "DoWhenTargetReached") {
+		GoSub -p "~£«callFuncWhenTargetReached~" £»target=£«target ;
 		GoSub FUNCbreakDeviceDelayed
-		Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
+		Set £«mode "stop" //will just auto stop see below 
 	} } }
 	
-	if(£FUNCDetectAndReachTarget_mode == "stop") {
+	if(£«mode == "stop") {
 		timerTFUNCDetectAndReachTarget off //safety
 		GoSub -p FUNCseekTargetLoop £»mode="stop" ;
 		
 		//reset b4 next call
-		Set £FUNCDetectAndReachTarget_mode ""
-		Set £FUNCDetectAndReachTarget_callFuncWhenTargetReached ""
-		Set £FUNCDetectAndReachTarget_target ""
+		Set £«mode ""
+		Set £«callFuncWhenTargetReached ""
+		Set £«target ""
 	}
 	
 	RETURN
@@ -2006,15 +2007,15 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(£FUNCDetectAndReachTarget_mode == "detect"){
 		if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 		
-		//if(£FUNCseekTargetLoop_TargetFoundEnt_OUTPUT == "") {
+		//if(£FUNCseekTargetLoop«TargetFoundEnt_OUTPUT == "") {
 		if(£FUNCDetectAndReachTarget_target == "") {
 			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTargetLoop
 			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
-			//Set £FUNCseekTargetLoop_callFuncWhenTargetFound "CFUNCFlyMeToTarget"
+			//Set £FUNCseekTargetLoop«callFuncWhenTargetFound "CFUNCFlyMeToTarget"
 			// this will keep tring to find a target.
 			GoSub -p FUNCseekTargetLoop "£»mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
 		} else { // here is reached when called by CFUNCFlyMeToTarget
-			//GoSub -p FUNCkillNPC "£»target=£FUNCseekTargetLoop_TargetFoundEnt_OUTPUT" ;
+			//GoSub -p FUNCkillNPC "£»target=£FUNCseekTargetLoop«TargetFoundEnt_OUTPUT" ;
 			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£»target=£FUNCDetectAndReachTarget_target" ;
 			GoSub FUNCbreakDeviceDelayed
 			Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
@@ -2545,13 +2546,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>FUNCcfgSkin () {
-	//INPUT: <£FUNCcfgSkin_simple>
-	if(not("Hologram" IsIn £FUNCcfgSkin_simple)) GoSub FUNCCustomCmdsB4DbgBreakpoint
-	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "~£FUNCcfgSkin_simple~"
-	TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "~£FUNCcfgSkin_simple~"
-	TWEAK SKIN "Hologram.tiny.index4000.boxLandMine"       "~£FUNCcfgSkin_simple~"
-	TWEAK SKIN "Hologram.tiny.index4000.boxTeleport"       "~£FUNCcfgSkin_simple~"
-	TWEAK SKIN "Hologram.tiny.index4000.boxMindControl"    "~£FUNCcfgSkin_simple~"
+	//INPUT: <£«simple>
+	if(not("Hologram" IsIn £«simple)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	TWEAK SKIN "Hologram.tiny.index4000.box.Clear"         "~£«simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "~£«simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxLandMine"       "~£«simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxTeleport"       "~£«simple~"
+	TWEAK SKIN "Hologram.tiny.index4000.boxMindControl"    "~£«simple~"
 	RETURN
 }
 >>TFUNCcfgAncientDevice () { GoSub FUNCcfgAncientDevice ACCEPT } >>FUNCcfgAncientDevice () {
@@ -2627,14 +2628,14 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>TFUNCblinkGlow () { GoSub FUNCblinkGlow ACCEPT } >>FUNCblinkGlow () {
-	//PARAMS: §FUNCblinkGlow_times
+	//PARAMS: §«times
 	GoSub FUNCsignalStrenghCheck
-	if(and(§FUNCblinkGlow_times >= 0 && §FUNCsignalStrenghCheck_IsAcceptable == 1)){
+	if(and(§«times >= 0 && §FUNCsignalStrenghCheck_IsAcceptable == 1)){
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 		//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
-		timerTrapGlowBlinkOff -m §FUNCblinkGlow_times  901 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear" //901 will last 100 times til it matches multiple of 1000 below
+		timerTrapGlowBlinkOff -m §«times  901 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear" //901 will last 100 times til it matches multiple of 1000 below
 		//On  at 1000 2000 3000 4000 5000
-		timerTrapGlowBlinkOn  -m §FUNCblinkGlow_times 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
+		timerTrapGlowBlinkOn  -m §«times 1000 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 	} else {
 		timerTrapGlowBlinkOff off
 		timerTrapGlowBlinkOn  off
@@ -2648,48 +2649,48 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//RETURN
 //}
 >>TFUNCshowlocals () { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals ()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
-	//INPUT: [§FUNCshowlocals_force]
-	//INPUT: [£FUNCshowlocals_filter]
-	if(and(£FUNCshowlocals_filter == "" && §FUNCshowlocals_force < 3)) { // only allow force if filter is set, or if force is high >=3
-		Set §FUNCshowlocals_force 0
+	//INPUT: [§«force]
+	//INPUT: [£«filter]
+	if(and(£«filter == "" && §«force < 3)) { // only allow force if filter is set, or if force is high >=3
+		Set §«force 0
 	}
-	//Set §FUNCshowlocals_force 0 //UNCOMMENT_ON_RELEASE as even with filters, this is about debugging the script. override to force release show nothing. the end user needs to comment this line
-	if(§FUNCshowlocals_force >= 2) {
-		showvars -f £FUNCshowlocals_filter
-	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §FUNCshowlocals_force >= 1)) {
-		showlocals -f £FUNCshowlocals_filter
+	//Set §«force 0 //UNCOMMENT_ON_RELEASE as even with filters, this is about debugging the script. override to force release show nothing. the end user needs to comment this line
+	if(§«force >= 2) {
+		showvars -f £«filter
+	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §«force >= 1)) {
+		showlocals -f £«filter
 	}	}
 	
 	//defaults for next call
-	Set §FUNCshowlocals_force 0
-	Set £FUNCshowlocals_filter ""
+	Set §«force 0
+	Set £«filter ""
 	RETURN
 }
 >>FUNCCustomCmdsB4DbgBreakpoint () { 
-	//INPUT: [£FUNCCustomCmdsB4DbgBreakpoint_DbgMsg]
-	//INPUT: [£FUNCCustomCmdsB4DbgBreakpoint_filter] use ".*" regex to show all
+	//INPUT: [£«DbgMsg]
+	//INPUT: [£«filter] use ".*" regex to show all
 	
-	if(£FUNCCustomCmdsB4DbgBreakpoint_DbgMsg != "") {
-		Set £DebugMessage £FUNCCustomCmdsB4DbgBreakpoint_DbgMsg // £DebugMessage is detected by ScriptUtils.cpp::DebugBreakpoint()
+	if(£«DbgMsg != "") {
+		Set £DebugMessage £«DbgMsg // £DebugMessage is detected by ScriptUtils.cpp::DebugBreakpoint()
 	} else {
 		Set £DebugMessage "(no helpful info was set)"
 	}
 	
-	if(£FUNCCustomCmdsB4DbgBreakpoint_filter == "") {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_filter ^debugcalledfrom_1
+	if(£«filter == "") {
+		Set £«filter ^debugcalledfrom_1
 	} else {
-		Set £FUNCCustomCmdsB4DbgBreakpoint_filter "~£FUNCCustomCmdsB4DbgBreakpoint_filter~|~^debugcalledfrom_1~"
+		Set £«filter "~£«filter~|~^debugcalledfrom_1~"
 	}
 	
-	Set £FUNCCustomCmdsB4DbgBreakpoint_filter "~£FUNCCustomCmdsB4DbgBreakpoint_filter~|~^debugcalledfrom_0~" // show also this func stuff
+	Set £«filter "~£«filter~|~^debugcalledfrom_0~" // show also this func stuff
 	
-	showvars -f "~£FUNCCustomCmdsB4DbgBreakpoint_filter~"
+	showvars -f "~£«filter~"
 	
 	GoSub FUNCDebugBreakpoint
 	
 	//reset to defaults b4 next call
-	Set £FUNCCustomCmdsB4DbgBreakpoint_DbgMsg ""
-	Set £FUNCCustomCmdsB4DbgBreakpoint_filter ""
+	Set £«DbgMsg ""
+	Set £«filter ""
 	RETURN
 }
 >>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp::DebugBreakpoint() at iDbgBrkPCount++
@@ -2710,27 +2711,27 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>FUNCAncientDeviceActivationToggle () {
-	//INPUT: <£FUNCAncientDeviceActivationToggle_Mode>
-	//INPUT: <£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached>
-	if(not("FUNC" IsIn £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	//INPUT: <£«Mode>
+	//INPUT: <£«callFuncWhenTargetReached>
+	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by
-		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
-			GoSub -p FUNCDetectAndReachTarget £»mode="InitDetectTarget" £callFuncWhenTargetReached=£FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ;
+		if(£«Mode == "FlyToTarget") {
+			GoSub -p FUNCDetectAndReachTarget £»mode="InitDetectTarget" £»callFuncWhenTargetReached=£«callFuncWhenTargetReached ;
 		} else {
-			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode ~£FUNCAncientDeviceActivationToggle_Mode~" ;
+			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode ~£«Mode~" ;
 		}
 		GoSub -p FUNCblinkGlow §»times=0 ;
 		Set §AncientDeviceTriggerStep 2
 	} else { if ( §AncientDeviceTriggerStep == 2 ) { // active
-		if(£FUNCAncientDeviceActivationToggle_Mode == "FlyToTarget") {
+		if(£«Mode == "FlyToTarget") {
 			GoSub -p FUNCDetectAndReachTarget £»mode="stop" ;
 		}
 		GoSub -p FUNCblinkGlow §»times=-1 ;
 		Set §AncientDeviceTriggerStep 1
 		// cleanup b4 next call
-		Set £FUNCAncientDeviceActivationToggle_Mode ""
-		Set £FUNCAncientDeviceActivationToggle_callFuncWhenTargetReached ""
+		Set £«Mode ""
+		Set £«callFuncWhenTargetReached ""
 	} }
 	
 	GoSub -p FUNCshowlocals £»filter=FUNCAncientDeviceActivationToggle §»force=1 ;
