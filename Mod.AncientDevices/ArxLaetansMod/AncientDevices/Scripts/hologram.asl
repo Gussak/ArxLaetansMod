@@ -318,8 +318,8 @@ ON INVENTORYUSE () {
 			//Set §AncientDeviceTriggerStep 1  //stop
 			//GoSub -p FUNCblinkGlow §»times=-1 ;
 		//} }
-		Set @CFUNCFlyMeToTarget_flySpeed 0.5 //takes 2s
-		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
+		Set @CFUNCFlyMeToTarget«flySpeed 0.5 //takes 2s
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £»callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -333,13 +333,13 @@ ON INVENTORYUSE () {
 			Set §AncientDeviceTriggerStep 1  //stop
 			GoSub -p FUNCblinkGlow §»times=-1 ;
 		} }
-		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
+		//TODOA GoSub -p FUNCAncientDeviceActivationToggle £»Mode=FlyToTarget £»callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
-		Set @CFUNCFlyMeToTarget_flySpeed 3.0 //takes 0.33s
-		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
+		Set @CFUNCFlyMeToTarget«flySpeed 3.0 //takes 0.33s
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £»callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} } } } }
@@ -1888,7 +1888,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//INPUT: <£«mode>
 	//INPUT: [£«callFuncWhenTargetFound]
 	//OUTPUT: £«TargetFoundEnt_OUTPUT
-	if(not("FUNC" IsIn £«callFuncWhenTargetFound)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call to ~£«callFuncWhenTargetFound~" ;
+	if(and(£«mode != "stop" && not("FUNC" IsIn £«callFuncWhenTargetFound));) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call to £«callFuncWhenTargetFound=~£«callFuncWhenTargetFound~ (btw £«mode=~£«mode~)" ;
 	
 	if(£«mode == "init") {
 		Set £«TargetFoundEnt_OUTPUT ""
@@ -1919,10 +1919,10 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>TCFUNCFlyMeToTarget () { GoSub CFUNCFlyMeToTarget ACCEPT } >>CFUNCFlyMeToTarget () {  //TODO re-use this for mindcontrol and teleport
-	//INPUT: <£CFUNCFlyMeToTarget_callFuncWhenTargetReached>
-	//INPUT: [@CFUNCFlyMeToTarget_flySpeed] this is used only when initializing
-	if(not("FUNC" IsIn £CFUNCFlyMeToTarget_callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call set ~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" ;
-	if(@CFUNCFlyMeToTarget_flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid flySpeed ~@CFUNCFlyMeToTarget_flySpeed~" ;
+	//INPUT: <£«callFuncWhenTargetReached>
+	//INPUT: [@«flySpeed] this is used only when initializing
+	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call set ~£«callFuncWhenTargetReached~" ;
+	if(@«flySpeed <= 0.0) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid flySpeed ~@«flySpeed~" ;
 	
 	if(^life_~£FUNCseekTargetLoop«HoverEnt~ > 0) {
 		if(^dist_~£FUNCseekTargetLoop«HoverEnt~ > §TeleDistEndTele) {
@@ -1939,8 +1939,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 				GoSub FUNCcalcInterpolateTeleStepDist1s()
 				Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
 				
-				if(and(@CFUNCFlyMeToTarget_flySpeed > 0.0 && @CFUNCFlyMeToTarget_flySpeed != 1.0)) {
-					Mul @TeleMeStepDist @CFUNCFlyMeToTarget_flySpeed // < 1.0 takes longer to travel. > 1.0 travel faster
+				if(and(@«flySpeed > 0.0 && @«flySpeed != 1.0)) {
+					Mul @TeleMeStepDist @«flySpeed // < 1.0 takes longer to travel. > 1.0 travel faster
 				}
 				
 				GoSub FUNCcalcFrameMilis	Set §TeleTimerFlyMilis §FUNCcalcFrameMilis_FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
@@ -1949,18 +1949,18 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			interpolate -s "~^me~" "~£FUNCseekTargetLoop«HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 		} else { // last step
 			interpolate "~^me~" "~£FUNCseekTargetLoop«HoverEnt~" 0.0 //one last step to be precise
-			GoSub -p "~£CFUNCFlyMeToTarget_callFuncWhenTargetReached~" £»target=£FUNCseekTargetLoop«HoverEnt ;
-			Set £CFUNCFlyMeToTarget_do "off"
+			GoSub -p "~£«callFuncWhenTargetReached~" £»target=£FUNCseekTargetLoop«HoverEnt ;
+			Set £«do "off"
 		}
 	} else {
-		Set £CFUNCFlyMeToTarget_do "off"
+		Set £«do "off"
 	}
 	
-	if(£CFUNCFlyMeToTarget_do == "off") {
+	if(£«do == "off") {
 		timerTCFUNCFlyMeToTarget off
 		//reset b4 next call
-		Set @CFUNCFlyMeToTarget_flySpeed 1.0
-		Set £CFUNCFlyMeToTarget_do "on"
+		Set @«flySpeed 1.0
+		Set £«do "on"
 	}
 	
 	RETURN
@@ -1970,8 +1970,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//INPUT: <£«mode>
 	//INPUT: <£«callFuncWhenTargetReached>
 	//INPUT: [£«target]
-	if(£«mode == "") GoSub FUNCCustomCmdsB4DbgBreakpoint
-	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(£«mode == "") GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«mode=~£«mode~" ;
+	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncWhenTargetReached=~£«callFuncWhenTargetReached~" ;
 	
 	if(£«mode == "InitDetectTarget"){
 		GoSub -p FUNCseekTargetLoop £»mode="init" £»callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
@@ -2009,8 +2009,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		
 		//if(£FUNCseekTargetLoop«TargetFoundEnt_OUTPUT == "") {
 		if(£FUNCDetectAndReachTarget_target == "") {
-			Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTargetLoop
-			//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
+			Set £CFUNCFlyMeToTarget«callFuncWhenTargetReached "FUNCDetectAndReachTarget" // CFUNCFlyMeToTarget is called by FUNCseekTargetLoop
+			//Set £CFUNCFlyMeToTarget«callFuncWhenTargetReached "CFUNCSniperBulletAtTarget" // CFUNCFlyMeToTarget will set CFUNCSniperBulletAtTarget's target param
 			//Set £FUNCseekTargetLoop«callFuncWhenTargetFound "CFUNCFlyMeToTarget"
 			// this will keep tring to find a target.
 			GoSub -p FUNCseekTargetLoop "£»mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
@@ -2023,7 +2023,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	}
 	//if(£FUNCDetectAndReachTarget_mode == "detect") {
 		//if(not("FUNC" IsIn £FUNCDetectAndReachTarget_callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
-		//Set £CFUNCFlyMeToTarget_callFuncWhenTargetReached "FUNCDetectAndReachTarget"
+		//Set £CFUNCFlyMeToTarget«callFuncWhenTargetReached "FUNCDetectAndReachTarget"
 		//GoSub -p FUNCseekTargetLoop "£»mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
 	//}
 	
@@ -2713,13 +2713,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 >>FUNCAncientDeviceActivationToggle () {
 	//INPUT: <£«Mode>
 	//INPUT: <£«callFuncWhenTargetReached>
-	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncWhenTargetReached=~£«callFuncWhenTargetReached~" ;
 	
 	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by
 		if(£«Mode == "FlyToTarget") {
 			GoSub -p FUNCDetectAndReachTarget £»mode="InitDetectTarget" £»callFuncWhenTargetReached=£«callFuncWhenTargetReached ;
 		} else {
-			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode ~£«Mode~" ;
+			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode £«Mode=~£«Mode~" ;
 		}
 		GoSub -p FUNCblinkGlow §»times=0 ;
 		Set §AncientDeviceTriggerStep 2
