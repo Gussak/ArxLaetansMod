@@ -6,26 +6,29 @@
 [I] Script:2409           ├─ Mod: test mod override hologram 2
 [I] Script:2412           └─ Ended collecting mod load order.
 ...
-[I] Script:2438          Modding script file: graph/obj3d/interactive/items/magic/hologram/hologram.asl
-[I] Script:2442          ├─ Mod name: mod hologram tests
-[W] Script:2313          fixing data to ISO-8859-1 read from 'mods/mod hologram tests/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch'
-[I] Script:2466          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2516          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2578          │   ├─ applied append   : graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl
-[I] Script:2584          │   └─ End apply all for: mod hologram tests
-[I] Script:2442          ├─ Mod name: test mod override hologram 1
-[I] Script:2466          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2516          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2550          │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
-[I] Script:2584          │   └─ End apply all for: test mod override hologram 1
-[I] Script:2442          ├─ Mod name: test mod override hologram 3
-[I] Script:2466          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2516          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2550          │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
-[I] Script:2584          │   └─ End apply all for: test mod override hologram 3
-[I] Script:2442          ├─ Mod name: test mod override hologram 2
-[I] Script:2466          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2516          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
-[I] Script:2550          │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
-[I] Script:2584          │   └─ End apply all for: test mod override hologram 2
-[I] Script:2591          └─ All Mods: Dumping applied result(s) of 3 override(s), 4 patch(es) and 1 append(s) at: "modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl"
+[I] Script:2441          Modding script file: graph/obj3d/interactive/items/magic/hologram/hologram.asl
+[I] Script:2445          ├─ Mod name: mod hologram enable tests
+[W] Script:2317          fixing data to ISO-8859-1 read from 'mods/mod hologram enable tests/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch'
+[I] Script:2464          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2503          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2544          │   ├─ applied append   : graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl
+[I] Script:2550          │   └─ Ended applying all for: mod hologram enable tests
+[I] Script:2539          ├─ Mod name: mod hologram dev libs
+[I] Script:2544          │   ├─ applied append   : graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl
+[I] Script:2550          │   └─ Ended applying all for: mod hologram dev libs
+[I] Script:2445          ├─ Mod name: test mod hologram 1
+[I] Script:2464          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2503          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2526          │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+[I] Script:2550          │   └─ Ended applying all for: test mod hologram 1
+[I] Script:2445          ├─ Mod name: test mod hologram 3
+[I] Script:2464          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2503          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2526          │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+[I] Script:2550          │   └─ Ended applying all for: test mod hologram 3
+[I] Script:2445          ├─ Mod name: test mod hologram 2
+[I] Script:2464          │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2503          │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+[I] Script:2526          │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+[I] Script:2550          │   └─ Ended applying all for: test mod hologram 2
+[I] Script:2558          └─ All Mods: Dumping applied result(s) of 3 override(s), 4 patch(es) and 2 append(s) at: "modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl"

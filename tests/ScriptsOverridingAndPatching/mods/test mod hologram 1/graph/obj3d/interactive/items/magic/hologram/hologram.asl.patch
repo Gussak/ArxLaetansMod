@@ -1,0 +1,11 @@
+--- hologram.asl	2024-01-17 22:48:41.756361725 -0300
++++ hologram.tmpToCreatePatch.asl	2024-01-17 22:48:47.971467539 -0300
+@@ -2699,7 +2699,7 @@
+ 	 * $ sed -r -e 's@(TestModPatch ")original(")@\1patched1b\2@' hologram.asl >hologram.tmpToCreatePatch.asl
+ 	 * $ diff -u hologram.asl hologram.tmpToCreatePatch.asl >hologram.asl.patch
+ 	 */
+-	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
++	Set £TestModPatch "patched1b" //change to "patched" at the diff's patch file !
+ 	++ §testsPerformed
+ 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
+ 	RETURN

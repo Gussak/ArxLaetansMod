@@ -1,0 +1,12 @@
+diff --git a/hologram.asl b/hologram.asl
+index 77a8f86..3d2b924 100644
+--- a/hologram.asl
++++ b/hologram.asl
+@@ -226,6 +226,7 @@
+ 	}
+ 
+ 	++ §OnInventoryUseCount //total activations just for debug
++	GoSub FUNCtests
+ 	
+ 	if(^inPlayerInventory == 1) {
+ 		// this is another morph cycle, just activate to go, no combining:

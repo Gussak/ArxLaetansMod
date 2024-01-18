@@ -2692,7 +2692,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 
->>FUNCmodPatch () { //keep this example here as patching only works on original/vanilla files
+>>FUNCmodPatch () { 
+	/**
+	 * keep this example here as patching only works on original/vanilla files
+	 * create the file hologram.tmpToCreatePatch.asl and modify there to: Set £TestModPatch "patched1b"
+	 * $ sed -r -e 's@(TestModPatch ")original(")@\1patched1b\2@' hologram.asl >hologram.tmpToCreatePatch.asl
+	 * $ diff -u hologram.asl hologram.tmpToCreatePatch.asl >hologram.asl.patch
+	 */
 	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
 	++ §testsPerformed
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
