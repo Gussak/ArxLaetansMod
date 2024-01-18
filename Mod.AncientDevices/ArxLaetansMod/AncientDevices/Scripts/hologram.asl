@@ -212,8 +212,7 @@ ON IDENTIFY () { //this is called (apparently every frame) when the player hover
 	ACCEPT
 }
 
->>FUNCtests () {
-	// this will be overriden by hologram.asl.override.asl
+>>FUNCtests () {	// keep here as this will be overriden by hologram.asl.override.asl
 	RETURN
 }
 ON INVENTORYUSE () {
@@ -251,22 +250,22 @@ ON INVENTORYUSE () {
 			}
 			
 			GoSub FUNCskillCheckAncientTech
-			Set §ActivateChance §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+			Set §ActivateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 			if ( §Quality >= 4 ) {
 				Set §ActivateChance 100
 			}
 			RANDOM §ActivateChance { //not granted to successfully activate it as it is a defective device
-				Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
+				Set §FUNCtrapAttack«TimeoutMillis §DefaultTrapTimeoutMillis
 				
 				TWEAK ICON "HologramGrenadeActive[icon]"
 				
 				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
 				
-				Calc §«calcTimes [ §FUNCtrapAttack_TimeoutMillis / 1000 ]
+				Calc §«calcTimes [ §FUNCtrapAttack«TimeoutMillis / 1000 ]
 				GoSub -p FUNCblinkGlow §»times=§«calcTimes ;
 				
-				//timerTrapVanish     -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
-				//timerTrapVanishGlow -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+				//timerTrapVanish     -m 1 §FUNCtrapAttack«TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
+				//timerTrapVanishGlow -m 1 §FUNCtrapAttack«TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
 				
 				GoSub FUNCtrapAttack
 			} else {
@@ -470,7 +469,7 @@ ON INVENTORYUSE () {
 	// means the device is malfunctioning and shocks the player, was 25%
 	Set §Malfunction 0
 	GoSub FUNCskillCheckAncientTech
-	Set §ChkMalfunction §FUNCskillCheckAncientTech_chanceFailure_OUTPUT
+	Set §ChkMalfunction §FUNCskillCheckAncientTech«chanceFailure_OUTPUT
 	Div §ChkMalfunction 2
 	RANDOM §ChkMalfunction {
 		GoSub FUNCshockPlayer
@@ -531,11 +530,11 @@ ON INVENTORYUSE () {
 	} else {
 		/////////// HEALING EFFECTS
 		GoSub FUNCskillCheckAncientTech
-		RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
+		RANDOM §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT { //was just 50
 			//PLAY "potion_mana"
 			//Set @IncMana @SignalStrLvl
-			//Inc @IncMana @FUNCskillCheckAncientTech_addBonus_OUTPUT
-			Calc @IncMana [ @SignalStrLvl + @FUNCskillCheckAncientTech_addBonus_OUTPUT ]
+			//Inc @IncMana @FUNCskillCheckAncientTech«addBonus_OUTPUT
+			Calc @IncMana [ @SignalStrLvl + @FUNCskillCheckAncientTech«addBonus_OUTPUT ]
 			if ( §Identified > 0 ) Mul @IncMana 1.5
 			SpecialFX MANA @IncMana
 			//TODO play some sound that is not drinking or some visual effect like happens with healing
@@ -544,11 +543,11 @@ ON INVENTORYUSE () {
 		}
 		
 		GoSub FUNCskillCheckAncientTech
-		RANDOM §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT { //was just 50
+		RANDOM §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT { //was just 50
 			//SpecialFX HEAL @SignalStrLvl
 			//Set @IncHP @SignalStrLvl
-			//Inc @IncHP @FUNCskillCheckAncientTech_addBonus_OUTPUT
-			Calc @IncHP [ @SignalStrLvl + @FUNCskillCheckAncientTech_addBonus_OUTPUT ]
+			//Inc @IncHP @FUNCskillCheckAncientTech«addBonus_OUTPUT
+			Calc @IncHP [ @SignalStrLvl + @FUNCskillCheckAncientTech«addBonus_OUTPUT ]
 			if ( §Identified > 0 ) Mul @IncHP 1.5
 			SPELLCAST -msf @IncHP HEAL PLAYER
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;HEAL"
@@ -595,18 +594,18 @@ ON INVENTORYUSE () {
 		RANDOM 15 { //to prevent player using as granted weapon against NPCs
 			//timerAttack55 -m  1 4950 SETTARGET PLAYER //for fireball
 			//timerAttack56 -m  1 5000 SPAWN FIREBALL //the origin to fire from must be above floor
-			Set §FUNCtrapAttack_TrapMode 1 //projectile at player
-			Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
-			GoSub FUNCtrapAttack
+			//Set §FUNCtrapAttack«TrapMode 1 //projectile at player
+			//Set §FUNCtrapAttack«TimeoutMillis §DefaultTrapTimeoutMillis
+			GoSub -p FUNCtrapAttack §»TrapMode=1 §»TimeoutMillis=§DefaultTrapTimeoutMillis ;
 		} else {
 		RANDOM 25 { //to prevent player using as granted weapon against NPCs
-			Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
-			//timerTrapVanish -m 1 §FUNCtrapAttack_TimeoutMillis GoTo TFUNChideHologramPartsPermanently
-			GoSub FUNCtrapAttack
+			//Set §FUNCtrapAttack«TimeoutMillis §DefaultTrapTimeoutMillis
+			//timerTrapVanish -m 1 §FUNCtrapAttack«TimeoutMillis GoTo TFUNChideHologramPartsPermanently
+			GoSub -p FUNCtrapAttack §»TimeoutMillis=§DefaultTrapTimeoutMillis ;
 			//timerDestroy -m   1 5100 GoTo TFUNCDestroySelfSafely
 		} }
 		
-		if (§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 0) {
+		if (§FUNCtrapAttack«TrapCanKillMode_OUTPUT == 0) {
 			timerGrantDestroySelf -m 1 §DefaultTrapTimeoutMillis GoTo TFUNCDestroySelfSafely
 		}
 		
@@ -769,7 +768,7 @@ On Main () { //HeartBeat happens once per second apparently (but may be less oft
 	
 	// any item that is going to explode will benefit from this
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Chk:TrapCanKillMode"
-	if (§FUNCtrapAttack_TrapCanKillMode_OUTPUT == 1) {
+	if (§FUNCtrapAttack«TrapCanKillMode_OUTPUT == 1) {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;TrapCanKillMode"
 		//attractor SELF 1 1000
 		GoSub FUNCMakeNPCsHostile //this is good as while the item is flying after being thrown, NPCs will wake up near it!
@@ -1354,10 +1353,10 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 >>TFUNCnameUpdate () { GoSub FUNCnameUpdate ACCEPT } >>FUNCnameUpdate () {
 	// if not identified, words will be in latin or messed up letters order
-	//OUTPUT: £FUNCnameUpdate_NameFinal_OUTPUT
+	//OUTPUT: £FUNCnameUpdate«NameFinal_OUTPUT
 	//if(§Identified == 0) ACCEPT //the player is still not sure about what is going on
 	
-	Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameBase~."
+	Set £«NameFinal_OUTPUT "~£«NameBase~."
 	
 	//if ( §bHologramInitialized == 1 ) {
 		GoSub FUNCcalcAncientTechSkill
@@ -1464,22 +1463,23 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		
 		if ( §Quality >= 4 ) {
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ MK2+" 
+				Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ MK2+" 
 			} else {
-				Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Gradus Duo+" 
+				Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Gradus Duo+" 
 			}
 		}
 		GoSub FUNCupdateIcon
 		
 		if(§AncientDeviceTriggerStep == 1){
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Stand-by)."
+			Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ (Stand-by)."
 		}
 		if(§AncientDeviceTriggerStep == 2){
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ .+!ACTIVE!+."
+			Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ .+!ACTIVE!+."
 		}
 		
+		todob
 		if(£FUNCseekTargetLoop«HoverEnt != "" && £FUNCseekTargetLoop«HoverEnt != "void") {
-			Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop«HoverEnt~,~§FUNCseekTargetLoop«HoverLife~hp)."
+			Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ (Aim:~£FUNCseekTargetLoop«HoverEnt~,~§FUNCseekTargetLoop«HoverLife~hp)."
 		}
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
@@ -1508,21 +1508,21 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		//}
 		if(§Identified == 1) {
 			// latin is almost identical...
-			if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." 
-			if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Quality:~£ItemQuality~."
-			if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~."
+			if(@AncientTechSkill >= 20) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Signal:~£SignalStrInfo~." 
+			if(@AncientTechSkill >= 30) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Quality:~£ItemQuality~."
+			if(@AncientTechSkill >= 40) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~."
 		} else {
-			if(@AncientTechSkill >= 20) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Nagsil:~£SignalStrInfo~." 
-			if(@AncientTechSkill >= 30) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Itaquyl:~£ItemQuality~."
-			if(@AncientTechSkill >= 40) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Ditononic:~£ItemConditionDesc~."
+			if(@AncientTechSkill >= 20) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Nagsil:~£SignalStrInfo~." 
+			if(@AncientTechSkill >= 30) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Itaquyl:~£ItemQuality~."
+			if(@AncientTechSkill >= 40) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Ditononic:~£ItemConditionDesc~."
 		}
-		//if(@AncientTechSkill >= 50) Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ Signal:~§SignalStrengthTrunc~, ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;) 
+		//if(@AncientTechSkill >= 50) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Signal:~§SignalStrengthTrunc~, ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;) 
 	//} else {
-		//Set £FUNCnameUpdate_NameFinal_OUTPUT "~£FUNCnameUpdate_NameFinal_OUTPUT~ (Not initialized)."
+		//Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ (Not initialized)."
 	//}
 	
-	//SetName "~£FUNCnameUpdate_NameBase~. Quality:~£ItemQuality~, Condition:~£ItemConditionDesc~(~§ItemConditionPercent~%), Uses:Count=~§UseCount,Remain=~§UseRemain~,Max=~§UseMax~"
-	SetName "~£FUNCnameUpdate_NameFinal_OUTPUT~"
+	//SetName "~£«NameBase~. Quality:~£ItemQuality~, Condition:~£ItemConditionDesc~(~§ItemConditionPercent~%), Uses:Count=~§UseCount,Remain=~§UseRemain~,Max=~§UseMax~"
+	SetName "~£«NameFinal_OUTPUT~"
 	GoSub FUNCshowlocals
 }
 
@@ -1573,23 +1573,23 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 >>TFUNCskillCheckAncientTech () { GoSub FUNCskillCheckAncientTech ACCEPT } >>FUNCskillCheckAncientTech () { //checks the technical skill like in a percent base. 
 	//INPUTS:
 	//OUTPUTS:
-	//  §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
-	//  §FUNCskillCheckAncientTech_chanceFailure_OUTPUT
-	//  §FUNCskillCheckAncientTech_bonus_OUTPUT
+	//  §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
+	//  §FUNCskillCheckAncientTech«chanceFailure_OUTPUT
+	//  @FUNCskillCheckAncientTech«bonus_OUTPUT
 	
 	GoSub FUNCcalcAncientTechSkill
 	
-	Set §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT @AncientTechSkill
-	if (§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT <  5) Set §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT  5 //minimal success chance
-	if (§FUNCskillCheckAncientTech_chanceSuccess_OUTPUT > 95) Set §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT 95 //minimal fail chance
+	Set §«chanceSuccess_OUTPUT @AncientTechSkill
+	if (§«chanceSuccess_OUTPUT <  5) Set §«chanceSuccess_OUTPUT  5 //minimal success chance
+	if (§«chanceSuccess_OUTPUT > 95) Set §«chanceSuccess_OUTPUT 95 //minimal fail chance
 	
-	Set §FUNCskillCheckAncientTech_chanceFailure_OUTPUT 100
-	Dec §FUNCskillCheckAncientTech_chanceFailure_OUTPUT §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+	Set §«chanceFailure_OUTPUT 100
+	Dec §«chanceFailure_OUTPUT §«chanceSuccess_OUTPUT
 	
-	Set @FUNCskillCheckAncientTech_addBonus_OUTPUT @AncientTechSkill
+	Set @«addBonus_OUTPUT @AncientTechSkill
 	Set @TmpRandomBonus 10
 	Inc @TmpRandomBonus ^rnd_10
-	Div @FUNCskillCheckAncientTech_addBonus_OUTPUT @TmpRandomBonus
+	Div @«addBonus_OUTPUT @TmpRandomBonus
 	
 	// unset after log if any
 	GoSub FUNCshowlocals
@@ -1599,10 +1599,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>TFUNCtrapAttack () { GoSub FUNCtrapAttack ACCEPT } >>FUNCtrapAttack () {
-	//INPUT: [§FUNCtrapAttack_TimeoutMillis]
-	//INPUT: [§FUNCtrapAttack_TrapMode]: 0=explosion(default) 1=projectile/targetPlayer
-	
-	//TODORM //INPUT: <§FUNCtrapAttack_TrapTimeSec>: in seconds (not milis)
+	//INPUT: [§FUNCtrapAttack«TimeoutMillis]
+	//INPUT: [§FUNCtrapAttack«TrapMode]: 0=explosion(default) 1=projectile/targetPlayer
+	//OUTPUT: §FUNCtrapAttack«TrapCanKillMode_OUTPUT
 	
 	SendEvent GLOW SELF "" //TODO this also makes it glow or just calls the ON GLOW event that needs to be implemented here?
 	
@@ -1612,7 +1611,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	PLAY "TRAP"
 	PLAY "POWER"
 	
-	Set §FUNCtrapAttack_TrapCanKillMode_OUTPUT 1 //this calls FUNCMakeNPCsHostile at main() heartbeat
+	Set §«TrapCanKillMode_OUTPUT 1 //this calls FUNCMakeNPCsHostile at main() heartbeat
 	
 	//attractor SELF 1 1000 //makes it a bit difficult for the player to run away
 	
@@ -1621,50 +1620,50 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	GoSub FUNCcalcSignalStrength
 	
 	// random trap
-	if(§FUNCtrapAttack_TimeoutMillis == 0)	Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
-	Set §FUNCtrapAttack_TrapTimeSec §FUNCtrapAttack_TimeoutMillis
-	Div §FUNCtrapAttack_TrapTimeSec 1000 //must be seconds (not milis) to easify things below like timer count and text
-	if(§FUNCtrapAttack_TrapTimeSec > 0) {
-		timerTrapTime     §FUNCtrapAttack_TrapTimeSec 1 Dec §FUNCtrapAttack_TrapTimeSec 1
-		timerTrapTimeName §FUNCtrapAttack_TrapTimeSec 1 SetName "Holo-Grenade Activated (~§FUNCtrapAttack_TrapTimeSec~s)"
+	if(§«TimeoutMillis == 0)	Set §«TimeoutMillis §DefaultTrapTimeoutMillis
+	Set §«TrapTimeSec §«TimeoutMillis
+	Div §«TrapTimeSec 1000 //must be seconds (not milis) to easify things below like timer count and text
+	if(§«TrapTimeSec > 0) {
+		timerTrapTime     §«TrapTimeSec 1 Dec §«TrapTimeSec 1
+		timerTrapTimeName §«TrapTimeSec 1 SetName "Holo-Grenade Activated (~§«TrapTimeSec~s)"
 	}
 	//timerTrapAttack  -m 0  100 GoTo TFUNCMakeNPCsHostile //doesnt work
 	
 	Set §TrapEffectTimeMillis 0
-	if (§FUNCtrapAttack_TrapMode == 0) { //explosion around self
+	if (§«TrapMode == 0) { //explosion around self
 		//Set §TmpTrapKind ^rnd_5
-		//if (§TmpTrapKind == 0) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl explosion  SELF
-		//if (§TmpTrapKind == 1) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl fire_field SELF
-		//if (§TmpTrapKind == 2) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl harm       SELF
-		//if (§TmpTrapKind == 3) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl ice_field  SELF
-		//if (§TmpTrapKind == 4) timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis SPELLCAST -smf @SignalStrLvl life_drain SELF
-		timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis GoTo TFUNCchkAndAttackExplosion
+		//if (§TmpTrapKind == 0) timerTrapAttack -m 1 §«TimeoutMillis SPELLCAST -smf @SignalStrLvl explosion  SELF
+		//if (§TmpTrapKind == 1) timerTrapAttack -m 1 §«TimeoutMillis SPELLCAST -smf @SignalStrLvl fire_field SELF
+		//if (§TmpTrapKind == 2) timerTrapAttack -m 1 §«TimeoutMillis SPELLCAST -smf @SignalStrLvl harm       SELF
+		//if (§TmpTrapKind == 3) timerTrapAttack -m 1 §«TimeoutMillis SPELLCAST -smf @SignalStrLvl ice_field  SELF
+		//if (§TmpTrapKind == 4) timerTrapAttack -m 1 §«TimeoutMillis SPELLCAST -smf @SignalStrLvl life_drain SELF
+		timerTrapAttack -m 1 §«TimeoutMillis GoTo TFUNCchkAndAttackExplosion
 		//this cause no damage? //if (§TmpTrapKind == 5) timerTrapAttack  -m 1 5000 SPELLCAST -smf @SignalStrLvl mass_incinerate SELF
 		//Unset §TmpTrapKind
 		Set §TrapEffectTimeMillis 2000 //some effects have infinite time and then will last 2s (from 5000 to 7000) like explosion default time, as I being infinite would then last 0s as soon this entity is destroyed right?
 	} else {
-	if (§FUNCtrapAttack_TrapMode == 1) { //projectile at player
-		timerTrapAttack -m 1 §FUNCtrapAttack_TimeoutMillis GoTo TFUNCchkAndAttackProjectile
+	if (§«TrapMode == 1) { //projectile at player
+		timerTrapAttack -m 1 §«TimeoutMillis GoTo TFUNCchkAndAttackProjectile
 	} }
 	
-	timerTrapVanish       -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"       "alpha"
-	timerTrapVanishActive -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
-	timerTrapVanishGlow   -m 1 §FUNCtrapAttack_TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"   "alpha"
+	timerTrapVanish       -m 1 §«TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"       "alpha"
+	timerTrapVanishActive -m 1 §«TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeActive" "alpha"
+	timerTrapVanishGlow   -m 1 §«TimeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow"   "alpha"
 	
 	// trap effect time
-	Set §TmpTrapDestroyTime §FUNCtrapAttack_TimeoutMillis
+	Set §TmpTrapDestroyTime §«TimeoutMillis
 	Inc §TmpTrapDestroyTime §TrapEffectTimeMillis
 	timerTrapDestroy -m 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely 
 	
-	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;§FUNCtrapAttack_TimeoutMillis=~§FUNCtrapAttack_TimeoutMillis~"
-	GoSub FUNCshowlocals
+	//Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;§«TimeoutMillis=~§«TimeoutMillis~"
+	GoSub -p FUNCshowlocals §»force=1 ;
 	// unset after log
 	//Unset §TmpTrapDestroyTime //DO NOT UNSET OR IT WILL BREAK THE TIMER!!!
 	
 	//restore defaults for next call "w/o params"
-	Set §FUNCtrapAttack_TrapMode 0
-	//Set §FUNCtrapAttack_TrapTimeSec §DefaultTrapTimoutSec
-	Set §FUNCtrapAttack_TimeoutMillis §DefaultTrapTimeoutMillis
+	Set §«TrapMode 0
+	//Set §«TrapTimeSec §DefaultTrapTimoutSec
+	Set §«TimeoutMillis §DefaultTrapTimeoutMillis
 	RETURN
 }
 
@@ -1974,15 +1973,15 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncWhenTargetReached=~£«callFuncWhenTargetReached~" ;
 	
 	if(£«mode == "InitDetectTarget"){
-		GoSub -p FUNCseekTargetLoop £»mode="init" £»callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
 		Set £«mode "TargetAcquired"
+		GoSub -p FUNCseekTargetLoop £»mode="init" £»callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
 	} else { if(£«mode == "TargetAcquired") {
-		GoSub -p CFUNCFlyMeToTarget £»target=£«target £»callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
 		Set £«mode "DoWhenTargetReached"
+		GoSub -p CFUNCFlyMeToTarget £»target=£«target £»callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
 	} else { if(£«mode == "DoWhenTargetReached") {
+		Set £«mode "stop" //will just auto stop see below 
 		GoSub -p "~£«callFuncWhenTargetReached~" £»target=£«target ;
 		GoSub FUNCbreakDeviceDelayed
-		Set £«mode "stop" //will just auto stop see below 
 	} } }
 	
 	if(£«mode == "stop") {
@@ -2078,9 +2077,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			timerShrink1 -m 0 100 Dec §Scale 1
 			timerShrink2 -m 0 100 SetScale §Scale
 			
-			Set §FUNCtrapAttack_TimeoutMillis 2000
+			Set §FUNCtrapAttack«TimeoutMillis 2000
 			GoSub FUNCcalcAncientTechSkill
-			Mul §FUNCtrapAttack_TimeoutMillis @AncientTechSkillDebuffPercMultiplyer
+			Mul §FUNCtrapAttack«TimeoutMillis @AncientTechSkillDebuffPercMultiplyer
 			GoSub FUNCtrapAttack
 			
 			timerLandMineDetectNearbyNPC off
@@ -2415,7 +2414,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	Set §AncientDeviceTriggerStep 0
-	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
 	RANDOM §CreateChance {
 		/////////////////////////////////////////////////////////////////
@@ -2446,7 +2445,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			RETURN //because this is not a normal tool
 		} else { /////////////////// MORPH only by combining below here! ////////////////////////////
 		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
-			Set §PristineChance @FUNCskillCheckAncientTech_chanceSuccess_OUTPUT
+			Set §PristineChance @FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 			Div §PristineChance 10
 			If (§PristineChance < 5) Set §PristineChance 5
 			RANDOM §PristineChance { // grants a minimal chance based on skill in case the player do not initialize it
@@ -2648,52 +2647,6 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//Set §FUNCconfigOptionChk_chkTrunc @FUNCconfigOptionChk_chk
 	//RETURN
 //}
->>TFUNCshowlocals () { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals ()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
-	//INPUT: [§«force]
-	//INPUT: [£«filter]
-	if(and(£«filter == "" && §«force < 3)) { // only allow force if filter is set, or if force is high >=3
-		Set §«force 0
-	}
-	//Set §«force 0 //UNCOMMENT_ON_RELEASE as even with filters, this is about debugging the script. override to force release show nothing. the end user needs to comment this line
-	if(§«force >= 2) {
-		showvars -f £«filter
-	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §«force >= 1)) {
-		showlocals -f £«filter
-	}	}
-	
-	//defaults for next call
-	Set §«force 0
-	Set £«filter ""
-	RETURN
-}
->>FUNCCustomCmdsB4DbgBreakpoint () { 
-	//INPUT: [£«DbgMsg]
-	//INPUT: [£«filter] use ".*" regex to show all
-	
-	if(£«DbgMsg != "") {
-		Set £DebugMessage £«DbgMsg // £DebugMessage is detected by ScriptUtils.cpp::DebugBreakpoint()
-	} else {
-		Set £DebugMessage "(no helpful info was set)"
-	}
-	
-	if(£«filter == "") {
-		Set £«filter ^debugcalledfrom_1
-	} else {
-		Set £«filter "~£«filter~|~^debugcalledfrom_1~"
-	}
-	
-	Set £«filter "~£«filter~|~^debugcalledfrom_0~" // show also this func stuff
-	
-	showvars -f "~£«filter~"
-	
-	GoSub FUNCDebugBreakpoint
-	
-	//reset to defaults b4 next call
-	Set £«DbgMsg ""
-	Set £«filter ""
-	RETURN
-}
->>FUNCDebugBreakpoint () { RETURN } //this is detected by the cpp code, so it only works in debug mode and with a breakpoint placed there at src/script/ScriptUtils.cpp::DebugBreakpoint() at iDbgBrkPCount++
 >>FUNCsignalStrenghUpdateRequirement () {
 	Set @SignalStrengthReqBase 0
 	// dont use too high values cuz of Mul below
@@ -2739,7 +2692,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 
->>FUNCmodPatch () { //keep here as patching only works on original/vanilla files
+>>FUNCmodPatch () { //keep this example here as patching only works on original/vanilla files
 	Set £TestModPatch "original" //change to "patched" at the diff's patch file !
 	++ §testsPerformed
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"

@@ -1,5 +1,3 @@
-*.sbkp
-
 # uncomment below to have a strict filter. Comment to detect changes to new files that are still not at the strict filters below
 *
 
@@ -46,49 +44,81 @@
 !tools/interim/HowTo.interim.ImportExportFtl.txt
 !tools/interim/SPECIALTX_ORIGIN.png
 
-!tests/
-!tests/ScriptsOverridingAndPatching/
-!tests/ScriptsOverridingAndPatching/newLogLooksLike.txt
-!tests/ScriptsOverridingAndPatching/readme.txt
-!tests/ScriptsOverridingAndPatching/mods/
-!tests/ScriptsOverridingAndPatching/mods/modloadorder.cfg
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
-!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch
+# Mod AncientDevices: find tests -type d |sed -r 's@^(.*)@!\1\n!\1/*@' |sort -u
+!tests
+!tests/*
+!tests/ScriptsOverridingAndPatching
+!tests/ScriptsOverridingAndPatching/*
+!tests/ScriptsOverridingAndPatching/mods
+!tests/ScriptsOverridingAndPatching/mods/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 1/graph/obj3d/interactive/items/magic/hologram/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 2/graph/obj3d/interactive/items/magic/hologram/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/*
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram
+!tests/ScriptsOverridingAndPatching/mods/test mod override hologram 3/graph/obj3d/interactive/items/magic/hologram/*
 
-# Mod AncientDevices: find Mod.AncientDevices -type d |sed -r 's@^(.*)@!\1\n!\1/*@'
-!Mod.AncientDevices/
+# Mod AncientDevices: find Mod.AncientDevices -type d |sed -r -e 's@^(.*)@!\1\n!\1/*@' |sed -r -e 's@.*WorkFiles.*@#&@' |sort -u
+!Mod.AncientDevices
 !Mod.AncientDevices/*
-!Mod.AncientDevices/ArxLaetansMod/
+!Mod.AncientDevices/ArxLaetansMod
 !Mod.AncientDevices/ArxLaetansMod/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Mods/
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/Mods/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/items
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/items/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/items/magic
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/items/magic/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/items/magic/hologram
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram lib/graph/obj3d/interactive/items/magic/hologram/*
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/*
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph
@@ -103,26 +133,30 @@
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic/*
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic/hologram
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram tests/graph/obj3d/interactive/items/magic/hologram/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels/
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures/
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels/
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds/
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures/
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds/*
+!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures
 !Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons/
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons/*
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/*
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels/*
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Icons
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Icons/*
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures
+#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures/*
 
-# mod files (3D models etc) autogen
+# keep almost last, this will futher prevent such files (would not if on top!)
+*.lowercase.*
+*.sbkp
+*DO_NOT_COMMIT*
+
+# mod files (3D models etc) appended from autogen
 !ArxLaetansMod.MagicPotions.7z
 !ArxLaetansMod.RestorationPotions.7z
 !ArxLaetansMod.MagicGlassBottles.7z
 !ArxLaetansMod.Beverages.7z
 !ArxLaetansMod.HazardousPotions.7z
+
