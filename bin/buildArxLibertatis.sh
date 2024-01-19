@@ -23,6 +23,7 @@ set -eEu
 fQuestionDelay=9;if $bRetryingBuild;then fQuestionDelay=0.01;fi
 
 cd ArxLibertatis.github
+strLoggedPath="`pwd`"
 pwd
 mkdir -vp build && cd build
 pwd
@@ -46,12 +47,35 @@ if ! dpkg -s qtbase5-dev >/dev/null;then
   exit 1;
 fi
 
-#export SET_OPTIMIZATION_FLAGS=OFF #TODO this works?
-egrep "SET_OPTIMIZATION_FLAGS:BOOL=" ./CMakeCache.txt
+astrVarValoldValnew=(
+	"CMAKE_BUILD_TYPE:STRING"      ""    "Debug"
+	"CMAKE_CXX_FLAGS_DEBUG:STRING" -g    "-ggdb -O0 -fno-omit-frame-pointer"
+	"SET_OPTIMIZATION_FLAGS:BOOL"  ON    OFF  # like -O0 above I guess
+	"CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE TRUE
+)
+function FUNCshowSettings() {
+	for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
+		strVar="${astrVarValoldValnew[i+0]}"
+		egrep "${strVar}=" ./CMakeCache.txt
+	done
+}
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-	sed -i.`SECFUNCdtFmt --filename`.bkp -r 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' "./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
+	#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
+		#-e 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' \
+		#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
+	echo "BEFORE:";FUNCshowSettings
+	for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
+		strVar="${astrVarValoldValnew[i+0]}"
+		strValOld="${astrVarValoldValnew[i+1]}"
+		strValNew="${astrVarValoldValnew[i+2]}"
+		sed -i.`SECFUNCdtFmt --filename`.bkp -r \
+			-e "s'^${strVar}=.*$'${strVar}=${strValNew}'" \
+			"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
+	done
 fi
+echo "AFTER:";FUNCshowSettings
+
 #make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 : ${iMaxCores:=0} #help if the cpu is overheating, set this to 1. set to 0 to auto detect max cores.
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi
@@ -64,16 +88,37 @@ if echoc -t ${fQuestionDelay} -q "do not remake it all, just touch the files? (t
   astrMakeCmd+=(--touch)
 fi
 #doesnt work :( CPPFLAGS=-O0 "${astrMakeCmd[@]}"
-"${astrMakeCmd[@]}"
-set +x 
+SECFUNCexecA -ce "${astrMakeCmd[@]}" |tee ArxLibertatisBuildWithAllMakeCommands.log
+sed -i.bkp -r \
+	-e "s@${strLoggedPath}@\${strLoggedPath}@g" \
+	-e "s@(make.*Entering directory ').*(/build.*)'@\1\${strLoggedPath}\2@" \
+	ArxLibertatisBuildWithAllMakeCommands.log
+if egrep -i "$USER" ArxLibertatisBuildWithAllMakeCommands.log;then
+	echoc -p "found private data at log file"
+fi
 
 : ${bAutoDeploy:=true} #help
 if ! $bAutoDeploy;then echoc -w deploy;fi
-set -x
-while ! cp -vRu * ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/;do
-  echoc -w retry
-done
-mkdir -vp         ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/data/
+
+function FUNCmakeRO() {
+	pwd
+	if [[ ! -d "$1/" ]];then echoc -p "invalid path '$1/'";fi
+	SECFUNCexec -ce find "$1/" \( -perm -u+w -or -perm -g+w -or -perm -o+w \) -exec chmod ugo-w '{}' \;
+}
+function FUNCmakeRW() {
+	pwd
+	if [[ ! -d "$1/" ]];then echoc -p "invalid path '$1/'";fi
+	SECFUNCexec -ce find "$1/" \( -perm -u-w \) -exec chmod u+w '{}' \;
+}
+
+strDeployPath="../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/"
+FUNCmakeRW "$strDeployPath"
+SECFUNCexecA -ce cp -Ru * "$strDeployPath"
+#while ! SECFUNCexecA -ce cp -Ru * "$strDeployPath";do
+	##FUNCmakeRO "$strDeployPath"
+  #echoc -w retry
+#done
+SECFUNCexecA -ce mkdir -vp "${strDeployPath}/data/"
 # localization and misc (from data/core) must end at data/ and not data/core/
-cp -vRu ../data/core/* ../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/data/
-set +x
+SECFUNCexecA -ce cp -vRu ../data/core/* "${strDeployPath}/data/"
+FUNCmakeRO "${strDeployPath}/"

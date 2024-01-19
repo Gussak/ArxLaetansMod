@@ -47,6 +47,13 @@ while true;do
 
 	cd "$strPathRun"
 	
+	#strPrettyData="`ls -1d ../../ArxLibertatis.layer*.GFX-Arx_Neuralis*/graph/obj3d/textures*DISABLED*`"
+	strPrettyDataAt="../../ArxLibertatis.layer*.GFX-Arx_Neuralis*/graph/obj3d/textures"
+	strPrettyData="`ls -1d ${strPrettyDataAt}`"
+	if [[ ! -d "$strPrettyData" ]];then
+		echoc -p "having this path disabled will break/crash loading the game just after falling in the hole '$strPrettyDataAt'"
+	fi
+	
 	function FUNCsaveList() { 
 			find "$HOME/.local/share/arx/save" -iname "gsave.sav" -exec ls --full-time '{}' \; |sort -k6; 
 	}
