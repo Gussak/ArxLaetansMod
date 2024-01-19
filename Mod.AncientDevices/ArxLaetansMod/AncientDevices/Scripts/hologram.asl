@@ -212,9 +212,6 @@ ON IDENTIFY () { //this is called (apparently every frame) when the player hover
 	ACCEPT
 }
 
->>FUNCtests () {	// keep here as this will be overriden by hologram.asl.override.asl
-	RETURN
-}
 ON INVENTORYUSE () {
 	if(兌nitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
@@ -1477,8 +1474,7 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ .+!ACTIVE!+."
 		}
 		
-		todob
-		if(ΓUNCseekTargetLoop信overEnt != "" && ΓUNCseekTargetLoop信overEnt != "void") {
+		if(and(ΓUNCseekTargetLoop信overEnt != "" && ΓUNCseekTargetLoop信overEnt != "void")) {
 			Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ (Aim:~ΓUNCseekTargetLoop信overEnt~,~佝UNCseekTargetLoop信overLife~hp)."
 		}
 		
@@ -2692,7 +2688,7 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 
->>FUNCmodPatch () { 
+>>FUNCtestModPatch () { 
 	/**
 	 * keep this example here as patching only works on original/vanilla files
 	 * create the file hologram.tmpToCreatePatch.asl and modify there to: Set ΡestModPatch "patched1b"

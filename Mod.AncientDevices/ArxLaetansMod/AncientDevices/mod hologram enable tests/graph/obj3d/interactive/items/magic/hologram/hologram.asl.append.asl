@@ -63,6 +63,7 @@ __
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
+
 >>TFUNCtestLogicOperators () { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators () {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestLogicOperators"
 	
@@ -284,25 +285,25 @@ __
 		GoSub FUNCCustomCmdsB4DbgBreakpoint
 	}
 	
-	//Set @test1 1.0
-	//Set @test2 11.0
-	//Set £name "foo"
-	//if(and(@test1 == 1.0 && or(£name != "dummy" || @test2 > 10.0)){
-		//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:A"
-	//}
-	//if(and(@test1 == 2.0 && or(£name != "dummy" || @test2 > 10.0)){ //TODO this is failing
-		//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:B"
-	//}
-	//if(and(@test1 == 1.0 && or(£name == "dummy" || @test2 > 10.0)){
-		//Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:C"
-	//}
-	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 <= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:D"
-	//if(or(@test1 == 2.0 || £name == "dummy" || @test2 >= 10.0)) Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtests:E"
+	/* KEEP: this messes the code editor tho, but keep here
+	if(or(and( @testFloat == 1.5 && §testInt == 7 ] || £testString == "foo")){ //test format close/open block warnings
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;E1=ok"
+	}
+	//*/
+	//* KEEP
+	if(or(and [ @testFloat == 1.5 && §testInt == 7 ; || £testString == "foo")){ //test format close/open block warnings
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;E1=ok"
+	}
+	//*/
+	if(or [ and [ @testFloat == 1.5 && §testInt == 7 ] || £testString == "foo" ]){ // new optional format with [ ]
+		Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;E2=ok"
+	}
 	
 	++ §testsPerformed
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
+
 >>TFUNCtestDistAbsPos () { GoSub FUNCtestDistAbsPos ACCEPT } >>FUNCtestDistAbsPos () {
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCdistAbsPos"
 	// distance to absolute locations
@@ -375,7 +376,7 @@ __
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	++ §testsPerformed
 	//showvars //showlocals
-	GoSub -p FUNCshowlocals §force=1 ;
+	GoSub -p FUNCshowlocals §»force=1 ;
 	//Set £DebugMessage "~£DebugMessage~ test break point in deep call stack.\n yes works to stop the engine by creating a system popup!"	GoSub FUNCCustomCmdsB4DbgBreakpoint // keep commented
 	RETURN
 }
@@ -413,12 +414,12 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	RETURN
 }
 >>FUNCtestStrParam () {
-	GoSub -p FUNCshowlocals £filter="~^debugcalledfrom_1~" §force=1 ;
+	GoSub -p FUNCshowlocals £»filter="~^debugcalledfrom_1~" §»force=1 ;
 	++ §testsPerformed
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
->>TFUNCtests () { GoSub FUNCtests ACCEPT } >>FUNCtests () {
+>>TFUNCtest () { GoSub FUNCtest ACCEPT } >>FUNCtest () { // FUNCtest is also like a prefix to all other subtests filter on showlocals
 	//GoSub FUNCtestDegrees showlocals
 	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
 		//TODO put this on CircularOptionChoser
@@ -446,6 +447,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		Set §testsPerformed 0
 		Set §testsEnded 0
 		Set £TestsCompleted ""
+		
 		GoSub FUNCtestDistAbsPos
 		GoSub FUNCtestPrintfFormats
 		GoSub FUNCtestElseIf
@@ -454,13 +456,13 @@ this tests a WRONG closure with code after it (put some comment after the closur
 		GoSub FUNCtestLogicOperators
 		GoSub FUNCtestCallStack1 //test for PR_WarnMsgShowsGotoGosubCallStack
 		GoSub FUNCtestCalcNesting
-		GoSub FUNCtestAsk
 		GoSub FUNCtestModOverride
-		GoSub FUNCtestModPatch
-		GoSub -p FUNCtestStrParam £test="a b" £simple2=AsDf £simple="hologram.tiny.index4000.boxconfigoptions" £filter=".*(identified|stack).*" §force=1 ;
+		GoSub -p FUNCtestStrParam £»test="a b" £»simple2=AsDf £»simple="hologram.tiny.index4000.boxconfigoptions" £»filter=".*(identified|stack).*" §»force=1 ;
+		GoSub FUNCtestModPatch	if [ £TestModPatch != "patched2b" ] GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: the last patch should be £TestModPatch=='patched2b' but is '~£TestModPatch~'" ;
+		GoSub FUNCtestAsk //TODO not working yet
 		
 		Set §testsEnded 1
-		GoSub -p FUNCshowlocals §force=1 ;
+		GoSub -p FUNCshowlocals £»filter="test" §»force=1 ;
 	}
 	 
 	GoSub FUNCshowlocals

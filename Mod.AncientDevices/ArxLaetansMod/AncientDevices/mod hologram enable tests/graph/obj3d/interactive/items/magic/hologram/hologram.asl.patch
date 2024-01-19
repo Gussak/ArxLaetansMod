@@ -6,7 +6,7 @@ index 77a8f86..3d2b924 100644
  	}
  
  	++ §OnInventoryUseCount //total activations just for debug
-+	GoSub FUNCtests
++	GoSub FUNCtest
  	
  	if(^inPlayerInventory == 1) {
  		// this is another morph cycle, just activate to go, no combining:

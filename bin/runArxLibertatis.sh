@@ -75,6 +75,7 @@ while true;do
 	export ARX_ScriptErrorPopupCommand='yad --no-markup --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center --button="Edit:0" --button="Ignore:1" --button="Ignore10s:2" --button="Ignore60s:3" --button="Ignore10m:4" --button="Ignore1h:5"'
 	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
 	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
+	export ARX_WarnGoSubWithLocalScopeParams=true
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
