@@ -2250,7 +2250,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		Set £«gore ^last_spawned
 		(Move -e £«gore 0 25 0)	(Rotate -ae £«gore 0 0 5) //TODO fix the model instead? this is to fix gore that is too high and inclined a bit
 		//Set -mr £«target £KilledNPCinvList2D * //this is mainly to show on the log
-		Inventory GetItemCountList -e £«target £KilledNPCinvList2D *
+		Inventory GetItemCountList -e £«target £KilledNPCinvList2D all
 		DropItem -e £«target all
 	}
 	
