@@ -22,9 +22,12 @@ set -eEu
 : ${bRetryingBuild:=false}; declare -p bRetryingBuild #help
 fQuestionDelay=9;if $bRetryingBuild;then fQuestionDelay=0.01;fi
 
+: ${bRebuildFullVerbose:=false} #help use to create the full log file with all make commands
+
 cd ArxLibertatis.github
 strLoggedPath="`pwd`"
 pwd
+if $bRebuildFullVerbose;then trash build;fi
 mkdir -vp build && cd build
 pwd
 #  -DARX_DEBUG=1
@@ -47,39 +50,64 @@ if ! dpkg -s qtbase5-dev >/dev/null;then
   exit 1;
 fi
 
-astrVarValoldValnew=(
-	"CMAKE_BUILD_TYPE:STRING"      ""    "Debug"
-	"CMAKE_CXX_FLAGS_DEBUG:STRING" -g    "-ggdb -O0 -fno-omit-frame-pointer"
-	"SET_OPTIMIZATION_FLAGS:BOOL"  ON    OFF  # like -O0 above I guess
-	"CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE TRUE
-)
+astrVarValoldValnew=()
+function FUNCpatchCache() {
+	astrVarValoldValnew+=("$1" "" "$2")
+	sed -i.`SECFUNCdtFmt --filename`.bkp -r \
+		-e "s'^${1}=.*'${1}=${2}'" \
+		"./CMakeCache.txt"
+}
 function FUNCshowSettings() {
 	for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
 		strVar="${astrVarValoldValnew[i+0]}"
 		egrep "${strVar}=" ./CMakeCache.txt
 	done
 }
+
+#astrVarValoldValnew=(
+	#"CMAKE_BUILD_TYPE:STRING"      ""    "Debug"
+	#"CMAKE_CXX_FLAGS_DEBUG:STRING" -g    "-ggdb -O0 -fno-omit-frame-pointer"
+	#"SET_OPTIMIZATION_FLAGS:BOOL"  ON    OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
+#)
+if $bRebuildFullVerbose;then
+#astrVarValoldValnew+=(
+	#"CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE TRUE
+#)
+	FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  TRUE
+else
+	FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE
+fi
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
 		#-e 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' \
 		#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 	echo "BEFORE:";FUNCshowSettings
-	for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
-		strVar="${astrVarValoldValnew[i+0]}"
-		strValOld="${astrVarValoldValnew[i+1]}"
-		strValNew="${astrVarValoldValnew[i+2]}"
-		sed -i.`SECFUNCdtFmt --filename`.bkp -r \
-			-e "s'^${strVar}=.*$'${strVar}=${strValNew}'" \
-			"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
-	done
+	#for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
+		#strVar="${astrVarValoldValnew[i+0]}"
+		#strValOld="${astrVarValoldValnew[i+1]}"
+		#strValNew="${astrVarValoldValnew[i+2]}"
+		#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
+			#-e "s'^${strVar}=.*$'${strVar}=${strValNew}'" \
+			#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
+	#done
+	if echoc -t ${fQuestionDelay} -q "use heavy debug?";then
+		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
+		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb -O0 -fno-omit-frame-pointer" # seems perfect but FPS drops to 3, difficult to test in-game
+		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
+	else
+		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
+		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-g"
+		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
+	fi
 fi
+declare -p astrVarValoldValnew
 echo "AFTER:";FUNCshowSettings
 
 #make -j "`grep "core id" /proc/cpuinfo |wc -l`"
 : ${iMaxCores:=0} #help if the cpu is overheating, set this to 1. set to 0 to auto detect max cores.
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi
-astrMakeCmd=(make -j "$iMaxCores")
+astrMakeCmd=(unbuffer make -j "$iMaxCores")
 if echoc -q -t ${fQuestionDelay} "check coding style for warnings?";then
 	"${astrMakeCmd[@]}" style
 fi

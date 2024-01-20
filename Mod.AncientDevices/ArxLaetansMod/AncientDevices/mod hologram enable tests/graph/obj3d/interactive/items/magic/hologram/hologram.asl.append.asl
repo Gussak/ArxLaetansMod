@@ -421,7 +421,10 @@ this tests a WRONG closure with code after it (put some comment after the closur
 }
 >>TFUNCtest () { GoSub FUNCtest ACCEPT } >>FUNCtest () { // FUNCtest is also like a prefix to all other subtests filter on showlocals
 	//GoSub FUNCtestDegrees showlocals
-	if(^degreesx_player > 300) { //301 is the maximum Degrees player can look up is that
+	
+	Set @testPlayerDegreesX ^degreesx_player
+	
+	if(and(@testPlayerDegreesX > 300 && @testPlayerDegreesX < 302)) { //301 is the maximum Degrees player can look up is that, but 360 is horizon!
 		//TODO put this on CircularOptionChoser
 		//++ #FUNCshowlocals_enabled	if(#FUNCshowlocals_enabled > 1) Set #FUNCshowlocals_enabled 0
 		if(&G_HologCfgOpt_ShowLocals == 21.1) { //TODOA use CFUNCconfigOptionToggle instead
@@ -433,7 +436,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	}
 	
 	//if(^degreesx_player == 74.9) { //minimum Degrees player can look down is that
-	if(^degreesx_player < 75) { // 74.9 is the minimum Degrees player can look down is that
+	if(and(@testPlayerDegreesX < 75 && @testPlayerDegreesX > 74)) { // 74.9 is the minimum Degrees player can look down is that, but 0 is horizon!
 		//TODO put this on CircularOptionChoser
 		
 		//fail teleport -pi //tele the player to its starting spawn point

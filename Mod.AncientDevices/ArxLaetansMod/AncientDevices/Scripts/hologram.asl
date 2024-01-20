@@ -1013,18 +1013,21 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>FUNCconfigOptionHover () {
-	// X degrees from 74.9 (downest) to 301 (upperest)
+	// X degrees from 74.9 (downest) to 0 in the horizon. from 360 in the horizon to 301 (upperest)
 	// Each face has 11 options.
 	// Top and bottom faces can only provide access to half the options looking upwards, so we will use just 5 and the limit to the center one.
 	// total accessibblle options in X: 11+5+5 = 21
-	// available degrees in X: 301-74.9 = 226.1
-	// each opt degrees range: 226.1 / 21 = 10.766666667
+	// available degrees in X: (360-301=59 + 74.9-0=74.9)=133.9=134
+	// each opt degrees range: 134 / 21 = 6.3809523809
 	Set @CfgOptHoverX ^degreesx_player 
 	Set @CfgOptHoverY ^degreesy_player 
-	// calc option up/down degrees range to index
-	Set @CfgOptIndexTmp @CfgOptHoverX
-	Sub @CfgOptIndexTmp 74.9
-	Div @CfgOptIndexTmp 10.766666667
+	// calc option up/down degrees range to index. this convert the degrees into 0-134 from bottom to top
+	if(@CfgOptHoverX < 75) {
+		Calc @CfgOptIndexTmp [ 74.9 - @CfgOptHoverX ]
+	} else { if(@CfgOptHoverX > 300) {
+		Calc @CfgOptIndexTmp [ 74.9 + 59 - [ @CfgOptHoverX - 301 ] ]
+	} }
+	Div @CfgOptIndexTmp 6.3809523809
 	Set 低fgOptIndexTruncTmp @CfgOptIndexTmp
 	Add 低fgOptIndexTruncTmp 1 //to fix from 0.0 to 1.0 that is the lowest option
 	// 低fgOptIndexTruncTmp 1-5 (5) bottom, 6-16 (11) horizon, 17-21 (5) top
@@ -1164,6 +1167,8 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 >>TFUNCinitDefaults () { GoSub FUNCinitDefaults ACCEPT } >>FUNCinitDefaults () { //DO NOT CALL FROM "ON INIT" or every item on the stack will have the same random values!!! :(
 	if(兌nitDefaultsDone > 0) RETURN
 	if (^amount > 1) RETURN //this must not be a stack of items to prevent identical random values!
+	
+	Set 伶ebugMode 1 //COMMENT_ON_RELEASE
 	
 	Set ｘncientDeviceMode "AncientBox"
 	
@@ -1512,6 +1517,12 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(@AncientTechSkill >= 30) Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ Itaquyl:~ΖtemQuality~."
 			if(@AncientTechSkill >= 40) Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ Ditononic:~ΖtemConditionDesc~."
 		}
+		
+		//EASY DEBUG STUFF
+		if(伶ebugMode == 1) {
+			Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ DBG:~^degreesx_player~,~^degreesy_player~,~^degreesz_player~."
+		}
+		
 		//if(@AncientTechSkill >= 50) Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ Signal:~刨ignalStrengthTrunc~, ~兌temConditionPercent~% ~助seCount~/~助seMax~ Remaining ~助seRemain~." //detailed condition for nerds ;) 
 	//} else {
 		//Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ (Not initialized)."
@@ -1944,6 +1955,7 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			interpolate -s "~^me~" "~ΓUNCseekTargetLoop信overEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 		} else { // last step
 			interpolate "~^me~" "~ΓUNCseekTargetLoop信overEnt~" 0.0 //one last step to be precise
+			GoSub -p FUNCshowlocals 宏force=1 ;
 			GoSub -p "~ㄚcallFuncWhenTargetReached~" ˙target=ΓUNCseekTargetLoop信overEnt ;
 			Set ㄚdo "off"
 		}
@@ -1952,6 +1964,7 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	}
 	
 	if(ㄚdo == "off") {
+		GoSub -p FUNCshowlocals 宏force=1 ;
 		timerTCFUNCFlyMeToTarget off
 		//reset b4 next call
 		Set @剌lySpeed 1.0
@@ -1971,12 +1984,15 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(ㄚmode == "InitDetectTarget"){
 		Set ㄚmode "TargetAcquired"
 		GoSub -p FUNCseekTargetLoop ˙mode="init" ˙callFuncWhenTargetFound=FUNCDetectAndReachTarget ;
+		GoSub -p FUNCshowlocals 宏force=1 ;
 	} else { if(ㄚmode == "TargetAcquired") {
 		Set ㄚmode "DoWhenTargetReached"
 		GoSub -p CFUNCFlyMeToTarget ˙target=ㄚtarget ˙callFuncWhenTargetReached=FUNCDetectAndReachTarget ;
+		GoSub -p FUNCshowlocals 宏force=1 ;
 	} else { if(ㄚmode == "DoWhenTargetReached") {
 		Set ㄚmode "stop" //will just auto stop see below 
 		GoSub -p "~ㄚcallFuncWhenTargetReached~" ˙target=ㄚtarget ;
+		GoSub -p FUNCshowlocals 宏force=1 ;
 		GoSub FUNCbreakDeviceDelayed
 	} } }
 	
@@ -2100,6 +2116,7 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		timerTFUNCteleportToAndKillNPC_flyMeToNPC -m 0 劫eleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe
 		//TODO explode npc in gore dismembering, may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	}
+	GoSub -p FUNCshowlocals 宏force=1 ;
 	RETURN
 }
 >>TFUNCteleportToAndKillNPC () { GoSub FUNCteleportToAndKillNPC ACCEPT } >>FUNCteleportToAndKillNPC () {

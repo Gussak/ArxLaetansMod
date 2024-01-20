@@ -49,10 +49,13 @@ while true;do
 	
 	#strPrettyData="`ls -1d ../../ArxLibertatis.layer*.GFX-Arx_Neuralis*/graph/obj3d/textures*DISABLED*`"
 	strPrettyDataAt="../../ArxLibertatis.layer*.GFX-Arx_Neuralis*/graph/obj3d/textures"
-	strPrettyData="`ls -1d ${strPrettyDataAt}`"
+	strPrettyData="`ls -1d ${strPrettyDataAt}`"&&:
 	if [[ ! -d "$strPrettyData" ]];then
 		echoc -p "having this path disabled will break/crash loading the game just after falling in the hole '$strPrettyDataAt'"
 	fi
+	
+	: ${strMainModFile:="${strPathIni}/ArxLaetansMod.github/Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/hologram.asl"} #help
+	SECFUNCexecA -ce chmod -v u+w "$strMainModFile"
 	
 	function FUNCsaveList() { 
 			find "$HOME/.local/share/arx/save" -iname "gsave.sav" -exec ls --full-time '{}' \; |sort -k6; 
@@ -75,7 +78,17 @@ while true;do
 		#acmdParams+=(--loadslot="$nNewestSaveIndex"); #this doesnt seem to work?
 		acmdParams+=(--loadsave "$strNewestSaveFile");
 	fi
-	acmd=(nemiver --use-launch-terminal ./arx "${acmdParams[@]}" "$@")
+	
+	acmd=()
+	: ${bTermLogWithColors:=true} #help
+	if $bTermLogWithColors;then
+		acmd+=(unbuffer)
+	fi
+	: ${bForceDebugger:=false} #help
+	if $bForceDebugger || egrep "CMAKE_BUILD_TYPE:STRING=Debug" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
+		acmd+=(nemiver --use-launch-terminal)
+	fi
+	acmd+=(./arx "${acmdParams[@]}" "$@")
 
 	export ARX_LimitShadowBlobsForVertexes=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
@@ -83,12 +96,13 @@ while true;do
 	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
 	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 	export ARX_WarnGoSubWithLocalScopeParams=true
+	export ARX_LogDateTimeFormat="h:m:s"
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
 	ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest
 	rxvt -geometry 100x1 -e tail -F "$strFlLog"&disown #rxvt wont stack with xterm windows group on ubuntu windows docks
-	unbuffer "${acmd[@]}" 2>&1 |tee "$strFlLog"
+	"${acmd[@]}" 2>&1 |tee "$strFlLog"
 	
 	echoc -w "re-run (BUT HIT CTRL+C if it is not reading the newest changes you implemented, chache problem? RAM not ECC problem???)"
 done
