@@ -2240,7 +2240,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(^life_~£«target~ <= 0) {
 		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="WARN: target='~£«target~' but life is <= 0" ; //npc can be dead already tho what is not a problem... TODOA ^type_<entity> will return NPC or ITEM:Equippable ITEM:Consumable ITEM:MISC
 	}
-	if(£«target == "void" || £«target == "") {
+	if(or(£«target == "void" || £«target == "")) {
 		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»filter=".*" £»DbgMsg="ERROR: target='~£«target~'" ;
 	}
 	
