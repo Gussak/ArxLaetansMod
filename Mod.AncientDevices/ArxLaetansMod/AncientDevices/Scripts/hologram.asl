@@ -2122,13 +2122,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		//SetInteractivity None
 		
 		GoSub FUNCcalcFrameMilis	Set §«TeleTimerFlyMilis §FUNCcalcFrameMilis«FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
-		timerTFUNCteleportToAndKillNPC_flyMeToNPC -m 0 §«TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe
+		timerTFUNCteleportToAndKillNPC_flyPlayerToMe -m 0 §«TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe
 		//TODO explode npc in gore dismembering, may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	}
 	GoSub -p FUNCshowlocals §»force=1 ;
 	RETURN
 }
-/* deprecated
+/* TODO REMOVE deprecated
 >>TFUNCteleportToAndKillNPC () { GoSub FUNCteleportToAndKillNPC ACCEPT } >>FUNCteleportToAndKillNPC () {
 	//TODO may be can use cpp ARX_NPC_TryToCutSomething() to explode the body
 	//TODO try also modify GetFirstInterAtPos(..., float & fMaxPos)  fMaxPos=10000, but needs to disable player interactivity to not work as telekinesis or any other kind of activation...
@@ -2162,22 +2162,22 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 */
 >>TFUNCteleportToAndKillNPC_flyMeToNPC () { GoSub FUNCteleportToAndKillNPC_flyMeToNPC ACCEPT } >>FUNCteleportToAndKillNPC_flyMeToNPC () {
-	if(^life_~£FUNCteleportToAndKillNPC«HoverEnt~ > 0) {
+	if(^life_~£CFUNCTeleportPlayerToTarget«target~ > 0) {
 		//the idea is to be unsafe positioning over npc location as it will be destroyed
 		if(@TeleMeStepDist == 0) {
-			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£FUNCteleportToAndKillNPC«HoverEnt~
+			Set @FUNCcalcInterpolateTeleStepDist1s_Init ^dist_~£CFUNCTeleportPlayerToTarget«target~
 			GoSub FUNCcalcInterpolateTeleStepDist1s()
 			//Set @TeleMeStepDist @FUNCcalcInterpolateTeleStepDist1s_OUTPUT
 			//Mul @TeleMeStepDist 0.33 //this will make it take 3 times longer to travel, is more challenging
 			Calc @TeleMeStepDist [ @FUNCcalcInterpolateTeleStepDist1s_OUTPUT * 0.33 ] //this will make it take 3 times longer to travel, is more challenging
 		}
-		interpolate -s "~^me~" "~£FUNCteleportToAndKillNPC«HoverEnt~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
+		interpolate -s "~^me~" "~£CFUNCTeleportPlayerToTarget«target~" @TeleMeStepDist //0.95 //0.9 the more the smoother anim it gets, must be < 1.0 tho or it wont move!
 	} else {
-		interpolate "~^me~" "~£FUNCteleportToAndKillNPC«HoverEnt~" 0.0 //one last step to be precise
+		interpolate "~^me~" "~£CFUNCTeleportPlayerToTarget«target~" 0.0 //one last step to be precise
 		timerTFUNCteleportToAndKillNPC_flyMeToNPC off
 	}
 	
-	if(and(^dist_~£FUNCteleportToAndKillNPC«HoverEnt~ < §TeleDistEndTele && §TelePlayerNow == 0)) {
+	if(and(^dist_~£CFUNCTeleportPlayerToTarget«target~ < §TeleDistEndTele && §TelePlayerNow == 0)) {
 		Set §TelePlayerNow 1 //to start player flying only once
 		GoSub FUNCcalcFrameMilis()	Set §«TeleTimerFlyMilis §FUNCcalcFrameMilis«FrameMilis_OUTPUT //must be a new var to let the func one modifications not interfere with this timer below
 		timerTFUNCteleportToAndKillNPC_flyPlayerToMe -m 0 §«TeleTimerFlyMilis GoTo TFUNCteleportToAndKillNPC_flyPlayerToMe()
@@ -2201,7 +2201,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			interpolate -s player "~^me~" @«TelePlayerStepDist
 		} else {
 			Set §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis 0
-			Set @TeleDmgPlayer ^life_~£FUNCteleportToAndKillNPC«HoverEnt~
+			Set @TeleDmgPlayer ^life_~£CFUNCTeleportPlayerToTarget«target~
 			if(@TeleDmgPlayer >= ^life_player) {
 				Calc §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis [ @TeleDmgPlayer - ^life_player ]
 				if(§FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis == 0) ++ §FUNCbreakDeviceDelayed_ParalyzePlayerExtraMilis
@@ -2212,9 +2212,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			}
 			DoDamage -l player @TeleDmgPlayer
 			
-			GoSub -p FUNCkillNPC §»destroyCorpse=1 £»target=£FUNCteleportToAndKillNPC«HoverEnt ;
+			GoSub -p FUNCkillNPC §»destroyCorpse=1 £»target=£CFUNCTeleportPlayerToTarget«target ;
 			
-			//timerTeleDestroyNPC -m 1 50 Destroy "~£FUNCteleportToAndKillNPC«HoverEnt~" //must be last thing or the ent reference will fail for the other commands 
+			//timerTeleDestroyNPC -m 1 50 Destroy "~£CFUNCTeleportPlayerToTarget«target~" //must be last thing or the ent reference will fail for the other commands 
 			
 			//Weapon -e player ON //doesnt work on player?
 			GoSub -p FUNCbreakDeviceDelayed §»ParalyzePlayer=1 ; //only after everything else have completed! this takes a long time to finish breaking it
