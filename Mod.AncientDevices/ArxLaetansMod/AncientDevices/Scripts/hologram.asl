@@ -1109,6 +1109,14 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		GoSub CFUNCconfigOptionEnable
 	}
 	
+	if(§FUNCconfigOptions«index == &G_HologCfgOpt_ShowLocals) {
+		if(&G_HologCfgOpt_ShowLocals > §FUNCconfigOptions«index) {
+			Set &G_Debug_ShowLocals 1 // &G_HologCfgOpt_ShowLocals == 21.1
+		} else {
+			Set &G_Debug_ShowLocals 0 // &G_HologCfgOpt_ShowLocals == 21.0
+		}
+	}
+	
 	Set @«check -1 //set invalid to be required on next call
 	RETURN
 }
@@ -1168,7 +1176,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(§InitDefaultsDone > 0) RETURN
 	if (^amount > 1) RETURN //this must not be a stack of items to prevent identical random values!
 	
-	Set §DebugMode 1 //COMMENT_ON_RELEASE
+	Set &G_DebugMode 1 //COMMENT_ON_RELEASE
 	
 	Set £AncientDeviceMode "AncientBox"
 	
@@ -1519,8 +1527,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		}
 		
 		//EASY DEBUG STUFF
-		if(§DebugMode == 1) {
-			Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ DBG:~^degreesx_player~,~^degreesy_player~,~^degreesz_player~."
+		if(&G_DebugMode == 1) {
+			//Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ DBG:~^degreesx_player~,~^degreesy_player~,~^degreesz_player~."
 		}
 		
 		//if(@AncientTechSkill >= 50) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Signal:~§SignalStrengthTrunc~, ~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~." //detailed condition for nerds ;) 

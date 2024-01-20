@@ -15,22 +15,29 @@
 // INFO: to use this lib in your mod, rename this file and the parent paths to match your mod's name and location! TODO: let a global script be called in some way so this could be a proper lib? or just let this lib be appended to all scripts as a global mod?
 
 >>TFUNCshowlocals () { GoSub FUNCshowlocals ACCEPT } >>FUNCshowlocals ()  { //no £_aaaDebugScriptStackAndLog. this func is to easy disable showlocals.
-	//INPUT: [§«force] 0=nothing 1=locals 2=globals(+locals) 3=always
-	//INPUT: [£«filter] log will only show if filter is set
-	//obs.: change G_HologCfgOpt_ShowLocals to your mod cfg var that can be enabled thru some action in game
+	//INPUT: [§«force] 0=nothing 1=locals 2=globals(+locals) 3=(strict filter)
+	//INPUT: [£«filter] 
 	//ex.: GoSub -p FUNCshowlocals §»force=1 £»filter="testLocalVarName" ;
 	//ex.: Set £FUNCshowlocals«filter "testLocalVarName"	GoSub -p FUNCshowlocals §»force=1 ; //to set before GoSub call
 	//ex.: GoSub -p FUNCshowlocals §»force=2 £»filter="testGlobalVarName" ; //but matching names at local vars will show too
-	//ex.: GoSub -p FUNCshowlocals §»force=3 ; // overkill, will show everything
+	//ex.: GoSub -p FUNCshowlocals §»force=3 ; // shows only what is requested in the filter
 	
-	if(and(£«filter == "" && §«force < 3)) { // only allow force if filter is set, or if force is high >=3
-		Set §«force 0
+	if(&G_DebugMode == 0) { //this global override can be controlled by your mod (any mod actually)
+		RETURN
 	}
-	//Set §«force 0 //UNCOMMENT_ON_RELEASE as even with filters, this is about debugging the script. This override forces release to show nothing. the end user needs to comment this line to see such logs
+	
+	if(£«filter == "") Set £«filter "" //prevents "void"
+	if(§«force < 3) {
+		if(£«filter == "") { // all vars from the caller function
+			Set £«filter "~^debugcalledfrom_1~" 
+		} else {
+			Set £«filter "~£«filter~|~^debugcalledfrom_1~"
+		}
+	}
 	
 	if(§«force >= 2) {
 		showvars -f £«filter
-	} else { if(or(&G_HologCfgOpt_ShowLocals == 21.1 || §«force >= 1)) {
+	} else { if(or(&G_Debug_ShowLocals == 1 || §«force >= 1)) {
 		showlocals -f £«filter
 	}	}
 	
