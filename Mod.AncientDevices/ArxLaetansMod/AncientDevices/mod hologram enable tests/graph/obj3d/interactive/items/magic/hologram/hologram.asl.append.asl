@@ -65,6 +65,7 @@ __
 }
 
 >>TFUNCtestLogicOperators () { GoSub FUNCtestLogicOperators ACCEPT } >>FUNCtestLogicOperators () {
+	//TODO outside logical operators code, check if there is any word like || or && may be ',' too? and warn about it!
 	Set £ScriptDebug________________Tests "~£ScriptDebug________________Tests~;FUNCtestLogicOperators"
 	
 	Set @testFloat 1.5 //dont change!
