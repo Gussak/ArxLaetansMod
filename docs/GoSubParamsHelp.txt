@@ -1,0 +1,28 @@
+/**
+ * tips how to code easily with GoSub params,
+ * or "function" auto vars
+ * Obs.: this multiline comment is supported at newest TEST branch
+ */
+
+>>FUNCtst () {
+	GoSub -p FUNCdoIt §»mode=1 £»type="init" ;
+	//access the var from FUNCtestA if it was not reset:
+	Set §«mode §FUNCdoIt»mode // this auto creates the var §FUNCtst«mode
+	Set @«work @FUNCdoIt«work_OUTPUT // this auto creates the var @FUNCtst«work_OUTPUT
+	//you can use @FUNCtst«foo or @«foo at FUNCtst, it is the same var!
+	RETURN;
+}
+
+>>FUNCdoIt () {
+	//INPUT: <§FUNCdoIt«mode> this is how to access this var outside FUNCdoIt, but here can be just §«mode !
+	//INPUT: [£FUNCdoIt«type] this is how to access this var outside FUNCdoIt, but here can be just £«type !
+	//OUTPUT: @FUNCdoIt«work_OUTPUT
+	if(£«type == "") Set £«type "undefined"
+	
+	// your code
+	Set @«work_OUTPUT 1.23 // is @FUNCdoIt«work_OUTPUT outside FUNCdoIt !
+	
+	//reset to some default b4 next call, the optional params
+	Set £«type "undefined"
+	RETURN;
+}
