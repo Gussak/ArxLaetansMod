@@ -1,0 +1,40 @@
+21:17:25[I] Script:2379     Modding mode (1): developer mode always apply patches, overrides and appends, letting you edit .asl files without restarting the game
+21:17:25[I] Script:2416     Mod load order file found: mods/modloadorder.cfg
+21:17:25[I] Script:2422      ├─ Mod: mod hologram enable tests
+21:17:25[I] Script:2422      ├─ Mod: mod test something special is missing
+21:17:25[I] Script:2422      ├─ Mod: mod hologram dev libs
+21:17:25[I] Script:2422      ├─ Mod: test mod hologram 1
+21:17:25[I] Script:2422      ├─ Mod: test mod hologram 3
+21:17:25[I] Script:2422      ├─ Mod: test mod hologram 2
+21:17:25[I] Script:2422      ├─ Mod: test fix encoding
+21:17:25[I] Script:2425      └─ Ended collecting mod load order.
+...
+21:59:59[I] Script:2451     Modding script file: graph/obj3d/interactive/items/magic/hologram/hologram.asl
+21:59:59[I] Script:2455     ├─ Mod name: mod hologram enable tests
+21:59:59[I] Script:2474     │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2513     │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2554     │   ├─ applied append   : graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl
+21:59:59[I] Script:2560     │   └─ Ended applying all for: mod hologram enable tests
+21:59:59[I] Script:2549     ├─ Mod name: mod hologram dev libs
+21:59:59[I] Script:2554     │   ├─ applied append   : graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl
+21:59:59[I] Script:2560     │   └─ Ended applying all for: mod hologram dev libs
+21:59:59[I] Script:2455     ├─ Mod name: test mod hologram 1
+21:59:59[I] Script:2474     │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2513     │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2536     │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+21:59:59[I] Script:2560     │   └─ Ended applying all for: test mod hologram 1
+21:59:59[I] Script:2455     ├─ Mod name: test mod hologram 3
+21:59:59[I] Script:2474     │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2513     │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2536     │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+21:59:59[I] Script:2560     │   └─ Ended applying all for: test mod hologram 3
+21:59:59[I] Script:2455     ├─ Mod name: test mod hologram 2
+21:59:59[I] Script:2474     │   ├─ lower case patch : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2513     │   ├─ applied patch    : graph/obj3d/interactive/items/magic/hologram/hologram.asl.patch.lowercase.patch
+21:59:59[I] Script:2536     │   ├─ applied overrides: graph/obj3d/interactive/items/magic/hologram/hologram.asl.override.asl
+21:59:59[I] Script:2560     │   └─ Ended applying all for: test mod hologram 2
+21:59:59[I] Script:2549     ├─ Mod name: test fix encoding
+21:59:59[W] Script:2317     fixing data to ISO-8859-1 read from 'mods/test fix encoding/graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl'
+21:59:59[I] Script:2554     │   ├─ applied append   : graph/obj3d/interactive/items/magic/hologram/hologram.asl.append.asl
+21:59:59[I] Script:2560     │   └─ Ended applying all for: test fix encoding
+21:59:59[I] Script:2568     └─ All Mods: Dumping applied result(s) of 3 override(s), 4 patch(es) and 3 append(s) at: "modsdump/graph/obj3d/interactive/items/magic/hologram/hologram.asl"

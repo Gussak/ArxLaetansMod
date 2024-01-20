@@ -1,0 +1,45 @@
+22:00:14[I] ScriptedInterface:325 Local variables for hologram_0002 at Event on inventoryuse sent from player at GoSub {CallStackId(FromPosition): funcancientdeviceactivationtoggle(p=17930,l=339,c=123) -> funcdetectandreachtarget(p=127870,l=2713,c=120) -> funcseektargetloop(p=91590,l=2014,c=96) -> funcshowlocals(p=87959,l=1931,c=37) }, (Position 151447, Line 3257, Column 24):
+£funcseektargetloop«mode = "seek"
+£funcseektargetloop«callfuncwhentargetfound = "funcdetectandreachtarget"
+£funcseektargetloop«targetfoundent_output = ""
+
+22:00:14[I] ScriptedInterface:325 Local variables for hologram_0002 at Event on inventoryuse sent from player at GoSub {CallStackId(FromPosition): funcancientdeviceactivationtoggle(p=17930,l=339,c=123) -> funcdetectandreachtarget(p=127870,l=2713,c=120) -> funcshowlocals(p=91628,l=2015,c=37) }, (Position 151447, Line 3257, Column 24):
+£funcdetectandreachtarget«mode = "targetacquired"
+£funcdetectandreachtarget«callfuncwhentargetreached = "cfuncteleportplayertotarget"
+
+22:00:14[I] ScriptedInterface:325 Local variables for hologram_0002 at Event on inventoryuse sent from player at GoSub {CallStackId(FromPosition): funcancientdeviceactivationtoggle(p=17930,l=339,c=123) -> funcshowlocals(p=128434,l=2730,c=79) }, (Position 151447, Line 3257, Column 24):
+£funcancientdeviceactivationtoggle«mode = "flytotarget"
+£funcancientdeviceactivationtoggle«callfuncwhentargetreached = "cfuncteleportplayertotarget"
+
+22:00:15[I] ScriptedInterface:325 Local variables for hologram_0002 at GoSub {CallStackId(FromPosition): funcseektargetloop(p=87429,l=1921,c=51) -> funcdetectandreachtarget(p=88298,l=1940,c=64) -> cfuncflymetotarget(p=91809,l=2018,c=102) -> funcshowlocals(p=90550,l=1986,c=38) }, (Position 151447, Line 3257, Column 24):
+@cfuncflymetotarget«flyspeed = 0.5
+£cfuncflymetotarget«target = "goblin_base_0092"
+£cfuncflymetotarget«callfuncwhentargetreached = "funcdetectandreachtarget"
+
+22:00:15[I] ScriptedInterface:325 Local variables for hologram_0002 at GoSub {CallStackId(FromPosition): funcseektargetloop(p=87429,l=1921,c=51) -> funcdetectandreachtarget(p=88298,l=1940,c=64) -> cfuncflymetotarget(p=91809,l=2018,c=102) -> funcdetectandreachtarget(p=90634,l=1987,c=83) -> cfuncteleportplayertotarget(p=92011,l=2022,c=62) -> funcshowlocals(p=97177,l=2146,c=36) }, (Position 151447, Line 3257, Column 24):
+£cfuncteleportplayertotarget«target = "goblin_base_0092"
+§cfuncteleportplayertotarget_hoverlife = 0
+
+22:00:15[I] ScriptedInterface:325 Local variables for hologram_0002 at GoSub {CallStackId(FromPosition): funcseektargetloop(p=87429,l=1921,c=51) -> funcdetectandreachtarget(p=88298,l=1940,c=64) -> cfuncflymetotarget(p=91809,l=2018,c=102) -> funcdetectandreachtarget(p=90634,l=1987,c=83) -> funcshowlocals(p=92049,l=2023,c=37) }, (Position 151447, Line 3257, Column 24):
+£funcdetectandreachtarget«mode = "stop"
+£funcdetectandreachtarget«callfuncwhentargetreached = "cfuncteleportplayertotarget"
+£funcdetectandreachtarget«target = "goblin_base_0092"
+
+22:00:15[I] ScriptedInterface:325 Local variables for hologram_0002 at GoSub {CallStackId(FromPosition): funcseektargetloop(p=87429,l=1921,c=51) -> funcdetectandreachtarget(p=88298,l=1940,c=64) -> cfuncflymetotarget(p=91809,l=2018,c=102) -> funcshowlocals(p=90747,l=1995,c=37) }, (Position 151447, Line 3257, Column 24):
+@cfuncflymetotarget«flyspeed = 0.5
+£cfuncflymetotarget«target = "goblin_base_0092"
+£cfuncflymetotarget«callfuncwhentargetreached = "funcdetectandreachtarget"
+£cfuncflymetotarget«do = "off"
+
+22:00:15[I] ScriptedInterface:325 Local variables for hologram_0002 at GoSub {CallStackId(FromPosition): funcseektargetloop(p=87429,l=1921,c=51) -> funcdetectandreachtarget(p=88298,l=1940,c=64) -> funcshowlocals(p=91847,l=2019,c=37) }, (Position 151447, Line 3257, Column 24):
+£funcdetectandreachtarget«mode = ""
+£funcdetectandreachtarget«callfuncwhentargetreached = ""
+£funcdetectandreachtarget«target = ""
+
+22:00:15[I] ScriptedInterface:325 Local variables for hologram_0002 at GoSub {CallStackId(FromPosition): funcseektargetloop(p=87429,l=1921,c=51) -> funcshowlocals(p=88345,l=1943,c=37) }, (Position 151447, Line 3257, Column 24):
+£funcseektargetloop«mode = ""
+£funcseektargetloop«callfuncwhentargetfound = ""
+£funcseektargetloop«targetfoundent_output = "goblin_base_0092"
+£funcseektargetloop«hoverent = "goblin_base_0092"
+§funcseektargetloop«hoverlife = 9
+
