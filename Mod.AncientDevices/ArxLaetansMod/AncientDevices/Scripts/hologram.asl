@@ -2110,9 +2110,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>CFUNCTeleportPlayerToTarget () {
-	//INPUT: <£CFUNCTeleportPlayerToTarget_target>
-	Set §CFUNCTeleportPlayerToTarget_HoverLife ^life_~£CFUNCTeleportPlayerToTarget_target~
-	if(§CFUNCTeleportPlayerToTarget_HoverLife > 0) {
+	//INPUT: <£CFUNCTeleportPlayerToTarget«target>
+	Set §«TargetLife ^life_~£«target~
+	if(§«TargetLife > 0) {
 		//if(^inInventory == "player") {
 			//DropItem -e player "~^me~" //or wont be able to calc the distance from it to the player 
 			//Calc §MeY [ ^dist_player / 2 * -1 ]
