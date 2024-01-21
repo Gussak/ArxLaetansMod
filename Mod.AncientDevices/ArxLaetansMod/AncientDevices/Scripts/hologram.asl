@@ -167,7 +167,7 @@ ON MovementDetected () {
 	//Set £TestMovementdetected "~£TestMovementdetected~, SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
 	Set £TestMovementdetected "SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
 	
-	if ( §AncientDeviceTriggerStep == 2 && £FUNCAncientDeviceActivationToggle«Mode == "DetectTargetNearby" ) { // Active
+	if (and(§AncientDeviceTriggerStep == 2 && £FUNCAncientDeviceActivationToggle«Mode == "DetectTargetNearby")) { // Active
 		GoSub FUNCsignalStrenghCheck
 		if(§FUNCsignalStrenghCheck«IsAcceptable == 0) {
 			GoSub -p FUNCAncientDeviceActivationToggle £»force="OFF" ;
@@ -614,7 +614,7 @@ ON INVENTORYUSE () {
 		} }
 		
 		if (§FUNCtrapAttack«TrapCanKillMode_OUTPUT == 0) {
-			timerGrantDestroySelf -m 1 §DefaultTrapTimeoutMillis GoTo TFUNCDestroySelfSafely
+			timerTFUNCDestroySelfSafely -m 1 §DefaultTrapTimeoutMillis GoTo TFUNCDestroySelfSafely
 		}
 		
 		GoSub FUNCupdateUses
@@ -649,6 +649,55 @@ ON INVENTORYUSE () {
 	ACCEPT
 }
 
+>>FUNCpatchNPCinventory() {
+	//INPUT <£FUNCpatchNPCinventory«npc>
+	
+	if(£«npc == "") {
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR:invalid £«npc='~£«npc~'" ;
+		RETURN
+	}
+	
+	Set -r £«npc §«ChkNpcInvIsPatched §NPCvar_HoloLootPatchDone
+	if(§«ChkNpcInvIsPatched == 0) { //each item has a weight
+		//Set -ri £«npc §«HoloAdd "rune"
+		Set §«HoloAddTotal 0
+		
+		Inventory GetItemCount -e £«npc §«HoloAdd "rune"
+		Mul §«HoloAdd 36
+		Add §«HoloAddTotal ^rnd_~§«HoloAdd~
+		
+		Inventory GetItemCount -e £«npc §«HoloAdd "ring"
+		Mul §«HoloAdd 18
+		Add §«HoloAddTotal ^rnd_~§«HoloAdd~
+		
+		Inventory GetItemCount -e £«npc §«HoloAdd "scroll"
+		Mul §«HoloAdd 12
+		Add §«HoloAddTotal ^rnd_~§«HoloAdd~
+		
+		Inventory GetItemCount -e £«npc §«HoloAdd "potion"
+		Mul §«HoloAdd 6
+		Add §«HoloAddTotal ^rnd_~§«HoloAdd~
+		
+		//todo other magic items could add 4
+		
+		Inventory GetItemCount -e £«npc §«HoloAdd "bottle"
+		Mul §«HoloAdd 2
+		Add §«HoloAddTotal ^rnd_~§«HoloAdd~
+		
+		Add §«HoloAddTotal ^rnd_1 //minimum chance
+		
+		if(§«HoloAddTotal > 0) {
+			Inventory AddMulti -e £«npc "magic/hologram/hologram" §«HoloAddTotal
+		}
+		
+		Set -w £«npc §NPCvar_HoloLootPatchDone 1
+	}
+	
+	// clear b4 next call
+	Set £«npc ""
+	RETURN
+}
+
 //>>FUNCisnInvOrFloor ()
 On Main () { //HeartBeat happens once per second apparently (but may be less often?)
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
@@ -663,41 +712,7 @@ On Main () { //HeartBeat happens once per second apparently (but may be less oft
 	
 	Set £LootingInventory ^lootinventory
 	if(£LootingInventory != "none") { //dynamically patch inventories
-		Set -r £LootingInventory §HoloLootPatchOther §HoloLootPatchDone
-		if(§HoloLootPatchOther == 0) { //each item has a weight
-			//Set -ri £LootingInventory §HoloAdd "rune"
-			Set §HoloAddTotal 0
-			
-			Inventory GetItemCount -e £LootingInventory §HoloAdd "rune"
-			Mul §HoloAdd 36
-			Add §HoloAddTotal ^rnd_~§HoloAdd~
-			
-			Inventory GetItemCount -e £LootingInventory §HoloAdd "ring"
-			Mul §HoloAdd 18
-			Add §HoloAddTotal ^rnd_~§HoloAdd~
-			
-			Inventory GetItemCount -e £LootingInventory §HoloAdd "scroll"
-			Mul §HoloAdd 12
-			Add §HoloAddTotal ^rnd_~§HoloAdd~
-			
-			Inventory GetItemCount -e £LootingInventory §HoloAdd "potion"
-			Mul §HoloAdd 6
-			Add §HoloAddTotal ^rnd_~§HoloAdd~
-			
-			//todo other magic items could add 4
-			
-			Inventory GetItemCount -e £LootingInventory §HoloAdd "bottle"
-			Mul §HoloAdd 2
-			Add §HoloAddTotal ^rnd_~§HoloAdd~
-			
-			Add §HoloAddTotal ^rnd_1
-			
-			if(§HoloAddTotal > 0) {
-				Inventory AddMulti -e £LootingInventory "magic/hologram/hologram" §HoloAddTotal
-			}
-			
-			Set -w £LootingInventory §HoloLootPatchDone 1
-		}
+		GoSub -p FUNCpatchNPCinventory £»npc=£LootingInventory ;
 	}
 	
 	if ( £AncientDeviceMode == "HologramMode" ) {
@@ -1048,7 +1063,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	// quadrants in Y rotation
 	Set §CfgOptIndexTruncTmp2 21
 	Sub §CfgOptIndexTruncTmp2 §CfgOptIndexTruncTmp
-	if(@CfgOptHoverY > 0 && @CfgOptHoverY < 90) { //Cfg Opts 6-
+	if(and(@CfgOptHoverY > 0 && @CfgOptHoverY < 90)) { //Cfg Opts 6-
 		if(§CfgOptIndexTruncTmp <= 5) { //bottom
 		} else {
 		if(and(§CfgOptIndexTruncTmp >= 6 && §CfgOptIndexTruncTmp <= 16)) { //horizon
@@ -1058,11 +1073,11 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		if(§CfgOptIndexTruncTmp >= 17) { //top
 		} } }
 	} else {
-	if(@CfgOptHoverY > 90 && @CfgOptHoverY < 180) {
+	if(and(@CfgOptHoverY > 90 && @CfgOptHoverY < 180)) {
 	} else {
-	if(@CfgOptHoverY > 180 && @CfgOptHoverY < 270) {
+	if(and(@CfgOptHoverY > 180 && @CfgOptHoverY < 270)) {
 	} else {
-	if(@CfgOptHoverY > 270 && @CfgOptHoverY < 360) {
+	if(and(@CfgOptHoverY > 270 && @CfgOptHoverY < 360)) {
 	}	} } }
 	GoSub -p FUNCconfigOptionHighlight §»index=§CfgOptIndex ;
 	RETURN
@@ -1334,7 +1349,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	////Mul §TmpBreakDestroyMilis 5000
 	//Inc §TmpBreakDestroyMilis ^rnd_10000
 	Calc §TmpBreakDestroyMilis [ §DefaultTrapTimeoutMillis + ^rnd_10000 ]
-	timerTrapBreakDestroySafely -m 1 §TmpBreakDestroyMilis GoTo TFUNCDestroySelfSafely //to give time to let the player examine it a bit
+	timerTFUNCDestroySelfSafely -m 1 §TmpBreakDestroyMilis GoTo TFUNCDestroySelfSafely //to give time to let the player examine it a bit
 	if(§FUNCbreakDeviceDelayed_ParalyzePlayer == 1) {
 		//Set @FUNCparalysePlayer_Millis 100
 		//Dec @FUNCparalysePlayer_Millis @AncientTechSkill
@@ -1354,8 +1369,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	}
 	
 	//timerTrapBreakDestroyAutoDrop -m 1 1500 DropItem -e player "~^me~"
-	timerTrapBreakDestroyAutoDrop -m 1 1500 GoTo TFUNCshockPlayer //this drops it
-	timerTrapBreakDestroyAutoDrop -m 0 3000 GoTo TFUNCshockPlayer //this also warns the player
+	timerTFUNCshockPlayer1 -m 1 1500 GoTo TFUNCshockPlayer //this drops it
+	timerTFUNCshockPlayer2 -m 0 3000 GoTo TFUNCshockPlayer //this also warns the player
 	
 	GoSub FUNCshowlocals
 	//reset to default b4 next call
@@ -1679,7 +1694,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	// trap effect time
 	Set §TmpTrapDestroyTime §«TimeoutMillis
 	Inc §TmpTrapDestroyTime §TrapEffectTimeMillis
-	timerTrapDestroy -m 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely 
+	timerTFUNCDestroySelfSafely -m 1 §TmpTrapDestroyTime GoTo TFUNCDestroySelfSafely 
 	
 	//Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;§«TimeoutMillis=~§«TimeoutMillis~"
 	GoSub -p FUNCshowlocals §»force=1 ;
@@ -2260,13 +2275,13 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		Spawn Item "movable\\npc_gore\\npc_gore" "~£«target~"
 		Set £«gore ^last_spawned
 		(Move -e £«gore 0 25 0)	(Rotate -ae £«gore 0 0 5) //TODO fix the model instead? this is to fix gore that is too high and inclined a bit
-		//Set -mr £«target £KilledNPCinvList2D * //this is mainly to show on the log
-		Inventory GetItemCountList -e £«target £KilledNPCinvList2D all
+		GoSub -p FUNCpatchNPCinventory £»npc=£«target ;
+		Inventory GetItemCountList -e £«target £KilledNPCinvList2D all //this is mainly to show on the log
 		DropItem -e £«target all
 	}
 	
 	DoDamage -fmlcgewsao £«target 99999 //this is essential. Just destroying the NPC wont kill it and it will (?) remain in game invisible fighting other NPCs
-	if(§«destroyCorpse == 1) timerFUNCkillNPC -m 1 50 Destroy £«target //on next frame to avoid other quest/data sync problems probably
+	if(§«destroyCorpse == 1) timerFUNCkillNPC -m 1 50 Destroy £FUNCkillNPC«target //on next frame to avoid other quest/data sync problems probably
 	
 	GoSub -p FUNCshowlocals §»force=1 ; //keep here
 	

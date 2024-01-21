@@ -21,6 +21,9 @@
 	
 	// your code
 	Set @«work_OUTPUT 1.23 // is @FUNCdoIt«work_OUTPUT outside FUNCdoIt !
+	Set @«target ^hover_1500
+	
+	timerFUNCdoIt1 -m 1 50 Destroy £FUNCdoIt«target // when timers are executed, they are not in the call stack context, so the function label is not known, and it is required to use the full var name
 	
 	//reset to some default b4 next call, the optional params
 	Set £«type "undefined"
