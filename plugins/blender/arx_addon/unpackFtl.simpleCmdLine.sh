@@ -21,9 +21,9 @@ egrep "[#]help" "$0" >&2
 
 strFl="`realpath "$1"`";declare -p strFl
 
-cd "`dirname "$(readlink "$0")"`";pwd
+cd "`dirname "$(readlink "$0")"`";pwd #not realpath because the symlink can point to another symlink that will be where libArxIO.so.0 can be found!
 #if ! ls -l "libArxIO.so.0";then echoc -pw "libArxIO.so.0 not found here: `pwd`";exit 1;fi
-if [[ ! -f "libArxIO.so.0" ]];then echoc -pw "libArxIO.so.0 not found here: `pwd`";exit 1;fi
+if [[ ! -f "libArxIO.so.0" ]];then echoc -p "`basename $0`: libArxIO.so.0 not found here: `pwd`";echoc -w;exit 1;fi
 
 if [[ -f "${strFl}.unpack" ]];then
   mv -vf "${strFl}.unpack" "${strFl}.unpack.old"
