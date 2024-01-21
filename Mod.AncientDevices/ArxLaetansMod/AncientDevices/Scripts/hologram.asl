@@ -161,12 +161,19 @@ ON INIT () {
 }
 
 ON MovementDetected () {
-	todob
 	Set @posmex ^locationx_~^me~
 	Set @posmey ^locationy_~^me~
 	Set @posmez ^locationz_~^me~
 	//Set £TestMovementdetected "~£TestMovementdetected~, SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
 	Set £TestMovementdetected "SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
+	
+	if ( §AncientDeviceTriggerStep == 2 && £FUNCAncientDeviceActivationToggle«Mode == "DetectTargetNearby" ) { // Active
+		GoSub FUNCsignalStrenghCheck
+		if(§FUNCsignalStrenghCheck«IsAcceptable == 0) {
+			GoSub -p FUNCAncientDeviceActivationToggle £»force="OFF" ;
+		}
+	}
+	
 	ACCEPT
 }
 
@@ -241,7 +248,7 @@ ON INVENTORYUSE () {
 		} } }
 	}
 	
-	if ( £AncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off
+	if ( £AncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off. no toggle
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			if (^amount > 1) { //cannot activate a stack of items
 				SPEAK -p [player_no] NOP
@@ -291,20 +298,20 @@ ON INVENTORYUSE () {
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "LandMine" ) {
-		if ( §AncientDeviceTriggerStep == 1 ) {
-			Set §AncientDeviceTriggerStep 2 //activate
-			//Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			timerLandMineDetectNearbyNPC -m 0 50 GoTo TFUNCLandMine
-			GoSub -p FUNCblinkGlow §»times=0 ;
-		} else { if ( §AncientDeviceTriggerStep == 2 ) {
-			timerLandMineDetectNearbyNPC off 
-			//Set §Scale 100 SetScale §Scale
-			Set §AncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow §»times=-1 ;
-		} }
-		todob
-		//GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £»callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
+		//if ( §AncientDeviceTriggerStep == 1 ) {
+			//Set §AncientDeviceTriggerStep 2 //activate
+			////Set §Scale 500 SetScale §Scale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//timerTFUNCLandMine -m 0 50 GoTo TFUNCLandMine
+			//GoSub -p FUNCblinkGlow §»times=0 ;
+		//} else { if ( §AncientDeviceTriggerStep == 2 ) {
+			//timerTFUNCLandMine off 
+			////Set §Scale 100 SetScale §Scale
+			//Set §AncientDeviceTriggerStep 1  //stop
+			//GoSub -p FUNCblinkGlow §»times=-1 ;
+		//} }
+		Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="DetectTargetNearby" £»callFuncDetectNearbyTarget=TFUNCLandMine ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -1057,7 +1064,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	} else {
 	if(@CfgOptHoverY > 270 && @CfgOptHoverY < 360) {
 	}	} } }
-	GoSub -p FUNCconfigOptionHighlight §»index=~§CfgOptIndex~ ;
+	GoSub -p FUNCconfigOptionHighlight §»index=§CfgOptIndex ;
 	RETURN
 }
 >>FUNCconfigOptionHighlight () {
@@ -1921,7 +1928,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Set £«mode "stop"
 			Set £«TargetFoundEnt_OUTPUT £«HoverEnt
 			if(£«callFuncWhenTargetFound != "") {
-				GoSub -p "~£«callFuncWhenTargetFound~" £»target=£«HoverEnt ;
+				GoSub -p £«callFuncWhenTargetFound £»target=£«HoverEnt ;
 			}
 		}
 		GoSub -p FUNCshowlocals §»force=1 ;
@@ -1968,7 +1975,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		} else { // last step
 			interpolate "~^me~" "~£FUNCseekTargetLoop«HoverEnt~" 0.0 //one last step to be precise
 			GoSub -p FUNCshowlocals §»force=1 ;
-			GoSub -p "~£«callFuncWhenTargetReached~" £»target=£FUNCseekTargetLoop«HoverEnt ;
+			GoSub -p £«callFuncWhenTargetReached £»target=£FUNCseekTargetLoop«HoverEnt ;
 			Set £«do "off"
 		}
 	} else {
@@ -2003,7 +2010,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		GoSub -p FUNCshowlocals §»force=1 ;
 	} else { if(£«mode == "DoWhenTargetReached") {
 		Set £«mode "stop" //will just auto stop see below 
-		GoSub -p "~£«callFuncWhenTargetReached~" £»target=£«target ;
+		GoSub -p £«callFuncWhenTargetReached £»target=£«target ;
 		GoSub -p FUNCshowlocals §»force=1 ;
 		GoSub FUNCbreakDeviceDelayed
 	} } }
@@ -2039,7 +2046,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			GoSub -p FUNCseekTargetLoop "£»mode=init" "£callFuncWhenTargetFound=CFUNCFlyMeToTarget" ;
 		} else { // here is reached when called by CFUNCFlyMeToTarget
 			//GoSub -p FUNCkillNPC "£»target=£FUNCseekTargetLoop«TargetFoundEnt_OUTPUT" ;
-			GoSub -p "~£FUNCDetectAndReachTarget_callFuncWhenTargetReached~" "£»target=£FUNCDetectAndReachTarget_target" ;
+			GoSub -p £FUNCDetectAndReachTarget_callFuncWhenTargetReached £»target=£FUNCDetectAndReachTarget_target ;
 			GoSub FUNCbreakDeviceDelayed
 			Set £FUNCDetectAndReachTarget_mode "stop" //will just auto stop see below 
 		}
@@ -2072,7 +2079,6 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>TFUNCLandMine () { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine () {
-	todob
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
 	GoSub FUNCsignalStrenghCheck if(§FUNCsignalStrenghCheck«IsAcceptable == 0) ACCEPT
 	
@@ -2082,7 +2088,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(£«OnTopEntList != "none") {
 		Set §«OnTopLife 0
 		
-		Set §«LoopIndex 0	>>LOOP_FLM_ChkNPC
+		Set §«LoopIndex 0	>>LOOP_FUNCLandMine_ChkNPC
 			Set -a £«OnTopEntId §«LoopIndex "~£«OnTopEntList~"
 			if(£«OnTopEntId != "") {
 				Set §«OnTopLife ^life_~£«OnTopEntId~
@@ -2096,7 +2102,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 					}
 				}
 			}
-		++ §«LoopIndex	if(not(or(§«OnTopLife > 0 || £«OnTopEntId == ""))) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
+		++ §«LoopIndex	if(not(or(§«OnTopLife > 0 || £«OnTopEntId == ""))) GoTo LOOP_FUNCLandMine_ChkNPC //end loop if found one alive or on end of array
 		
 		if(§«OnTopLife > 0) {
 			//Set §Scale 100
@@ -2108,7 +2114,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Mul §FUNCtrapAttack«TimeoutMillis @AncientTechSkillDebuffPercMultiplyer
 			GoSub FUNCtrapAttack
 			
-			timerLandMineDetectNearbyNPC off
+			timerTFUNCLandMine off
 			
 			GoSub -p FUNCshowlocals §»force=1 ;
 		}
@@ -2654,14 +2660,21 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>FUNCAncientDeviceActivationToggle () {
-	//INPUT: <£«Mode>
-	//INPUT: <£«callFuncWhenTargetReached>
+	//INPUT: <£FUNCAncientDeviceActivationToggle«force>
+	//INPUT: <£FUNCAncientDeviceActivationToggle«Mode>
+	//INPUT: [£FUNCAncientDeviceActivationToggle«callFuncWhenTargetReached]
+	//INPUT: [£FUNCAncientDeviceActivationToggle«callFuncDetectNearbyTarget]
+	
+	if ( £«force == "ON" ) Set §AncientDeviceTriggerStep 1
+	if ( £«force == "OFF" ) Set §AncientDeviceTriggerStep 2
+	
 	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by. Will activate.
 		if(£«Mode == "FlyToTarget") {
 			if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncWhenTargetReached=~£«callFuncWhenTargetReached~" ;
 			GoSub -p FUNCDetectAndReachTarget £»mode="InitDetectTarget" £»callFuncWhenTargetReached=£«callFuncWhenTargetReached ;
-		} else { if(£«Mode == "WaitTargetNearby") {
-			todob
+		} else { if(£«Mode == "DetectTargetNearby") {
+			if(not("FUNC" IsIn £«callFuncDetectNearbyTarget)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncDetectNearbyTarget=~£«callFuncDetectNearbyTarget~" ;
+			timerFUNCAncientDeviceActivationToggle_DetectTargetNearby -m 0 50 GoTo -w £«callFuncDetectNearbyTarget
 		} else {
 			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode £«Mode=~£«Mode~" ;
 		} }
@@ -2670,13 +2683,16 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	} else { if ( §AncientDeviceTriggerStep == 2 ) { // Active. Will Stop.
 		if(£«Mode == "FlyToTarget") {
 			GoSub -p FUNCDetectAndReachTarget £»mode="stop" ;
-		}
+		} else { if(£«Mode == "DetectTargetNearby") {
+			timerFUNCAncientDeviceActivationToggle_DetectTargetNearby off
+		} }
 		GoSub -p FUNCblinkGlow §»times=-1 ;
 		Set §AncientDeviceTriggerStep 1
 		
 		// cleanup b4 next call
 		Set £«Mode ""
 		Set £«callFuncWhenTargetReached ""
+		Set £«callFuncDetectNearbyTarget ""
 	} }
 	
 	GoSub -p FUNCshowlocals £»filter=FUNCAncientDeviceActivationToggle §»force=1 ;
