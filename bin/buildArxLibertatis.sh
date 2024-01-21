@@ -53,9 +53,9 @@ fi
 astrVarValoldValnew=()
 function FUNCpatchCache() {
 	astrVarValoldValnew+=("$1" "" "$2")
-	sed -i.`SECFUNCdtFmt --filename`.bkp -r \
+	if ! sed -i.`SECFUNCdtFmt --filename`.bkp -r \
 		-e "s'^${1}=.*'${1}=${2}'" \
-		"./CMakeCache.txt"
+		"./CMakeCache.txt";then exit 1;fi
 }
 function FUNCshowSettings() {
 	for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
@@ -78,7 +78,9 @@ else
 	FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE
 fi
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
-	cmake -DDEVELOPER=ON .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+	if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+		exit 1
+	fi
 	#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
 		#-e 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' \
 		#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
@@ -109,20 +111,22 @@ echo "AFTER:";FUNCshowSettings
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi
 astrMakeCmd=(unbuffer make -j "$iMaxCores")
 if echoc -q -t ${fQuestionDelay} "check coding style for warnings?";then
-	"${astrMakeCmd[@]}" style
+	if ! "${astrMakeCmd[@]}" style;then exit 1;fi
 fi
 #does not work :( astrMakeCmd+=(-e CPPFLAGS=-O0) #-O0 is important to let line breakpoints work in debuggers
 if echoc -t ${fQuestionDelay} -q "do not remake it all, just touch the files? (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
   astrMakeCmd+=(--touch)
 fi
 #doesnt work :( CPPFLAGS=-O0 "${astrMakeCmd[@]}"
-SECFUNCexecA -ce "${astrMakeCmd[@]}" |tee ArxLibertatisBuildWithAllMakeCommands.log
-sed -i.bkp -r \
+SECFUNCexecA -ce "${astrMakeCmd[@]}" |tee ArxLibertatisBuildWithAllMakeCommands.log # tee prevents detecting exit error code
+if egrep "make:.*Error" ArxLibertatisBuildWithAllMakeCommands.log;then exit 1;fi
+
+SECFUNCexecA -ce sed -i.bkp -r \
 	-e "s@${strLoggedPath}@\${strLoggedPath}@g" \
 	-e "s@(make.*Entering directory ').*(/build.*)'@\1\${strLoggedPath}\2@" \
 	ArxLibertatisBuildWithAllMakeCommands.log
 if egrep -i "$USER" ArxLibertatisBuildWithAllMakeCommands.log;then
-	echoc -p "found private data at log file"
+	echoc -p "WARNING: found private data at log file"
 fi
 
 : ${bAutoDeploy:=true} #help

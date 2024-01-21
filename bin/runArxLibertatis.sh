@@ -99,6 +99,8 @@ while true;do
 	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 	export ARX_WarnGoSubWithLocalScopeParams=true
 	export ARX_LogDateTimeFormat="h:m:s"
+	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
+	export ARX_WarnTimerCallingGoSub="hologram.asl"
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"

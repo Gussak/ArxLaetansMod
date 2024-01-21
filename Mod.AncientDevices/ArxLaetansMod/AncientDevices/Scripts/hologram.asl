@@ -161,6 +161,7 @@ ON INIT () {
 }
 
 ON MovementDetected () {
+	todob
 	Set @posmex ^locationx_~^me~
 	Set @posmey ^locationy_~^me~
 	Set @posmez ^locationz_~^me~
@@ -302,6 +303,8 @@ ON INVENTORYUSE () {
 			Set §AncientDeviceTriggerStep 1  //stop
 			GoSub -p FUNCblinkGlow §»times=-1 ;
 		} }
+		todob
+		//GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £»callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
 		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
@@ -1494,9 +1497,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		
 		//if(@AncientTechSkill >= 50) { //detailed info for nerds ;) 
 			if(§Identified == 1) {
-				Set £SignalStrInfo "~£SignalStrInfo~(req ~%.1f,@SignalStrengthReq~%, here is ~§SignalStrengthTrunc~%, ~$G_Holog_SignalMode~ for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req ~%.1f,@FUNCsignalStrenghCheck«Required~%, here is ~§SignalStrengthTrunc~%, ~$G_Holog_SignalMode~ for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			} else {
-				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@SignalStrengthReq~, here is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@FUNCsignalStrenghCheck«Required~, here is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			}
 			//Set §hours   ^gamehours
 			//Mod §hours 24
@@ -1684,7 +1687,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>TFUNCchkAndAttackExplosion () { GoSub FUNCchkAndAttackExplosion ACCEPT } >>FUNCchkAndAttackExplosion () {
-	GoSub FUNCsignalStrenghCheck	if(§FUNCsignalStrenghCheck_IsAcceptable == 1) {
+	GoSub FUNCsignalStrenghCheck	if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
 		Set §TmpTrapKind ^rnd_5
 		if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl explosion  SELF
 		if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl fire_field SELF
@@ -1699,7 +1702,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 >>TFUNCchkAndAttackProjectile () { GoSub FUNCchkAndAttackProjectile ACCEPT } >>FUNCchkAndAttackProjectile () {
 	//if ( ^#PLAYERDIST > §iFUNCMakeNPCsHostile_rangeDefault ) ACCEPT //the objective is to protect NPCs that did not get alerted by the player aggressive action
-	GoSub FUNCsignalStrenghCheck	if(§FUNCsignalStrenghCheck_IsAcceptable == 1) {
+	GoSub FUNCsignalStrenghCheck	if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
 		Set §TmpTrapKind ^rnd_6
 		if (§TmpTrapKind == 0) SPELLCAST -smf @SignalStrLvl FIREBALL              PLAYER
 		if (§TmpTrapKind == 1) SPELLCAST -smf @SignalStrLvl FIRE_PROJECTILE       PLAYER
@@ -2069,31 +2072,33 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>TFUNCLandMine () { GoSub FUNCLandMine ACCEPT } >>FUNCLandMine () {
+	todob
 	//TODO new command attractor to NPCs range 150? strong so they forcedly step on it if too nearby
-	if(@SignalStrength < 15) ACCEPT //minimum requirement to function
-	Set @LandMineTriggerRange 50
-	Add @LandMineTriggerRange @AncientTechSkill
-	Set £FLM_OnTopEntList ^$objontop_~@LandMineTriggerRange~
-	if(£FLM_OnTopEntList != "none") {
-		Set §FLM_OnTopLife 0
+	GoSub FUNCsignalStrenghCheck if(§FUNCsignalStrenghCheck«IsAcceptable == 0) ACCEPT
+	
+	Set @«TriggerRange 50
+	Add @«TriggerRange @AncientTechSkill
+	Set £«OnTopEntList ^$ObjOnTop_~@«TriggerRange~
+	if(£«OnTopEntList != "none") {
+		Set §«OnTopLife 0
 		
-		Set §LoopIndex 0	>>LOOP_FLM_ChkNPC
-			Set -a £FLM_OnTopEntId §LoopIndex "~£FLM_OnTopEntList~"
-			if(£FLM_OnTopEntId != "") {
-				Set §FLM_OnTopLife ^life_~£FLM_OnTopEntId~
-				if(§FLM_OnTopLife > 0) {
+		Set §«LoopIndex 0	>>LOOP_FLM_ChkNPC
+			Set -a £«OnTopEntId §«LoopIndex "~£«OnTopEntList~"
+			if(£«OnTopEntId != "") {
+				Set §«OnTopLife ^life_~£«OnTopEntId~
+				if(§«OnTopLife > 0) {
 					if(§Quality >= 4) { // high quality wont trigger with innofensive rats
-						Set £FLM_OnTopEntClass ^class_~£FLM_OnTopEntId~
-						if(£FLM_OnTopEntClass == "rat_base") { //should be any npc that is never a threat
-							Set §FLM_OnTopLife 0
-							Set £FLM_OnTopEntId ""
+						Set £«OnTopEntClass ^class_~£«OnTopEntId~
+						if(£«OnTopEntClass == "rat_base") { //should be any npc that is never a threat
+							Set §«OnTopLife 0
+							Set £«OnTopEntId ""
 						}
 					}
 				}
 			}
-		++ §LoopIndex	if(not(or(§FLM_OnTopLife > 0 || £FLM_OnTopEntId == ""))) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
+		++ §«LoopIndex	if(not(or(§«OnTopLife > 0 || £«OnTopEntId == ""))) GoTo LOOP_FLM_ChkNPC //end loop if found one alive or on end of array
 		
-		if(§FLM_OnTopLife > 0) {
+		if(§«OnTopLife > 0) {
 			//Set §Scale 100
 			timerShrink1 -m 0 100 Dec §Scale 1
 			timerShrink2 -m 0 100 SetScale §Scale
@@ -2105,7 +2110,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			
 			timerLandMineDetectNearbyNPC off
 			
-			GoSub FUNCshowlocals
+			GoSub -p FUNCshowlocals §»force=1 ;
 		}
 	}
 	RETURN
@@ -2598,22 +2603,23 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 >>FUNCsignalStrenghCheck () {
-	//OUTPUT: §FUNCsignalStrenghCheck_IsAcceptable
-	Set §FUNCsignalStrenghCheck_IsAcceptable 0
+	//OUTPUT: §FUNCsignalStrenghCheck«IsAcceptable
+	//OUTPUT: @FUNCsignalStrenghCheck«Required
+	Set §«IsAcceptable 0
 	
-	Set @SignalStrengthReq @SignalStrengthReqBase
+	Set @«Required @SignalStrengthReqBase
 	if(§Quality >= 4) {
-		Mul @SignalStrengthReq 1.666
-		if(@SignalStrengthReq > 95) Set @SignalStrengthReq 95
+		Mul @«Required 1.666
+		if(@«Required > 95) Set @«Required 95
 	}
 	
-	if(@SignalStrength >= @SignalStrengthReq) Set §FUNCsignalStrenghCheck_IsAcceptable 1
+	if(@SignalStrength >= @«Required) Set §«IsAcceptable 1
 	RETURN
 }
 >>TFUNCblinkGlow () { GoSub FUNCblinkGlow ACCEPT } >>FUNCblinkGlow () {
 	//PARAMS: §«times
 	GoSub FUNCsignalStrenghCheck
-	if(and(§«times >= 0 && §FUNCsignalStrenghCheck_IsAcceptable == 1)){
+	if(and(§«times >= 0 && §FUNCsignalStrenghCheck«IsAcceptable == 1)){
 		TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow.Clear" "Hologram.tiny.index4000.grenadeGlow"
 		//Off at  900 1800 2700 3600 4500. Could be 850 too: 850 1700 2550 3400 4250. but if 800 would clash with ON at 4000
 		timerTrapGlowBlinkOff -m §«times  901 TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear" //901 will last 100 times til it matches multiple of 1000 below
@@ -2650,22 +2656,24 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 >>FUNCAncientDeviceActivationToggle () {
 	//INPUT: <£«Mode>
 	//INPUT: <£«callFuncWhenTargetReached>
-	if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncWhenTargetReached=~£«callFuncWhenTargetReached~" ;
-	
-	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by
+	if ( §AncientDeviceTriggerStep == 1 ) { // stopped or stand-by. Will activate.
 		if(£«Mode == "FlyToTarget") {
+			if(not("FUNC" IsIn £«callFuncWhenTargetReached)) GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid £«callFuncWhenTargetReached=~£«callFuncWhenTargetReached~" ;
 			GoSub -p FUNCDetectAndReachTarget £»mode="InitDetectTarget" £»callFuncWhenTargetReached=£«callFuncWhenTargetReached ;
+		} else { if(£«Mode == "WaitTargetNearby") {
+			todob
 		} else {
 			GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid mode £«Mode=~£«Mode~" ;
-		}
+		} }
 		GoSub -p FUNCblinkGlow §»times=0 ;
 		Set §AncientDeviceTriggerStep 2
-	} else { if ( §AncientDeviceTriggerStep == 2 ) { // active
+	} else { if ( §AncientDeviceTriggerStep == 2 ) { // Active. Will Stop.
 		if(£«Mode == "FlyToTarget") {
 			GoSub -p FUNCDetectAndReachTarget £»mode="stop" ;
 		}
 		GoSub -p FUNCblinkGlow §»times=-1 ;
 		Set §AncientDeviceTriggerStep 1
+		
 		// cleanup b4 next call
 		Set £«Mode ""
 		Set £«callFuncWhenTargetReached ""
