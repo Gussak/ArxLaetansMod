@@ -659,6 +659,9 @@ else #OBJ TO FTL ###############################################################
   #if $bCanAutoFixTxPath && 
   echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there. fTr is optional, will default to 0). Textures matching regex '.*[.]index[0-9]*' will be auto deployed, so you need to set only one in blender to all of them be detected."
   sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
+  while ! egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";do
+		echoc -wp "wrong path for map_Kd, should have '${strTXPathRelative}' on it"
+  done
   if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
     # preview
     astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
