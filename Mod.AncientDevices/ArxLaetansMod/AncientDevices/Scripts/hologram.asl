@@ -2740,6 +2740,12 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 >>FUNCtestChangeMesh () {
+	/**
+	 * the mesh disappears!
+	 * the mesh is failing to load probably.
+	 * try to enable LogDebug and read it, otherwise use MYDBG...
+	 * compile in full debug mode and put a breakpoint at usemesh!
+	 */
 	if(^inInventory != "none") RETURN //must be on floor
 	timerChangeMesh 1 3 USEMESH "ancientdevices/ancientdevice.grenade"
 	timerChangeSkinToActive 1 6 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
