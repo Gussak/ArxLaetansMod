@@ -2747,7 +2747,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	 * compile in full debug mode and put a breakpoint at usemesh!
 	 */
 	if(^inInventory != "none") RETURN //must be on floor
-	timerChangeMesh 1 3 USEMESH "ancientdevices/ancientdevice.grenade"
+	timerChangeMesh 1 3 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
 	timerChangeSkinToActive 1 6 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
 	timerChangeSkinToInactive 1 9 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade" //after usemesh!!!
 	RETURN
