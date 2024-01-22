@@ -1,0 +1,2 @@
+This work, "AncientDevice.Grenade" (https://github.com/Gussak/ArxLaetansMod), is licensed under CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) by Gussak (https://github.com/Gussak). Re-used and modified a part from "Metal kontusz knob" (https://sketchfab.com/3d-models/metal-kontusz-knob-b72f54c4723746e6a4d100c5492bc5fa) by Virtual Museums of Małopolska
+ (https://sketchfab.com/WirtualneMuzeaMalopolski) is licensed under CC0 Public Domain (https://creativecommons.org/publicdomain/zero/1.0/).

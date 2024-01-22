@@ -79,6 +79,7 @@ else
 fi
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+	#if ! cmake -DDEVELOPER=1 -DDEBUG=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 		exit 1
 	fi
 	#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
@@ -93,12 +94,13 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 			#-e "s'^${strVar}=.*$'${strVar}=${strValNew}'" \
 			#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 	#done
-	if echoc -t ${fQuestionDelay} -q "use heavy debug?";then
+	if echoc -t ${fQuestionDelay} -q "use heavy debug (if not will use a light debug that misses a lot the breakpoints but runs much faster)?";then
 		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
 		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb -O0 -fno-omit-frame-pointer" # seems perfect but FPS drops to 3, difficult to test in-game
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 	else
-		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
+		#FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
+		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
 		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-g"
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
 	fi

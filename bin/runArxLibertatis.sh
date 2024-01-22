@@ -89,6 +89,9 @@ while true;do
 	: ${bForceDebugger:=false} #help
 	if $bForceDebugger || egrep "CMAKE_BUILD_TYPE:STRING=Debug" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
 		acmd+=(nemiver --use-launch-terminal)
+		if ! egrep "CMAKE_CXX_FLAGS_DEBUG:STRING.*O0.*fno-omit-frame-pointer" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
+			echoc --alert "using a light debug mode that misses a lot the breakpoints!!!"
+		fi
 	fi
 	acmd+=(./arx "${acmdParams[@]}" "$@")
 

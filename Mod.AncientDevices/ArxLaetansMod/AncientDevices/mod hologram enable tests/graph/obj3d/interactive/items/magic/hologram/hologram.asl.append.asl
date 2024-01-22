@@ -437,7 +437,7 @@ this tests a WRONG closure with code after it (put some comment after the closur
 	}
 	
 	//if(^degreesx_player == 74.9) { //minimum Degrees player can look down is that
-	if(and(@testPlayerDegreesX < 75 && @testPlayerDegreesX > 74)) { // 74.9 is the minimum Degrees player can look down is that, but 0 is horizon!
+	if(and(@testPlayerDegreesX > 74 && @testPlayerDegreesX < 75)) { // 74.9 is the minimum Degrees player can look down is that, but 0 is horizon!
 		//TODO put this on CircularOptionChoser
 		
 		//fail teleport -pi //tele the player to its starting spawn point

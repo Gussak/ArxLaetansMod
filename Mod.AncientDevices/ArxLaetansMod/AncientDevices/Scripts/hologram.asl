@@ -249,6 +249,11 @@ ON INVENTORYUSE () {
 	}
 	
 	if ( £AncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off. no toggle
+		if(and(@testPlayerDegreesX > 74 && @testPlayerDegreesX < 75)) {
+			GoSub FUNCtestChangeMesh
+			ACCEPT
+		}
+		
 		if ( §AncientDeviceTriggerStep == 1 ) {
 			if (^amount > 1) { //cannot activate a stack of items
 				SPEAK -p [player_no] NOP
@@ -263,9 +268,14 @@ ON INVENTORYUSE () {
 			RANDOM §ActivateChance { //not granted to successfully activate it as it is a defective device
 				Set §FUNCtrapAttack«TimeoutMillis §DefaultTrapTimeoutMillis
 				
-				TWEAK ICON "HologramGrenadeActive[icon]"
-				
+				//TWEAK ICON "HologramGrenadeActive[icon]"
+				TWEAK ICON "AncientDevice.Grenade.Active[icon]"
 				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
+				/* todob
+				//USEMESH "magic\hologram\AncientDevice.Grenade"
+				USEMESH "ancientdevices/ancientdevice.grenade"
+				TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
+				*/
 				
 				Calc §«calcTimes [ §FUNCtrapAttack«TimeoutMillis / 1000 ]
 				GoSub -p FUNCblinkGlow §»times=§«calcTimes ;
@@ -2467,7 +2477,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			} else {
 				Set £FUNCnameUpdate_NameBase "Grolhoam Degnare" 
 			}
-			Set £IconBasename "HologramGrenade"
+			//Set £IconBasename "HologramGrenade"
+			Set £IconBasename "AncientDevice.Grenade"
 			
 			//PLAY "TRAP"
 			TWEAK SKIN "Hologram.tiny.index4000.box"               "Hologram.tiny.index4000.box.Clear"
@@ -2727,3 +2738,12 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	Set £TestsCompleted "~£TestsCompleted~, ~^debugcalledfrom_0~"
 	RETURN
 }
+
+>>FUNCtestChangeMesh () {
+	if(^inInventory != "none") RETURN //must be on floor
+	timerChangeMesh 1 3 USEMESH "ancientdevices/ancientdevice.grenade"
+	timerChangeSkinToActive 1 6 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
+	timerChangeSkinToInactive 1 9 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade" //after usemesh!!!
+	RETURN
+}
+
