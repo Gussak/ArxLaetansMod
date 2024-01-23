@@ -44,7 +44,7 @@
 !tools/interim/HowTo.interim.ImportExportFtl.txt
 !tools/interim/SPECIALTX_ORIGIN.png
 
-# Mod AncientDevices: find tests -type d |sed -r 's@^(.*)@!\1\n!\1/*@' |sort -u
+# find tests -type d |sed -r 's@^(.*)@!\1\n!\1/*@' |sort -u
 !tests
 !tests/*
 !tests/ScriptsOverridingAndPatching
@@ -94,7 +94,7 @@
 !tests/ScriptsOverridingAndPatching/mods/test mod hologram 3/graph/obj3d/interactive/items/magic/hologram
 !tests/ScriptsOverridingAndPatching/mods/test mod hologram 3/graph/obj3d/interactive/items/magic/hologram/*
 
-# Mod AncientDevices: find ArxLaetansMod.AncientDevice.* -type d -not -iregex ".*/tmp.*\|.*/blender_.*\|.*/rendered.*" |sed -r -e 's@^(.*)@!\1\n!\1/*@' |sed -r -e 's@.*WorkFile.*@#&@' |sort -u
+# find ArxLaetansMod.AncientDevice.* -type d -not -iregex ".*/tmp.*\|.*/blender_.*\|.*/rendered.*" |sed -r -e 's@^(.*)@!\1\n!\1/*@' |sed -r -e 's@.*WorkFile.*@#&@' |sort -u
 !ArxLaetansMod.AncientDevice.Grenade
 !ArxLaetansMod.AncientDevice.Grenade/*
 !ArxLaetansMod.AncientDevice.Grenade/game
@@ -123,6 +123,9 @@
 !ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/textures/*
 
 # keep almost last, this will futher prevent such files (would not if on top!)
+ArxLaetansMod.AncientDevice.Grenade/unpackFtl.simpleCmdLine.sh
+ArxLaetansMod.AncientDevice.Grenade/convertFTLtoOBJ.sh
+ArxLaetansMod.AncientDevice.Grenade/convertOBJtoFTL.sh
 *.lowercase.*
 *.sbkp
 *.xcf
