@@ -26,6 +26,9 @@ while true;do
 	: ${bClear:=false} #help
 	if $bClear;then clear;fi
 	
+	strDbgWhatFile="`echoc -t 3 -S "Debug what file (ex.: ScriptedAnimation)?"`" # src/script/ScriptedIOProperties.cpp
+	declare -p strDbgWhatFile
+	
 	: ${bBuildB4Run:=true} #help
 	if $bBuildB4Run;then 
 		cd "$strPathIni"
@@ -72,9 +75,12 @@ while true;do
 		--data-dir="../Arx Fatalis" #TODOA could just place data*.pak at libertatis path? or on a layer?
 		#--debug="warn,error,debug" #TODOA this works???
 		#--debug="debug,info,console,warning,error,critical"
-		--debug="debug"
 		--debug-gl
 	);
+	#if echoc -t $fQuestionDelay -S asdf@Dskjfh todoa
+	if [[ -n "$strDbgWhatFile" ]];then
+		acmdParams+=(--debug="$strDbgWhatFile");
+	fi
 	strNewestSaveFile="`FUNCsaveList |tail -n 1 |sed -r "s@.*($HOME/.*)@\1@"`"
 	if [[ -n "$nNewestSaveIndex" ]] && echoc -t 6 -q "load newest savegame $nNewestSaveIndex ($strNewestSaveFile)?@Dy";then
 		#acmdParams+=(--loadslot="$nNewestSaveIndex"); #this doesnt seem to work?

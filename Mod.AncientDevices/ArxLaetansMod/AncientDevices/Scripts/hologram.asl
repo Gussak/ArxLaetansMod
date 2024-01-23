@@ -2746,10 +2746,12 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	 * try to enable LogDebug and read it, otherwise use MYDBG...
 	 * compile in full debug mode and put a breakpoint at usemesh!
 	 */
+	GoSub -p FUNCshowlocals £filter=FUNCAncientDeviceActivationToggle §»force=1 ; //TODO RM testing wrong £filter insetad oif £»filter
 	if(^inInventory != "none") RETURN //must be on floor
-	timerChangeMesh 1 3 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
-	timerChangeSkinToActive 1 6 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
-	timerChangeSkinToInactive 1 9 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade" //after usemesh!!!
+	SetScale 200
+	timerChangeMesh -m 1 750 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
+	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
+	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade" //after usemesh!!!
 	RETURN
 }
 
