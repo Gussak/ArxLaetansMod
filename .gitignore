@@ -94,64 +94,44 @@
 !tests/ScriptsOverridingAndPatching/mods/test mod hologram 3/graph/obj3d/interactive/items/magic/hologram
 !tests/ScriptsOverridingAndPatching/mods/test mod hologram 3/graph/obj3d/interactive/items/magic/hologram/*
 
-# Mod AncientDevices: find Mod.AncientDevices -type d |sed -r -e 's@^(.*)@!\1\n!\1/*@' |sed -r -e 's@.*WorkFiles.*@#&@' |sort -u
-!Mod.AncientDevices
-!Mod.AncientDevices/*
-!Mod.AncientDevices/ArxLaetansMod
-!Mod.AncientDevices/ArxLaetansMod/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/3DModels/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Icons/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/items
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/items/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/items/magic
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/items/magic/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/items/magic/hologram
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram dev libs/graph/obj3d/interactive/items/magic/hologram/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/items
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/items/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/items/magic
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/items/magic/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/items/magic/hologram
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/mod hologram enable tests/graph/obj3d/interactive/items/magic/hologram/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Scripts/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Sounds/*
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures
-!Mod.AncientDevices/ArxLaetansMod/AncientDevices/Textures/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/3DModels/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Icons
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Icons/*
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures
-#!Mod.AncientDevices/ArxLaetansMod/AncientDevices/WorkFiles/Textures/*
+# Mod AncientDevices: find ArxLaetansMod.AncientDevice.* -type d -not -iregex ".*/tmp.*\|.*/blender_.*\|.*/rendered.*" |sed -r -e 's@^(.*)@!\1\n!\1/*@' |sed -r -e 's@.*WorkFile.*@#&@' |sort -u
+!ArxLaetansMod.AncientDevice.Grenade
+!ArxLaetansMod.AncientDevice.Grenade/*
+!ArxLaetansMod.AncientDevice.Grenade/game
+!ArxLaetansMod.AncientDevice.Grenade/game/*
+!ArxLaetansMod.AncientDevice.Grenade/game/graph
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/*
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/*
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/interactive
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/interactive/*
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/interactive/items
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/interactive/items/*
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/interactive/items/ancientdevices
+!ArxLaetansMod.AncientDevice.Grenade/game/graph/obj3d/interactive/items/ancientdevices/*
+!ArxLaetansMod.AncientDevice.Grenade/graph
+!ArxLaetansMod.AncientDevice.Grenade/graph/*
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/*
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/interactive
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/interactive/*
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/interactive/items
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/interactive/items/*
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/interactive/items/ancientdevices
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/interactive/items/ancientdevices/*
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/textures
+!ArxLaetansMod.AncientDevice.Grenade/graph/obj3d/textures/*
 
 # keep almost last, this will futher prevent such files (would not if on top!)
 *.lowercase.*
 *.sbkp
+*.xcf
+*autosave.blend
+*.blend
+*.blend1
+*.log
 *DO_NOT_COMMIT*
+.cfg
 
 # mod files (3D models etc) appended from autogen
 !ArxLaetansMod.MagicPotions.7z
