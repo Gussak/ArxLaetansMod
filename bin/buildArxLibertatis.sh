@@ -138,12 +138,12 @@ if ! $bAutoDeploy;then echoc -w deploy;fi
 function FUNCmakeRO() {
 	pwd
 	if [[ ! -d "$1/" ]];then echoc -p "invalid path '$1/'";fi
-	SECFUNCexec -ce find "$1/" \( -perm -u+w -or -perm -g+w -or -perm -o+w \) -exec chmod ugo-w '{}' \;
+	SECFUNCexec -m "$FUNCNAME" -ce find "$1/" \( -perm -u+w -or -perm -g+w -or -perm -o+w \) -exec chmod ugo-w '{}' \;
 }
 function FUNCmakeRW() {
 	pwd
 	if [[ ! -d "$1/" ]];then echoc -p "invalid path '$1/'";fi
-	SECFUNCexec -ce find "$1/" \( -perm -u-w \) -exec chmod u+w '{}' \;
+	SECFUNCexec -m "$FUNCNAME" -ce find "$1/" \( -perm -u-w \) -exec chmod u+w '{}' \;
 }
 
 strDeployPath="../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/"
