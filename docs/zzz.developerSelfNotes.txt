@@ -223,5 +223,105 @@ public:
 // create a simple and easy patch file ex.:
 git diff hologram.asl hologram.patchedForTests.asl >hologram.asl.patch
 
+some special chars for tests: £§«» ¢¥©®¬±¯ª°º¹²³µ¶·Þß€¥×þð¶œç¿¡ÞÐøØÆŒ  §·tst §¯tst §°tst §¹tst §¹tst §«tst §«tst \xBB  
+€¶aList
+¥¬aList
+€¯aList
+¥ªaList
+¥°aList
 
-some special chars for tests: £§¢¥©ª«¬®¯°±º¹²³µ¶·«Þß  §·tst §¯tst §°tst §¹tst §¹tst §«tst §«tst \xBB
+// arrays: multidimensional
+
+/**
+ * Arrays:
+ * It is recommended that the name contains hints about the dimension and key option, for easy coding, as suffix like 2D 3D 1D 12D ex.: €Locations3D, or K2D K13D €LocationsK13D if using keyId
+ * index can be
+ *   first=0=prepend or 
+ *   append(afterLast) or
+ * <values...> depend on the dimension
+ * [-rw] these params come before others ex.: Array -rws entIdR entIdW €fooListK2D 2 someKeyIdA §a1 §a2
+ *  -sw <entWriteTo>  the array is written to entWriteTo
+ *  -sr <entReadFrom> the values are read from entReadFrom but only if they are local variables
+ *  -gr <entReadFrom> the array is read from entReadFrom
+ *  -gw <entWriteTo>  the values are written to entWriteTo and must be local variables (error otherwise)
+ * vars: €localVarIndexedArray ¥globalVarIndexedArray €¶localVarKeyValue ¥¶globalVarKeyValue
+ * basic: Array [-gsd] <€localVar|¥globalVar> <dimension> <index|key> <values...> 
+ * negative index: counts from last: -1 is just before last or at last index
+ * targeting: Array [-gsdrw] <entWriteTo> <entReadFrom> <€localVar|¥globalVar> <dimension> <index|key> <values...> 
+ */
+/* CPP coding:
+ * : each value in the vector is of the var multitype struct that has string,int,float
+ * : the variable type assigned can be auto detected in this order: string[a-z_] float[0-9-.] int[0-9-]
+ * : indexed array: for(i=0;i<max;i+=dimension) //simple vector with fixed dimension
+ * : key value array: map.find(key)->second[index] //map<key,vector> each key can have a dimension
+ */
+/** OPTIONS (Flags)
+ * [-sgdilc] exclusive set/get/delete/insert/list/copy
+ * [-i] ATTENTION! only accepts simple indexed arrays (w/o keyIds)
+ * [-l] ATTENTION! only accepts a list with KeyIDs
+ * tip: each key in the map array can contain a specific vector dimension, letting you create data structures.
+ * */
+Array -s <€var|¥var> <dimension> <¶?stringKeyId|index> <values...> 
+ex.: Array -s €¶akList3D 3 someKeyIdA 11 21 31 // array key
+ex.: Array -s €aiList3D 3 7 11 21 31 // array index
+Array -g <€var|¥var> <dimension> <¶?stringKeyId|index> <vars...> 
+ex.: Array -g €¶akList2D 2 someKeyIdB §b1 §b2
+ex.: // this below is the same array where each key as a dimension (a data structure)
+  Array -g €¶akListMultiDimensions 2 someKey2D §i1 £s2
+  Array -g €¶akListMultiDimensions 3 someKey3D §i1 §i2 §i3
+  Array -g €¶akListMultiDimensions 4 someKey4D £s1 §i2 @f3 §i4
+ex.: Array -g €aiList4D 4 7 §c1 §c2 §c3 §c4
+ex.: Array -g €aiList5D 4 -1 §c1 §c2 §c3 §c4 §c5
+Array -d <€¶var|¥¶var> <stringKeyId|.*|all> //clears, can be regex to match keyId
+ex.: Array -d €¶fooListK2D someKeyIdB
+ex.: Array -d €¶fooListK2D "rat_base_.*"
+/** * [-d] delete index * existing after will be shifted to the left */
+Array -d <€var|¥var> <index|n,n1-n2|*|all> //can be specific indexes separated by ',' or range (inclusive n1, inclusive n2)
+ex.: Array -d €posList3D 7
+ex.: Array -d €posList3D -3
+/** * [-i] insert at index * existing at index and after will be shifted to the right. ONLY WORKS with simple array that have no keyId! */
+Array -i <€var|¥var> <dimension> <index|append> <values...> 
+ex.: Array -i €posList3D 3 7 10 20 30
+ex.: Array -i €posList3D 3 append 10 20 30 // appends after last
+/** * [-l] sorted list of keys */
+Array -l <€var|¥var> <£var|€var|¥var> <filter>
+ex.: Array -l €¶akList3D £listOfKeyIDs "goblin_[0-9]*" // creates a list separated by " "
+ex.: Array -l €¶akList3D €aiList .* // creates 1D indexed array of strings
+/** * [-c] make a copy */
+Array -c <€var|¥var> <€var|¥var> <n,n1-n2|*|all>
+ex.: Array -c €aiList3D €aiCopyTo "6,1,3-9" //accepts anything in any order
+Array -c <€¶var|¥¶var> <€¶var|¥¶var> <.*|all>
+ex.: Array -c €¶akList3D €¶akCopyTo all
+
+
+
+
+
+
+///////////////////////////////// OLD SKETCH DELETE BELOW HERE //////////////////////////
+
+
+///** * set at index */
+//Array -s <€localVarDimension> <index> <values...> 
+//ex.: Array -s €posList3D 7 11 21 31
+
+///** get from index into vars */
+//Array -g <€localVarDimension> <index> <vars...> 
+//ex.: Array -g €posList3D 7 §posX §posY §posZ
+
+///** get by key into vars */
+//Array -g <€localVarDimension> <index> <vars...> 
+//ex.: Array -ks €posList4D stringKeyId §posX §posY §posZ
+//ex.: Array -kg €posList4D stringKeyId §posX §posY §posZ
+
+//...
+
+//Array [-rw] <dimension> <€localvar> // -r entReadFrom, -w entWriteTo, use the dimension on the var name
+
+//Array -i <dimension> <€localvar> <index> <values...> // insert at index (index can be first=0=prepend or append=-1, a negative value inserts from last). exinsting will be shifted to the right. values... depend on the dimension
+//ex.: Array -i 3 €posList3D 7 10 20 30
+
+//Array -d <dimension> <€localvar> <index> // delete index. exinsting will be shifted to the left.
+//ex.: Array -d 3 €posList3D 7
+
+//Array -d <dimension> <€localvar> <index> // delete index. exinsting will be shifted to the left.
