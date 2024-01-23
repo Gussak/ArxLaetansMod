@@ -244,7 +244,8 @@ some special chars for tests: £§«» ¢¥©®¬±¯ª°º¹²³µ¶·Þß€
  *  -sr <entReadFrom> the values are read from entReadFrom but only if they are local variables
  *  -gr <entReadFrom> the array is read from entReadFrom
  *  -gw <entWriteTo>  the values are written to entWriteTo and must be local variables (error otherwise)
- * vars: €localVarIndexedArray ¥globalVarIndexedArray €¶localVarKeyValue ¥¶globalVarKeyValue
+ * vars fixed dimension: €localVarIndexedArray ¥globalVarIndexedArray
+ * vars variable dimension per KeyID: €¶localVarKeyValue ¥¶globalVarKeyValue
  * basic: Array [-gsd] <€localVar|¥globalVar> <dimension> <index|key> <values...> 
  * negative index: counts from last: -1 is just before last or at last index
  * targeting: Array [-gsdrw] <entWriteTo> <entReadFrom> <€localVar|¥globalVar> <dimension> <index|key> <values...> 
@@ -258,12 +259,15 @@ some special chars for tests: £§«» ¢¥©®¬±¯ª°º¹²³µ¶·Þß€
 /** OPTIONS (Flags)
  * [-sgdilc] exclusive set/get/delete/insert/list/copy
  * [-i] ATTENTION! only accepts simple indexed arrays (w/o keyIds)
- * [-l] ATTENTION! only accepts a list with KeyIDs
  * tip: each key in the map array can contain a specific vector dimension, letting you create data structures.
  * */
+/** set */
 Array -s <€var|¥var> <dimension> <¶?stringKeyId|index> <values...> 
 ex.: Array -s €¶akList3D 3 someKeyIdA 11 21 31 // array key
 ex.: Array -s €aiList3D 3 7 11 21 31 // array index
+Array -s <€¶var|¥¶var> <€¶varFrom|¥¶varFrom> <keyFilterRegex:.*|all>
+ex.: Array -s €¶akList3D €¶varFrom all // overwrite values of matching keys (erasing existing first to match the copied valueDimension) or create new key,valueDimension
+/** get */
 Array -g <€var|¥var> <dimension> <¶?stringKeyId|index> <vars...> 
 ex.: Array -g €¶akList2D 2 someKeyIdB §b1 §b2
 ex.: // this below is the same array where each key as a dimension (a data structure)
@@ -272,6 +276,7 @@ ex.: // this below is the same array where each key as a dimension (a data struc
   Array -g €¶akListMultiDimensions 4 someKey4D £s1 §i2 @f3 §i4
 ex.: Array -g €aiList4D 4 7 §c1 §c2 §c3 §c4
 ex.: Array -g €aiList5D 4 -1 §c1 §c2 §c3 §c4 §c5
+/** delete */
 Array -d <€¶var|¥¶var> <stringKeyId|.*|all> //clears, can be regex to match keyId
 ex.: Array -d €¶fooListK2D someKeyIdB
 ex.: Array -d €¶fooListK2D "rat_base_.*"
@@ -283,10 +288,14 @@ ex.: Array -d €posList3D -3
 Array -i <€var|¥var> <dimension> <index|append> <values...> 
 ex.: Array -i €posList3D 3 7 10 20 30
 ex.: Array -i €posList3D 3 append 10 20 30 // appends after last
+Array -i <€var|¥var> <dimension> <index|append> <€var|¥var> <n,n1-n2|*|all>
+ex.: Array -i €posList3D 3 7 €posListToInsert3D 6,32,9-1 // insert the filtered array €posListToInsert3D at index 7 of 3 dimensional list €posList3D
 /** * [-l] sorted list of keys */
-Array -l <€var|¥var> <£var|€var|¥var> <filter>
+Array -l <€¶var|¥¶var> <£var|€var|¥var> <.*|all>
 ex.: Array -l €¶akList3D £listOfKeyIDs "goblin_[0-9]*" // creates a list separated by " "
 ex.: Array -l €¶akList3D €aiList .* // creates 1D indexed array of strings
+Array -l <€var|¥var> <dimension> <Columns:n,n1-n2|*|all> <£var|€var|¥var> // the column at each entry in the array
+ex.: Array -l €akList3D 3 1,0,2-0 £listOfKeyIDs "goblin_[0-9]*" // creates a list separated by " "
 /** * [-c] make a copy */
 Array -c <€var|¥var> <€var|¥var> <n,n1-n2|*|all>
 ex.: Array -c €aiList3D €aiCopyTo "6,1,3-9" //accepts anything in any order
