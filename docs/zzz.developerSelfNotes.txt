@@ -101,8 +101,8 @@ LODS:
  P,0: perfect, original
  H,1: perceptually High, little loss, still nearby
  M,2: perceptually Medium, some loss, a bit far
- L,3: perceptually Low, lossy, far
- B,4: perceptually bad, very lossy, very far
+ L,3: perceptually Low, lossy, far, but carefully prepared to keep contour at least
+ B,4: perceptually bad, very lossy, very far, visually messed up but still resembles the original
  F,5: flat shape mesh that "looks" to the active camera, square, 2 triangles, could have a front, left, right, back, top and bottom flat textures. these textures could also be the icons in the inventory
 */
 AncientDevice.Hologram.ftl //original
