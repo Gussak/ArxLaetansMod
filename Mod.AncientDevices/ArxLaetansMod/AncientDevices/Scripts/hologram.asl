@@ -161,11 +161,11 @@ ON INIT () {
 }
 
 ON MovementDetected () {
-	Set @posmex ^locationx_~^me~
-	Set @posmey ^locationy_~^me~
-	Set @posmez ^locationz_~^me~
-	//Set ΡestMovementdetected "~ΡestMovementdetected~, SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
-	Set ΡestMovementdetected "SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
+	//Set @posmex ^locationx_~^me~
+	//Set @posmey ^locationy_~^me~
+	//Set @posmez ^locationz_~^me~
+	////Set ΡestMovementdetected "~ΡestMovementdetected~, SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
+	//Set ΡestMovementdetected "SENDER:~^sender~, ME:~^me~, (~@posmex~,~@posmey~,~@posmez~), "
 	
 	if (and(你ncientDeviceTriggerStep == 2 && ΓUNCAncientDeviceActivationToggle俑ode == "DetectTargetNearby")) { // Active
 		GoSub FUNCsignalStrenghCheck
@@ -173,6 +173,8 @@ ON MovementDetected () {
 			GoSub -p FUNCAncientDeviceActivationToggle ˙force="OFF" ;
 		}
 	}
+	
+	GoSub FUNCupdateIcon
 	
 	ACCEPT
 }
@@ -1411,39 +1413,15 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		
 		// condition from 0.00 to 1.00
 		//DO NOT CALL BECOMES ENDLESS RECURSIVE LOOP: GoSub FUNCupdateUses
-		//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;FUNCnameUpdate"
 		Set @ItemCondition 助seRemain
-		//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;~@ItemCondition~=~助seRemain~"
 		Div @ItemCondition 助seMax
-		//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;/~助seMax~=~@ItemCondition~"
-		//TODO try again these 'else { if' below
-		//if      ( @ItemCondition >= 0.80 ) { Set ΖtemConditionDesc "excellent" }
-		//else { if ( @ItemCondition >= 0.60 ) { Set ΖtemConditionDesc "good"      }
-		//else { if ( @ItemCondition >= 0.40 ) { Set ΖtemConditionDesc "average"   }
-		//else { if ( @ItemCondition >= 0.20 ) { Set ΖtemConditionDesc "bad"       }
-		//else {                               Set ΖtemConditionDesc "critical"    } } } }
-		//Set @ItemConditionSureTmp @ItemCondition
-		//Mul @ItemConditionSureTmp 10 //0-10
-		//Div @ItemConditionSureTmp  2 //0-5
 		Calc @ItemConditionSureTmp [ @ItemCondition * 10 / 2 ]
 		Set 兌temConditionSure @ItemConditionSureTmp //trunc
 		if(兌dentified == 1) {
-			//if ( 兌temConditionSure == 5 ) Set ΖtemConditionDesc "perfect"
-			//if ( 兌temConditionSure == 4 ) Set ΖtemConditionDesc "excellent"
-			//if ( 兌temConditionSure == 3 ) Set ΖtemConditionDesc "good"
-			//if ( 兌temConditionSure == 2 ) Set ΖtemConditionDesc "average"
-			//if ( 兌temConditionSure == 1 ) Set ΖtemConditionDesc "bad"
-			//if ( 兌temConditionSure == 0 ) Set ΖtemConditionDesc "critical"
 			//Set -a ΖtemConditionDesc 兌temConditionSure "Perfect Excellent Good Average Bad Critical"
 			Set -v ΖtemConditionDesc 兌temConditionSure "Critical" "Bad" "Average" "Good" "Excellent" "Perfect" ;
 		} else {
-			//if ( 兌temConditionSure == 5 ) Set ΖtemConditionDesc "etcerpf" //messy
-			//if ( 兌temConditionSure == 4 ) Set ΖtemConditionDesc "ntexlecel" //messy
-			//if ( 兌temConditionSure == 3 ) Set ΖtemConditionDesc "bonae" //latin
-			//if ( 兌temConditionSure == 2 ) Set ΖtemConditionDesc "gearave" //messy
-			//if ( 兌temConditionSure == 1 ) Set ΖtemConditionDesc "malae" //latin
-			//if ( 兌temConditionSure == 0 ) Set ΖtemConditionDesc "discrimine" //latin
-			//                                            latin      latin messy   latin messy     messy
+			//                                            latin       latin   messy     latin   messy       messy
 			Set -v ΖtemConditionDesc 兌temConditionSure "discrimine" "malae" "gearave" "bonae" "ntexlecel" "etcerpf" ;
 		}
 		
@@ -1453,18 +1431,8 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		if(刨ignalStrengthTrunc == 0) Set 刨ignalStrSure 0
 		if(刨ignalStrengthTrunc >= 95) Set 刨ignalStrSure 4
 		if(兌dentified == 1) {
-			//if(刨ignalStrSure == 0) Set ΠignalStrInfo "none"
-			//if(刨ignalStrSure == 1) Set ΠignalStrInfo "bad"
-			//if(刨ignalStrSure == 2) Set ΠignalStrInfo "good"
-			//if(刨ignalStrSure == 3) Set ΠignalStrInfo "strong"
-			//if(刨ignalStrSure == 4) Set ΠignalStrInfo "excellent"
 			Set -v ΠignalStrInfo 刨ignalStrSure "None" "Bad" "Good" "Strong" "Excellent" ;
 		} else {
-			//if(刨ignalStrSure == 0) Set ΠignalStrInfo "nullum" //latin
-			//if(刨ignalStrSure == 1) Set ΠignalStrInfo "malae" //latin
-			//if(刨ignalStrSure == 2) Set ΠignalStrInfo "bonae" //latin
-			//if(刨ignalStrSure == 3) Set ΠignalStrInfo "fortis" //latin
-			//if(刨ignalStrSure == 4) Set ΠignalStrInfo "ntexlecel" //messy
 			//                                    latin    latin   latin   latin    messy
 			Set -v ΠignalStrInfo 刨ignalStrSure "Nullum" "Malae" "Bonae" "Fortis" "Ntexlecel" ;
 		}
@@ -1492,19 +1460,22 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		}
 		
 		if(兌dentified == 1) {
-			if(利uality >= 5) Set ΖtemQuality "pristine+"
-			if(利uality == 4) Set ΖtemQuality "superior+" //80+
-			if(利uality == 3) Set ΖtemQuality "decent"
-			if(利uality == 2) Set ΖtemQuality "mediocre"
-			if(利uality == 1) Set ΖtemQuality "inferior"
-			if(利uality == 0) Set ΖtemQuality "dreadful"
+			//if(利uality >= 5) Set ΖtemQuality "pristine+"
+			//if(利uality == 4) Set ΖtemQuality "superior+" //80+
+			//if(利uality == 3) Set ΖtemQuality "decent"
+			//if(利uality == 2) Set ΖtemQuality "mediocre"
+			//if(利uality == 1) Set ΖtemQuality "inferior"
+			//if(利uality == 0) Set ΖtemQuality "dreadful"
+			Set -v ΖtemQuality 利uality "dreadful" "inferior" "mediocre" "decent" "superior+" "pristine+" ;
 		} else {
-			if(利uality >= 5) Set ΖtemQuality "nistepri+"
-			if(利uality == 4) Set ΖtemQuality "orpesuri+"
-			if(利uality == 3) Set ΖtemQuality "tdenec"
-			if(利uality == 2) Set ΖtemQuality "edimecro"
-			if(利uality == 1) Set ΖtemQuality "nrifeior"
-			if(利uality == 0) Set ΖtemQuality "horribilis" //latin
+			//if(利uality >= 5) Set ΖtemQuality "nistepri+"
+			//if(利uality == 4) Set ΖtemQuality "orpesuri+"
+			//if(利uality == 3) Set ΖtemQuality "tdenec"
+			//if(利uality == 2) Set ΖtemQuality "edimecro"
+			//if(利uality == 1) Set ΖtemQuality "nrifeior"
+			//if(利uality == 0) Set ΖtemQuality "horribilis" //latin
+			//                           latin        messy...
+			Set -v ΖtemQuality 利uality "horribilis" "nrifeior" "edimecro" "tdenec" "orpesuri+" "nistepri+" ;
 		}
 		
 		if ( 利uality >= 4 ) {
@@ -1517,10 +1488,14 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		GoSub FUNCupdateIcon
 		
 		if(你ncientDeviceTriggerStep == 1){
-			Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ (Stand-by)."
+			Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ (off)."
 		}
 		if(你ncientDeviceTriggerStep == 2){
-			Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ .+!ACTIVE!+."
+			if(佝UNCsignalStrenghCheck侵sAcceptable == 1) {
+				Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ (.+!ON!+.)"
+			} else {
+				Set ㄚNameFinal_OUTPUT "~ㄚNameFinal_OUTPUT~ (StandBy)"
+			}
 		}
 		
 		if(and(ΓUNCseekTargetLoop信overEnt != "" && ΓUNCseekTargetLoop信overEnt != "void")) {
@@ -1584,26 +1559,27 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	Set Ζcon "~ΖconBasename~"
 	
 	if(利uality >= 4) Set Ζcon "~Ζcon~MK2"
+	
+	// new models and icons
+	if(or(
+			ｘncientDeviceMode == "Grenade" //||
+	)) {
+		if(你ncientDeviceTriggerStep == 1){
+			Set Ζcon "~Ζcon~.OFF"
+		}
+		if(你ncientDeviceTriggerStep == 2){
+			if(佝UNCsignalStrenghCheck侵sAcceptable == 1) {
+				Set Ζcon "~Ζcon~.ON"
+			} else {
+				Set Ζcon "~Ζcon~.StandBy"
+			}
+		}
+	}
+	
 	Set Ζcon "~Ζcon~[icon]"
 	
 	if(ΖconPrevious != Ζcon)	TWEAK ICON "~Ζcon~"
 	
-	//INPUT: [佝UNCupdateIcon_force]
-	//if (Ζcon == "") Set 佝UNCupdateIcon_force 1
-	//if (and(利uality >= 4 && not("MK2" IsIn Ζcon))) Set 佝UNCupdateIcon_force 1
-	//if ( 利uality >= 4 ) {
-		//if(or(not("MK2" IsIn Ζcon) || 佝UNCupdateIcon_force > 0)) {
-			//Set Ζcon "~ΖconBasename~MK2[icon]"
-			//TWEAK ICON "~Ζcon~"
-		//}
-	//} else {
-		//if(or(Ζcon == "" || 佝UNCupdateIcon_force > 0)) { //first time
-			//Set Ζcon "~ΖconBasename~[icon]"
-			//TWEAK ICON "~Ζcon~"
-		//}
-	//}
-	//if(佝UNCupdateIcon_force > 0) TWEAK ICON "~Ζcon~"
-	//Set 佝UNCupdateIcon_force 0 //reset for next unparametrised call
 	RETURN
 }
 
@@ -2747,10 +2723,11 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	 * compile in full debug mode and put a breakpoint at usemesh!
 	 */
 	if(^inInventory != "none") RETURN //must be on floor
-	SetScale 200
+	SetScale 150 //already fixed tho from 20 to 30 width in blender
 	timerChangeMesh -m 1 750 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
 	RETURN
 }
+
 

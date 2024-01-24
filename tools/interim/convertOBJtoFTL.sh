@@ -960,11 +960,23 @@ else #OBJ TO FTL ###############################################################
   SECFUNCtrash "$strPathReleaseHelper/"
   SECFUNCtrash "$strPathReleaseSetupHelper/"
   mkdir -vp "${strPathReleaseHelper}/textures/NoBakedTextures/"
-  if ! SECFUNCexecA --noerrormessage -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
-    echoc -t 3 -p "license file not found"
+  if SECFUNCexecA --noerrormessage -ce cp -vf "./${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
+    :
+  elif SECFUNCexecA --noerrormessage -ce cp -vf "${strBlenderSafePath}/${strFlCoreName}.license.txt" "$strPathReleaseHelper/";then
+    :
+  else
+		echoc -t 3 -p "license file not found"
   fi
+  
   SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathReleaseHelper/"
-  SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "${strBlenderSafePath}/${strFlCoreName}.blend" #TODOA chk blender file if all is ok
+  
+  if SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "./${strFlCoreName}.blend";then #TODOA chk blender file if all is ok
+		:
+	elif SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "${strBlenderSafePath}/${strFlCoreName}.blend";then #TODOA chk blender file if all is ok
+		:
+	else
+		echoc -t 3 -p "blend file not found"
+	fi
   
   astrFlRelatPathTxCpAllList=()
   IFS=$'\n' read -d '' -r -a astrFlRelatPathTxTmpList < <(egrep "map_Kd" "$strFlWFMtl" |sed -r -e 's@\\@/@g' -e 's@map_Kd @@')&&:
