@@ -110,6 +110,7 @@ while true;do
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
 	export ARX_WarnTimerCallingGoSub="hologram.asl"
+	#export ARX_MaxTextureSize=512
 
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
