@@ -2749,8 +2749,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(^inInventory != "none") RETURN //must be on floor
 	SetScale 200
 	timerChangeMesh -m 1 750 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
-	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
-	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade" //after usemesh!!!
+	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
+	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
 	RETURN
 }
 

@@ -153,6 +153,14 @@ if $bExitAfterConfig;then exit 0;fi
 strFlCoreName="${1-}";shift&&:
 strFlCoreNameProprietary="${1-}";shift&&:
 
+if [[ -z "$strFlCoreName" ]];then
+  echoc -p "invalid strFlCoreName=''"
+  echoc --info "you must provide a model name to work with."
+  echoc --info "It could be a new model name you create to be new thing in game or to replace some existing model."
+  echoc --info "But it can also be the same name as the current path like '$(basename "$(pwd)")' or of some .ftl model here too."
+  exit 1
+fi
+
 #help ISSUE/LIMITATION: while a ftl exporter in blender could provide each face with a specific transparency value, this script can only provide one transparency value for all the faces using each texture container TODO:NO:OverlyComplex: code a gradient transparency min/max && (up/down &&/|| left/right) based on vertex locations
 
 #CFG
@@ -203,27 +211,19 @@ if [[ "${strRelativeDeployPath:0:1}" == "/" ]];then
   exit 1
 fi
 
-if [[ -n "$strFlCoreName" ]];then
-  if [[ -z "$strFlCoreNameProprietary" ]];then
-    if $bDaemon;then
-      strFlCoreNameProprietary=""
-      echoc --info "the daemon is used after everything is already setup and the user is only updating things on the model, therefore strFlCoreNameProprietary is uneccessary and also shall not have an automatic default."
-    else
-      strFlCoreNameProprietary="$(basename "$(pwd)" |tr '[:upper:]' '[:lower:]')"
-      if ! echoc -t $fPromptTm -q "the automatic reference file will be  strFlCoreNameProprietary='$strFlCoreNameProprietary' ok? if not it will just be ignored.@Dy";then
-        strFlCoreNameProprietary=""
-      elif [[ ! -f "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" ]];then
-        echoc --info "strFlCoreNameProprietary='$strFlCoreNameProprietary' does not exist, ignoring it."
-        strFlCoreNameProprietary=""
-      fi
-    fi
-  fi
-else
-  echoc -p "invalid strFlCoreName=''"
-  echoc --info "you must provide a model name to work with."
-  echoc --info "It could be a new model name you create to be new thing in game or to replace some existing model."
-  echoc --info "But it can also be the same name as the current path like '$(basename "$(pwd)")' or of some .ftl model here too."
-  exit 1
+if [[ -z "$strFlCoreNameProprietary" ]];then
+	if $bDaemon;then
+		strFlCoreNameProprietary=""
+		echoc --info "the daemon is used after everything is already setup and the user is only updating things on the model, therefore strFlCoreNameProprietary is uneccessary and also shall not have an automatic default."
+	else
+		strFlCoreNameProprietary="$(basename "$(pwd)" |tr '[:upper:]' '[:lower:]')"
+		if ! echoc -t $fPromptTm -q "the automatic reference file will be  strFlCoreNameProprietary='$strFlCoreNameProprietary' ok? if not it will just be ignored.@Dy";then
+			strFlCoreNameProprietary=""
+		elif [[ ! -f "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" ]];then
+			echoc --info "strFlCoreNameProprietary='$strFlCoreNameProprietary' does not exist, ignoring it."
+			strFlCoreNameProprietary=""
+		fi
+	fi
 fi
 # automatic detection is unnecessarily complex..
 #if [[ -n "$strFlCoreName" ]];then
@@ -275,7 +275,7 @@ FUNCchkVersion python3 "Python 3.10.12"
 
 #if [[ -z "`(nvm --version)`" ]];then echoc -p "install arx-convert dependency: https://stackoverflow.com/a/76318697/1422630";exit 1;fi
 FUNCchkDep "install nvm (to make it easy to install the arx-convert dependency correct version of node.js): https://stackoverflow.com/a/76318697/1422630 : curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash; bash; nvm install 18; nvm use 18; #obs.: to be able to use nvm, you need to run a new bash instance to let is update access to nvm on every terminal you need to use it" declare -p NVM_DIR
-if ! bash -ci "nvm --version" |egrep -q "0\.39\.3";then FUNCchkVersion nvm "0.39.3";fi #nvm needs subshell with login to load the .bashrc file with it's configs and activate self, so this is a trick
+if ! bBashAutoCmdOnStart="false" bash -ci "nvm --version" |egrep -q "0\.39\.3";then FUNCchkVersion nvm "0.39.3";fi #nvm needs subshell with login to load the .bashrc file with it's configs and activate self, so this is a trick
 
 FUNCchkDep "install arx-covert: npm i arx-convert -g" arx-convert --version
 FUNCchkVersion arx-convert "arx-convert - version 7.1.0"
