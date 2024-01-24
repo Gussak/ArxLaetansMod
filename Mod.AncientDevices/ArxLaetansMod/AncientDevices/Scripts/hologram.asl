@@ -2723,7 +2723,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	 * compile in full debug mode and put a breakpoint at usemesh!
 	 */
 	if(^inInventory != "none") RETURN //must be on floor
-	SetScale 150 //already fixed tho from 20 to 30 width in blender
+	//SetScale 150 //already fixed tho from 20 to 30 width in blender
 	timerChangeMesh -m 1 750 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
