@@ -96,6 +96,37 @@ inventory playeradd movable/broken_bottle/broken_bottle
 
 ================================ TODO 
 
+/*
+LODS:
+ P,0:!perfect, original
+ H,1: perceptually High, little loss, still nearby
+ M,2:!perceptually Medium, some loss, a bit far, but still looks good!
+ L,3: perceptually Low, lossy, far, but carefully prepared to keep contour at least
+ B,4: perceptually bad, very lossy, very far, visually messed up but still resembles the original
+ F,5:!flat shape mesh that "looks" to the active camera, square, 2 triangles, could have a front, left, right, back, top and bottom flat textures. these textures could also be the icons in the inventory.
+*/
+AncientDevice.Hologram.ftl //original
+AncientDevice.Hologram[High].ftl
+AncientDevice.Hologram[Medium].ftl
+AncientDevice.Hologram[Low].ftl
+AncientDevice.Hologram[Bad].ftl
+AncientDevice.Hologram[Flat].ftl
+AncientDevice.Hologram[H].ftl
+AncientDevice.Hologram[M].ftl
+AncientDevice.Hologram[L].ftl
+AncientDevice.Hologram[B].ftl
+AncientDevice.Hologram[F].ftl
+AncientDevice.Hologram[1].ftl
+AncientDevice.Hologram[2].ftl
+AncientDevice.Hologram[3].ftl
+AncientDevice.Hologram[4].ftl
+AncientDevice.Hologram[5].ftl
+AncientDevice.Hologram[LOD1].ftl
+AncientDevice.Hologram[LOD2].ftl
+AncientDevice.Hologram[LOD3].ftl
+AncientDevice.Hologram[LOD4].ftl
+AncientDevice.Hologram[LOD5].ftl
+
 // SetCommand replace string var value matching  regex with string value
 // can be used to remove an item of an array stored in a string
 Set -x £work ".*regexMatch.*" "value"
