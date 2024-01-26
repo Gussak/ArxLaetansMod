@@ -2727,6 +2727,14 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	timerChangeMesh -m 1 750 USEMESH "ancientdevices/ancientdevice.grenade.ftl" // the extension will be removed and re-added!!!
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
+	
+	timerChangeSkinToInactive -m 1 2000 experiment LOD high
+	timerChangeSkinToInactive -m 1 3000 experiment LOD medium
+	timerChangeSkinToInactive -m 1 4000 experiment LOD low
+	timerChangeSkinToInactive -m 1 5000 experiment LOD bad
+	timerChangeSkinToInactive -m 1 6000 experiment LOD flat
+	timerChangeSkinToInactive -m 1 7000 experiment LOD perfect
+	
 	RETURN
 }
 
