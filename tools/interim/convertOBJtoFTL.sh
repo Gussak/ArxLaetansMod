@@ -150,12 +150,20 @@ if $bWriteCfgVars;then SECFUNCcfgAutoWriteAllVars;fi #this will also show all co
 if $bExitAfterConfig;then exit 0;fi
 ### collect optional/required named params
 #help params: [strFlCoreName] | <strFlCoreName> [strFlCoreNameProprietary] #strFlCoreName can be any filename you create. strFlCoreNameProprietary can be the current folder name (ex.: bottle_wine) or must be a proprietary model name that does not match the folder name ex.: game/graph/obj3d/interactive/items/movable/bones/bone_bassin.ftl (only the basename, w/o the path and the extension .ftl)
+
 strFlCoreName="${1-}";shift&&:
+strLOD=""
+if [[ "$strFlCoreName" =~ .*\[LOD.\] ]];then
+	strLOD="${strFlCoreName:$((${#strFlCoreName}-6))}"
+	strFlCoreName="${strFlCoreName:0:$((${#strFlCoreName}-6))}"
+	declare -p strLOD strFlCoreName
+fi
+
 strFlCoreNameProprietary="${1-}";shift&&:
 
 if [[ -z "$strFlCoreName" ]];then
   echoc -p "invalid strFlCoreName=''"
-  echoc --info "you must provide a model name to work with."
+  echoc --info "you must provide a model name to work with (it may also be appended by LOD like 'hologram[LODB]')."
   echoc --info "It could be a new model name you create to be new thing in game or to replace some existing model."
   echoc --info "But it can also be the same name as the current path like '$(basename "$(pwd)")' or of some .ftl model here too."
   exit 1
@@ -191,9 +199,9 @@ export strPathTools;declare -p strPathTools
 export strPathDeployAtModInstallFolder;declare -p strPathDeployAtModInstallFolder
 : ${strAppTextEditor:="geany"} #help
 export strAppTextEditor;declare -p strAppTextEditor
-: ${strFlWFObj:="`realpath "${strPathObjToFtl}/${strFlCoreName}.obj"`"}&&: #wavefront obj3d file
+: ${strFlWFObj:="`realpath "${strPathObjToFtl}/${strFlCoreName}${strLOD}.obj"`"}&&: #wavefront obj3d file
 export strFlWFObj;declare -p strFlWFObj
-: ${strFlWFMtl:="`realpath "${strPathObjToFtl}/${strFlCoreName}.mtl"`"}&&: #wavefront obj3d file
+: ${strFlWFMtl:="`realpath "${strPathObjToFtl}/${strFlCoreName}${strLOD}.mtl"`"}&&: #wavefront obj3d file
 export strFlWFMtl;declare -p strFlWFMtl
 : ${strPathReleaseHelper:="`pwd`/RELEASE/ArxLaetansMod/$strFlCoreName/"} #help
 export strPathReleaseHelper;declare -p strPathReleaseHelper
@@ -225,29 +233,9 @@ if [[ -z "$strFlCoreNameProprietary" ]];then
 		fi
 	fi
 fi
-# automatic detection is unnecessarily complex..
-#if [[ -n "$strFlCoreName" ]];then
-  #strFlCoreNameProprietary="${1-}";shift&&:
-  #if [[ -z "$strFlCoreNameProprietary" ]];then
-    #strFlCoreNameProprietary="$(basename "$(pwd)")" #AUTOCFG
-  #fi
-#else
-  #strFlBlendFound="$(find -iname "*.blend" -not -iregex ".*\(copy\|autosave\|quit\|copybuffer_material\).*")"&&:
-  #declare -p strFlBlendFound #echo there may have more than one blender file
-  #if [[ -f "$strFlBlendFound" ]];then
-    #ls -l "$strFlBlendFound"
-    #strFlCoreName="`basename "$strFlBlendFound"`"
-    #if echoc -q "the above blender file was found, is this the new model name '$strFlCoreName'?";then
-      #strFlCoreNameProprietary="$(basename "$(pwd)")" #AUTOCFG
-    #fi
-  #else
-    #strFlCoreName="$(basename "$(pwd)")" #AUTOCFG
-    #strFlCoreNameProprietary="${strFlCoreName}"
-  #fi
-#fi
 export strFlCoreName
 export strFlCoreNameProprietary
-declare -p strFlCoreName strFlCoreNameProprietary
+declare -p strFlCoreName strFlCoreNameProprietary strLOD
 
 # Main code
 if SECFUNCarrayCheck -n astrRemainingParams;then :;fi
@@ -313,7 +301,7 @@ astrJSONSubsectionList=(
 
 function FUNCapplyTweaksFinalize() {
   echo ">>>>>>>>>>>>>>>>>>> finalize ugly json <<<<<<<<<<<<<<<"
-  local lstrFlUgly="${strFlCoreName}.ftl.unpack.ugly"
+  local lstrFlUgly="${strFlCoreName}${strLOD}.ftl.unpack.ugly"
   echo -n >"${lstrFlUgly}30final.json"; #clear/create
   local liTotTx
   : ${liTotTx:=1000} #helpf just a trick to blindly use all available
@@ -334,11 +322,11 @@ function FUNCapplyTweaksFinalize() {
   ls -l "${lstrFlUgly}"* |egrep -v ".bkp$"
   cp -vf "${lstrFlUgly}30final.json" "${lstrFlUgly}.json"
   
-  if ! SECFUNCexecA -ce python3 -m json.tool "${lstrFlUgly}.json" >"${strFlCoreName}.ftl.unpack.json";then #prettyfy
+  if ! SECFUNCexecA -ce python3 -m json.tool "${lstrFlUgly}.json" >"${strFlCoreName}${strLOD}.ftl.unpack.json";then #prettyfy
     ls -l "${lstrFlUgly}.json"
     exit 1
   fi
-  ls -l "${strFlCoreName}.ftl.unpack.json"
+  ls -l "${strFlCoreName}${strLOD}.ftl.unpack.json"
 };export -f FUNCapplyTweaksFinalize
 function FUNCapplyTweaks() { #helpf
   #local lbFinalize=true;if [[ "$1" == --nofinalize ]];then lbFinalize=false;shift;fi #useful to multithread process many textures at once
@@ -356,7 +344,7 @@ function FUNCapplyTweaks() { #helpf
   #clear;
   #cd "${strFlCoreName}"_OBJToFTL;
   
-  local lstrFlUgly="${strFlCoreName}.ftl.unpack.ugly"
+  local lstrFlUgly="${strFlCoreName}${strLOD}.ftl.unpack.ugly"
   
   #local lastrSections=(
     #header #0
@@ -427,8 +415,8 @@ function FUNCapplyTweaks() { #helpf
 if $bJustApplyTweaks;then
   cd "${strFlCoreName}_OBJToFTL"
   FUNCapplyTweaks "$@"
-  SECFUNCexecA -ce arx-convert "${strFlCoreName}.ftl.unpack.json" --from=json --to=ftl --output="${strFlCoreName}.ftl"
-  ls -l "${strFlCoreName}.ftl"
+  SECFUNCexecA -ce arx-convert "${strFlCoreName}${strLOD}.ftl.unpack.json" --from=json --to=ftl --output="${strFlCoreName}${strLOD}.ftl"
+  ls -l "${strFlCoreName}${strLOD}.ftl"
   exit 0
 fi
 
@@ -436,21 +424,21 @@ if $bDaemon;then
   bSpeak=true
   bProccessNow=false
   while true;do
-    ls -l "${strFlWFObj}" "${strFlWFMtl}" "${strPathObjToFtl}/${strFlCoreName}.ftl" &&:
-    #TODO grant files are not modified before starting processing them #strKey="$(sha1sum "${strFlWFObj}" "${strFlWFMtl}" "${strPathObjToFtl}/${strFlCoreName}.ftl")"&&:;echo "${strKey-}"
-    if [[ "${strFlWFObj}" -nt "${strPathObjToFtl}/${strFlCoreName}.ftl" ]];then
+    ls -l "${strFlWFObj}" "${strFlWFMtl}" "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" &&:
+    #TODO grant files are not modified before starting processing them #strKey="$(sha1sum "${strFlWFObj}" "${strFlWFMtl}" "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl")"&&:;echo "${strKey-}"
+    if [[ "${strFlWFObj}" -nt "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" ]];then
       bProccessNow=true
     fi
-    if ! $bProccessNow && [[ "${strFlWFMtl}" -nt "${strPathObjToFtl}/${strFlCoreName}.ftl" ]];then
+    if ! $bProccessNow && [[ "${strFlWFMtl}" -nt "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" ]];then
       if echoc -t 3 -q "did you update '$strFlWFMtl' manually? if so, convert obj to ftl now? (beware tho, configs from blender exported in the .mtl will override your changes)";then
         bProccessNow=true
       fi
     fi
     if $bProccessNow;then
-      if $bSpeak;then echoc --say "${strFlCoreName} modified";fi
-      if ! "${strSelf}" "$strFlCoreName";then
+      if $bSpeak;then echoc --say "${strFlCoreName}${strLOD} modified";fi
+      if ! "${strSelf}" "${strFlCoreName}${strLOD}";then
         echoc -p "errored above"
-        if $bSpeak;then echoc --say "${strFlCoreName} failed";fi
+        if $bSpeak;then echoc --say "${strFlCoreName}${strLOD} failed";fi
         if echoc -q "failed, try cleaning the cache? (but may be a bug in this script...)";then
           SECFUNCtrash "${strPathObjToFtl}/"*".json"
           echoc --info "please run this script again, if the problem persists, create a bug report."
@@ -547,8 +535,8 @@ if $bFtlToObj;then #FTL TO OBJ #################################################
   #SECFUNCexecA -ce mkdir -vp "${strFlCoreName}_OBJToFTL"
 
   export WINEPREFIX="$HOME/Wine/ArxFatalis.64bits";
-  strFl="`realpath "${strFlCoreName}.ftl"`"
-  if [[ -f "${strPathFtlToObj}/${strFlCoreName}.obj" ]];then
+  strFl="`realpath "${strFlCoreName}${strLOD}.ftl"`"
+  if [[ -f "${strPathFtlToObj}/${strFlCoreName}${strLOD}.obj" ]];then
     ls -l --color "${strPathFtlToObj}"
   else
     (
@@ -603,7 +591,7 @@ else #OBJ TO FTL ###############################################################
   SECFUNCexecA -ce mkdir -vp "$strPathObjToFtl"
 
   while ! SECFUNCexecA -ce ls -l "${strFlWFObj}";do
-    echoc -wp "file strFlWFObj='${strFlWFObj}' is missing, may be you need to export it from blender? or may be it is not the correct filename strFlCoreName='$strFlCoreName' that should be passed as a param to this script. Btw, work with the .blend file at '$strBlenderSafePath'."
+    echoc -wp "file strFlWFObj='${strFlWFObj}' is missing, may be you need to export it from blender? or may be it is not the correct filename strFlCoreName='${strFlCoreName}${strLOD}' that should be passed as a param to this script. Btw, work with the .blend file at '$strBlenderSafePath'."
   done
 
   if $bDoBkpEverything;then
@@ -817,18 +805,18 @@ else #OBJ TO FTL ###############################################################
 
   ls -l "${strFlCoreName}_FTLToOBJ"&&:
 
-  SECFUNCexecA -ce ls -l "${strPathObjToFtl}/${strFlCoreName}.ftl"
+  SECFUNCexecA -ce ls -l "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl"
 
-  #strLnHint="${strFlCoreName}.ftl.HIGH_POLY_LOCATION_HINT"
+  #strLnHint="${strFlCoreName}${strLOD}.ftl.HIGH_POLY_LOCATION_HINT"
   #declare -p strLnHint
-  #SECFUNCexecA -ce ln -vsfT "${strPathObjToFtl}/${strFlCoreName}.ftl" "${strLnHint}" #so you will know where it is
+  #SECFUNCexecA -ce ln -vsfT "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" "${strLnHint}" #so you will know where it is
   #SECFUNCexecA -ce ls -l "${strLnHint}"
 
   strPathDeploy="${strPathDeployAtModInstallFolder}/${strRelativeDeployPath}/"
   declare -p strPathDeploy
   SECFUNCexecA -ce find "${strPathDeployAtModInstallFolder}/" -type d -perm -u-w -exec chmod -v u+w '{}' \;
   SECFUNCexecA -ce mkdir -vp "$strPathDeploy"
-  if [[ -f "${strPathDeploy}/${strFlCoreName}.ftl" ]];then SECFUNCexecA -ce chmod -v u+w "${strPathDeploy}/${strFlCoreName}.ftl";fi
+  if [[ -f "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl" ]];then SECFUNCexecA -ce chmod -v u+w "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl";fi
   
   if echoc -t $fPromptTm -q "prepare json file? (it will convert from ftl to json to fix the origin (hit spot) and let you manually fix it too)@Dy";then
     FUNCprepareProprietaryModelAsJSON
@@ -836,27 +824,27 @@ else #OBJ TO FTL ###############################################################
     cd "${strPathObjToFtl}"
     #guess the offset brute force: for((i=1;i<9955;i++));do echo $i;if explode skull.ftl --offset=$i --output=skull.ftl.unpacked;then break;fi;done #result=2549
     #this command is broken, try to import the ftl on blender and it will generate the unpack file: explode skull.ftl --offset=2549 --output=skull.ftl.unpacked --verbose
-    SECFUNCexecA -ce ../unpackFtl.simpleCmdLine.sh "${strFlCoreName}.ftl"&&:
-    while [[ ! -f "${strFlCoreName}.ftl.unpack" ]] || [[ "${strFlCoreName}.ftl" -nt "${strFlCoreName}.ftl.unpack" ]];do 
-      ls -l "${strFlCoreName}.ftl" "${strFlCoreName}.ftl.unpack"&&:;
+    SECFUNCexecA -ce ../unpackFtl.simpleCmdLine.sh "${strFlCoreName}${strLOD}.ftl"&&:
+    while [[ ! -f "${strFlCoreName}${strLOD}.ftl.unpack" ]] || [[ "${strFlCoreName}${strLOD}.ftl" -nt "${strFlCoreName}${strLOD}.ftl.unpack" ]];do 
+      ls -l "${strFlCoreName}${strLOD}.ftl" "${strFlCoreName}${strLOD}.ftl.unpack"&&:;
       echoc -p "try to import this .ftl on blender, even if it fails, the .unpack file will be created!"
-      if echoc -q "strFlUnpack='${strFlCoreName}.ftl.unpack' not found or ftl is newer than ftl.unpack file. Continue anyway?";then break;fi
+      if echoc -q "strFlUnpack='${strFlCoreName}${strLOD}.ftl.unpack' not found or ftl is newer than ftl.unpack file. Continue anyway?";then break;fi
     done
-    SECFUNCexecA -ce arx-convert "${strFlCoreName}.ftl.unpack" --from=ftl --to=json --output="${strFlCoreName}.ftl.unpack.ugly.json"
-    SECFUNCexecA -ce python3 -m json.tool "${strFlCoreName}.ftl.unpack.ugly.json" >"${strFlCoreName}.ftl.unpack.json"
+    SECFUNCexecA -ce arx-convert "${strFlCoreName}${strLOD}.ftl.unpack" --from=ftl --to=json --output="${strFlCoreName}${strLOD}.ftl.unpack.ugly.json"
+    SECFUNCexecA -ce python3 -m json.tool "${strFlCoreName}${strLOD}.ftl.unpack.ugly.json" >"${strFlCoreName}${strLOD}.ftl.unpack.json"
     
     # find a good lowest vertext to be the origin TODO: find the center one
     tabs -8
-    #strVectorsY="`cat "${strFlCoreName}.ftl.unpack.json" |egrep 'vector|"y"' |egrep 'vector' -A 1 |egrep -v "[-][-]" |tr -d '"{:,' |tr -d '\n' |sed 's@vector@\nvector@g' |egrep -vn "^ *$" |sed -r 's@ +@ @g' |sort -n -k3`"
-    strVectorsY="`cat "${strFlCoreName}.ftl.unpack.json" |egrep 'vector|"y"|"x"|"z"' |egrep 'vector' -A 3 |egrep -v "[-][-]" |tr -d '"{:,' |tr -d '\n' |sed 's@vector@\nvector@g' |egrep -v "^ *$" |egrep -vn "^ *$" |sed -r 's@ +@\t@g' |sort -n -k5`" # "^ *$" is to clean the top empty line created by 's@vector@\nvector@g'
+    #strVectorsY="`cat "${strFlCoreName}${strLOD}.ftl.unpack.json" |egrep 'vector|"y"' |egrep 'vector' -A 1 |egrep -v "[-][-]" |tr -d '"{:,' |tr -d '\n' |sed 's@vector@\nvector@g' |egrep -vn "^ *$" |sed -r 's@ +@ @g' |sort -n -k3`"
+    strVectorsY="`cat "${strFlCoreName}${strLOD}.ftl.unpack.json" |egrep 'vector|"y"|"x"|"z"' |egrep 'vector' -A 3 |egrep -v "[-][-]" |tr -d '"{:,' |tr -d '\n' |sed 's@vector@\nvector@g' |egrep -v "^ *$" |egrep -vn "^ *$" |sed -r 's@ +@\t@g' |sort -n -k5`" # "^ *$" is to clean the top empty line created by 's@vector@\nvector@g'
     echo "$strVectorsY"
     iOriginVectorIndex="`echo "$strVectorsY" |tail -n 1 |cut -d: -f1`"
     declare -p iOriginVectorIndex
     iOriginVectorIndex=$((iOriginVectorIndex-1))&&:
     declare -p iOriginVectorIndex
     if iOriginVectorIndex="$(echoc -t $fPromptTm -S "set iOriginVectorIndex='$iOriginVectorIndex'? You can also chose one from the above list (then, as this is a index, subtract 1 from it) if this one is not good, it must be the vertex that will hit the ground when dragging the object in-game, so usually the lowest one from the model@D${iOriginVectorIndex}")";then
-      SECFUNCexecA -ce egrep '"origin":' "${strFlCoreName}.ftl.unpack.json"
-      SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@(.*"origin": *)[0-9]*(,.*)@\1'"$iOriginVectorIndex"'\2@' "${strFlCoreName}.ftl.unpack.json" "${strFlCoreName}.ftl.unpack.ugly.json"
+      SECFUNCexecA -ce egrep '"origin":' "${strFlCoreName}${strLOD}.ftl.unpack.json"
+      SECFUNCexecA -ce sed ${strSedBkpOpt} -r 's@(.*"origin": *)[0-9]*(,.*)@\1'"$iOriginVectorIndex"'\2@' "${strFlCoreName}${strLOD}.ftl.unpack.json" "${strFlCoreName}${strLOD}.ftl.unpack.ugly.json"
     fi
     
     if false;then #TODO:WIP
@@ -932,28 +920,28 @@ else #OBJ TO FTL ###############################################################
     declare -p bShowTextFiles bDaemon
     if $bShowTextFiles;then 
       declare -p LINENO
-      SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlCoreName}.ftl.unpack.json";
+      SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlCoreName}${strLOD}.ftl.unpack.json";
     fi
     
     if echoc -t $fPromptTm -q "apply the changes to json (you can manually edit it too) creating a new ftl file?@Dy";then
       if $bDoBkpEverything;then
-        SECFUNCexecA -ce mv -vT "${strFlCoreName}.ftl" "${strFlCoreName}.ftl.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
+        SECFUNCexecA -ce mv -vT "${strFlCoreName}${strLOD}.ftl" "${strFlCoreName}${strLOD}.ftl.`date +%Y_%m_%d-%H_%M_%S_%N`.bkp"
       fi
-      SECFUNCexecA -ce arx-convert "${strFlCoreName}.ftl.unpack.json" --from=json --to=ftl --output="${strFlCoreName}.ftl"
+      SECFUNCexecA -ce arx-convert "${strFlCoreName}${strLOD}.ftl.unpack.json" --from=json --to=ftl --output="${strFlCoreName}${strLOD}.ftl"
     fi
   fi
   
   echoc --info "deploying at mod folder"
   cd "$strPathMain"
-  while ! SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathDeploy";do echoc -w "deploy failed, hit a key to retry";done
-  SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}.ftl"
+  while ! SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" "$strPathDeploy";do echoc -w "deploy failed, hit a key to retry";done
+  SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl"
   if [[ -n "$strFlCoreNameProprietary" ]];then # prepare replacer/override at installed mod folder
     ( 
       SECFUNCexecA -ce cd "${strPathDeploy}";
-      SECFUNCexecA -ce ln -vsfT "./${strFlCoreName}.ftl" "${strFlCoreNameProprietary}.ftl"
-      #SECFUNCexecA -ce ls -l "./${strFlCoreName}.ftl" "${strFlCoreNameProprietary}.ftl"
+      SECFUNCexecA -ce ln -vsfT "./${strFlCoreName}${strLOD}.ftl" "${strFlCoreNameProprietary}.ftl"
+      #SECFUNCexecA -ce ls -l "./${strFlCoreName}${strLOD}.ftl" "${strFlCoreNameProprietary}.ftl"
     )
-    SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}.ftl" "${strPathDeploy}/${strFlCoreNameProprietary}.ftl"
+    SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl" "${strPathDeploy}/${strFlCoreNameProprietary}.ftl"
   fi
   
   echoc -t $fPromptTm -w "hit a key to prepare release files"
@@ -968,7 +956,7 @@ else #OBJ TO FTL ###############################################################
 		echoc -t 3 -p "license file not found"
   fi
   
-  SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}.ftl" "$strPathReleaseHelper/"
+  SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" "$strPathReleaseHelper/"
   
   if SECFUNCexecA -ce 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -mmt16 "$strPathReleaseHelper/${strFlCoreName}.blend.7z" "./${strFlCoreName}.blend";then #TODOA chk blender file if all is ok
 		:
@@ -1045,9 +1033,9 @@ else #OBJ TO FTL ###############################################################
     fi
   done
   
-  # report
+  # report 
   ls -lR "$strPathReleaseHelper"
-  if $bSpeak;then echoc --say "${strFlCoreName} deployed";fi
+  if $bSpeak;then echoc --say "${strFlCoreName}${strLOD} deployed";fi
 fi
 
 echo
