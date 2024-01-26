@@ -2728,13 +2728,21 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
 	
-	timerChangeSkinToInactive -m 1 2000 experiment LOD high
-	timerChangeSkinToInactive -m 1 3000 experiment LOD medium
-	timerChangeSkinToInactive -m 1 4000 experiment LOD low
-	timerChangeSkinToInactive -m 1 5000 experiment LOD bad
-	timerChangeSkinToInactive -m 1 6000 experiment LOD flat
-	timerChangeSkinToInactive -m 1 7000 experiment LOD perfect
+	timerTFUNCtestLOD -m 1 2000 GoSub FUNCtestLOD £»lod="high" ;
 	
+	RETURN
+}
+>>TFUNCtestLOD () { GoSub FUNCtestLOD ACCEPT } >>FUNCtestLOD () {
+	experiment LOD £«lod
+	if(£«lod == "perfect")	{ £«lod="high" } else {
+	if(£«lod == "high")			{ £«lod="medium" } else {
+	if(£«lod == "medium")		{ £«lod="low" } else {
+	if(£«lod == "low")			{ £«lod="bad" } else {
+	if(£«lod == "bad")			{ £«lod="flat" } else {
+	if(£«lod == "flat")			{ £«lod="perfect" } else {
+		NOP
+	} } } } } }
+	timerTFUNCtestLOD -m 1 1000 GoSub FUNCtestLOD £»lod=£«lod ;
 	RETURN
 }
 
