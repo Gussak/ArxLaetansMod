@@ -12,11 +12,11 @@
 	//you can use @FUNCtst«work or @«work while at FUNCtst, it is the same var!
 	
 	// timers shall only use GoTo that ACCEPT (not GoSub that RETURN), so wrap a GoSub with a GoTo see TFUNCdoIt
-	timerTFUNCdoIt 1 1 GoTo TFUNCdoIt §»mode=§FUNCtst«mode ; // §»mode=§FUNCtst«mode expands to §TFUNCdoIt«mode=§FUNCtst«mode see (*1) below
+	timerTFUNCdoIt 1 1 GoTo -p TFUNCdoIt §»mode=§FUNCtst«mode ; // §»mode=§FUNCtst«mode expands to §TFUNCdoIt«mode=§FUNCtst«mode see (*1) below
 	RETURN;
 }
 
->>TFUNCdoIt () { GoSub FUNCdoIt §»mode=§«mode ; ACCEPT } >>FUNCdoIt () { // the GoTo matching params must be forwarded to the GoSub: §»mode=§«mode expands to §FUNCdoIt«mode=§TFUNCdoIt«mode
+>>TFUNCdoIt () { GoSub -p FUNCdoIt §»mode=§TFUNCdoIt«mode ; ACCEPT } >>FUNCdoIt () { // the GoTo matching params must be forwarded to the GoSub: §»mode=§«mode expands to §FUNCdoIt«mode=§TFUNCdoIt«mode
 	//INPUT: <§FUNCdoIt«mode> this is how to access this var outside FUNCdoIt, but here can be just §«mode !
 	//INPUT: [£FUNCdoIt«type] this is how to access this var outside FUNCdoIt, but here can be just £«type !
 	//OUTPUT: @FUNCdoIt«work_OUTPUT terminating with _OUTPUT is unnecessary, is just to make it clear how to use the var

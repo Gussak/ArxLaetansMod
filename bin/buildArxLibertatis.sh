@@ -101,9 +101,15 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 	else
 		#FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
-		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
-		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-g"
-		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
+		if echoc -q "Debug (if not will be Release. It may be broken, better test it)?@Dy";then
+			FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
+			FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-g"
+			FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
+		else
+			FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Release"
+			FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" ""
+			FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
+		fi
 	fi
 fi
 declare -p astrVarValoldValnew

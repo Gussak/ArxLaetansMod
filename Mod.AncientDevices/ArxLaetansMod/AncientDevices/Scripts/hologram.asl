@@ -2728,12 +2728,18 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
 	
-	timerTFUNCtestLOD -m 1 2000 GoTo TFUNCtestLOD £»lod="high" ;
+	Set £FUNCtestLOD«lod "high" //TODOABCDE £«lod is not working at FUNCtestLOD when a timer calls TFUNCtestLOD like: timerTFUNCtestLOD -m 1 2000 GoTo -p TFUNCtestLOD £»lod="high" ;
+	timerTFUNCtestLOD -m 1 2000 GoTo TFUNCtestLOD
 	
 	RETURN
 }
->>TFUNCtestLOD () { GoSub FUNCtestLOD £»lod=£«lod ; ACCEPT } >>FUNCtestLOD () {
+//>>TFUNCtestLOD () { GoSub -p FUNCtestLOD £»lod=£TFUNCtestLOD«lod ; GoSub -p FUNCshowlocals £»filter="testLOD" §»force=1 ; ACCEPT } >>FUNCtestLOD () {
+>>TFUNCtestLOD () { GoSub FUNCtestLOD ACCEPT } >>FUNCtestLOD () {
 	//INPUT: £FUNCtestLOD«lod
+	if(£«lod == "") {
+		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid empty £«lod=~£«lod~" ;
+		Set £«lod "high"
+	}
 	experiment LOD £«lod
 	if(£«lod == "perfect")	{ Set £«lod "high" } else {
 	if(£«lod == "high")			{ Set £«lod "medium" } else {
@@ -2743,7 +2749,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(£«lod == "flat")			{ Set £«lod "perfect" } else {
 		NOP
 	} } } } } }
-	timerTFUNCtestLOD -m 1 1000 GoTo TFUNCtestLOD £»lod=£FUNCtestLOD«lod ;
+	//timerTFUNCtestLOD -m 1 1000 GoTo -p TFUNCtestLOD £»lod=£«lod ;
+	timerTFUNCtestLOD -m 1 1000 GoTo TFUNCtestLOD
+	GoSub -p FUNCshowlocals £»filter="testLOD" §»force=1 ;
 	RETURN
 }
 
