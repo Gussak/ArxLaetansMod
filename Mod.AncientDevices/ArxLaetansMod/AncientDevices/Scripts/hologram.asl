@@ -130,6 +130,7 @@ TODO create a signal repeater item that can be placed in a high signal stregth p
 TODO x8 buttons CircularOptionChoser: place on ground, rotate it to 0 degrees, diff player yaw to it, on activate will highlight the chosen button.
 TODO at 75 ancientskill, player can chose what targeted spell will be cast. at 100, what explosion will happen. using the CircularOptionChoser x8 buttons
 /// <> /////PRIORITY:LOW
+TODO all messy translations (not latin) could become latin in some alternative indirect cognitive way
 TODO teleportArrow stack 10
 TODO grenade+hologram=teleportArrow (insta-kill any foe and teleport the player there)
 TODO teleportArrow+hologram=mindControl (undetectable, and frenzy foe against his friends)
@@ -189,7 +190,7 @@ ON Clone () { //happens when unstacking. is more reliable than ON INIT because I
 ON IDENTIFY () { //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
-	GoSub FUNChoverInfo
+	GoSub FUNChoverInfo //TODO RM?
 	if(£AncientDeviceMode == "ConfigOptions")	GoSub FUNCconfigOptionHover
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
@@ -206,7 +207,7 @@ ON IDENTIFY () { //this is called (apparently every frame) when the player hover
 				//TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~£SkyBoxCurrent~"
 			//}
 			
-			Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
+			if(£AncientDeviceMode == "") Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
 			
 			Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Identified_Now"
 			
@@ -847,9 +848,21 @@ ON COMBINE () {
 	UnSet £ScriptDebugCombineFailReason
 	GoSub -p FUNCshowlocals §»force=1 ;
 	
+	if (^amount > 1) { //this must not be a stack of items
+		SPEAK -p [player_no] NOP
+		Set £ScriptDebugCombineFailReason "Self:IsStack"
+		GoSub -p FUNCshowlocals §»force=1 ;
+		ACCEPT
+	}
+	
 	///////////////////// combine with other classes ///////////////////////
 	
-	if (or(£OtherEntIdToCombineWithMe ISCLASS "wall_block" || £OtherEntIdToCombineWithMe ISCLASS "bone" || £OtherEntIdToCombineWithMe ISCLASS "jail_stone")) { //add anything that can smash it but these are enough. This is not a combine actually, is more like an action. this can break a stack!
+	if (or(
+		£OtherEntIdToCombineWithMe ISCLASS "bone" || 
+		£OtherEntIdToCombineWithMe ISCLASS "torch" || 
+		£OtherEntIdToCombineWithMe ISCLASS "wall_block" || 
+		£OtherEntIdToCombineWithMe ISCLASS "jail_stone"
+	)) { //add anything that can smash it but these are enough. This is not a combine actually, is more like an action. this can break a stack!
 		GoSub FUNCbreakDeviceDelayed
 		ACCEPT
 	}
@@ -934,18 +947,12 @@ ON COMBINE () {
 		//GoSub FUNCshowlocals
 		//ACCEPT
 	//}
-	if (^amount > 1) { //this must not be a stack of items
-		SPEAK -p [player_no] NOP
-		Set £ScriptDebugCombineFailReason "Self:IsStack"
-		GoSub -p FUNCshowlocals §»force=1 ;
-		ACCEPT
-	}
-	if (§Identified == 0) {
-		SPEAK -p [player_not_skilled_enough] NOP
-		Set £ScriptDebugCombineFailReason "Self:NotIdentified"
-		GoSub -p FUNCshowlocals §»force=1 ;
-		ACCEPT
-	}
+	//if (§Identified == 0) { //this makes no sense considering the latin/messy translations and overall gameplay
+		//SPEAK -p [player_not_skilled_enough] NOP
+		//Set £ScriptDebugCombineFailReason "Self:NotIdentified"
+		//GoSub -p FUNCshowlocals §»force=1 ;
+		//ACCEPT
+	//}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £ScriptDebugCombineFailReason "Self:TODO:HoloTeleportArrow"
@@ -1216,7 +1223,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	Set &G_DebugMode 1 //COMMENT_ON_RELEASE
 	
-	Set £AncientDeviceMode "AncientBox"
+	if(£AncientDeviceMode == "") Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
 	
 	GoSub -p FUNCconfigOptions £»mode="hide" ;
 	TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"	"Hologram.skybox.index2000.DocUnidentified"
@@ -1346,7 +1353,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(§Identified == 1) {
 		Set £FUNCnameUpdate_NameBase "Broken Hologram Device" 
 	} else {
-		Set £FUNCnameUpdate_NameBase "Fracti Grolhoam Fabrica" 
+		Set £FUNCnameUpdate_NameBase "Fracti Grolhoam Fabrica" //latin messy latin
 	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
@@ -1506,7 +1513,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £SignalStrInfo "~£SignalStrInfo~(req ~%.1f,@FUNCsignalStrenghCheck«Required~%, here is ~§SignalStrengthTrunc~%, ~$G_Holog_SignalMode~ for ~§SignalModeChangeDelay~s)" //it is none or working for N seconds
 			} else {
-				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@FUNCsignalStrenghCheck«Required~, here is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds
+				Set £SignalStrInfo "~£SignalStrInfo~(req 0x~%X,@FUNCsignalStrenghCheck«Required~, here is 0x~%X,§SignalStrengthTrunc~% for 0x~%X,§SignalModeChangeDelay~s)" //it is none or working for N seconds //not messy, but could be
 			}
 			//Set §hours   ^gamehours
 			//Mod §hours 24
@@ -1521,7 +1528,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,§hours~:~%02d,§minutes~:~%02d,§seconds~(~^arxtime~)" 
 			} else {
-				Set £ItemConditionDesc "~£ItemConditionDesc~(0x~%X,§ItemConditionPercent~% 0x~%X,§UseCount~/0x~%X,§UseMax~ Reliquum 0x~%X,§UseRemain~) RT:0x~%X,^gamedays~day(s) 0x~%02X,§hours~:0x~%02X,§minutes~:0x~%02X,§seconds~" 
+				Set £ItemConditionDesc "~£ItemConditionDesc~(0x~%X,§ItemConditionPercent~% 0x~%X,§UseCount~/0x~%X,§UseMax~ Reliquum 0x~%X,§UseRemain~) RT:0x~%X,^gamedays~day(s) 0x~%02X,§hours~:0x~%02X,§minutes~:0x~%02X,§seconds~" //latin
 			}
 			//Set £ItemConditionDesc "~£ItemConditionDesc~(~§ItemConditionPercent~% ~§UseCount~/~§UseMax~ Remaining ~§UseRemain~) RT:~^gamedays~day(s) ~%02d,^gamehours~:~%02d,^gameminutes~:~%02d,^gameseconds~" 
 			Set £ItemQuality "~£ItemQuality~(~§UseMax~)"
@@ -1532,9 +1539,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(@AncientTechSkill >= 30) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Quality:~£ItemQuality~."
 			if(@AncientTechSkill >= 40) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Condition:~£ItemConditionDesc~."
 		} else {
-			if(@AncientTechSkill >= 20) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Nagsil:~£SignalStrInfo~." 
-			if(@AncientTechSkill >= 30) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Itaquyl:~£ItemQuality~."
-			if(@AncientTechSkill >= 40) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Ditononic:~£ItemConditionDesc~."
+			if(@AncientTechSkill >= 20) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Nagsil:~£SignalStrInfo~." //messy
+			if(@AncientTechSkill >= 30) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Itaquyl:~£ItemQuality~." //messy
+			if(@AncientTechSkill >= 40) Set £«NameFinal_OUTPUT "~£«NameFinal_OUTPUT~ Ditononic:~£ItemConditionDesc~." //messy
 		}
 		
 		//EASY DEBUG STUFF
@@ -2413,15 +2420,16 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
 	RANDOM §CreateChance {
-		/////////////////////////////////////////////////////////////////
-		////////////// MORPH thru simple activation while in inventory
+		/////////////////////////////////////////////////////////////////////////////////
+		////////////// MORPH thru simple activation while in inventory //////////////////
+		// each this can become a combine tree. AncientBox is the first of the main devices. SignalRepeater could be the first of another tree!
 		if (£AncientDeviceMode == "_BecomeSignalRepeater_") { Set £AncientDeviceMode "SignalRepeater"
 			// this must be easy to become again a hologram, so do minimal changes!
 			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
 			if(§Identified == 1) {
 				Set £FUNCnameUpdate_NameBase "Hologram Signal Repeater" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" 
+				Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" //all messy
 			}
 			Set £IconBasename "HoloSignalRepeater"
 			SetGroup "Special"
@@ -2439,7 +2447,12 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			SetGroup -r "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
-		} else { /////////////////// MORPH only by combining below here! ////////////////////////////
+		} else { 
+		
+		////////////////////////////////////////////////////////////////////////////////////
+		/////////////////// MORPH only by combining below here! ////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////
+		
 		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
 			Set §PristineChance @FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 			Div §PristineChance 10
@@ -2451,7 +2464,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £FUNCnameUpdate_NameBase "Hologram Grenade" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Degnare" 
+				Set £FUNCnameUpdate_NameBase "Grolhoam Degnare" //messy
 			}
 			//Set £IconBasename "HologramGrenade"
 			Set £IconBasename "AncientDevice.Grenade"
@@ -2478,7 +2491,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £FUNCnameUpdate_NameBase "Hologram Landmine" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Terra Perdere" 
+				Set £FUNCnameUpdate_NameBase "Grolhoam Terra Perdere" //messy latin latin
 			}
 			Set £IconBasename "HoloLandMine"
 			Set §AncientDeviceTriggerStep 1
@@ -2490,7 +2503,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £FUNCnameUpdate_NameBase "Hologram Teleport" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Itinerantur" 
+				Set £FUNCnameUpdate_NameBase "Grolhoam Itinerantur" //messy latin
 			}
 			Set £IconBasename "HoloTeleport"
 			Set §AncientDeviceTriggerStep 1
@@ -2504,7 +2517,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £FUNCnameUpdate_NameBase "Hologram Mind Control" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Mens Moderantum" 
+				Set £FUNCnameUpdate_NameBase "Grolhoam Mens Moderantum" //messy latin latin
 			}
 			Set £IconBasename "HoloMindControl"
 			Set §AncientDeviceTriggerStep 1
@@ -2516,7 +2529,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			if(§Identified == 1) {
 				Set £FUNCnameUpdate_NameBase "Hologram Sniper Bullet" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Procul Occidere" 
+				Set £FUNCnameUpdate_NameBase "Grolhoam Procul Occidere" //messy latin latin
 			}
 			Set £IconBasename "AncientSniperBullet"
 			Set §AncientDeviceTriggerStep 1
@@ -2563,7 +2576,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		if(§Identified == 1) {
 			Set £FUNCnameUpdate_NameBase "Ancient Box (OFF)" 
 		} else {
-			Set £FUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" 
+			Set £FUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" //latin
 		}
 	} else {
 	if(£AncientDeviceMode == "ConfigOptions") {
@@ -2599,7 +2612,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	if(§Identified == 1) {
 		Set £FUNCnameUpdate_NameBase "Holograms of the over world" 
 	} else {
-		Set £FUNCnameUpdate_NameBase "Grolhoam Super Mundi" 
+		Set £FUNCnameUpdate_NameBase "Grolhoam Super Mundi" //messy latin latin
 	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate

@@ -96,6 +96,12 @@ inventory playeradd movable/broken_bottle/broken_bottle
 
 ================================ TODO 
 
+raycast placing a hand (decal) in walls and floors (max dist 300), useful to use with the total darkness mod and still know the limits of the walls
+
+add stamina.
+
+hold jump to jump farer. spends full bar of stamina at most. adds at most 3.0 hunger.
+
 /*
 LODS:
  P,0:!perfect, original
