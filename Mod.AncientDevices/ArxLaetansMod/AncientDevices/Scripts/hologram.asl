@@ -2728,22 +2728,23 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
 	
-	timerTFUNCtestLOD -m 1 2000 GoSub FUNCtestLOD £»lod="high" ;
+	timerTFUNCtestLOD -m 1 2000 GoTo TFUNCtestLOD £»lod="high" ;
 	
 	RETURN
 }
->>TFUNCtestLOD () { GoSub FUNCtestLOD ACCEPT } >>FUNCtestLOD () {
+>>TFUNCtestLOD () { GoSub FUNCtestLOD £»lod=£«lod ; ACCEPT } >>FUNCtestLOD () {
+	//INPUT: £FUNCtestLOD«lod
 	experiment LOD £«lod
-	if(£«lod == "perfect")	{ £«lod="high" } else {
-	if(£«lod == "high")			{ £«lod="medium" } else {
-	if(£«lod == "medium")		{ £«lod="low" } else {
-	if(£«lod == "low")			{ £«lod="bad" } else {
-	if(£«lod == "bad")			{ £«lod="flat" } else {
-	if(£«lod == "flat")			{ £«lod="perfect" } else {
+	if(£«lod == "perfect")	{ Set £«lod "high" } else {
+	if(£«lod == "high")			{ Set £«lod "medium" } else {
+	if(£«lod == "medium")		{ Set £«lod "low" } else {
+	if(£«lod == "low")			{ Set £«lod "bad" } else {
+	if(£«lod == "bad")			{ Set £«lod "flat" } else {
+	if(£«lod == "flat")			{ Set £«lod "perfect" } else {
 		NOP
 	} } } } } }
-	timerTFUNCtestLOD -m 1 1000 GoSub FUNCtestLOD £»lod=£«lod ;
+	timerTFUNCtestLOD -m 1 1000 GoTo TFUNCtestLOD £»lod=£FUNCtestLOD«lod ;
 	RETURN
 }
 
-
+//KEEP HERE TEST: Set £TestFixScriptEncoding "matters(£§«»¥¶¤) maybe(`¹²³×äåéëþüúíóöáßðfghïø½©®bñµç¿~¡ÄÅÉËÞÜÚÍÓÖÁÐFGHÏ¼Ø°Æ¼¢®BÑµÇ)" // all can be easily input with AltGr dead keys

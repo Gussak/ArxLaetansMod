@@ -10,10 +10,13 @@
 	Set §«mode §FUNCdoIt«mode // this auto creates the var §FUNCtst«mode
 	Set @«work @FUNCdoIt«work_OUTPUT // this auto creates the var @FUNCtst«work
 	//you can use @FUNCtst«work or @«work while at FUNCtst, it is the same var!
+	
+	// timers shall only use GoTo that ACCEPT (not GoSub that RETURN), so wrap a GoSub with a GoTo see TFUNCdoIt
+	timerTFUNCdoIt 1 1 GoTo TFUNCdoIt §»mode=§FUNCtst«mode ; // §»mode=§FUNCtst«mode expands to §TFUNCdoIt«mode=§FUNCtst«mode see (*1) below
 	RETURN;
 }
 
->>FUNCdoIt () {
+>>TFUNCdoIt () { GoSub FUNCdoIt §»mode=§«mode ; ACCEPT } >>FUNCdoIt () { // the GoTo matching params must be forwarded to the GoSub: §»mode=§«mode expands to §FUNCdoIt«mode=§TFUNCdoIt«mode
 	//INPUT: <§FUNCdoIt«mode> this is how to access this var outside FUNCdoIt, but here can be just §«mode !
 	//INPUT: [£FUNCdoIt«type] this is how to access this var outside FUNCdoIt, but here can be just £«type !
 	//OUTPUT: @FUNCdoIt«work_OUTPUT terminating with _OUTPUT is unnecessary, is just to make it clear how to use the var
@@ -23,9 +26,10 @@
 	Set @«work_OUTPUT 1.23 // is @FUNCdoIt«work_OUTPUT outside FUNCdoIt !
 	Set @«target ^hover_1500
 	
-	timerFUNCdoIt1 -m 1 50 Destroy £FUNCdoIt«target // when timers are executed, they are not in the call stack context, so the function label "FUNCdoIt" is not known, so it is required to use the full var name £FUNCdoIt«target
+	timerFUNCdoIt1 -m 1 50 Destroy £FUNCdoIt«target // (*1) when timers are executed, they are not in the call stack context, so the function label "FUNCdoIt" is not known, so it is required to use the full var name £FUNCdoIt«target
 	
 	//reset the optional params to some default b4 next call
 	Set £«type "SomeDefault" // could be just "" tho
 	RETURN;
 }
+
