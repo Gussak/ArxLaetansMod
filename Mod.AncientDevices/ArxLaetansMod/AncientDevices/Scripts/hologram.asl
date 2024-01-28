@@ -2749,6 +2749,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 //>>TFUNCtestLOD () { GoSub -p FUNCtestLOD £»lod=£TFUNCtestLOD«lod ; GoSub -p FUNCshowlocals £»filter="testLOD" §»force=1 ; ACCEPT } >>FUNCtestLOD () {
 >>TFUNCtestLOD () { GoSub FUNCtestLOD ACCEPT } >>FUNCtestLOD () {
 	//INPUT: £FUNCtestLOD«lod
+	RETURN
+	
 	if(£«lod == "") {
 		GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid empty £«lod=~£«lod~" ;
 		Set £«lod "high"
