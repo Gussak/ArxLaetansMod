@@ -135,6 +135,7 @@ ArxLaetansMod.AncientDevice.Grenade/convertOBJtoFTL.sh
 *.log
 *DO_NOT_COMMIT*
 .cfg
+*.old
 
 # mod files (3D models etc) appended from autogen
 !ArxLaetansMod.MagicPotions.7z
