@@ -2771,4 +2771,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 
+>>TFUNCtestEnv () { GoSub FUNCtestEnv ACCEPT } >>FUNCtestEnv () {
+	Env -l
+	RETURN
+}
+
 //KEEP HERE TEST: Set £TestFixScriptEncoding "matters(£§«»¥¶¤) maybe(`¹²³×äåéëşüúíóöáßğfghïø½©®bñµç¿~¡ÄÅÉËŞÜÚÍÓÖÁĞFGHÏ¼Ø°Æ¼¢®BÑµÇ)" // all can be easily input with AltGr dead keys
