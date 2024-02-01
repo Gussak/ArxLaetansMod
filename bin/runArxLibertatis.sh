@@ -111,8 +111,9 @@ while true;do
 	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
 	export ARX_WarnTimerCallingGoSub="hologram.asl"
 	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
-	export ARX_LODBadDist=810
-
+	#export ARX_DebugFunctionFilter="isEnabled" # use in conjunction with the file being debugged. Needs the function name, not class::func
+	# KEEP: linux command to generate some doc, but they can all be listed with console command `env -l` now! LC_ALL=C egrep 'platform::getEnvironmentVariableValue' --include="*.h" --include="*.cpp" -iRhI * |sed -r -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*)",[^,]*,[^,]*, *([^,\)]*).*@export \2=\3 # \1@' -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*).*@export \2=? # \1@'
+	
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
 	echoc --info "EXEC: ${acmd[@]}"
 	ln -vsfT "$strFlLog" "`dirname "$strFlLog"`/arx.linux.log" #lastest

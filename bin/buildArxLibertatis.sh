@@ -153,13 +153,14 @@ function FUNCmakeRW() {
 }
 
 strDeployPath="../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/"
-FUNCmakeRW "$strDeployPath"
-SECFUNCexecA -ce cp -Ru * "$strDeployPath"
-#while ! SECFUNCexecA -ce cp -Ru * "$strDeployPath";do
-	##FUNCmakeRO "$strDeployPath"
-  #echoc -w retry
-#done
+while ! SECFUNCexecA -ce cp -Ru * "$strDeployPath";do
+	FUNCmakeRW "$strDeployPath"
+	echoc --info "deploy path RW done, retring copy"
+done
+
 SECFUNCexecA -ce mkdir -vp "${strDeployPath}/data/"
 # localization and misc (from data/core) must end at data/ and not data/core/
 SECFUNCexecA -ce cp -vRu ../data/core/* "${strDeployPath}/data/"
-FUNCmakeRO "${strDeployPath}/"
+if echoc -t ${fQuestionDelay} -q "make deploy path RO?";then
+	FUNCmakeRO "${strDeployPath}/"
+fi
