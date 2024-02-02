@@ -1,0 +1,25 @@
+.*
+!.gitignore
+!.editorconfig
+!/.mailmap
+!/.travis.yml
+!/.github
+/build
+
+/**/*.sbkp
+gitgui.sh
+buildSimple.sh
+
+*
+# the top dir must be explicit and have .../* too. but all child folders just need .../*
+!game/
+!game/*
+!game/graph/*
+!game/graph/obj3d/*
+!game/graph/obj3d/interactive/*
+!game/graph/obj3d/interactive/system/lod
+!game/graph/obj3d/interactive/system/lod/*.ftl
+!graph/
+!graph/*
+!graph/obj3d/*
+!graph/obj3d/textures/*.png

@@ -1,3 +1,4 @@
+# comments must have their exclusive line. each cfg line must not have comments appended on them!
 # uncomment below to have a strict filter. Comment to detect changes to new files that are still not at the strict filters below
 *
 
@@ -45,6 +46,7 @@
 !tools/interim/SPECIALTX_ORIGIN.png
 
 # find tests -type d |sed -r 's@^(.*)@!\1\n!\1/*@' |sort -u
+# the top dir must be explicit and have .../* too. but all child folders just need .../*
 !tests
 !tests/*
 !tests/ScriptsOverridingAndPatching
@@ -136,7 +138,9 @@ ArxLaetansMod.AncientDevice.Grenade/convertOBJtoFTL.sh
 *DO_NOT_COMMIT*
 .cfg
 *.old
+# force find
 !*.sh
+!.gitignore.ForMyArxLibertatisFork.CreateHardLink
 
 # mod files (3D models etc) appended from autogen
 !ArxLaetansMod.MagicPotions.7z
