@@ -69,20 +69,22 @@ function FUNCshowSettings() {
 	#"CMAKE_CXX_FLAGS_DEBUG:STRING" -g    "-ggdb -O0 -fno-omit-frame-pointer"
 	#"SET_OPTIMIZATION_FLAGS:BOOL"  ON    OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 #)
-if $bRebuildFullVerbose;then
-#astrVarValoldValnew+=(
-	#"CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE TRUE
-#)
-	FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  TRUE
-else
-	FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE
-fi
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	#if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	#if ! cmake -DDEVELOPER=1 -DDEBUG=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	if ! cmake -DDEVELOPER=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 		exit 1
 	fi
+
+	if $bRebuildFullVerbose;then
+	#astrVarValoldValnew+=(
+		#"CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE TRUE
+	#)
+		FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  TRUE
+	else
+		FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE
+	fi
+
 	#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
 		#-e 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' \
 		#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!

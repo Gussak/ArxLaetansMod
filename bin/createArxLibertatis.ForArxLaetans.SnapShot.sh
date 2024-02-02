@@ -16,12 +16,12 @@ strBranch="$(cd "${strBPath}";git branch |egrep "^[*]" |cut -f2 -d' ')"
 if $bCompiledMode;then
 	strWhat="Compiled"
 	astrTarParams=(
-		--exclude="${strBPath}/build/CMakeFiles"
+		--exclude="${strBPath}/build*/CMakeFiles"
 	)
 else
 	strWhat="SourceCode"
 	astrTarParams=(
-		--exclude="${strBPath}/build"
+		--exclude="${strBPath}/build*"
 		--exclude="${strBPath}/.git"
 	)
 fi
