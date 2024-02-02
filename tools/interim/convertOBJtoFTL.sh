@@ -214,8 +214,9 @@ strRelativeDeployPath="`pwd |sed -r "s@.*${strDeveloperWorkingPath}/@@"`"  #AUTO
 #strRelativeDeployPath="${strRelativeDeployPath%${strBlenderSafePath}}"
 export strRelativeDeployPath
 declare -p strRelativeDeployPath
-if [[ "${strRelativeDeployPath:0:1}" == "/" ]];then
-  echoc -p "strRelativeDeployPath='$strRelativeDeployPath' should be a relative path from strDeveloperWorkingPath='$strDeveloperWorkingPath', move this folder inside there. Or on the terminal, paste the path from the filemanager in case you are in a path tree that have symlinks in between."
+: ${bDeploy:=true} #help set bDeploy=false to ignore all deploying
+if $bDeploy && [[ "${strRelativeDeployPath:0:1}" == "/" ]];then
+  echoc -p "strRelativeDeployPath='$strRelativeDeployPath' should be a relative path from strDeveloperWorkingPath='$strDeveloperWorkingPath', move this folder inside there. Or on the terminal, paste the path from the filemanager in case you are in a path tree that have symlinks in between. Or set bDeploy=false"
   exit 1
 fi
 
@@ -227,7 +228,7 @@ if [[ -z "$strFlCoreNameProprietary" ]];then
 		strFlCoreNameProprietary="$(basename "$(pwd)" |tr '[:upper:]' '[:lower:]')"
 		if ! echoc -t $fPromptTm -q "the automatic reference file will be  strFlCoreNameProprietary='$strFlCoreNameProprietary' ok? if not it will just be ignored.@Dy";then
 			strFlCoreNameProprietary=""
-		elif [[ ! -f "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" ]];then
+		elif $bDeploy && [[ ! -f "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" ]];then
 			echoc --info "strFlCoreNameProprietary='$strFlCoreNameProprietary' does not exist, ignoring it."
 			strFlCoreNameProprietary=""
 		fi
@@ -480,7 +481,9 @@ function FUNCprepareProprietaryModelAsJSON() { #helpf to help on fixing the new 
   strFlPrettyJSon="${strFlCoreNameProprietary}.proprietary.ftl.unpack.json"
   if [[ ! -f "${strFlPrettyJSon}" ]];then
     echoc --info "preparing the json of the proprietary/reference .ftl file"
-    cp -vf "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" "./${strFlCoreNameProprietary}.proprietary.ftl"&&:
+    if $bDeploy;then
+			cp -vf "${strArxUnpackedDataFolder}/${strRelativeDeployPath}/${strFlCoreNameProprietary}.ftl" "./${strFlCoreNameProprietary}.proprietary.ftl"&&:
+		fi
     if [[ -f "./${strFlCoreNameProprietary}.proprietary.ftl" ]];then
       SECFUNCexecA -ce ./unpackFtl.simpleCmdLine.sh "${strFlCoreNameProprietary}.proprietary.ftl"
       SECFUNCexecA -ce arx-convert "${strFlCoreNameProprietary}.proprietary.ftl.unpack" --from=ftl --to=json --output="${strFlCoreNameProprietary}.proprietary.ftl.unpack.ugly.json"
@@ -647,31 +650,33 @@ else #OBJ TO FTL ###############################################################
   #if $bCanAutoFixTxPath && 
   echoc -w -t $fPromptTm "collecting blender material cfg (everything you properly configure in the blender material name will override cfgs from this script config file for each model. material name in blender ex.: sM=Glass;sFT=\"WATER|TRANS\";fTr=1.85; These are the POLY_... bit options. So, copy this there and just adjust the values if you need. sFT can be just a number too if the readable dont fit there. fTr is optional, will default to 0). Textures matching regex '.*[.]index[0-9]*' will be auto deployed, so you need to set only one in blender to all of them be detected."
   sed ${strSedBkpOpt} -r -e 's@\\@/@g' "${strFlWFMtl}" #before checking for strTXPathRelative. do not use windows folder separator to avoid too much complexity, only the final result must have it!
-  while ! egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";do
-		echoc -wp "wrong path for map_Kd, should have '${strTXPathRelative}' on it"
-  done
-  if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
-    # preview
-    astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
-    SECFUNCexecA -ce sed "${astrCmdAutoFixParams[@]}"
-    #strResp=""
-    #if $bCanAutoFixTxPath;then
-      #read -n 1 -p "fix the above manually (if not, will apply the above auto patch) (y/...)?" strResp;
-    #fi
-    #if ! ${bCanAutoFixTxPath} || [[ "${strResp}" == y ]];then
-    ##read -n 1 -p "press a key to fix '${strFlWFMtl}' file manually"
-      #SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child geany "${strFlWFMtl}"
-      #echoc -w
-    #else
-      #SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
-    #fi
-    if echoc -t $fPromptTm -q "are the above relative texture paths correct (only map_Kd matters for now tho)? (if not will open a text editor)@Dy";then
-      SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
-    else
-      SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlWFMtl}"
-      echoc -w
-    fi
-  fi
+  if egrep "map_Kd" "${strFlWFMtl}" -i;then
+		while ! egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";do
+			echoc -wp "wrong path for map_Kd, should have '${strTXPathRelative}' on it"
+		done
+		if egrep "map_Kd .*${strTXPathRelative}" -i "${strFlWFMtl}";then
+			# preview
+			astrCmdAutoFixParams=(-r -e "s@map_Kd .*${strTXPathRelative}/(.*)@map_Kd ${strTXPathRelative}/\1@i" -e 's@/@\\@gi' "${strFlWFMtl}")
+			SECFUNCexecA -ce sed "${astrCmdAutoFixParams[@]}"
+			#strResp=""
+			#if $bCanAutoFixTxPath;then
+				#read -n 1 -p "fix the above manually (if not, will apply the above auto patch) (y/...)?" strResp;
+			#fi
+			#if ! ${bCanAutoFixTxPath} || [[ "${strResp}" == y ]];then
+			##read -n 1 -p "press a key to fix '${strFlWFMtl}' file manually"
+				#SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child geany "${strFlWFMtl}"
+				#echoc -w
+			#else
+				#SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
+			#fi
+			if echoc -t $fPromptTm -q "are the above relative texture paths correct (only map_Kd matters for now tho)? (if not will open a text editor)@Dy";then
+				SECFUNCexecA -ce sed ${strSedBkpOpt} "${astrCmdAutoFixParams[@]}"
+			else
+				SECFUNCexecA -ce -m "${strGeanyWorkaround}" --child "$strAppTextEditor" "${strFlWFMtl}"
+				echoc -w
+			fi
+		fi
+	fi
   #IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(egrep "newmtl|map_Kd" "${strFlWFMtl}" |sed -r -e "s@newmtl (.*)@strCfgLn='\1';@" -e "s@map_Kd (.*)@strTxNm='\1';@" |tr -d "\n" |sed -r -e 's@strCfgLn.*@\n&@')&&:
   IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(
 		strRegexFixPathSeparator='s@\\@/@g'
@@ -811,12 +816,14 @@ else #OBJ TO FTL ###############################################################
   #declare -p strLnHint
   #SECFUNCexecA -ce ln -vsfT "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" "${strLnHint}" #so you will know where it is
   #SECFUNCexecA -ce ls -l "${strLnHint}"
-
-  strPathDeploy="${strPathDeployAtModInstallFolder}/${strRelativeDeployPath}/"
-  declare -p strPathDeploy
-  SECFUNCexecA -ce find "${strPathDeployAtModInstallFolder}/" -type d -perm -u-w -exec chmod -v u+w '{}' \;
-  SECFUNCexecA -ce mkdir -vp "$strPathDeploy"
-  if [[ -f "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl" ]];then SECFUNCexecA -ce chmod -v u+w "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl";fi
+	
+	if $bDeploy;then
+		strPathDeploy="${strPathDeployAtModInstallFolder}/${strRelativeDeployPath}/"
+		declare -p strPathDeploy
+		SECFUNCexecA -ce find "${strPathDeployAtModInstallFolder}/" -type d -perm -u-w -exec chmod -v u+w '{}' \;
+		SECFUNCexecA -ce mkdir -vp "$strPathDeploy"
+		if [[ -f "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl" ]];then SECFUNCexecA -ce chmod -v u+w "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl";fi
+	fi
   
   if echoc -t $fPromptTm -q "prepare json file? (it will convert from ftl to json to fix the origin (hit spot) and let you manually fix it too)@Dy";then
     FUNCprepareProprietaryModelAsJSON
@@ -931,17 +938,19 @@ else #OBJ TO FTL ###############################################################
     fi
   fi
   
-  echoc --info "deploying at mod folder"
-  cd "$strPathMain"
-  while ! SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" "$strPathDeploy";do echoc -w "deploy failed, hit a key to retry";done
-  SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl"
-  if [[ -n "$strFlCoreNameProprietary" ]];then # prepare replacer/override at installed mod folder
-    ( 
-      SECFUNCexecA -ce cd "${strPathDeploy}";
-      SECFUNCexecA -ce ln -vsfT "./${strFlCoreName}${strLOD}.ftl" "${strFlCoreNameProprietary}.ftl"
-      #SECFUNCexecA -ce ls -l "./${strFlCoreName}${strLOD}.ftl" "${strFlCoreNameProprietary}.ftl"
-    )
-    SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl" "${strPathDeploy}/${strFlCoreNameProprietary}.ftl"
+  if $bDeploy;then
+		echoc --info "deploying at mod folder"
+		cd "$strPathMain"
+		while ! SECFUNCexecA -ce cp -vf "${strPathObjToFtl}/${strFlCoreName}${strLOD}.ftl" "$strPathDeploy";do echoc -w "deploy failed, hit a key to retry";done
+		SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl"
+		if [[ -n "$strFlCoreNameProprietary" ]];then # prepare replacer/override at installed mod folder
+			( 
+				SECFUNCexecA -ce cd "${strPathDeploy}";
+				SECFUNCexecA -ce ln -vsfT "./${strFlCoreName}${strLOD}.ftl" "${strFlCoreNameProprietary}.ftl"
+				#SECFUNCexecA -ce ls -l "./${strFlCoreName}${strLOD}.ftl" "${strFlCoreNameProprietary}.ftl"
+			)
+			SECFUNCexecA -ce ls -l "${strPathDeploy}/${strFlCoreName}${strLOD}.ftl" "${strPathDeploy}/${strFlCoreNameProprietary}.ftl"
+		fi
   fi
   
   echoc -t $fPromptTm -w "hit a key to prepare release files"
