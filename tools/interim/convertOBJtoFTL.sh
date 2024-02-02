@@ -26,6 +26,7 @@ if ! which ScriptEchoColor;then
   echo "Obs.: echoc and SECFUNC... may be easily replaced with equivalent cmds, then remove this check line."
 fi
 source <(secinit) #init echoc and SECFUNC... #set -eEu #ScriptEchoColor
+if SECFUNCchkLastRunVersion --dev >/dev/null 2>&1;then echoc -p "still unable to run in ScriptEchoColor dev mode";exit 1;fi
 
 export SECnExecWaitDelayOnError=99999 #all SECFUNCexec will wait until you see the problem
 
@@ -264,7 +265,7 @@ FUNCchkVersion python3 "Python 3.10.12"
 
 #if [[ -z "`(nvm --version)`" ]];then echoc -p "install arx-convert dependency: https://stackoverflow.com/a/76318697/1422630";exit 1;fi
 FUNCchkDep "install nvm (to make it easy to install the arx-convert dependency correct version of node.js): https://stackoverflow.com/a/76318697/1422630 : curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash; bash; nvm install 18; nvm use 18; #obs.: to be able to use nvm, you need to run a new bash instance to let is update access to nvm on every terminal you need to use it" declare -p NVM_DIR
-if ! bBashAutoCmdOnStart="false" bash -ci "nvm --version" |egrep -q "0\.39\.3";then FUNCchkVersion nvm "0.39.3";fi #nvm needs subshell with login to load the .bashrc file with it's configs and activate self, so this is a trick
+if ! bBashAutoCmdOnStart="false" bash -ci "nvm --version" 2>&1 |egrep "0\.39\.3";then FUNCchkVersion nvm "0.39.3";fi #nvm needs subshell with login to load the .bashrc file with it's configs and activate self, so this is a trick
 
 FUNCchkDep "install arx-covert: npm i arx-convert -g" arx-convert --version
 FUNCchkVersion arx-convert "arx-convert - version 7.1.0"
@@ -677,6 +678,20 @@ else #OBJ TO FTL ###############################################################
 			fi
 		fi
 	fi
+	
+	astrChkMtlList=(
+		"newmtl sM=SPECIALTX_ORIGIN" #help SpecialMaterials: this texture must be set in a material named like that in blender
+		"map_Kd graph\obj3d\textures\specialtx_origin.png" #help SpecialMaterials: this texture must be set in a material pointing to that file in blender
+	)
+	for strChkMtl in "${astrChkMtlList[@]}";do
+		strChkMtl="$(echo "$strChkMtl" |sed -r 's@.@[&]@g')"
+		if ! egrep -i "${strChkMtl}" "$strFlWFMtl";then
+			echoc -p "the mtl file does not contain '${strChkMtl}', please fix it!"
+			egrep "[#]help SpecialMaterials:" "$0"
+			exit 1
+		fi
+	done
+	
   #IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(egrep "newmtl|map_Kd" "${strFlWFMtl}" |sed -r -e "s@newmtl (.*)@strCfgLn='\1';@" -e "s@map_Kd (.*)@strTxNm='\1';@" |tr -d "\n" |sed -r -e 's@strCfgLn.*@\n&@')&&:
   IFS=$'\n' read -d '' -r -a astrAutoCfgTmpList < <(
 		strRegexFixPathSeparator='s@\\@/@g'
@@ -790,17 +805,6 @@ else #OBJ TO FTL ###############################################################
 			exit 1
 		fi
 	fi
-	
-	astrChkMtlList=(
-		SPECIALTX_ORIGIN #help SpecialMaterials: this texture must be set in a material named sM=@Ogirin in blender
-	)
-	for strChkMtl in "${astrChkMtlList[@]}";do
-		if ! egrep -i "${strChkMtl}" "$strFlWFMtl";then
-			echoc -p "the mtl file does not contain the ${strChkMtl}, please fix it!"
-			egrep "[#]help SpecialMaterials:" "$0"
-			exit 1
-		fi
-	done
 	
   (
     SECFUNCexecA -ce cd "$strPathTools"; #must be run from where it is installed to find required deps: ArxLibertatisFTLConverter.pdb libArxIO.so.0
