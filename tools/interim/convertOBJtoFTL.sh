@@ -514,7 +514,9 @@ strRPWork="`realpath "${strDeveloperWorkingPath}"`"
 declare -p strRPCurrent strRPWork
 if ! [[ "${strRPCurrent}" =~ ^${strRPWork}.* ]];then
   pwd
-  if ! echoc -q "the current path above is not child of this top working directory strDeveloperWorkingPath='${strDeveloperWorkingPath}', you should create it like \`mkdir -vp '$strDeveloperWorkingPath'\` or reconfigure it, continue anyway?";then exit 1;fi
+  strIgnoreRelatedPath=""
+  if ! $bDeploy;then strIgnoreRelatedPath="@Dy";fi
+  if ! echoc -q "the current path above is not child of this top working directory strDeveloperWorkingPath='${strDeveloperWorkingPath}', you should create it like \`mkdir -vp '$strDeveloperWorkingPath'\` or reconfigure it, continue anyway?${strIgnoreRelatedPath}";then exit 1;fi
 fi
 
 function FUNCfixTextureAccess() {
