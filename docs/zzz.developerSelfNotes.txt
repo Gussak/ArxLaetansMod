@@ -352,6 +352,10 @@ some special chars for tests: £§«» ¢¥©®¬±¯ª°º¹²³µ¶·Þß€
 ¥°aList
 
 
+// "complex" refactor
+
+IFS=$'\n' read -d '' -r -a astrList < <(LC_ALL=C egrep 'platform::getEnvironmentVariableValue' --include="*.h" --include="*.cpp" -iRnIa * -c |grep -v :0 |cut -d: -f1)&&:;SECFUNCarrayShow astrList;for strFl in "${astrList[@]}";do sed -i`SECFUNCdtFmt --filename`.bkp -r 's@(platform::getEnvironmentVariableValue)([a-zA-Z]*)\((.*)(\)\;\}\(\)\;)(.*)@\1\2(\3).get\2();}();\5@' "$strFl"; echoc -w "DONE: $strFl";done
+
 
 
 
