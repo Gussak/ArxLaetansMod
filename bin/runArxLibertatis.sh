@@ -116,16 +116,7 @@ while true;do
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
 	export ARX_WarnTimerCallingGoSub="hologram.asl"
-	#export ARX_DebugFile="dummy";
-	#export ARX_DebugFunc="dummy";
-	#export ARX_DebugLine="dummy"; #this prevents all debug logs, so is useful with --debug="src"
-	#export ARX_Debug="dummy:dummy:dummy";
-	export ARX_Debug=".*/ArxGame.cpp:.*LOD.*:.*";
-	#export ARX_Debug=";.*/ArxGame.cpp;.*LOD.*;.*";
-	#export ARX_DebugFile=".*/ArxGame.cpp";
-	#export ARX_DebugFunc=".*LOD.*";
-	#export ARX_DebugLine=".*";
-	#export ARX_DebugFile="dummy"; export ARX_DebugFunc="dummy"; export ARX_DebugLine="dummy" #this prevents all debug logs, so is useful with --debug="src"
+	export ARX_Debug=":.*/ArxGame.cpp:.*LOD.*:.*"; # in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708"
 	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
 	#export ARX_DebugFunctionFilter="isEnabled" # use in conjunction with the file being debugged. Needs the function name, not class::func
 	# KEEP: linux command to generate some doc, but they can all be listed with console command `env -l` now! LC_ALL=C egrep 'platform::getEnvironmentVariableValue' --include="*.h" --include="*.cpp" -iRhI * |sed -r -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*)",[^,]*,[^,]*, *([^,\)]*).*@export \2=\3 # \1@' -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*).*@export \2=? # \1@'
