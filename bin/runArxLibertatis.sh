@@ -107,6 +107,7 @@ while true;do
 	fi
 	acmd+=(./arx "${acmdParams[@]}" "$@")
 
+	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
 	export ARX_LimitShadowBlobsForVertexes=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
 	export ARX_ScriptErrorPopupCommand='yad --no-markup --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center --button="Edit:0" --button="Ignore:1" --button="Ignore10s:2" --button="Ignore60s:3" --button="Ignore10m:4" --button="Ignore1h:5"'
@@ -116,9 +117,8 @@ while true;do
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
 	export ARX_WarnTimerCallingGoSub="hologram.asl"
-	export ARX_Debug=":.*/ArxGame.cpp:.*LOD.*:.*"; # in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708"
-	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
-	#export ARX_DebugFunctionFilter="isEnabled" # use in conjunction with the file being debugged. Needs the function name, not class::func
+	export ARX_Debug=":.*/ArxGame.cpp:.*LOD.*:^(?!.*1856).*$|1708"; # the first char ':' is the custom delimiter you can change. in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708" nop env -s ARX_Debug ":.*:.*(ARX_CHANGELEVEL_Push_IO|LOD).*:^(?!.*(1856|1863)).*$" nop env -l
+	
 	# KEEP: linux command to generate some doc, but they can all be listed with console command `env -l` now! LC_ALL=C egrep 'platform::getEnvironmentVariableValue' --include="*.h" --include="*.cpp" -iRhI * |sed -r -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*)",[^,]*,[^,]*, *([^,\)]*).*@export \2=\3 # \1@' -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*).*@export \2=? # \1@'
 	
 	#./arx --data-dir="../Arx Fatalis" --debug="warn,error" --debug-gl
