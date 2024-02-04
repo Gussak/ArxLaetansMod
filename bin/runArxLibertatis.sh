@@ -22,6 +22,7 @@ strPathRun="`realpath ../ArxLibertatis`"
 strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
 mkdir -vp "`dirname "$strFlLog"`"
 
+: ${bLoop:=true} #help
 while true;do
 	: ${bClear:=false} #help
 	if $bClear;then clear;fi
@@ -39,8 +40,12 @@ while true;do
 		if $bRetryingBuild;then fQuestionDelay=0.01;fi
 		if echoc -q -t ${fQuestionDelay} "re-build it?@Dy";then
 			while ! ./buildArxLibertatis.sh;do 
-				echoc -w "fix the code and retry";
-				bRetryingBuild=true
+				if $bLoop;then
+					echoc -w "fix the code and retry";
+					bRetryingBuild=true
+				else
+					exit 1
+				fi
 			done;
 		fi
 	fi
@@ -111,6 +116,15 @@ while true;do
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
 	export ARX_WarnTimerCallingGoSub="hologram.asl"
+	#export ARX_DebugFile="dummy";
+	#export ARX_DebugFunc="dummy";
+	#export ARX_DebugLine="dummy"; #this prevents all debug logs, so is useful with --debug="src"
+	#export ARX_Debug="dummy:dummy:dummy";
+	export ARX_Debug=".*/ArxGame.cpp:.*LOD.*:.*";
+	#export ARX_Debug=";.*/ArxGame.cpp;.*LOD.*;.*";
+	#export ARX_DebugFile=".*/ArxGame.cpp";
+	#export ARX_DebugFunc=".*LOD.*";
+	#export ARX_DebugLine=".*";
 	#export ARX_DebugFile="dummy"; export ARX_DebugFunc="dummy"; export ARX_DebugLine="dummy" #this prevents all debug logs, so is useful with --debug="src"
 	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
 	#export ARX_DebugFunctionFilter="isEnabled" # use in conjunction with the file being debugged. Needs the function name, not class::func
@@ -122,5 +136,6 @@ while true;do
 	rxvt -geometry 100x1 -e tail -F "$strFlLog"&disown #rxvt wont stack with xterm windows group on ubuntu windows docks
 	"${acmd[@]}" 2>&1 |tee "$strFlLog"
 	
+	if ! $bLoop;then break;fi
 	echoc -w "re-run (BUT HIT CTRL+C if it is not reading the newest changes you implemented, chache problem? RAM not ECC problem???)"
 done

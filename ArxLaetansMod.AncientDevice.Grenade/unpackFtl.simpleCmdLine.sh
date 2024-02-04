@@ -1,1 +1,1 @@
-../plugins/blender/arx_addon/unpackFtl.simpleCmdLine.sh
+../../../05.LinuxTools/arx_addon/unpackFtl.simpleCmdLine.sh

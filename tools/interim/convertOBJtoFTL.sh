@@ -32,6 +32,14 @@ export SECnExecWaitDelayOnError=99999 #all SECFUNCexec will wait until you see t
 
 strSelf="`realpath "$0"`"
 
+#help Usage example: after exporting all to .obj (with the LOD suffix if necessary) inside AncientDevice.Grenade_OBJToFTL folder
+#help ./convertOBJtoFTL.sh "AncientDevice.Grenade" # check if the first LOD_PERFECT works w/o errors
+#help ./convertOBJtoFTL.sh --noprompt "AncientDevice.Grenade[LODH]" # ex.: this requires the file to be exported as AncientDevice.Grenade[LODH].obj
+#help ./convertOBJtoFTL.sh --noprompt "AncientDevice.Grenade[LODM]"
+#help ./convertOBJtoFTL.sh --noprompt "AncientDevice.Grenade[LODL]"
+#help ./convertOBJtoFTL.sh --noprompt "AncientDevice.Grenade[LODB]"
+#help ./convertOBJtoFTL.sh --noprompt "AncientDevice.Grenade[LODF]"
+
 #if [[ "${1-}" == --help ]];then shift;egrep "[#]help" "${strSelf}";exit 0;fi
 #help most options, when you hit enter, will accept the asked question by default. it is when the 'y' in the yes option is in yellow color.
 
