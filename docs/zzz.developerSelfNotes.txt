@@ -386,3 +386,14 @@ IFS=$'\n' read -d '' -r -a astrList < <(LC_ALL=C egrep 'platform::getEnvironment
 //ex.: Array -d 3 €posList3D 7
 
 //Array -d <dimension> <€localvar> <index> // delete index. exinsting will be shifted to the left.
+
+class Foo {
+	std::string id;
+	float val;
+public:
+	Foo(std::string _id) : val(1.f) { }
+	Foo(std::string _id, float _val) : id(_id), val(_val) { }
+	Foo & operator=(float _val) { assert(id != ""); val = _val; return *this; }
+};
+			//static Foo bar = [](){return 2.f;}();
+			static Foo bar([](){return "the id";}(), [](){return 2.f;}());

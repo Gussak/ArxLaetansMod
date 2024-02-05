@@ -173,9 +173,9 @@ ON MovementDetected () {
 		if(§FUNCsignalStrenghCheck«IsAcceptable == 0) {
 			GoSub -p FUNCAncientDeviceActivationToggle £»force="OFF" ;
 		}
+		
+		GoSub FUNCupdateIcon
 	}
-	
-	GoSub FUNCupdateIcon
 	
 	ACCEPT
 }

@@ -27,7 +27,7 @@ while true;do
 	: ${bClear:=false} #help
 	if $bClear;then clear;fi
 	
-	strDbgWhatFile="src"
+	: ${strDbgWhatFile:="src"} # value for arx param ex.: --debug="src"
 	#strDbgWhatFile="`echoc -t 3 -S "Debug what file (ex.: ScriptedAnimation)?"`" # src/script/ScriptedIOProperties.cpp
 	declare -p strDbgWhatFile
 	
@@ -117,7 +117,8 @@ while true;do
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
 	export ARX_WarnTimerCallingGoSub="hologram.asl"
-	export ARX_Debug=":.*/ArxGame.cpp:.*LOD.*:^(?!.*1856).*$"; # the first char ':' is the custom delimiter you can change. in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708" nop env -s ARX_Debug ":.*:.*(ARX_CHANGELEVEL_Push_IO|LOD).*:^(?!.*(1856|1863)).*$" nop env -l
+	: ${ARX_Debug:=":.*/ArxGame.cpp:.*LOD.*:^(?!.*1856).*$"};export ARX_Debug # the first char ':' is the custom delimiter you can change. in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708" nop env -s ARX_Debug ":.*:.*(ARX_CHANGELEVEL_Push_IO|LOD).*:^(?!.*(1856|1863)).*$" nop env -l
+	declare |egrep "^ARX_"
 	
 	# KEEP: linux command to generate some doc, but they can all be listed with console command `env -l` now! LC_ALL=C egrep 'platform::getEnvironmentVariableValue' --include="*.h" --include="*.cpp" -iRhI * |sed -r -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*)",[^,]*,[^,]*, *([^,\)]*).*@export \2=\3 # \1@' -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*).*@export \2=? # \1@'
 	

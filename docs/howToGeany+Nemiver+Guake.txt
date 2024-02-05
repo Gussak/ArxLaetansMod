@@ -1,0 +1,21 @@
+Integrating a development environment ;)
+
+Geany (v1.38):
+	- keep all source files opened, this will let navigation (identifiers clicks) work
+	- use the filetype.d and follow it's install instructions, will highlight .asl files well
+	- code .asl functions like: >>FUNCname () {   // pay attention to let a space between FUNCname and the '()'. the '()' are useless in .asl but will let navigation work in geany with filetype.d
+	- to navigate the file list with PgUp PgDn, right click on a file and hit ESC, so the list keeps the focus
+
+Nemiver:
+	- compile to debug at CMakeCache.txt with:
+		CMAKE_BUILD_TYPE:STRING      "Debug"
+		CMAKE_CXX_FLAGS_DEBUG:STRING "-ggdb -O0 -fno-omit-frame-pointer"
+		SET_OPTIMIZATION_FLAGS:BOOL  OFF
+	- on start hit Ctrl+Shift+B, hit Shift+TAB, Up, TAB, paste or type the function name, and hit Enter
+
+Guake:
+	To easy compile and open errors in geany:
+	- configure Quick Open with:
+		 geany "%(file_path)s:%(line_number)s"
+		# pay attention! there is one space before the command, it is important to let you easily re-run the previous make command
+		# now Ctrl+click on the left side of the file (in case there is spaces in absolute shown path)
