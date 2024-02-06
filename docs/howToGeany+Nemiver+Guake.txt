@@ -16,6 +16,6 @@ Nemiver:
 Guake:
 	To easy compile and open errors in geany:
 	- configure Quick Open with:
-		 geany "%(file_path)s:%(line_number)s"
-		# pay attention! there is one space before the command, it is important to let you easily re-run the previous make command
+		geany "%(file_path)s:%(line_number)s";history -d -1
+		# `history -d -1` is important to let you easily re-run the previous make command
 		# now Ctrl+click on the left side of the file (in case there is spaces in absolute shown path)
