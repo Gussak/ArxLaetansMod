@@ -162,6 +162,7 @@ ON INIT () {
 }
 
 ON MovementDetected () {
+	if(§DebugTestLOD == 1) ACCEPT
 	//Set @posmex ^locationx_~^me~
 	//Set @posmey ^locationy_~^me~
 	//Set @posmez ^locationz_~^me~
@@ -181,6 +182,7 @@ ON MovementDetected () {
 }
 
 ON Clone () { //happens when unstacking. is more reliable than ON INIT because INIT also clone local vars values
+	if(§DebugTestLOD == 1) ACCEPT
 	Set £CloneInfo "SENDER:~^sender~, ME:~^me~"
 	GoSub -p FUNCshowlocals £»filter="CloneInfo" §»force=1 ;
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
@@ -188,6 +190,7 @@ ON Clone () { //happens when unstacking. is more reliable than ON INIT because I
 }
 
 ON IDENTIFY () { //this is called (apparently every frame) when the player hovers the mouse over the item, but requires `SETEQUIP identify_value ...` to be set or this event wont be called.
+	if(§DebugTestLOD == 1) ACCEPT
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	GoSub FUNChoverInfo //TODO RM?
@@ -225,6 +228,7 @@ ON IDENTIFY () { //this is called (apparently every frame) when the player hover
 }
 
 ON INVENTORYUSE () {
+	if(§DebugTestLOD == 1) ACCEPT
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) {
@@ -713,6 +717,7 @@ ON INVENTORYUSE () {
 
 //>>FUNCisnInvOrFloor ()
 On Main () { //HeartBeat happens once per second apparently (but may be less often?)
+	if(§DebugTestLOD == 1) ACCEPT
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £_aaaDebugScriptStackAndLog "On Main:"
@@ -814,6 +819,7 @@ On Main () { //HeartBeat happens once per second apparently (but may be less oft
 }
 
 ON CUSTOM () { //this is the receiving end of the transmission
+	if(§DebugTestLOD == 1) ACCEPT
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	if (^amount > 1) ACCEPT //this must not be a stack of items
@@ -839,6 +845,7 @@ ON CUSTOM () { //this is the receiving end of the transmission
 }
 
 ON COMBINE () {
+	if(§DebugTestLOD == 1) ACCEPT
 	if(§InitDefaultsDone == 0) GoSub FUNCinitDefaults
 	
 	Set £ClassMe ^class_~^me~ //SELF
@@ -978,12 +985,14 @@ ON COMBINE () {
 }
 
 ON InventoryIn () { Set £_aaaDebugScriptStackAndLog "On_InventoryIn" //this happens when item is added to an inventory right?
+	if(§DebugTestLOD == 1) ACCEPT
 	//if (^amount > 1) ACCEPT //this must not be a stack of items
 	PLAY -s //stops sounds started with -i flag
 	ACCEPT
 }
 
 ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this happens when item is removed from an inventory right?
+	if(§DebugTestLOD == 1) ACCEPT
 	//if (^amount > 1) ACCEPT //this must not be a stack of items
 	PLAY -s //stops sounds started with -i flag
 	ACCEPT
@@ -2768,6 +2777,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//timerTFUNCtestLOD -m 1 1000 GoTo -p TFUNCtestLOD £»lod=£«lod ;
 	timerTFUNCtestLOD -m 1 1000 GoTo TFUNCtestLOD
 	GoSub -p FUNCshowlocals £»filter="testLOD" §»force=1 ;
+	
+	Set §DebugTestLOD 1
 	RETURN
 }
 
