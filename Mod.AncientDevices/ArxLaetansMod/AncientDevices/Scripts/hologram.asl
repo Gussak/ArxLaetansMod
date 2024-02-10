@@ -163,7 +163,7 @@ ON INIT () {
 	SET_MATERIAL METAL
 	SetGroup "DeviceTechBasic"
 	SET_PRICE 50
-	PlayerStackSize 50 
+	PlayerStackSize 50
 	
 	Set §IdentifyObjectKnowledgeRequirement 35
 	SETEQUIP identify_value §IdentifyObjectKnowledgeRequirement //seems to enable On Identify event but the value seems to be ignored to call that event?
@@ -948,9 +948,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	//GoSub FUNCshockPlayer
 	
 	if(§Identified == 1) {
-		Set £FUNCnameUpdate_NameBase "Broken Hologram Device" 
+		Set £FUNCnameUpdate«NameBase "Broken Hologram Device" 
 	} else {
-		Set £FUNCnameUpdate_NameBase "Fracti Grolhoam Fabrica" //latin messy latin
+		Set £FUNCnameUpdate«NameBase "Fracti Grolhoam Fabrica" //latin messy latin
 	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
@@ -2011,54 +2011,58 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 >>TFUNCmorphUpgrade () { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade ()  {
 	//INPUT: <§FUNCmorphUpgrade_otherQuality>
+
+	/////////////////////////////////////////////////////////////////////////////////
+	////////////// MORPH thru simple activation while in inventory //////////////////
+	// each this can become a combine tree. AncientBox is the first of the main devices. SignalRepeater could be the first of another tree!
+	if (£AncientDeviceMode == "_BecomeSignalRepeater_") {
+		Set £AncientDeviceMode "SignalRepeater"
+		// this must be easy to become again a hologram, so do minimal changes!
+		TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
+		if(§Identified == 1) {
+			Set £FUNCnameUpdate«NameBase "Hologram Signal Repeater" 
+		} else {
+			Set £FUNCnameUpdate«NameBase "Grolhoam Nagils Atrepere" //all messy
+		}
+		Set £IconBasename "HoloSignalRepeater"
+		SetGroup "Special"
+		//Set §AncientDeviceTriggerStep 1
+		//PlayerStackSize 1
+		RETURN
+	} else { 
+	if ( £AncientDeviceMode == "SignalRepeater" ) {
+		Set £AncientDeviceMode "RoleplayClassFocus" GoSub FUNCcfgAncientDevice
+		SetGroup "Special"
+		//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
+		RETURN //because this is not a normal tool
+	} else { 
+	if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
+		Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
+		GoSub -p FUNCconfigOptions £»mode="show" ;
+		SetGroup "Special"
+		//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
+		RETURN //because this is not a normal tool
+	} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
+	if ( £AncientDeviceMode == "ConfigOptions" ) {
+		Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
+		GoSub -p FUNCconfigOptions £»mode="hide" ;
+		SetGroup -r "Special" // back to basic device
+		//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
+		RETURN //because this is not a normal tool
+	} else {
+		NOP
+	} } } }
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////
+	/////////////////// MORPH only by combining below here! ////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
 	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	Set §AncientDeviceTriggerStep 0
 	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
 	RANDOM §CreateChance {
-		/////////////////////////////////////////////////////////////////////////////////
-		////////////// MORPH thru simple activation while in inventory //////////////////
-		// each this can become a combine tree. AncientBox is the first of the main devices. SignalRepeater could be the first of another tree!
-		if (£AncientDeviceMode == "_BecomeSignalRepeater_") {
-			Set £AncientDeviceMode "SignalRepeater"
-			// this must be easy to become again a hologram, so do minimal changes!
-			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
-			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Signal Repeater" 
-			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" //all messy
-			}
-			Set £IconBasename "HoloSignalRepeater"
-			SetGroup "Special"
-			//Set §AncientDeviceTriggerStep 1
-			//PlayerStackSize 1
-		} else { 
-		if ( £AncientDeviceMode == "SignalRepeater" ) {
-			Set £AncientDeviceMode "RoleplayClassFocus" GoSub FUNCcfgAncientDevice
-			SetGroup "Special"
-			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
-			RETURN //because this is not a normal tool
-		} else { 
-		if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
-			Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions £»mode="show" ;
-			SetGroup "Special"
-			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
-			RETURN //because this is not a normal tool
-		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
-		if ( £AncientDeviceMode == "ConfigOptions" ) {
-			Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions £»mode="hide" ;
-			SetGroup -r "Special" // back to basic device
-			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
-			RETURN //because this is not a normal tool
-		} else { 
-		
-		////////////////////////////////////////////////////////////////////////////////////
-		/////////////////// MORPH only by combining below here! ////////////////////////////
-		////////////////////////////////////////////////////////////////////////////////////
-		
 		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
 			Set §PristineChance @FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 			Div §PristineChance 10
@@ -2068,9 +2072,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			}
 			
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Grenade" 
+				Set £FUNCnameUpdate«NameBase "Hologram Grenade" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Degnare" //messy
+				Set £FUNCnameUpdate«NameBase "Grolhoam Degnare" //messy
 			}
 			//Set £IconBasename "HologramGrenade"
 			Set £IconBasename "AncientDevice.Grenade"
@@ -2095,9 +2099,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			//TODO TWEAK SKIN "Hologram.tiny.index4000.LandMine.Clear"   "Hologram.tiny.index4000.LandMine"
 			//Set §Scale 10 SetScale §Scale //TODO create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Landmine" 
+				Set £FUNCnameUpdate«NameBase "Hologram Landmine" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Terra Perdere" //messy latin latin
+				Set £FUNCnameUpdate«NameBase "Grolhoam Terra Perdere" //messy latin latin
 			}
 			Set £IconBasename "HoloLandMine"
 			Set §AncientDeviceTriggerStep 1
@@ -2107,9 +2111,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			TWEAK SKIN "Hologram.tiny.index4000.boxLandMine" "Hologram.tiny.index4000.boxTeleport" 
 			Set §Scale 100 SetScale §Scale
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Teleport" 
+				Set £FUNCnameUpdate«NameBase "Hologram Teleport" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Itinerantur" //messy latin
+				Set £FUNCnameUpdate«NameBase "Grolhoam Itinerantur" //messy latin
 			}
 			Set £IconBasename "HoloTeleport"
 			Set §AncientDeviceTriggerStep 1
@@ -2121,9 +2125,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			TWEAK SKIN "Hologram.tiny.index4000.boxTeleport" "Hologram.tiny.index4000.boxMindControl" 
 			Set §Scale 100 SetScale §Scale
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Mind Control" 
+				Set £FUNCnameUpdate«NameBase "Hologram Mind Control" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Mens Moderantum" //messy latin latin
+				Set £FUNCnameUpdate«NameBase "Grolhoam Mens Moderantum" //messy latin latin
 			}
 			Set £IconBasename "HoloMindControl"
 			Set §AncientDeviceTriggerStep 1
@@ -2133,14 +2137,14 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			TWEAK SKIN "Hologram.tiny.index4000.boxMindControl" "Hologram.tiny.index4000.boxSniperBullet" 
 			Set §Scale 100 SetScale §Scale
 			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Sniper Bullet" 
+				Set £FUNCnameUpdate«NameBase "Hologram Sniper Bullet" 
 			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Procul Occidere" //messy latin latin
+				Set £FUNCnameUpdate«NameBase "Grolhoam Procul Occidere" //messy latin latin
 			}
 			Set £IconBasename "AncientSniperBullet"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
-		} } } } } } } } }
+		} } } } }
 		
 		if(§AncientDeviceTriggerStep == 1) {
 			GoSub FUNCupdateUses
@@ -2180,20 +2184,30 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		PlayerStackSize 50
 		Set £IconBasename "AncientBox"
 		if(§Identified == 1) {
-			Set £FUNCnameUpdate_NameBase "Ancient Box (OFF)" 
+			Set £FUNCnameUpdate«NameBase "Ancient Box (OFF)" 
 		} else {
-			Set £FUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" //latin
+			Set £FUNCnameUpdate«NameBase "Antiqua Capsa (Debilitatum)" //latin
 		}
 	} else {
 	if(£AncientDeviceMode == "RoleplayClassFocus") {
-		GoSub -p FUNCcfgSkin £»simple="Hologram.tiny.index4000.boxRoleplayClassFocus" ;
+		SET_MATERIAL METAL
+		SET_GROUP JEWELRY
 		SET_PRICE 50
+		SET_STEAL 50
+		SETEQUIP identify_value 1
+		SETOBJECTTYPE RING
+		SET_WEIGHT 0
+		HALO -olcs 0.59 0.46 1 30
+		SET_SHADOW OFF
 		PlayerStackSize 1
+		
+		GoSub -p FUNCcfgSkin £»simple="Hologram.tiny.index4000.boxRoleplayClassFocus" ;
+		
 		Set £IconBasename "AncientRoleplayClassFocus"
 		if(§Identified == 1) {
-			Set £FUNCnameUpdate_NameBase "Ancient Box Class Focus" 
+			Set £FUNCnameUpdate«NameBase "Ancient Box Class Focus" 
 		} else {
-			Set £FUNCnameUpdate_NameBase "Antiqua Capsa Slacs Sucfo" //latin/messy
+			Set £FUNCnameUpdate«NameBase "Antiqua Capsa Slacs Sucfo" //latin/messy
 		}
 	} else {
 	if(£AncientDeviceMode == "ConfigOptions") {
@@ -2201,7 +2215,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		SET_PRICE 13
 		PlayerStackSize 1
 		Set £IconBasename "AncientConfigOptions"
-		Set £FUNCnameUpdate_NameBase "Ancient Device Config Options" //keep always readable!
+		Set £FUNCnameUpdate«NameBase "Ancient Device Config Options" //keep always readable!
 	} } }
 	
 	GoSub FUNCupdateUses
@@ -2227,9 +2241,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	SET_PRICE 100
 	
 	if(§Identified == 1) {
-		Set £FUNCnameUpdate_NameBase "Holograms of the over world" 
+		Set £FUNCnameUpdate«NameBase "Holograms of the over world" 
 	} else {
-		Set £FUNCnameUpdate_NameBase "Grolhoam Super Mundi" //messy latin latin
+		Set £FUNCnameUpdate«NameBase "Grolhoam Super Mundi" //messy latin latin
 	}
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
@@ -2392,10 +2406,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 //KEEP HERE TEST: Set £TestFixScriptEncoding "matters(£§«»¥¶¤) maybe(`¹²³×äåéëþüúíóöáßðfghïø½©®bñµç¿~¡ÄÅÉËÞÜÚÍÓÖÁÐFGHÏ¼Ø°Æ¼¢®BÑµÇ)" // all can be easily input with AltGr dead keys
 
->>FUNCCalcClassFocus () {
-	Set £AncientDeviceMode "RoleplayClassFocus"
-	SETOBJECTTYPE RING
-	SET_SHADOW OFF
+>>FUNCClassFocusCalc () {
+	if(£AncientDeviceMode != "RoleplayClassFocus")	GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="ERROR: invalid call of class focus calc: '~£AncientDeviceMode~'" ;
 	
 	////////////////////////////////////////////////////////////
 	///////////// based on docs/RoleplayClassFocusBuffSkills.txt
@@ -2424,15 +2436,15 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	// bonus for each class
 	Calc @«BMW [ @«M - @«W ] if(@«BMW < 0) Set @«BMW 0
 	Calc @«BMT [ @«M - @«T ] if(@«BMT < 0) Set @«BMT 0
-	Set  @«BM  [ @«BMW + @«BMT ]
+	Calc @«BM  [ @«BMW + @«BMT ]
 	
 	Calc @«BTM [ @«T - @«M ] if(@«BTM < 0) Set @«BTM 0
 	Calc @«BTW [ @«T - @«W ] if(@«BTW < 0) Set @«BTW 0
-	Set  @«BT  [ @«BTM + @«BTW ]
+	Calc @«BT  [ @«BTM + @«BTW ]
 	
 	Calc @«BWM [ @«W - @«M ] if(@«BWM < 0) Set @«BWM 0
 	Calc @«BWT [ @«W - @«T ] if(@«BWT < 0) Set @«BWT 0
-	Set  @«BW  [ @«BWM + @«BWT ]
+	Calc @«BW  [ @«BWM + @«BWT ]
 	
 	Div @«BM @«fNormalizer
 	Div @«BT @«fNormalizer
@@ -2476,17 +2488,24 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 ON EQUIPIN () {
+	GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="test equip" ;
+	
 	if(£AncientDeviceMode == "RoleplayClassFocus") {
 		PLAY "EQUIP_RING"
+		
 		GoSub FUNCsignalStrenghCheck
 		if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
-			GoSub FUNCCalcClassFocus
+			GoSub FUNCClassFocusCalc
 			HERO_SAY -d "Class Focus ON"
 		} else {
 			HERO_SAY -d "Class Focus FAIL (re-equip at a high signal strength location)"
 		}
-		ACCEPT
+	} else {
+		HERO_SAY -d "Equip failed"
+		GoSub -p FUNCshowlocals §»force=1 ;
 	}
+	
+	ACCEPT
 }
 
 ON EQUIPOUT () {
@@ -2941,6 +2960,14 @@ ON INVENTORYUSE () {
 	ACCEPT
 }
 
->>FUNCdummy () {
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+>>CFUNCA_KeepAtTheEnd () { // !!! important to quickly check if the script openning and closing of braces match!!!!!!!!!!!!!!!!!!!!!!!
 	RETURN
 }
