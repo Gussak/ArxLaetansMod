@@ -542,12 +542,12 @@ ON COMBINE () {
 		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
-	if (§Identified == 0) {
-		SPEAK -p [player_not_skilled_enough] NOP
-		Set £«FailReason "Self:NotIdentified"
-		GoSub -p FUNCshowlocals §»force=1 ;
-		ACCEPT
-	}
+	//if (§Identified == 0) {
+		//SPEAK -p [player_not_skilled_enough] NOP
+		//Set £«FailReason "Self:NotIdentified"
+		//GoSub -p FUNCshowlocals §»force=1 ;
+		//ACCEPT
+	//}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £«FailReason "Self:TODO:HoloTeleportArrow"
@@ -557,7 +557,7 @@ ON COMBINE () {
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	Set -r £OtherEntIdToCombineWithMe §FUNCmorphUpgrade_otherQuality §Quality
+	Set -r £OtherEntIdToCombineWithMe §FUNCmorphUpgrade«otherQuality §Quality
 	GoSub FUNCmorphUpgrade
 	
 	DESTROY £OtherEntIdToCombineWithMe
@@ -2010,7 +2010,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 //}
 
 >>TFUNCmorphUpgrade () { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade ()  {
-	//INPUT: <§FUNCmorphUpgrade_otherQuality>
+	//INPUT: <§FUNCmorphUpgrade«otherQuality>
 
 	/////////////////////////////////////////////////////////////////////////////////
 	////////////// MORPH thru simple activation while in inventory //////////////////
@@ -2057,11 +2057,11 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	////////////////////////////////////////////////////////////////////////////////////
 	/////////////////// MORPH only by combining below here! ////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
-	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(§FUNCmorphUpgrade«otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	Set §AncientDeviceTriggerStep 0
 	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
-	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
+	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade«otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
 	RANDOM §CreateChance {
 		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
 			Set §PristineChance @FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
@@ -2161,7 +2161,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		GoSub FUNCshowlocals
 	}
 	
-	Set §FUNCmorphUpgrade_otherQuality -1 //init invalid to req b4 next call
+	Set §FUNCmorphUpgrade«otherQuality -1 //init invalid to req b4 next call
 	RETURN
 }
 >>FUNCcfgSkin () {
@@ -2470,29 +2470,29 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	Calc @«FDefense    [ @«warriorDefense * @«PW ]
 	
 	//TODO Calc -fcn round result to floor,ceiling,nearest
-	Calc @«FDebuffConstitution  [ //all
+	Calc @«FDebuffConstitution [ //all
 		[
-			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
-			@«FIntuition + @«FStealth + @«FMechanism // thief
-			@«FProjectile + @«FCombat + @«FDefense // warrior
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge + // mage
+			@«FIntuition + @«FStealth + @«FMechanism +          // thief
+			@«FProjectile + @«FCombat + @«FDefense              // warrior
 		] / 9
 	]
-	Calc @«FDebuffMental  [ //mage
+	Calc @«FDebuffMental [ //mage
 		[
-			@«FIntuition + @«FStealth + @«FMechanism // thief
-			@«FProjectile + @«FCombat + @«FDefense // warrior
+			@«FIntuition + @«FStealth + @«FMechanism +          // thief
+			@«FProjectile + @«FCombat + @«FDefense              // warrior
 		] / 6
 	]
-	Calc @«FDebuffDexterity  [ //thief
+	Calc @«FDebuffDexterity [ //thief
 		[
-			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
-			@«FProjectile + @«FCombat + @«FDefense // warrior
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge + // mage
+			@«FProjectile + @«FCombat + @«FDefense              // warrior
 		] / 6
 	]
-	Calc @«FDebuffStrength  [ //warrior
+	Calc @«FDebuffStrength [ //warrior
 		[
-			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
-			@«FIntuition + @«FStealth + @«FMechanism // thief
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge + // mage
+			@«FIntuition + @«FStealth + @«FMechanism            // thief
 		] / 6
 	]
 	
