@@ -542,12 +542,12 @@ ON COMBINE () {
 		GoSub -p FUNCshowlocals §»force=1 ;
 		ACCEPT
 	}
-	if (§Identified == 0) {
-		SPEAK -p [player_not_skilled_enough] NOP
-		Set £«FailReason "Self:NotIdentified"
-		GoSub -p FUNCshowlocals §»force=1 ;
-		ACCEPT
-	}
+	//if (§Identified == 0) {
+		//SPEAK -p [player_not_skilled_enough] NOP
+		//Set £«FailReason "Self:NotIdentified"
+		//GoSub -p FUNCshowlocals §»force=1 ;
+		//ACCEPT
+	//}
 	//if (§AncientDeviceTriggerStep > 0) {
 		//SPEAK -p [player_no] NOP
 		//Set £«FailReason "Self:TODO:HoloTeleportArrow"
@@ -557,7 +557,7 @@ ON COMBINE () {
 	
 	PLAY -s //stops sounds started with -i flag
 	
-	Set -r £OtherEntIdToCombineWithMe §FUNCmorphUpgrade_otherQuality §Quality
+	Set -r £OtherEntIdToCombineWithMe §FUNCmorphUpgrade«otherQuality §Quality
 	GoSub FUNCmorphUpgrade
 	
 	DESTROY £OtherEntIdToCombineWithMe
@@ -2010,7 +2010,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 //}
 
 >>TFUNCmorphUpgrade () { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade ()  {
-	//INPUT: <§FUNCmorphUpgrade_otherQuality>
+	//INPUT: <§FUNCmorphUpgrade«otherQuality>
 
 	/////////////////////////////////////////////////////////////////////////////////
 	////////////// MORPH thru simple activation while in inventory //////////////////
@@ -2057,11 +2057,11 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	////////////////////////////////////////////////////////////////////////////////////
 	/////////////////// MORPH only by combining below here! ////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
-	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
+	if(§FUNCmorphUpgrade«otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	Set §AncientDeviceTriggerStep 0
 	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
-	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
+	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade«otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
 	RANDOM §CreateChance {
 		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
 			Set §PristineChance @FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
@@ -2161,7 +2161,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		GoSub FUNCshowlocals
 	}
 	
-	Set §FUNCmorphUpgrade_otherQuality -1 //init invalid to req b4 next call
+	Set §FUNCmorphUpgrade«otherQuality -1 //init invalid to req b4 next call
 	RETURN
 }
 >>FUNCcfgSkin () {
@@ -2455,64 +2455,138 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	Calc @«PT [ @«BT * @«fDifficulty / @«T ]
 	Calc @«PW [ @«BW * @«fDifficulty / @«W ]
 	
-	// final bonus result
+	// final bonus skill
 	// mage
-	Calc @«FCasting         [ @«mageCasting * @«PM ]
-	Calc @«FEtherealLink    [ @«mageEtherealLink * @«PM ]
-	Calc @«FObjectKnowledge [ @«mageObjKnowledge * @«PM ]
+	Calc @«FBS_Casting         [ @«mageCasting * @«PM ]
+	Calc @«FBS_EtherealLink    [ @«mageEtherealLink * @«PM ]
+	Calc @«FBS_ObjectKnowledge [ @«mageObjKnowledge * @«PM ]
 	// thief
-	Calc @«FIntuition [ @«thiefIntuition * @«PT ]
-	Calc @«FStealth [ @«thiefStealth * @«PT ]
-	Calc @«FMechanism [ @«thiefMechanism * @«PT ]
+	Calc @«FBS_Intuition [ @«thiefIntuition * @«PT ]
+	Calc @«FBS_Stealth [ @«thiefStealth * @«PT ]
+	Calc @«FBS_Mechanism [ @«thiefMechanism * @«PT ]
 	// warrior
-	Calc @«FProjectile [ @«warriorProjectile * @«PW ]
-	Calc @«FCombat     [ @«warriorCombat * @«PW ]
-	Calc @«FDefense    [ @«warriorDefense * @«PW ]
+	Calc @«FBS_Projectile [ @«warriorProjectile * @«PW ]
+	Calc @«FBS_Combat     [ @«warriorCombat * @«PW ]
+	Calc @«FBS_Defense    [ @«warriorDefense * @«PW ]
 	
 	//TODO Calc -fcn round result to floor,ceiling,nearest
-	Calc @«FDebuffConstitution  [ //all
+	
+	// apply skills
+	// mage @«BM
+	SETEQUIP CASTING          @«FBS_Casting
+	SETEQUIP ETHERAL_LINK     @«FBS_EtherealLink
+	SETEQUIP OBJECT_KNOWLEDGE @«FBS_ObjectKnowledge
+	// thief @«BT
+	SETEQUIP STEALTH          @«FBS_Stealth
+	SETEQUIP MECANISM         @«FBS_Mechanism
+	SETEQUIP INTUITION        @«FBS_Intuition
+	// warrior @«BW
+	SETEQUIP CLOSE_COMBAT     @«FBS_Combat
+	SETEQUIP PROJECTILE       @«FBS_Projectile
+	SETEQUIP DEFENSE          @«FBS_Defense
+	
+	// Total Skillpoints Added from +10 Strength
+	Set @«TSAConstitution 30
+	Set @«TSAStrength 35
+	Set @«TSAMental 85
+	Set @«TSADexterity 65
+	
+	// the bonus for the class is proportionally spread thru stats based on the stat influence at the skill
+	// the stat increases skills. the skills compose the class bonus. the class bonus is spread back to the stats.
+	Calc @«F_Constitution [ @«FBS_Defense / @«TSAConstitution ] // because +10 constitution would add 30 to defense
+	Calc @«F_Strength [ [
+		[ @«FBS_Combat          * [ 20 / @«TSAStrength ] ] + // because +10 strength would add 20 to warriorCombat
+		[ @«FBS_Projectile      * [ 10 / @«TSAStrength ] ] + // because +10 strength would add 10 to warriorProjectile
+		[ @«FBS_ObjectKnowledge * [  5 / @«TSAStrength ] ] + // because +10 strength would add  5 to mageObjKnowledge
+		0
+	] / 3 ] // normalize per skills considered
+	Calc @«F_Dexterity [ [
+		[ @«FBS_Stealth         * [ 20 / @«TSADexterity ] ] +
+		[ @«FBS_Projectile      * [ 20 / @«TSADexterity ] ] +
+		[ @«FBS_Mechanism       * [ 10 / @«TSADexterity ] ] +
+		[ @«FBS_Combat          * [ 10 / @«TSADexterity ] ] +
+		[ @«FBS_ObjectKnowledge * [  5 / @«TSADexterity ] ] +
+		0
+	] / 5 ] // normalize per skills considered
+	Calc @«F_Mental [ [
+		[ @«FBS_Intuition       * [ 20 / @«TSAMental ] ] +
+		[ @«FBS_Casting         * [ 20 / @«TSAMental ] ] +
+		[ @«FBS_EtherealLink    * [ 20 / @«TSAMental ] ] +
+		[ @«FBS_ObjectKnowledge * [ 15 / @«TSAMental ] ] +
+		[ @«FBS_Mechanism       * [ 10 / @«TSAMental ] ] +
+		0
+	] / 5 ]
+	
+	/*KEEPCOMMENT: this buffing doesnt directly relates skill with stat because of the other influences from a single skill (ex.: 30 in defense) into skills of the same class, will end up in a not intended result into stats
+	// stats affect skills, this way skill buffs can affect stats for class focus
+	Calc @«F_Constitution [ @«FDefense / 30 ] // 10 constitution adds 30 to defense
+	
+	Set @«TSAStrength 35 // Total Skillpoints Added from +10 Strength
+	Calc @«F_Strength [
+		[ @«FBS_Combat          * [ 20 / @«TSAStrength ] ] +
+		[ @«FBS_Projectile      * [ 10 / @«TSAStrength ] ] +
+		[ @«FBS_ObjectKnowledge * [  5 / @«TSAStrength ] ] +
+		0
+	]
+	
+	Set @«TSAMental 85
+	Calc @«F_Mental [
+		[ @«FBS_Intuition       * [ 20 / @«TSAMental ] ] +
+		[ @«FBS_Casting         * [ 20 / @«TSAMental ] ] +
+		[ @«FBS_EtherealLink    * [ 20 / @«TSAMental ] ] +
+		[ @«FBS_ObjectKnowledge * [ 15 / @«TSAMental ] ] +
+		[ @«FBS_Mechanism       * [ 10 / @«TSAMental ] ] +
+		0
+	]
+	
+	Set @«TSADexterity 65
+	Calc @«F_Dexterity [
+		[ @«FBS_Stealth         * [ 20 / @«TSADexterity ] ] +
+		[ @«FBS_Projectile      * [ 20 / @«TSADexterity ] ] +
+		[ @«FBS_Mechanism       * [ 10 / @«TSADexterity ] ] +
+		[ @«FBS_Combat          * [ 10 / @«TSADexterity ] ] +
+		[ @«FBS_ObjectKnowledge * [  5 / @«TSADexterity ] ] +
+		0
+	]
+	*/
+	
+	SETEQUIP CONSTITUTION @«F_Constitution // ^PLAYER_ATTRIBUTE_CONSTITUTION
+	SETEQUIP MENTAL       @«F_Mental       // ^PLAYER_ATTRIBUTE_MENTAL
+	SETEQUIP DEXTERITY    @«F_Dexterity    //^PLAYER_ATTRIBUTE_DEXTERITY
+	SETEQUIP STRENGTH     @«F_Strength     //^PLAYER_ATTRIBUTE_STRENGTH
+	
+	/*KEEPCOMMENT: DEBUFF is not good, each will mess skills related to all classes..
+	Calc @«FDebuffConstitution [ //all
 		[
-			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
-			@«FIntuition + @«FStealth + @«FMechanism // thief
-			@«FProjectile + @«FCombat + @«FDefense // warrior
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge + // mage
+			@«FIntuition + @«FStealth + @«FMechanism +          // thief
+			@«FProjectile + @«FCombat + @«FDefense              // warrior
 		] / 9
 	]
-	Calc @«FDebuffMental  [ //mage
+	Calc @«FDebuffMental [ //mage
 		[
-			@«FIntuition + @«FStealth + @«FMechanism // thief
-			@«FProjectile + @«FCombat + @«FDefense // warrior
+			@«FIntuition + @«FStealth + @«FMechanism +          // thief
+			@«FProjectile + @«FCombat + @«FDefense              // warrior
 		] / 6
 	]
-	Calc @«FDebuffDexterity  [ //thief
+	Calc @«FDebuffDexterity [ //thief
 		[
-			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
-			@«FProjectile + @«FCombat + @«FDefense // warrior
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge + // mage
+			@«FProjectile + @«FCombat + @«FDefense              // warrior
 		] / 6
 	]
-	Calc @«FDebuffStrength  [ //warrior
+	Calc @«FDebuffStrength [ //warrior
 		[
-			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
-			@«FIntuition + @«FStealth + @«FMechanism // thief
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge + // mage
+			@«FIntuition + @«FStealth + @«FMechanism            // thief
 		] / 6
 	]
-	
-	// apply
-	SETEQUIP CASTING          +~@«FCasting~
-	SETEQUIP ETHERAL_LINK     +~@«FEtherealLink~
-	SETEQUIP OBJECT_KNOWLEDGE +~@«FObjectKnowledge~
-	
-	SETEQUIP STEALTH   +~@«FStealth~
-	SETEQUIP MECANISM  +~@«FMechanism~
-	SETEQUIP INTUITION +~@«FIntuition~
-	
-	SETEQUIP CLOSE_COMBAT +~@«FCombat~
-	SETEQUIP PROJECTILE   +~@«FProjectile~
-	SETEQUIP DEFENSE      +~@«FDefense~
 	
 	SETEQUIP CONSTITUTION -~@«FDebuffConstitution~ // ^PLAYER_ATTRIBUTE_CONSTITUTION
 	SETEQUIP MENTAL -~@«FDebuffMental~ // ^PLAYER_ATTRIBUTE_MENTAL
 	SETEQUIP DEXTERITY -~@«FDebuffDexterity~ //^PLAYER_ATTRIBUTE_DEXTERITY
 	SETEQUIP STRENGTH -~@«FDebuffStrength~  //^PLAYER_ATTRIBUTE_STRENGTH
+	*/
 	
 	GoSub -p FUNCshowlocals §»force=1 ;
 	
