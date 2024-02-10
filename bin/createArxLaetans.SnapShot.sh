@@ -7,7 +7,7 @@ if ! which secinit;then
 fi
 source <(secinit)
 
-strWhat="ArxLaetans"
+: ${strFileNameDesc:="ArxLaetans"} #help
 
 : ${bCompiledMode:=false} #help
 
@@ -15,21 +15,26 @@ strWhat="ArxLaetans"
 
 #IFS=$'\n' read -d '' -r -a astrFileList < <(cat "${strBPath}/.gitignore" |sed "s@^#[!]@!@" |egrep -v "/$|^$|^#|^[*]$" |sort -u |tr -d '!' |sed 's@.*@--include="&"@')&&:
 #IFS=$'\n' read -d '' -r -a astrFileList < <(cat "${strBPath}/.gitignore" |sed "s@^#[!]@!@" |egrep -v "/$|^$|^#|^[*]$" |sort -u |tr -d '!' |sed "s@.*@${strBPath}/&@")&&:
-IFS=$'\n' read -d '' -r -a astrRegexFileList < <(cat "${strBPath}/.gitignore" |sed "s@^#[!]@!@" |egrep -v "/$|^$|^#|^[*]$" |sort -u |tr -d '!' |sed -r -e 's@[*]@.*@g' -e "s@.*@${strBPath}/&@")&&:
-declare -p astrRegexFileList |tr '[' '\n'
+: ${bUseReversedGitIgnore:=true} #help
+if $bUseReversedGitIgnore;then
+	IFS=$'\n' read -d '' -r -a astrRegexFileList < <(cat "${strBPath}/.gitignore" |sed "s@^#[!]@!@" |egrep -v "/$|^$|^#|^[*]$" |sort -u |tr -d '!' |sed -r -e 's@[*]@.*@g' -e "s@.*@${strBPath}/&@")&&:
+	declare -p astrRegexFileList |tr '[' '\n'
 
-echoc --info "preparing find regex from .gitignore"
+	echoc --info "preparing find regex from .gitignore"
 
-astrFindRegexFileList=()
-for strRegexFile in "${astrRegexFileList[@]}";do
-	if((`SECFUNCarraySize astrFindRegexFileList` > 0));then
-		astrFindRegexFileList+=(-or)
-	fi
-	astrFindRegexFileList+=(-iregex)
-	astrFindRegexFileList+=("$strRegexFile")
-done
-declare -p astrFindRegexFileList |tr '[' '\n'
-IFS=$'\n' read -d '' -r -a astrFileList < <(find "${strBPath}/" "${astrFindRegexFileList[@]}")&&:
+	astrFindRegexFileList=()
+	for strRegexFile in "${astrRegexFileList[@]}";do
+		if((`SECFUNCarraySize astrFindRegexFileList` > 0));then
+			astrFindRegexFileList+=(-or)
+		fi
+		astrFindRegexFileList+=(-iregex)
+		astrFindRegexFileList+=("$strRegexFile")
+	done
+	declare -p astrFindRegexFileList |tr '[' '\n'
+	IFS=$'\n' read -d '' -r -a astrFileList < <(find "${strBPath}/" "${astrFindRegexFileList[@]}")&&:
+else
+	IFS=$'\n' read -d '' -r -a astrFileList < <(find "${strBPath}/")&&: # -iregex "$strFileFilter")&&:
+fi
 
 : ${strFileFilter:=""} #help to backup only text files, try strFileFilter=".*[.](txt|asl|info|md|sh|py|cfg|patch|d)$"
 if [[ -n "${strFileFilter}" ]];then
@@ -41,7 +46,6 @@ if [[ -n "${strFileFilter}" ]];then
 			astrFileList+=("${strFile}")
 		fi
 	done
-	strWhat+="_TextFiles"
 fi
 declare -p astrFileList |tr '[' '\n'
 
@@ -55,7 +59,7 @@ astrTarParams=(
 	#--exclude="${strBPath}/.git"
 )
 
-strFlBN="${strBPath}.ForArxLaetansMod.${strWhat}.Branch_${strBranch}.SnapShot.`SECFUNCdtFmt --filename`"
+strFlBN="${strBPath}.ForArxLaetansMod.${strFileNameDesc}.Branch_${strBranch}.SnapShot.`SECFUNCdtFmt --filename`"
 
 SECFUNCexecA -ce tar "${astrTarParams[@]}" -vcf "${strFlBN}.tar" "${astrFileList[@]}"
 

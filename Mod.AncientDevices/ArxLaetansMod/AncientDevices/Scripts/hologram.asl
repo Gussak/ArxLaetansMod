@@ -2422,9 +2422,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	Set @«warriorProjectile ^PLAYER_SKILL_PROJECTILE
 	Set @«warriorCombat     ^PLAYER_SKILL_CLOSE_COMBAT
-	//Set @«warriorDefensePrevious @«warriorDefense //DEBUGRM
 	Set @«warriorDefense    ^PLAYER_SKILL_DEFENSE
-	//Set @«warriorDefenseToo ^PLAYER_SKILL_DEFENSE //DEBUGRM
 
 	Set @«TotalClasses 3
 	Calc @«fNormalizer [ @«TotalClasses - 1 ]
@@ -2433,7 +2431,6 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	// sum for each class
 	Calc @«M [ @«mageCasting       + @«mageEtherealLink + @«mageObjKnowledge ]
 	Calc @«T [ @«thiefMechanism    + @«thiefStealth     + @«thiefIntuition   ]
-	//Set @«Wprevious @«W //DEBUGRM
 	Calc @«W [ @«warriorProjectile + @«warriorCombat    + @«warriorDefense   ]
 	
 	// bonus for each class
@@ -2447,7 +2444,6 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	Calc @«BWM [ @«W - @«M ] if(@«BWM < 0) Set @«BWM 0
 	Calc @«BWT [ @«W - @«T ] if(@«BWT < 0) Set @«BWT 0
-	//Set @«BWprevious @«BW //DEBUGRM
 	Calc @«BW  [ @«BWM + @«BWT ]
 	
 	Div @«BM @«fNormalizer
@@ -2473,6 +2469,33 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	Calc @«FCombat     [ @«warriorCombat * @«PW ]
 	Calc @«FDefense    [ @«warriorDefense * @«PW ]
 	
+	//TODO Calc -fcn round result to floor,ceiling,nearest
+	Calc @«FDebuffConstitution  [ //all
+		[
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
+			@«FIntuition + @«FStealth + @«FMechanism // thief
+			@«FProjectile + @«FCombat + @«FDefense // warrior
+		] / 9
+	]
+	Calc @«FDebuffMental  [ //mage
+		[
+			@«FIntuition + @«FStealth + @«FMechanism // thief
+			@«FProjectile + @«FCombat + @«FDefense // warrior
+		] / 6
+	]
+	Calc @«FDebuffDexterity  [ //thief
+		[
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
+			@«FProjectile + @«FCombat + @«FDefense // warrior
+		] / 6
+	]
+	Calc @«FDebuffStrength  [ //warrior
+		[
+			@«FCasting + @«FEtherealLink + @«FObjectKnowledge //mage
+			@«FIntuition + @«FStealth + @«FMechanism // thief
+		] / 6
+	]
+	
 	// apply
 	SETEQUIP CASTING          +~@«FCasting~
 	SETEQUIP ETHERAL_LINK     +~@«FEtherealLink~
@@ -2486,12 +2509,17 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	SETEQUIP PROJECTILE   +~@«FProjectile~
 	SETEQUIP DEFENSE      +~@«FDefense~
 	
+	SETEQUIP CONSTITUTION -~@«FDebuffConstitution~ // ^PLAYER_ATTRIBUTE_CONSTITUTION
+	SETEQUIP MENTAL -~@«FDebuffMental~ // ^PLAYER_ATTRIBUTE_MENTAL
+	SETEQUIP DEXTERITY -~@«FDebuffDexterity~ //^PLAYER_ATTRIBUTE_DEXTERITY
+	SETEQUIP STRENGTH -~@«FDebuffStrength~  //^PLAYER_ATTRIBUTE_STRENGTH
+	
 	GoSub -p FUNCshowlocals §»force=1 ;
 	
 	RETURN
 }
 
-ON EQUIPIN () {
+On EquipIn () {
 	if(£AncientDeviceMode == "RoleplayClassFocus") {
 		PLAY "EQUIP_RING"
 		
@@ -2510,7 +2538,7 @@ ON EQUIPIN () {
 	ACCEPT
 }
 
-ON EQUIPOUT () {
+On EquipOut () {
 	if(£AncientDeviceMode == "RoleplayClassFocus") {
 		//TODO explain why "magic/ring_oliver/ring_oliver.asl" doesnt need to undo the bonus like is required below...
 		SETEQUIP CASTING          -~@«FCasting~
@@ -2524,6 +2552,11 @@ ON EQUIPOUT () {
 		SETEQUIP CLOSE_COMBAT -~@«FCombat~
 		SETEQUIP PROJECTILE   -~@«FProjectile~
 		SETEQUIP DEFENSE      -~@«FDefense~
+		
+		SETEQUIP CONSTITUTION +~@«FDebuffConstitution~ // ^PLAYER_ATTRIBUTE_CONSTITUTION
+		SETEQUIP MENTAL       +~@«FDebuffMental~ // ^PLAYER_ATTRIBUTE_MENTAL
+		SETEQUIP DEXTERITY    +~@«FDebuffDexterity~ //^PLAYER_ATTRIBUTE_DEXTERITY
+		SETEQUIP STRENGTH     +~@«FDebuffStrength~  //^PLAYER_ATTRIBUTE_STRENGTH
 		
 		HERO_SAY -d "Class Focus OFF"
 		ACCEPT
