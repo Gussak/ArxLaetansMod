@@ -246,450 +246,6 @@ ON IDENTIFY () { //this is called (apparently every frame) when the player hover
 	ACCEPT
 }
 
-ON INVENTORYUSE () {
-	if(伶ebugTestLOD == 1) ACCEPT
-	if(兌nitDefaultsDone == 0) GoSub FUNCinitDefaults
-	
-	if (^amount > 1) {
-		SPEAK -p [player_no] NOP
-		ACCEPT //this must not be a stack of items
-	}
-
-	++ 別nInventoryUseCount //total activations just for debug
-	
-	if(^inPlayerInventory == 1) {
-		// this is another morph cycle, just activate to go, no combining:
-		if(and(ｘncientDeviceMode == "AncientBox" && 呆HologramInitialized == 0)) { //signal repeater can only be created inside the inventory
-			Set ｘncientDeviceMode "_BecomeSignalRepeater_"
-			GoSub FUNCmorphUpgrade
-			ACCEPT
-		} else {
-		if(ｘncientDeviceMode == "SignalRepeater") {
-			GoSub FUNCmorphUpgrade
-			ACCEPT
-		} else {
-		if(ｘncientDeviceMode == "RoleplayClassFocus") {
-			GoSub FUNCmorphUpgrade
-			ACCEPT
-		} else {
-		if(ｘncientDeviceMode == "ConfigOptions") { //last only revert to hologram inside the inventory
-			GoSub FUNCmorphUpgrade
-			ACCEPT
-		} } } }
-	
-	if ( ｘncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off. no toggle
-		if(and(@testPlayerDegreesX > 74 && @testPlayerDegreesX < 75)) {
-			GoSub FUNCtestChangeMesh
-			ACCEPT
-		}
-		
-		if ( 你ncientDeviceTriggerStep == 1 ) {
-			if (^amount > 1) { //cannot activate a stack of items
-				SPEAK -p [player_no] NOP
-				ACCEPT
-			}
-			
-			GoSub FUNCskillCheckAncientTech
-			Set 你ctivateChance 佝UNCskillCheckAncientTech剃hanceSuccess_OUTPUT
-			if ( 利uality >= 4 ) {
-				Set 你ctivateChance 100
-			}
-			RANDOM 你ctivateChance { //not granted to successfully activate it as it is a defective device
-				Set 佝UNCtrapAttack俊imeoutMillis 伶efaultTrapTimeoutMillis
-				
-				//TWEAK ICON "HologramGrenadeActive[icon]"
-				TWEAK ICON "AncientDevice.Grenade.Active[icon]"
-				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
-				/* todob
-				//USEMESH "magic\hologram\AncientDevice.Grenade"
-				USEMESH "ancientdevices/ancientdevice.grenade"
-				TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
-				*/
-				
-				Calc 妨calcTimes [ 佝UNCtrapAttack俊imeoutMillis / 1000 ]
-				GoSub -p FUNCblinkGlow 宏times=妨calcTimes ;
-				
-				//timerTrapVanish     -m 1 佝UNCtrapAttack俊imeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
-				//timerTrapVanishGlow -m 1 佝UNCtrapAttack俊imeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
-				
-				GoSub FUNCtrapAttack
-			} else {
-				//SetName "Broken Hologram Device"
-				////PLAY "POWER_DOWN"
-				////PLAY "sfx_lightning_loop"
-				//GoSub FUNCshockPlayer
-				////GoSub FUNCMalfunction
-				////SpecialFX TORCH //it vanished..
-				//SpecialFX FIERY
-				//SetGroup "DeviceTechBroken"
-				GoSub FUNCbreakDeviceDelayed
-			}
-			//timerTrapDestroy -m 1 5100 GoTo TFUNCDestroySelfSafely
-			//timerTrapDestroy -m 1 7000 GoTo TFUNCDestroySelfSafely //some effects have infinite time and then will last 2s (from 5000 to 7000)
-			Set 你ncientDeviceTriggerStep 2
-		} else { // after trap being activated will only shock the player and who is in-between too
-			GoSub FUNCshockPlayer
-			if (^inPlayerInventory == 1) { //but if in inventory, will dissassemble the grenade recovering 2 holograms used to create it
-				INVENTORY ADDMULTI "magic\hologram\hologram" 2 //TODO this isnt working?
-				GoSub FUNCDestroySelfSafely
-			}
-		}
-		ACCEPT
-	} else {
-	if ( ｘncientDeviceMode == "LandMine" ) {
-		//if ( 你ncientDeviceTriggerStep == 1 ) {
-			//Set 你ncientDeviceTriggerStep 2 //activate
-			////Set 刨cale 500 SetScale 刨cale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			//Set 刨cale 33 SetScale 刨cale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-			//timerTFUNCLandMine -m 0 50 GoTo TFUNCLandMine
-			//GoSub -p FUNCblinkGlow 宏times=0 ;
-		//} else { if ( 你ncientDeviceTriggerStep == 2 ) {
-			//timerTFUNCLandMine off 
-			////Set 刨cale 100 SetScale 刨cale
-			//Set 你ncientDeviceTriggerStep 1  //stop
-			//GoSub -p FUNCblinkGlow 宏times=-1 ;
-		//} }
-		Set 刨cale 33 SetScale 刨cale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
-		GoSub -p FUNCAncientDeviceActivationToggle ˙Mode="DetectTargetNearby" ˙callFuncDetectNearbyTarget=TFUNCLandMine ;
-		ACCEPT
-	} else {
-	if ( ｘncientDeviceMode == "Teleport" ) {
-		//if ( 你ncientDeviceTriggerStep == 1 ) {
-			//Set 你ncientDeviceTriggerStep 2 // activate
-			//timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
-			//GoSub -p FUNCblinkGlow 宏times=0 ;
-		//} else { if ( 你ncientDeviceTriggerStep == 2 ) {
-			//timerTFUNCteleportToAndKillNPC off
-			//Set 你ncientDeviceTriggerStep 1  //stop
-			//GoSub -p FUNCblinkGlow 宏times=-1 ;
-		//} }
-		Set @CFUNCFlyMeToTarget剌lySpeed 0.5 //takes 2s
-		GoSub -p FUNCAncientDeviceActivationToggle ˙Mode="FlyToTarget" ˙callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
-		ACCEPT
-	} else {
-	if ( ｘncientDeviceMode == "MindControl" ) {
-		if ( 你ncientDeviceTriggerStep == 1 ) {
-			Set 你ncientDeviceTriggerStep 2
-			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
-			GoSub -p FUNCblinkGlow 宏times=0 ;
-		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
-			timerMindControlDetectHoverNPC off
-			Set 你ncientDeviceTriggerStep 1  //stop
-			GoSub -p FUNCblinkGlow 宏times=-1 ;
-		} }
-		//TODOA GoSub -p FUNCAncientDeviceActivationToggle ˙Mode=FlyToTarget ˙callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
-		GoSub FUNCnameUpdate
-		ACCEPT
-	} else {
-	if ( ｘncientDeviceMode == "SniperBullet" ) {
-		Set @CFUNCFlyMeToTarget剌lySpeed 3.0 //takes 0.33s
-		GoSub -p FUNCAncientDeviceActivationToggle ˙Mode="FlyToTarget" ˙callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
-		ACCEPT
-	} else {
-	if ( ｘncientDeviceMode == "RoleplayClassFocus" ) {
-		EQUIP PLAYER
-		ACCEPT
-	} } } } } }
-	GoSub FUNCnameUpdate
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////  !!! HOLOGRAM ONLY BELOW HERE !!!  /////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	if(and(ｘncientDeviceMode == "AncientBox" && ^inInventory == "none")) { //on floor
-		GoSub FUNCcfgHologram
-		ACCEPT
-	}
-	
-	if(ｘncientDeviceMode != "HologramMode") {
-		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Unrecognized:ｘncientDeviceMode='~ｘncientDeviceMode~'"
-		SPEAK -p [player_no] NOP
-		GoSub -p FUNCshowlocals 宏force=1 ˙filter=".*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
-		ACCEPT
-	}
-	
-	//////////////// DENY ACTIVATION SECTION ///////////////////////
-	
-	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;DebugLog:10"
-	//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;20"
-	//if (^inPlayerInventory == 1) {
-		//if(and(ｘncientDeviceMode == "HologramMode" && 呆HologramInitialized == 0)) {
-			//Set ｘncientDeviceMode "_BecomeSignalRepeater_"
-			//GoSub FUNCmorphUpgrade
-		//} else {
-		//if(ｘncientDeviceMode == "SignalRepeater") {
-			//GoSub FUNCmorphUpgrade //revert to hologram
-		//} else {
-			//PLAY "POWER_DOWN"
-			//GoSub FUNCshowlocals
-		//}	}
-		//ACCEPT //can only be activated if deployed
-	//}
-	
-	if (助seBlockedMili > 0) {
-		GoSub FUNCMalfunction
-		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Deny_A:Blocked=~助seBlockedMili~"
-		
-		++ 助seCount 
-		GoSub FUNCupdateUses //an attempt to use while blocked will damage it too, the player must wait the cooldown
-		GoSub FUNCnameUpdate
-		
-		GoSub FUNCshowlocals
-		ACCEPT
-	} else { if (助seBlockedMili < 0) {
-		// log to help fix inconsistency if it ever happens
-		timerBlocked off
-		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Fix_A:Blocked=~助seBlockedMili~ IsNegative, fixing it to 0"
-		//GoSub FUNCshowlocals
-		Set 助seBlockedMili 0
-	} }
-	
-	if (呆HologramInitialized == 1) {
-		if ( ^#PLAYERDIST > 200 ) { //after scale up. 185 was almost precise but annoying to use. 190 is good but may be annoying if there is things on the ground.
-			GoSub FUNCMalfunction
-			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Deny_C:PlayerDist=~^#PLAYERDIST~"
-			GoSub FUNCshowlocals
-			ACCEPT
-		}
-	}
-	
-	//////////// INITIALIZE: Turn On ///////////
-	if (呆HologramInitialized == 0) { //first use will just scale it up/initialize it
-		PLAY "POWER"
-		
-		//Collision ON
-		//Damager -eu 1
-		PLAYERSTACKSIZE 1 //for the HOLOGRAM functionalities it is important to prevent resetting the use count when trying to mix(glitch) a stack, on reload game, it seems to keep the local vars to each object!
-		SetGroup "DeviceTechHologram"
-		
-		TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.box.Clear"
-		
-		////Set 助seMax 5
-		////Inc 助seMax ^rnd_110
-		////GoSub FUNCcalcAncientTechSkill
-		////Inc 助seMax @AncientTechSkill
-		////Set 助seRemain 助seMax
-		//Set 助seHologramDestructionStart 助seMax
-		//Mul 助seHologramDestructionStart 0.95
-		Calc 助seHologramDestructionStart [ 助seMax * 0.95 ]
-		
-		SET_SHADOW OFF
-		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;30"
-		
-		// grow effect (timers begin imediatelly or after this event exits?)
-		// total time
-		Set 助seBlockedMili 2000 //the time it will take to grow
-		//timerBlocked -m 100 50 Dec 助seBlockedMili 50 //to wait while it scales up
-		timerBlocked -m 0 50 Dec 助seBlockedMili 50 //will just decrement 助seBlockedMili
-		// interactivity blocked
-		SET_INTERACTIVITY NONE
-		timerInteractivity -m 1 助seBlockedMili SET_INTERACTIVITY YES
-		// scale up effect (each timer must have it's own unique id)
-		Set 刨cale 100 //default. target is 1000%
-		timerGrowInc  -m 100 20 Inc 刨cale 9 //1000-100=900; 900/100=9 per step
-		timerGrowInc2 -m 100 20 SetScale 刨cale
-		
-		Set 呆HologramInitialized 1
-		
-		TWEAK ICON "HologramInitialized[icon]"
-		
-		GoSub FUNCupdateUses
-		GoSub FUNCnameUpdate
-		
-		//showvars
-		GoSub FUNCshowlocals //to not need to scroll up the log in terminal
-		ACCEPT
-	}
-	
-	//////////////// WORK on landscapes etc /////////////////////////
-	++ 助seCount
-	
-	if (助seCount == 1) { //init skyboxes
-		Set 刨kyMode 2 //cubemap
-		Set 刨kyBoxIndex 0 //initializes the landscapes
-		Set ΠkyBoxCurrent "Hologram.skybox.index~刨kyBoxIndex~"
-		TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"   "~ΠkyBoxCurrent~" //no problem if unidentified
-		TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~ΠkyBoxCurrent~"
-		//Set ΠkyBoxCurrentUVS "Hologram.skybox.UVSphere.index3000.Clear" //sync this with what is in blender
-		Set ΠkyBoxCurrentUVS "Hologram.skybox.UVSphere.index2000.DocBackground" //sync this with what is in  blender
-		GoSub FUNCChangeSkyBox
-	}
-	
-	// means the device is malfunctioning and shocks the player, was 25%
-	Set 冶alfunction 0
-	GoSub FUNCskillCheckAncientTech
-	Set 低hkMalfunction 佝UNCskillCheckAncientTech剃hanceFailure_OUTPUT
-	Div 低hkMalfunction 2
-	RANDOM 低hkMalfunction {
-		GoSub FUNCshockPlayer
-		//dodamage -lu player 3 //-u push, extra dmg with push. this grants some damage if lightning above fails
-		INC 助seCount 10  //damage
-		INC 助seCount ^rnd_10
-		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;60.damagePlayer"
-		Set 冶alfunction 1
-		Inc 助seBlockedMili ^rnd_10000
-	}
-	
-	//it called the attention of some hostile creature, not related to player skill. no need to use any hiding/shadow value as the hologram emits light and will call attention anyway. Only would make sense in some closed room, but rats may find their way there too.
-	RANDOM 10 {
-		PLAY "sfx_lightning_loop"
-		RANDOM 75 { 
-			spawn npc "rat_base\\rat_base" SELF //player
-			INC 助seCount 20 //damage
-			INC 助seCount ^rnd_20
-			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;70.spawn rat"
-			Inc 助seBlockedMili ^rnd_15000
-			Set 冶alfunction 1
-		} else {
-			//spawn npc "wrat_base\\wrat_base" player //too strong on low levels
-			//TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)! try the demon and the blue creature
-			////RANDOM 75 {
-				//spawn npc "dog\\dog" player //these dogs are friendly...
-				//Inc 助seBlockedMili 30000
-				//Set 冶alfunction 1
-				//INC 助seCount 5 //durability
-				//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;70.spawn dog"
-				////spawn npc "bat\\bat" player //no, kills rats
-			////} else {
-				////spawn npc "goblin_base\\goblin_base" player //doesnt attack player
-				////spawn npc "goblin_test\\goblin_test" player //doesnt attack the player
-				//Inc 助seBlockedMili 60000
-				//Set 冶alfunction 1
-			////}
-		//}
-		}
-	}
-	
-	// warning to help the player wakeup 
-	if (助seCount >= 助seHologramDestructionStart) { //this may happen a few times or just once, depending on the player bad luck ;)
-		RANDOM 25 {
-			PLAY "sfx_lightning_loop"
-		}
-		PLAY "TRAP"
-		SETLIGHT 1 //TODO??
-		Set 冶alfunction 1
-		Set 助seBlockedMili 100 //to prevent any other delay and let the player quickly reach the destruction event
-		TWEAK SKIN "Hologram.skybox.index1000.Status.Good" "Hologram.skybox.index1000.Status.Bad"
-		GoSub FUNCshockPlayer
-	}
-
-	if (冶alfunction > 0) {
-		GoSub FUNCMalfunction
-		//DoDamage -u player 0 //-u push
-	} else {
-		/////////// HEALING EFFECTS
-		GoSub FUNCskillCheckAncientTech
-		RANDOM 佝UNCskillCheckAncientTech剃hanceSuccess_OUTPUT { //was just 50
-			//PLAY "potion_mana"
-			//Set @IncMana @SignalStrLvl
-			//Inc @IncMana @FUNCskillCheckAncientTech冠ddBonus_OUTPUT
-			Calc @IncMana [ @SignalStrLvl + @FUNCskillCheckAncientTech冠ddBonus_OUTPUT ]
-			if ( 兌dentified > 0 ) Mul @IncMana 1.5
-			SpecialFX MANA @IncMana
-			//TODO play some sound that is not drinking or some visual effect like happens with healing
-			SPEAK -p [player_yes] NOP //TODO good?
-			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;MANA"
-		}
-		
-		GoSub FUNCskillCheckAncientTech
-		RANDOM 佝UNCskillCheckAncientTech剃hanceSuccess_OUTPUT { //was just 50
-			//SpecialFX HEAL @SignalStrLvl
-			//Set @IncHP @SignalStrLvl
-			//Inc @IncHP @FUNCskillCheckAncientTech冠ddBonus_OUTPUT
-			Calc @IncHP [ @SignalStrLvl + @FUNCskillCheckAncientTech冠ddBonus_OUTPUT ]
-			if ( 兌dentified > 0 ) Mul @IncHP 1.5
-			SPELLCAST -msf @IncHP HEAL PLAYER
-			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;HEAL"
-			//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;43"
-		}
-		
-		///////////////// SKYBOXES
-		GoSub FUNCChangeSkyBox
-	}
-	
-	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;100;"
-	if (助seCount >= 助seMax) { /////////////////// DESTROY ///////////////////
-		Set 伶estructionStarted 1
-		PLAY "TRAP"
-		PLAY "POWER"
-		SET_INTERACTIVITY NONE
-		attractor SELF 1 3000 //intentionally hinders player fleeing a bit
-		//nothing happens: SetTrap 20 //technical is the skill used to detect trap above that value
-		//SPELLCAST -smf 1 Paralyze PLAYER //nothing happens
-		//DoDamage -lu player 1 //-u push
-		//SPELLCAST -smf 1 Trap PLAYER //nothing happens
-		GoSub FUNCMakeNPCsHostile
-		
-		///////////// ANIMATION ////////////////
-		//Set 助seBlockedMili 999999 //any huge value beyond destroy limit
-		//             times delay
-		//timerShrink1 -m 100   30 Dec 刨cale 10 //from 1000 to 0 in 3s with a shrink of 10% each step
-		//timerShrink2 -m 100   30 SetScale 刨cale
-		// total time to finish the animation is 5000ms
-		//Set 刨IZED 10 //controls shrink varying speed from faster to slower: 5000/x=10/1; x=5000/10; 500ms
-		//timerShrink0 -m 100  500 Dec 刨IZED 1 //this is the speed somehow
-		//timerShrink1 -m 100   50 Dec 刨cale 刨IZED
-		timerShrink1 -m 100   50 Dec 刨cale 10
-		timerShrink2 -m 100   50 SetScale 刨cale
-		//timerLevitateX -m  0 150 Inc 劫EMPORARY ^rnd_2
-		//timerLevitateZ -m  0 200 Inc 劫EMPORARY2 3
-		timerLevitate  -m 10 100 Move 0 -10 0 // Y negative is upwards //this doesnt seem to work well everytime //TODO use animation, but how?
-		timerCrazySpin10p -m 0 75 Inc 刪otateY 1
-		//timerCrazySpin10y -m 0 150 Inc 劫EMPORARY 2
-		//timerCrazySpin10r -m 0 200 Inc 劫EMPORARY2 3
-		//timerCrazySpin10  -m 0 10 Rotate 含mp 劫EMPORARY 劫EMPORARY2
-		timerCrazySpin10  -m 0 10 Rotate 0 刪otateY 0 //the model doesnt spin from it's mass or geometric center but from it's origin that is on the bottom and using other than Y will just look bad..
-		//timerCrazySpin20 -m 0   10 Rotate ^rnd_360 ^rnd_360 ^rnd_360
-		RANDOM 15 { //to prevent player using as granted weapon against NPCs
-			//timerAttack55 -m  1 4950 SETTARGET PLAYER //for fireball
-			//timerAttack56 -m  1 5000 SPAWN FIREBALL //the origin to fire from must be above floor
-			//Set 佝UNCtrapAttack俊rapMode 1 //projectile at player
-			//Set 佝UNCtrapAttack俊imeoutMillis 伶efaultTrapTimeoutMillis
-			GoSub -p FUNCtrapAttack 宏TrapMode=1 宏TimeoutMillis=伶efaultTrapTimeoutMillis ;
-		} else {
-		RANDOM 25 { //to prevent player using as granted weapon against NPCs
-			//Set 佝UNCtrapAttack俊imeoutMillis 伶efaultTrapTimeoutMillis
-			//timerTrapVanish -m 1 佝UNCtrapAttack俊imeoutMillis GoTo TFUNChideHologramPartsPermanently
-			GoSub -p FUNCtrapAttack 宏TimeoutMillis=伶efaultTrapTimeoutMillis ;
-			//timerDestroy -m   1 5100 GoTo TFUNCDestroySelfSafely
-		} }
-		
-		if (佝UNCtrapAttack俊rapCanKillMode_OUTPUT == 0) {
-			timerTFUNCDestroySelfSafely -m 1 伶efaultTrapTimeoutMillis GoTo TFUNCDestroySelfSafely
-		}
-		
-		GoSub FUNCupdateUses
-		GoSub FUNCnameUpdate
-		
-		//showvars
-		GoSub FUNCshowlocals //last to be easier to read on log
-		ACCEPT
-	}
-	
-	if (助seBlockedMili <= 0) {
-		Inc 助seBlockedMili ^rnd_5000 //normal activation minimum random delay
-	}
-	
-	if (助seCount < 助seHologramDestructionStart) { 
-		//this must be after all changes to 助seBlockedMili !
-		//trap start used the status bad override, so it can be ignored as wont change
-		TWEAK SKIN "Hologram.skybox.index1000.Status.Good" "Hologram.skybox.index1000.Status.Warn"
-		//// after the timeout will always be GOOD
-		//Set ΠtatusSkinCurrent "Hologram.skybox.index1000.Status.Good"
-		//Set ΠtatusSkinPrevious "~ΠtatusSkinCurrent~"
-		//// reaching this point is always WARN: the player must wait the cooldown
-		timerSkinGood -m 1 助seBlockedMili TWEAK SKIN "Hologram.skybox.index1000.Status.Warn" "Hologram.skybox.index1000.Status.Good"
-	}
-	
-	timerBlocked -m 0 50 Dec 助seBlockedMili 50 //will just decrement 助seBlockedMili (should use -i too to only work when player is nearby?)
-	
-	GoSub FUNCupdateUses
-	GoSub FUNCnameUpdate
-	
-	GoSub FUNCshowlocals
-	ACCEPT
-}
-
 >>FUNCpatchNPCinventory() {
 	//INPUT <ΓUNCpatchNPCinventory南pc>
 	
@@ -2919,7 +2475,7 @@ ON InventoryOut () { Set δaaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	RETURN
 }
 
-ON EQUIPIN {
+ON EQUIPIN () {
 	if(ｘncientDeviceMode == "RoleplayClassFocus") {
 		PLAY "EQUIP_RING"
 		GoSub FUNCsignalStrenghCheck
@@ -2933,9 +2489,458 @@ ON EQUIPIN {
 	}
 }
 
-ON EQUIPOUT {
+ON EQUIPOUT () {
 	if(ｘncientDeviceMode == "RoleplayClassFocus") {
 		HERO_SAY -d "Class Focus OFF"
 		ACCEPT
 	}
+}
+
+ON INVENTORYUSE () {
+	if(伶ebugTestLOD == 1) ACCEPT
+	if(兌nitDefaultsDone == 0) GoSub FUNCinitDefaults
+	
+	if (^amount > 1) {
+		SPEAK -p [player_no] NOP
+		ACCEPT //this must not be a stack of items
+	}
+
+	++ 別nInventoryUseCount //total activations just for debug
+	
+	if(^inPlayerInventory == 1) {
+		// this is another morph cycle, just activate to go, no combining:
+		if(and(ｘncientDeviceMode == "AncientBox" && 呆HologramInitialized == 0)) { //signal repeater can only be created inside the inventory
+			Set ｘncientDeviceMode "_BecomeSignalRepeater_"
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} else {
+		if(ｘncientDeviceMode == "SignalRepeater") {
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} else {
+		if(ｘncientDeviceMode == "RoleplayClassFocus") {
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} else {
+		if(ｘncientDeviceMode == "ConfigOptions") { //last only revert to hologram inside the inventory
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} } } }
+	}
+	
+	if ( ｘncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off. no toggle
+		if(and(@testPlayerDegreesX > 74 && @testPlayerDegreesX < 75)) {
+			GoSub FUNCtestChangeMesh
+			ACCEPT
+		}
+		
+		if ( 你ncientDeviceTriggerStep == 1 ) {
+			if (^amount > 1) { //cannot activate a stack of items
+				SPEAK -p [player_no] NOP
+				ACCEPT
+			}
+			
+			GoSub FUNCskillCheckAncientTech
+			Set 你ctivateChance 佝UNCskillCheckAncientTech剃hanceSuccess_OUTPUT
+			if ( 利uality >= 4 ) {
+				Set 你ctivateChance 100
+			}
+			RANDOM 你ctivateChance { //not granted to successfully activate it as it is a defective device
+				Set 佝UNCtrapAttack俊imeoutMillis 伶efaultTrapTimeoutMillis
+				
+				//TWEAK ICON "HologramGrenadeActive[icon]"
+				TWEAK ICON "AncientDevice.Grenade.Active[icon]"
+				TWEAK SKIN "Hologram.tiny.index4000.grenade" "Hologram.tiny.index4000.grenadeActive"
+				/* todob
+				//USEMESH "magic\hologram\AncientDevice.Grenade"
+				USEMESH "ancientdevices/ancientdevice.grenade"
+				TWEAK SKIN "AncientDevice.Grenade" "AncientDevice.Grenade.Active" //after usemesh!!!
+				*/
+				
+				Calc 妨calcTimes [ 佝UNCtrapAttack俊imeoutMillis / 1000 ]
+				GoSub -p FUNCblinkGlow 宏times=妨calcTimes ;
+				
+				//timerTrapVanish     -m 1 佝UNCtrapAttack俊imeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenade"     "Hologram.tiny.index4000.grenade.Clear"
+				//timerTrapVanishGlow -m 1 佝UNCtrapAttack俊imeoutMillis TWEAK SKIN "Hologram.tiny.index4000.grenadeGlow" "Hologram.tiny.index4000.grenadeGlow.Clear"
+				
+				GoSub FUNCtrapAttack
+			} else {
+				//SetName "Broken Hologram Device"
+				////PLAY "POWER_DOWN"
+				////PLAY "sfx_lightning_loop"
+				//GoSub FUNCshockPlayer
+				////GoSub FUNCMalfunction
+				////SpecialFX TORCH //it vanished..
+				//SpecialFX FIERY
+				//SetGroup "DeviceTechBroken"
+				GoSub FUNCbreakDeviceDelayed
+			}
+			//timerTrapDestroy -m 1 5100 GoTo TFUNCDestroySelfSafely
+			//timerTrapDestroy -m 1 7000 GoTo TFUNCDestroySelfSafely //some effects have infinite time and then will last 2s (from 5000 to 7000)
+			Set 你ncientDeviceTriggerStep 2
+		} else { // after trap being activated will only shock the player and who is in-between too
+			GoSub FUNCshockPlayer
+			if (^inPlayerInventory == 1) { //but if in inventory, will dissassemble the grenade recovering 2 holograms used to create it
+				INVENTORY ADDMULTI "magic\hologram\hologram" 2 //TODO this isnt working?
+				GoSub FUNCDestroySelfSafely
+			}
+		}
+		ACCEPT
+	} else {
+	if ( ｘncientDeviceMode == "LandMine" ) {
+		//if ( 你ncientDeviceTriggerStep == 1 ) {
+			//Set 你ncientDeviceTriggerStep 2 //activate
+			////Set 刨cale 500 SetScale 刨cale //TODO should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//Set 刨cale 33 SetScale 刨cale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+			//timerTFUNCLandMine -m 0 50 GoTo TFUNCLandMine
+			//GoSub -p FUNCblinkGlow 宏times=0 ;
+		//} else { if ( 你ncientDeviceTriggerStep == 2 ) {
+			//timerTFUNCLandMine off 
+			////Set 刨cale 100 SetScale 刨cale
+			//Set 你ncientDeviceTriggerStep 1  //stop
+			//GoSub -p FUNCblinkGlow 宏times=-1 ;
+		//} }
+		Set 刨cale 33 SetScale 刨cale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
+		GoSub -p FUNCAncientDeviceActivationToggle ˙Mode="DetectTargetNearby" ˙callFuncDetectNearbyTarget=TFUNCLandMine ;
+		ACCEPT
+	} else {
+	if ( ｘncientDeviceMode == "Teleport" ) {
+		//if ( 你ncientDeviceTriggerStep == 1 ) {
+			//Set 你ncientDeviceTriggerStep 2 // activate
+			//timerTFUNCteleportToAndKillNPC -m 0 333 GoTo TFUNCteleportToAndKillNPC
+			//GoSub -p FUNCblinkGlow 宏times=0 ;
+		//} else { if ( 你ncientDeviceTriggerStep == 2 ) {
+			//timerTFUNCteleportToAndKillNPC off
+			//Set 你ncientDeviceTriggerStep 1  //stop
+			//GoSub -p FUNCblinkGlow 宏times=-1 ;
+		//} }
+		Set @CFUNCFlyMeToTarget剌lySpeed 0.5 //takes 2s
+		GoSub -p FUNCAncientDeviceActivationToggle ˙Mode="FlyToTarget" ˙callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
+		ACCEPT
+	} else {
+	if ( ｘncientDeviceMode == "MindControl" ) {
+		if ( 你ncientDeviceTriggerStep == 1 ) {
+			Set 你ncientDeviceTriggerStep 2
+			timerMindControlDetectHoverNPC -m 0 333 GoTo TFUNCMindControl
+			GoSub -p FUNCblinkGlow 宏times=0 ;
+		} else { if ( 你ncientDeviceTriggerStep == 2 ) {
+			timerMindControlDetectHoverNPC off
+			Set 你ncientDeviceTriggerStep 1  //stop
+			GoSub -p FUNCblinkGlow 宏times=-1 ;
+		} }
+		//TODOA GoSub -p FUNCAncientDeviceActivationToggle ˙Mode=FlyToTarget ˙callFuncWhenTargetReached=CFUNCMindControlAtTarget ;
+		GoSub FUNCnameUpdate
+		ACCEPT
+	} else {
+	if ( ｘncientDeviceMode == "SniperBullet" ) {
+		Set @CFUNCFlyMeToTarget剌lySpeed 3.0 //takes 0.33s
+		GoSub -p FUNCAncientDeviceActivationToggle ˙Mode="FlyToTarget" ˙callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
+		ACCEPT
+	} else {
+	if ( ｘncientDeviceMode == "RoleplayClassFocus" ) {
+		EQUIP PLAYER
+		ACCEPT
+	} } } } } }
+	GoSub FUNCnameUpdate
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////  !!! HOLOGRAM ONLY BELOW HERE !!!  /////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	if(and(ｘncientDeviceMode == "AncientBox" && ^inInventory == "none")) { //on floor
+		GoSub FUNCcfgHologram
+		ACCEPT
+	}
+	
+	if(ｘncientDeviceMode != "HologramMode") {
+		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Unrecognized:ｘncientDeviceMode='~ｘncientDeviceMode~'"
+		SPEAK -p [player_no] NOP
+		GoSub -p FUNCshowlocals 宏force=1 ˙filter=".*(AncientDevice|ActivateChance|quality|blinkGlow|trapAttack|UseCount|UseBlockedMili).*" ;
+		ACCEPT
+	}
+	
+	//////////////// DENY ACTIVATION SECTION ///////////////////////
+	
+	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;DebugLog:10"
+	//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;20"
+	//if (^inPlayerInventory == 1) {
+		//if(and(ｘncientDeviceMode == "HologramMode" && 呆HologramInitialized == 0)) {
+			//Set ｘncientDeviceMode "_BecomeSignalRepeater_"
+			//GoSub FUNCmorphUpgrade
+		//} else {
+		//if(ｘncientDeviceMode == "SignalRepeater") {
+			//GoSub FUNCmorphUpgrade //revert to hologram
+		//} else {
+			//PLAY "POWER_DOWN"
+			//GoSub FUNCshowlocals
+		//}	}
+		//ACCEPT //can only be activated if deployed
+	//}
+	
+	if (助seBlockedMili > 0) {
+		GoSub FUNCMalfunction
+		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Deny_A:Blocked=~助seBlockedMili~"
+		
+		++ 助seCount 
+		GoSub FUNCupdateUses //an attempt to use while blocked will damage it too, the player must wait the cooldown
+		GoSub FUNCnameUpdate
+		
+		GoSub FUNCshowlocals
+		ACCEPT
+	} else { if (助seBlockedMili < 0) {
+		// log to help fix inconsistency if it ever happens
+		timerBlocked off
+		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Fix_A:Blocked=~助seBlockedMili~ IsNegative, fixing it to 0"
+		//GoSub FUNCshowlocals
+		Set 助seBlockedMili 0
+	} }
+	
+	if (呆HologramInitialized == 1) {
+		if ( ^#PLAYERDIST > 200 ) { //after scale up. 185 was almost precise but annoying to use. 190 is good but may be annoying if there is things on the ground.
+			GoSub FUNCMalfunction
+			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;Deny_C:PlayerDist=~^#PLAYERDIST~"
+			GoSub FUNCshowlocals
+			ACCEPT
+		}
+	}
+	
+	//////////// INITIALIZE: Turn On ///////////
+	if (呆HologramInitialized == 0) { //first use will just scale it up/initialize it
+		PLAY "POWER"
+		
+		//Collision ON
+		//Damager -eu 1
+		PLAYERSTACKSIZE 1 //for the HOLOGRAM functionalities it is important to prevent resetting the use count when trying to mix(glitch) a stack, on reload game, it seems to keep the local vars to each object!
+		SetGroup "DeviceTechHologram"
+		
+		TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.box.Clear"
+		
+		////Set 助seMax 5
+		////Inc 助seMax ^rnd_110
+		////GoSub FUNCcalcAncientTechSkill
+		////Inc 助seMax @AncientTechSkill
+		////Set 助seRemain 助seMax
+		//Set 助seHologramDestructionStart 助seMax
+		//Mul 助seHologramDestructionStart 0.95
+		Calc 助seHologramDestructionStart [ 助seMax * 0.95 ]
+		
+		SET_SHADOW OFF
+		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;30"
+		
+		// grow effect (timers begin imediatelly or after this event exits?)
+		// total time
+		Set 助seBlockedMili 2000 //the time it will take to grow
+		//timerBlocked -m 100 50 Dec 助seBlockedMili 50 //to wait while it scales up
+		timerBlocked -m 0 50 Dec 助seBlockedMili 50 //will just decrement 助seBlockedMili
+		// interactivity blocked
+		SET_INTERACTIVITY NONE
+		timerInteractivity -m 1 助seBlockedMili SET_INTERACTIVITY YES
+		// scale up effect (each timer must have it's own unique id)
+		Set 刨cale 100 //default. target is 1000%
+		timerGrowInc  -m 100 20 Inc 刨cale 9 //1000-100=900; 900/100=9 per step
+		timerGrowInc2 -m 100 20 SetScale 刨cale
+		
+		Set 呆HologramInitialized 1
+		
+		TWEAK ICON "HologramInitialized[icon]"
+		
+		GoSub FUNCupdateUses
+		GoSub FUNCnameUpdate
+		
+		//showvars
+		GoSub FUNCshowlocals //to not need to scroll up the log in terminal
+		ACCEPT
+	}
+	
+	//////////////// WORK on landscapes etc /////////////////////////
+	++ 助seCount
+	
+	if (助seCount == 1) { //init skyboxes
+		Set 刨kyMode 2 //cubemap
+		Set 刨kyBoxIndex 0 //initializes the landscapes
+		Set ΠkyBoxCurrent "Hologram.skybox.index~刨kyBoxIndex~"
+		TWEAK SKIN "Hologram.skybox.index2000.DocIdentified"   "~ΠkyBoxCurrent~" //no problem if unidentified
+		TWEAK SKIN "Hologram.skybox.index2000.DocUnidentified" "~ΠkyBoxCurrent~"
+		//Set ΠkyBoxCurrentUVS "Hologram.skybox.UVSphere.index3000.Clear" //sync this with what is in blender
+		Set ΠkyBoxCurrentUVS "Hologram.skybox.UVSphere.index2000.DocBackground" //sync this with what is in  blender
+		GoSub FUNCChangeSkyBox
+	}
+	
+	// means the device is malfunctioning and shocks the player, was 25%
+	Set 冶alfunction 0
+	GoSub FUNCskillCheckAncientTech
+	Set 低hkMalfunction 佝UNCskillCheckAncientTech剃hanceFailure_OUTPUT
+	Div 低hkMalfunction 2
+	RANDOM 低hkMalfunction {
+		GoSub FUNCshockPlayer
+		//dodamage -lu player 3 //-u push, extra dmg with push. this grants some damage if lightning above fails
+		INC 助seCount 10  //damage
+		INC 助seCount ^rnd_10
+		Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;60.damagePlayer"
+		Set 冶alfunction 1
+		Inc 助seBlockedMili ^rnd_10000
+	}
+	
+	//it called the attention of some hostile creature, not related to player skill. no need to use any hiding/shadow value as the hologram emits light and will call attention anyway. Only would make sense in some closed room, but rats may find their way there too.
+	RANDOM 10 {
+		PLAY "sfx_lightning_loop"
+		RANDOM 75 { 
+			spawn npc "rat_base\\rat_base" SELF //player
+			INC 助seCount 20 //damage
+			INC 助seCount ^rnd_20
+			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;70.spawn rat"
+			Inc 助seBlockedMili ^rnd_15000
+			Set 冶alfunction 1
+		} else {
+			//spawn npc "wrat_base\\wrat_base" player //too strong on low levels
+			//TODOA add medium (usesdmg30-60) and hard (usesdmg50-80) creatures? is there a hostile dog (medium) or a weak small spider (hard)?  tweak/create a shrunk small and nerfed spider (hard)! tweak/create a bigger buffed rat (medium)! try the demon and the blue creature
+			////RANDOM 75 {
+				//spawn npc "dog\\dog" player //these dogs are friendly...
+				//Inc 助seBlockedMili 30000
+				//Set 冶alfunction 1
+				//INC 助seCount 5 //durability
+				//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;70.spawn dog"
+				////spawn npc "bat\\bat" player //no, kills rats
+			////} else {
+				////spawn npc "goblin_base\\goblin_base" player //doesnt attack player
+				////spawn npc "goblin_test\\goblin_test" player //doesnt attack the player
+				//Inc 助seBlockedMili 60000
+				//Set 冶alfunction 1
+			////}
+		//}
+		}
+	}
+	
+	// warning to help the player wakeup 
+	if (助seCount >= 助seHologramDestructionStart) { //this may happen a few times or just once, depending on the player bad luck ;)
+		RANDOM 25 {
+			PLAY "sfx_lightning_loop"
+		}
+		PLAY "TRAP"
+		SETLIGHT 1 //TODO??
+		Set 冶alfunction 1
+		Set 助seBlockedMili 100 //to prevent any other delay and let the player quickly reach the destruction event
+		TWEAK SKIN "Hologram.skybox.index1000.Status.Good" "Hologram.skybox.index1000.Status.Bad"
+		GoSub FUNCshockPlayer
+	}
+
+	if (冶alfunction > 0) {
+		GoSub FUNCMalfunction
+		//DoDamage -u player 0 //-u push
+	} else {
+		/////////// HEALING EFFECTS
+		GoSub FUNCskillCheckAncientTech
+		RANDOM 佝UNCskillCheckAncientTech剃hanceSuccess_OUTPUT { //was just 50
+			//PLAY "potion_mana"
+			//Set @IncMana @SignalStrLvl
+			//Inc @IncMana @FUNCskillCheckAncientTech冠ddBonus_OUTPUT
+			Calc @IncMana [ @SignalStrLvl + @FUNCskillCheckAncientTech冠ddBonus_OUTPUT ]
+			if ( 兌dentified > 0 ) Mul @IncMana 1.5
+			SpecialFX MANA @IncMana
+			//TODO play some sound that is not drinking or some visual effect like happens with healing
+			SPEAK -p [player_yes] NOP //TODO good?
+			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;MANA"
+		}
+		
+		GoSub FUNCskillCheckAncientTech
+		RANDOM 佝UNCskillCheckAncientTech剃hanceSuccess_OUTPUT { //was just 50
+			//SpecialFX HEAL @SignalStrLvl
+			//Set @IncHP @SignalStrLvl
+			//Inc @IncHP @FUNCskillCheckAncientTech冠ddBonus_OUTPUT
+			Calc @IncHP [ @SignalStrLvl + @FUNCskillCheckAncientTech冠ddBonus_OUTPUT ]
+			if ( 兌dentified > 0 ) Mul @IncHP 1.5
+			SPELLCAST -msf @IncHP HEAL PLAYER
+			Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;HEAL"
+			//Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;43"
+		}
+		
+		///////////////// SKYBOXES
+		GoSub FUNCChangeSkyBox
+	}
+	
+	Set δaaaDebugScriptStackAndLog "~δaaaDebugScriptStackAndLog~;100;"
+	if (助seCount >= 助seMax) { /////////////////// DESTROY ///////////////////
+		Set 伶estructionStarted 1
+		PLAY "TRAP"
+		PLAY "POWER"
+		SET_INTERACTIVITY NONE
+		attractor SELF 1 3000 //intentionally hinders player fleeing a bit
+		//nothing happens: SetTrap 20 //technical is the skill used to detect trap above that value
+		//SPELLCAST -smf 1 Paralyze PLAYER //nothing happens
+		//DoDamage -lu player 1 //-u push
+		//SPELLCAST -smf 1 Trap PLAYER //nothing happens
+		GoSub FUNCMakeNPCsHostile
+		
+		///////////// ANIMATION ////////////////
+		//Set 助seBlockedMili 999999 //any huge value beyond destroy limit
+		//             times delay
+		//timerShrink1 -m 100   30 Dec 刨cale 10 //from 1000 to 0 in 3s with a shrink of 10% each step
+		//timerShrink2 -m 100   30 SetScale 刨cale
+		// total time to finish the animation is 5000ms
+		//Set 刨IZED 10 //controls shrink varying speed from faster to slower: 5000/x=10/1; x=5000/10; 500ms
+		//timerShrink0 -m 100  500 Dec 刨IZED 1 //this is the speed somehow
+		//timerShrink1 -m 100   50 Dec 刨cale 刨IZED
+		timerShrink1 -m 100   50 Dec 刨cale 10
+		timerShrink2 -m 100   50 SetScale 刨cale
+		//timerLevitateX -m  0 150 Inc 劫EMPORARY ^rnd_2
+		//timerLevitateZ -m  0 200 Inc 劫EMPORARY2 3
+		timerLevitate  -m 10 100 Move 0 -10 0 // Y negative is upwards //this doesnt seem to work well everytime //TODO use animation, but how?
+		timerCrazySpin10p -m 0 75 Inc 刪otateY 1
+		//timerCrazySpin10y -m 0 150 Inc 劫EMPORARY 2
+		//timerCrazySpin10r -m 0 200 Inc 劫EMPORARY2 3
+		//timerCrazySpin10  -m 0 10 Rotate 含mp 劫EMPORARY 劫EMPORARY2
+		timerCrazySpin10  -m 0 10 Rotate 0 刪otateY 0 //the model doesnt spin from it's mass or geometric center but from it's origin that is on the bottom and using other than Y will just look bad..
+		//timerCrazySpin20 -m 0   10 Rotate ^rnd_360 ^rnd_360 ^rnd_360
+		RANDOM 15 { //to prevent player using as granted weapon against NPCs
+			//timerAttack55 -m  1 4950 SETTARGET PLAYER //for fireball
+			//timerAttack56 -m  1 5000 SPAWN FIREBALL //the origin to fire from must be above floor
+			//Set 佝UNCtrapAttack俊rapMode 1 //projectile at player
+			//Set 佝UNCtrapAttack俊imeoutMillis 伶efaultTrapTimeoutMillis
+			GoSub -p FUNCtrapAttack 宏TrapMode=1 宏TimeoutMillis=伶efaultTrapTimeoutMillis ;
+		} else {
+		RANDOM 25 { //to prevent player using as granted weapon against NPCs
+			//Set 佝UNCtrapAttack俊imeoutMillis 伶efaultTrapTimeoutMillis
+			//timerTrapVanish -m 1 佝UNCtrapAttack俊imeoutMillis GoTo TFUNChideHologramPartsPermanently
+			GoSub -p FUNCtrapAttack 宏TimeoutMillis=伶efaultTrapTimeoutMillis ;
+			//timerDestroy -m   1 5100 GoTo TFUNCDestroySelfSafely
+		} }
+		
+		if (佝UNCtrapAttack俊rapCanKillMode_OUTPUT == 0) {
+			timerTFUNCDestroySelfSafely -m 1 伶efaultTrapTimeoutMillis GoTo TFUNCDestroySelfSafely
+		}
+		
+		GoSub FUNCupdateUses
+		GoSub FUNCnameUpdate
+		
+		//showvars
+		GoSub FUNCshowlocals //last to be easier to read on log
+		ACCEPT
+	}
+	
+	if (助seBlockedMili <= 0) {
+		Inc 助seBlockedMili ^rnd_5000 //normal activation minimum random delay
+	}
+	
+	if (助seCount < 助seHologramDestructionStart) { 
+		//this must be after all changes to 助seBlockedMili !
+		//trap start used the status bad override, so it can be ignored as wont change
+		TWEAK SKIN "Hologram.skybox.index1000.Status.Good" "Hologram.skybox.index1000.Status.Warn"
+		//// after the timeout will always be GOOD
+		//Set ΠtatusSkinCurrent "Hologram.skybox.index1000.Status.Good"
+		//Set ΠtatusSkinPrevious "~ΠtatusSkinCurrent~"
+		//// reaching this point is always WARN: the player must wait the cooldown
+		timerSkinGood -m 1 助seBlockedMili TWEAK SKIN "Hologram.skybox.index1000.Status.Warn" "Hologram.skybox.index1000.Status.Good"
+	}
+	
+	timerBlocked -m 0 50 Dec 助seBlockedMili 50 //will just decrement 助seBlockedMili (should use -i too to only work when player is nearby?)
+	
+	GoSub FUNCupdateUses
+	GoSub FUNCnameUpdate
+	
+	GoSub FUNCshowlocals
+	ACCEPT
+}
+
+>>FUNCdummy () {
+	RETURN
 }
