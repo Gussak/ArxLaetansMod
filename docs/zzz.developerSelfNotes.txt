@@ -397,3 +397,5 @@ public:
 };
 			//static Foo bar = [](){return 2.f;}();
 			static Foo bar([](){return "the id";}(), [](){return 2.f;}());
+
+echo "Strength Mind Dexterity Constitution Stealth Mecanism Intuition EtheralLink ObjectKnowledge Casting Projectile CloseCombat Defense" |sed -r -e 's@([a-Z]*)@float min\1 = 10.f, float max\1 = 255.f, @g'

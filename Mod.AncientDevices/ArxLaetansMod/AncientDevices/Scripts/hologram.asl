@@ -2370,6 +2370,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	timerChangeSkinToActive -m 0 1000 TWEAK SKIN "AncientDevice.Grenade.StatusOFF" "AncientDevice.Grenade.StatusON" //after usemesh!!!
 	timerChangeSkinToInactive -m 0 1251 TWEAK SKIN "AncientDevice.Grenade.StatusON" "AncientDevice.Grenade.StatusOFF" //after usemesh!!!
 	
+	ReBirth -e player
+	
 //	Set £FUNCtestLOD«lod "high" //TODOABCDE £«lod is not working at FUNCtestLOD when a timer calls TFUNCtestLOD like: timerTFUNCtestLOD -m 1 2000 GoTo -p TFUNCtestLOD £»lod="high" ;
 //	timerTFUNCtestLOD -m 1 2000 GoTo TFUNCtestLOD
 	
