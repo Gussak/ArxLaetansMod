@@ -66,6 +66,21 @@ __
 ^PLAYER_ATTRIBUTE_MENTAL
 ^PLAYER_ATTRIBUTE_STRENGTH
 __
+ SETEQUIP STRENGTH 1
+ SETEQUIP DEXTERITY 1
+ SETEQUIP CONSTITUTION 1
+ SETEQUIP INTELLIGENCE 1
+__
+ SETEQUIP STEALTH +8
+ SETEQUIP MECANISM +8
+ SETEQUIP INTUITION +8
+ SETEQUIP ETHERAL_LINK +8
+ SETEQUIP OBJECT_KNOWLEDGE +8
+ SETEQUIP CASTING +8
+ SETEQUIP CLOSE_COMBAT +8
+ SETEQUIP PROJECTILE +8
+ SETEQUIP DEFENSE +8
+__
 on inventories init, this configures the generic scroll into specific spell and level:
  INVENTORY ADD "magic\\scroll_generic\\scroll_generic"
  SENDEVENT -ir TRANSMUTE 1 "8 SPEED" //the 1 distance means apparently items inside the container being ON INIT or ON INITEND
@@ -253,11 +268,14 @@ ON INVENTORYUSE () {
 			GoSub FUNCmorphUpgrade
 			ACCEPT
 		} else {
+		if(£AncientDeviceMode == "RoleplayClassFocus") {
+			GoSub FUNCmorphUpgrade
+			ACCEPT
+		} else {
 		if(£AncientDeviceMode == "ConfigOptions") { //last only revert to hologram inside the inventory
 			GoSub FUNCmorphUpgrade
 			ACCEPT
-		} } }
-	}
+		} } } }
 	
 	if ( £AncientDeviceMode == "Grenade" ) { // is unstable and cant be turned off. no toggle
 		if(and(@testPlayerDegreesX > 74 && @testPlayerDegreesX < 75)) {
@@ -333,7 +351,6 @@ ON INVENTORYUSE () {
 		//} }
 		Set §Scale 33 SetScale §Scale //TODOA create a huge landmine (from box there, height 100%, width and length 5000%, blend alpha 0.1 there just to be able to work) on blender hologram overlapping, it will be scaled down here! Or should be a new model, a thin plate on the ground disguised as rock floor texture may be graph/obj3d/textures/l2_gobel_[stone]_floor01.jpg. Could try a new command like `setplayertweak mesh <newmesh>` but for items!
 		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="DetectTargetNearby" £»callFuncDetectNearbyTarget=TFUNCLandMine ;
-		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "Teleport" ) {
@@ -348,7 +365,6 @@ ON INVENTORYUSE () {
 		//} }
 		Set @CFUNCFlyMeToTarget«flySpeed 0.5 //takes 2s
 		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £»callFuncWhenTargetReached=CFUNCTeleportPlayerToTarget ;
-		GoSub FUNCnameUpdate
 		ACCEPT
 	} else {
 	if ( £AncientDeviceMode == "MindControl" ) {
@@ -368,9 +384,13 @@ ON INVENTORYUSE () {
 	if ( £AncientDeviceMode == "SniperBullet" ) {
 		Set @CFUNCFlyMeToTarget«flySpeed 3.0 //takes 0.33s
 		GoSub -p FUNCAncientDeviceActivationToggle £»Mode="FlyToTarget" £»callFuncWhenTargetReached=CFUNCSniperBulletAtTarget ;
-		GoSub FUNCnameUpdate
 		ACCEPT
-	} } } } }
+	} else {
+	if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
+		EQUIP PLAYER
+		ACCEPT
+	} } } } } }
+	GoSub FUNCnameUpdate
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////  !!! HOLOGRAM ONLY BELOW HERE !!!  /////////////////
@@ -799,6 +819,8 @@ On Main () { //HeartBeat happens once per second apparently (but may be less oft
 		}
 	} else { if ( £AncientDeviceMode == "SignalRepeater" ) {
 		SENDEVENT -ir CUSTOM 3000 "CustomCmdSignalRepeater ~^me~ ~@SignalStrength~"
+	} else { if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
+		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;~£AncientDeviceMode~" //TODO chk ^dragged to hold cooking?
 	} else { if ( £AncientDeviceMode == "Grenade" ) {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;~£AncientDeviceMode~" //TODO chk ^dragged to hold cooking?
 	} else { if ( £AncientDeviceMode == "LandMine" ) {
@@ -809,7 +831,7 @@ On Main () { //HeartBeat happens once per second apparently (but may be less oft
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;~£AncientDeviceMode~" //TODO
 	} else { if ( £AncientDeviceMode == "SniperBullet" ) {
 		Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;~£AncientDeviceMode~" //TODO
-	} } } } } } }
+	} } } } } } } }
 	
 	// any item that is going to explode will benefit from this
 	Set £_aaaDebugScriptStackAndLog "~£_aaaDebugScriptStackAndLog~;Chk:TrapCanKillMode"
@@ -2442,7 +2464,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		/////////////////////////////////////////////////////////////////////////////////
 		////////////// MORPH thru simple activation while in inventory //////////////////
 		// each this can become a combine tree. AncientBox is the first of the main devices. SignalRepeater could be the first of another tree!
-		if (£AncientDeviceMode == "_BecomeSignalRepeater_") { Set £AncientDeviceMode "SignalRepeater"
+		if (£AncientDeviceMode == "_BecomeSignalRepeater_") {
+			Set £AncientDeviceMode "SignalRepeater"
 			// this must be easy to become again a hologram, so do minimal changes!
 			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
 			if(§Identified == 1) {
@@ -2455,15 +2478,23 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			//Set §AncientDeviceTriggerStep 1
 			//PlayerStackSize 1
 		} else { 
-		if ( £AncientDeviceMode == "SignalRepeater" ) { Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
+		if ( £AncientDeviceMode == "SignalRepeater" ) {
+			Set £AncientDeviceMode "RoleplayClassFocus" GoSub FUNCcfgAncientDevice
+			SetGroup "Special"
+			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
+			RETURN //because this is not a normal tool
+		} else { 
+		if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
+			Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
 			GoSub -p FUNCconfigOptions £»mode="show" ;
 			SetGroup "Special"
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
 			RETURN //because this is not a normal tool
 		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
-		if ( £AncientDeviceMode == "ConfigOptions" ) { Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
+		if ( £AncientDeviceMode == "ConfigOptions" ) {
+			Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
 			GoSub -p FUNCconfigOptions £»mode="hide" ;
-			SetGroup -r "Special"
+			SetGroup -r "Special" // back to basic device
 			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
 			RETURN //because this is not a normal tool
 		} else { 
@@ -2553,7 +2584,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Set £IconBasename "AncientSniperBullet"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
-		} } } } } } } }
+		} } } } } } } } }
 		
 		if(§AncientDeviceTriggerStep == 1) {
 			GoSub FUNCupdateUses
@@ -2598,13 +2629,24 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Set £FUNCnameUpdate_NameBase "Antiqua Capsa (Debilitatum)" //latin
 		}
 	} else {
+	if(£AncientDeviceMode == "RoleplayClassFocus") {
+		GoSub -p FUNCcfgSkin £»simple="Hologram.tiny.index4000.boxRoleplayClassFocus" ;
+		SET_PRICE 50
+		PlayerStackSize 1
+		Set £IconBasename "AncientRoleplayClassFocus"
+		if(§Identified == 1) {
+			Set £FUNCnameUpdate_NameBase "Ancient Box Class Focus" 
+		} else {
+			Set £FUNCnameUpdate_NameBase "Antiqua Capsa Slacs Sucfo" //latin/messy
+		}
+	} else {
 	if(£AncientDeviceMode == "ConfigOptions") {
 		GoSub -p FUNCcfgSkin £»simple="Hologram.tiny.index4000.boxConfigOptions" ;
 		SET_PRICE 13
 		PlayerStackSize 1
 		Set £IconBasename "AncientConfigOptions"
 		Set £FUNCnameUpdate_NameBase "Ancient Device Config Options" //keep always readable!
-	} }
+	} } }
 	
 	GoSub FUNCupdateUses
 	GoSub FUNCnameUpdate
@@ -2685,6 +2727,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	// dont use too high values cuz of Mul below
 	if(£AncientDeviceMode == "AncientBox"    ) Set @SignalStrengthReqBase  1
 	if(£AncientDeviceMode == "SignalRepeater") Set @SignalStrengthReqBase  1
+	if(£AncientDeviceMode == "RoleplayClassFocus") Set @SignalStrengthReqBase 100 //just to equip it
 	if(£AncientDeviceMode == "ConfigOptions" ) Set @SignalStrengthReqBase  0 //keep 0!
 	if(£AncientDeviceMode == "HologramMode"  ) Set @SignalStrengthReqBase  5 //can randomly be dangerous
 	if(£AncientDeviceMode == "Grenade"       ) Set @SignalStrengthReqBase 30 //can instakill
@@ -2793,54 +2836,104 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 //KEEP HERE TEST: Set £TestFixScriptEncoding "matters(£§«»¥¶¤) maybe(`¹²³×äåéëþüúíóöáßðfghïø½©®bñµç¿~¡ÄÅÉËÞÜÚÍÓÖÁÐFGHÏ¼Ø°Æ¼¢®BÑµÇ)" // all can be easily input with AltGr dead keys
 
->>FUNCClassFocusMode () {
-/* TODO: ClassFocus ring
- SETOBJECTTYPE RING
- SET_SHADOW OFF
- 
-ON INVENTORYUSE {
- EQUIP PLAYER
- ACCEPT
+>>FUNCCalcClassFocus () {
+	Set £AncientDeviceMode "RoleplayClassFocus"
+	SETOBJECTTYPE RING
+	SET_SHADOW OFF
+	
+	////////////////////////////////////////////////////////////
+	///////////// based on docs/RoleplayClassFocusBuffSkills.txt
+	
+	Set @«mageCasting      ^PLAYER_SKILL_CASTING
+	Set @«mageEtherealLink ^PLAYER_SKILL_ETHERAL_LINK
+	Set @«mageObjKnowledge ^PLAYER_SKILL_OBJECT_KNOWLEDGE
+	
+	Set @«thiefMechanism ^PLAYER_SKILL_MECANISM
+	Set @«thiefStealth   ^PLAYER_SKILL_STEALTH
+	Set @«thiefIntuition ^PLAYER_SKILL_INTUITION
+	
+	Set @«warriorProjectile ^PLAYER_SKILL_PROJECTILE
+	Set @«warriorCombat     ^PLAYER_SKILL_CLOSE_COMBAT
+	Set @«warriorDefense    ^PLAYER_SKILL_DEFENSE
+
+	Set @«TotalClasses 3
+	Calc @«fNormalizer [ @«TotalClasses - 1 ]
+	Set @«fDifficulty 1.0 // TODO user cfg or base this in some global game cfg about difficulty: 0.0 hardest=vanilla; ... ; 1.0 default calculated bonus; > 1.0 easier than default, means more bonus
+	
+	// sum for each class
+	Calc @«M [ @«mageCasting       + @«mageEtherealLink + @«mageObjKnowledge ]
+	Calc @«T [ @«thiefMechanism    + @«thiefStealth     + @«thiefIntuition   ]
+	Calc @«W [ @«warriorProjectile + @«warriorCombat    + @«warriorDefense   ]
+	
+	// bonus for each class
+	Calc @«BMW [ @«M - @«W ] if(@«BMW < 0) Set @«BMW 0
+	Calc @«BMT [ @«M - @«T ] if(@«BMT < 0) Set @«BMT 0
+	Set  @«BM  [ @«BMW + @«BMT ]
+	
+	Calc @«BTM [ @«T - @«M ] if(@«BTM < 0) Set @«BTM 0
+	Calc @«BTW [ @«T - @«W ] if(@«BTW < 0) Set @«BTW 0
+	Set  @«BT  [ @«BTM + @«BTW ]
+	
+	Calc @«BWM [ @«W - @«M ] if(@«BWM < 0) Set @«BWM 0
+	Calc @«BWT [ @«W - @«T ] if(@«BWT < 0) Set @«BWT 0
+	Set  @«BW  [ @«BWM + @«BWT ]
+	
+	Div @«BM @«fNormalizer
+	Div @«BT @«fNormalizer
+	Div @«BW @«fNormalizer
+	
+	// bonus multiplier
+	Calc @«PM [ @«BM * @«fDifficulty / @«M ]
+	Calc @«PT [ @«BT * @«fDifficulty / @«T ]
+	Calc @«PW [ @«BW * @«fDifficulty / @«W ]
+	
+	// final bonus result
+	// mage
+	Calc @«FCasting         [ @«mageCasting * @«PM ]
+	Calc @«FEtherealLink    [ @«mageEtherealLink * @«PM ]
+	Calc @«FObjectKnowledge [ @«mageObjKnowledge * @«PM ]
+	// thief
+	Calc @«FIntuition [ @«thiefIntuition * @«PT ]
+	Calc @«FStealth [ @«thiefStealth * @«PT ]
+	Calc @«FMechanism [ @«thiefMechanism * @«PT ]
+	// warrior
+	Calc @«FProjectile [ @«warriorProjectile * @«PW ]
+	Calc @«FCombat     [ @«warriorCombat * @«PW ]
+	Calc @«FDefense    [ @«warriorDefense * @«PW ]
+	
+	// apply
+	SETEQUIP CASTING          +~@«FCasting~
+	SETEQUIP ETHERAL_LINK     +~@«FEtherealLink~
+	SETEQUIP OBJECT_KNOWLEDGE +~@«FObjectKnowledge~
+	
+	SETEQUIP STEALTH   +~@«FStealth~
+	SETEQUIP MECANISM  +~@«FMechanism~
+	SETEQUIP INTUITION +~@«FIntuition~
+	
+	SETEQUIP CLOSE_COMBAT +~@«FCombat~
+	SETEQUIP PROJECTILE   +~@«FProjectile~
+	SETEQUIP DEFENSE      +~@«FDefense~
+	
+	RETURN
 }
 
 ON EQUIPIN {
- PLAY "EQUIP_RING"
- HERO_SAY -d "Class Focus ON"
- ACCEPT
+	if(£AncientDeviceMode == "RoleplayClassFocus") {
+		PLAY "EQUIP_RING"
+		GoSub FUNCsignalStrenghCheck
+		if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
+			GoSub FUNCCalcClassFocus
+			HERO_SAY -d "Class Focus ON"
+		} else {
+			HERO_SAY -d "Class Focus FAIL (re-equip at a high signal strength location)"
+		}
+		ACCEPT
+	}
 }
 
 ON EQUIPOUT {
-	HERO_SAY -d "Class Focus OFF"
-	ACCEPT
-}
-
- SETEQUIP STRENGTH 1
- SETEQUIP DEXTERITY 1
- SETEQUIP CONSTITUTION 1
- SETEQUIP INTELLIGENCE 1
- SETEQUIP STEALTH +8
- SETEQUIP MECANISM +8
- SETEQUIP INTUITION +8
- SETEQUIP ETHERAL_LINK +8
- SETEQUIP OBJECT_KNOWLEDGE +8
- SETEQUIP CASTING +8
- SETEQUIP CLOSE_COMBAT +8
- SETEQUIP PROJECTILE +8
- SETEQUIP DEFENSE +8
-
-	// mage
-	^PLAYER_SKILL_CASTING
-	^PLAYER_SKILL_ETHERAL_LINK
-	^PLAYER_SKILL_OBJECT_KNOWLEDGE
-	// thief
-	^PLAYER_SKILL_MECANISM
-	^PLAYER_SKILL_STEALTH
-	^PLAYER_SKILL_INTUITION
-	// warrior
-	^PLAYER_SKILL_PROJECTILE
-	^PLAYER_SKILL_CLOSE_COMBAT
-	^PLAYER_SKILL_DEFENSE
-
-*/
-	RETURN
+	if(£AncientDeviceMode == "RoleplayClassFocus") {
+		HERO_SAY -d "Class Focus OFF"
+		ACCEPT
+	}
 }
