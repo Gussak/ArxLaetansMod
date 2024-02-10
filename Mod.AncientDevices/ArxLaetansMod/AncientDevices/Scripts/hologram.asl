@@ -2422,7 +2422,9 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	Set @«warriorProjectile ^PLAYER_SKILL_PROJECTILE
 	Set @«warriorCombat     ^PLAYER_SKILL_CLOSE_COMBAT
+	//Set @«warriorDefensePrevious @«warriorDefense //DEBUGRM
 	Set @«warriorDefense    ^PLAYER_SKILL_DEFENSE
+	//Set @«warriorDefenseToo ^PLAYER_SKILL_DEFENSE //DEBUGRM
 
 	Set @«TotalClasses 3
 	Calc @«fNormalizer [ @«TotalClasses - 1 ]
@@ -2431,6 +2433,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	// sum for each class
 	Calc @«M [ @«mageCasting       + @«mageEtherealLink + @«mageObjKnowledge ]
 	Calc @«T [ @«thiefMechanism    + @«thiefStealth     + @«thiefIntuition   ]
+	//Set @«Wprevious @«W //DEBUGRM
 	Calc @«W [ @«warriorProjectile + @«warriorCombat    + @«warriorDefense   ]
 	
 	// bonus for each class
@@ -2444,6 +2447,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	Calc @«BWM [ @«W - @«M ] if(@«BWM < 0) Set @«BWM 0
 	Calc @«BWT [ @«W - @«T ] if(@«BWT < 0) Set @«BWT 0
+	//Set @«BWprevious @«BW //DEBUGRM
 	Calc @«BW  [ @«BWM + @«BWT ]
 	
 	Div @«BM @«fNormalizer
@@ -2488,18 +2492,16 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 }
 
 ON EQUIPIN () {
-	GoSub -p FUNCCustomCmdsB4DbgBreakpoint £»DbgMsg="test equip" ;
-	
 	if(£AncientDeviceMode == "RoleplayClassFocus") {
 		PLAY "EQUIP_RING"
 		
-		GoSub FUNCsignalStrenghCheck
-		if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
+		//GoSub FUNCsignalStrenghCheck
+		//if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
 			GoSub FUNCClassFocusCalc
-			HERO_SAY -d "Class Focus ON"
-		} else {
-			HERO_SAY -d "Class Focus FAIL (re-equip at a high signal strength location)"
-		}
+			//HERO_SAY -d "Class Focus ON"
+		//} else {
+			//HERO_SAY -d "Class Focus FAIL (re-equip at a high signal strength location)"
+		//}
 	} else {
 		HERO_SAY -d "Equip failed"
 		GoSub -p FUNCshowlocals §»force=1 ;
@@ -2510,6 +2512,19 @@ ON EQUIPIN () {
 
 ON EQUIPOUT () {
 	if(£AncientDeviceMode == "RoleplayClassFocus") {
+		//TODO explain why "magic/ring_oliver/ring_oliver.asl" doesnt need to undo the bonus like is required below...
+		SETEQUIP CASTING          -~@«FCasting~
+		SETEQUIP ETHERAL_LINK     -~@«FEtherealLink~
+		SETEQUIP OBJECT_KNOWLEDGE -~@«FObjectKnowledge~
+		
+		SETEQUIP STEALTH   -~@«FStealth~
+		SETEQUIP MECANISM  -~@«FMechanism~
+		SETEQUIP INTUITION -~@«FIntuition~
+		
+		SETEQUIP CLOSE_COMBAT -~@«FCombat~
+		SETEQUIP PROJECTILE   -~@«FProjectile~
+		SETEQUIP DEFENSE      -~@«FDefense~
+		
 		HERO_SAY -d "Class Focus OFF"
 		ACCEPT
 	}
