@@ -2011,54 +2011,58 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 >>TFUNCmorphUpgrade () { GoSub FUNCmorphUpgrade ACCEPT } >>FUNCmorphUpgrade ()  {
 	//INPUT: <§FUNCmorphUpgrade_otherQuality>
+
+	/////////////////////////////////////////////////////////////////////////////////
+	////////////// MORPH thru simple activation while in inventory //////////////////
+	// each this can become a combine tree. AncientBox is the first of the main devices. SignalRepeater could be the first of another tree!
+	if (£AncientDeviceMode == "_BecomeSignalRepeater_") {
+		Set £AncientDeviceMode "SignalRepeater"
+		// this must be easy to become again a hologram, so do minimal changes!
+		TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
+		if(§Identified == 1) {
+			Set £FUNCnameUpdate_NameBase "Hologram Signal Repeater" 
+		} else {
+			Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" //all messy
+		}
+		Set £IconBasename "HoloSignalRepeater"
+		SetGroup "Special"
+		//Set §AncientDeviceTriggerStep 1
+		//PlayerStackSize 1
+		RETURN
+	} else { 
+	if ( £AncientDeviceMode == "SignalRepeater" ) {
+		Set £AncientDeviceMode "RoleplayClassFocus" GoSub FUNCcfgAncientDevice
+		SetGroup "Special"
+		//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
+		RETURN //because this is not a normal tool
+	} else { 
+	if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
+		Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
+		GoSub -p FUNCconfigOptions £»mode="show" ;
+		SetGroup "Special"
+		//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
+		RETURN //because this is not a normal tool
+	} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
+	if ( £AncientDeviceMode == "ConfigOptions" ) {
+		Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
+		GoSub -p FUNCconfigOptions £»mode="hide" ;
+		SetGroup -r "Special" // back to basic device
+		//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
+		RETURN //because this is not a normal tool
+	} else {
+		NOP
+	} } } }
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////
+	/////////////////// MORPH only by combining below here! ////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
 	if(§FUNCmorphUpgrade_otherQuality < 0) GoSub FUNCCustomCmdsB4DbgBreakpoint
 	
 	Set §AncientDeviceTriggerStep 0
 	GoSub FUNCskillCheckAncientTech	Set §CreateChance §FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 	if (and(or(§Quality >= 4 || §FUNCmorphUpgrade_otherQuality >= 4) && §ItemConditionSure == 5)) Set §CreateChance 100
 	RANDOM §CreateChance {
-		/////////////////////////////////////////////////////////////////////////////////
-		////////////// MORPH thru simple activation while in inventory //////////////////
-		// each this can become a combine tree. AncientBox is the first of the main devices. SignalRepeater could be the first of another tree!
-		if (£AncientDeviceMode == "_BecomeSignalRepeater_") {
-			Set £AncientDeviceMode "SignalRepeater"
-			// this must be easy to become again a hologram, so do minimal changes!
-			TWEAK SKIN "Hologram.tiny.index4000.box" "Hologram.tiny.index4000.boxSignalRepeater"
-			if(§Identified == 1) {
-				Set £FUNCnameUpdate_NameBase "Hologram Signal Repeater" 
-			} else {
-				Set £FUNCnameUpdate_NameBase "Grolhoam Nagils Atrepere" //all messy
-			}
-			Set £IconBasename "HoloSignalRepeater"
-			SetGroup "Special"
-			//Set §AncientDeviceTriggerStep 1
-			//PlayerStackSize 1
-		} else { 
-		if ( £AncientDeviceMode == "SignalRepeater" ) {
-			Set £AncientDeviceMode "RoleplayClassFocus" GoSub FUNCcfgAncientDevice
-			SetGroup "Special"
-			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
-			RETURN //because this is not a normal tool
-		} else { 
-		if ( £AncientDeviceMode == "RoleplayClassFocus" ) {
-			Set £AncientDeviceMode "ConfigOptions" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions £»mode="show" ;
-			SetGroup "Special"
-			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.boxConfigOptions"
-			RETURN //because this is not a normal tool
-		} else { ////////////////////////// last, reinits/resets the Special non-combining cycle ///////////////////////
-		if ( £AncientDeviceMode == "ConfigOptions" ) {
-			Set £AncientDeviceMode "AncientBox" GoSub FUNCcfgAncientDevice
-			GoSub -p FUNCconfigOptions £»mode="hide" ;
-			SetGroup -r "Special" // back to basic device
-			//TWEAK SKIN "Hologram.tiny.index4000.boxSignalRepeater" "Hologram.tiny.index4000.box"
-			RETURN //because this is not a normal tool
-		} else { 
-		
-		////////////////////////////////////////////////////////////////////////////////////
-		/////////////////// MORPH only by combining below here! ////////////////////////////
-		////////////////////////////////////////////////////////////////////////////////////
-		
 		if (or(£AncientDeviceMode == "HologramMode" || £AncientDeviceMode == "AncientBox")) { Set £AncientDeviceMode "Grenade"
 			Set §PristineChance @FUNCskillCheckAncientTech«chanceSuccess_OUTPUT
 			Div §PristineChance 10
@@ -2140,7 +2144,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 			Set £IconBasename "AncientSniperBullet"
 			Set §AncientDeviceTriggerStep 1
 			PLAYERSTACKSIZE 3
-		} } } } } } } } }
+		} } } } }
 		
 		if(§AncientDeviceTriggerStep == 1) {
 			GoSub FUNCupdateUses
@@ -2392,7 +2396,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 
 //KEEP HERE TEST: Set £TestFixScriptEncoding "matters(£§«»¥¶¤) maybe(`¹²³×äåéëþüúíóöáßðfghïø½©®bñµç¿~¡ÄÅÉËÞÜÚÍÓÖÁÐFGHÏ¼Ø°Æ¼¢®BÑµÇ)" // all can be easily input with AltGr dead keys
 
->>FUNCCalcClassFocus () {
+>>FUNCClassFocus () {
 	Set £AncientDeviceMode "RoleplayClassFocus"
 	SETOBJECTTYPE RING
 	SET_SHADOW OFF
@@ -2480,7 +2484,7 @@ ON EQUIPIN () {
 		PLAY "EQUIP_RING"
 		GoSub FUNCsignalStrenghCheck
 		if(§FUNCsignalStrenghCheck«IsAcceptable == 1) {
-			GoSub FUNCCalcClassFocus
+			GoSub FUNCClassFocus
 			HERO_SAY -d "Class Focus ON"
 		} else {
 			HERO_SAY -d "Class Focus FAIL (re-equip at a high signal strength location)"
@@ -2941,6 +2945,14 @@ ON INVENTORYUSE () {
 	ACCEPT
 }
 
->>FUNCdummy () {
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+>>CFUNCA_KeepAtTheEnd () { // !!! important to quickly check if the script openning and closing of braces match!!!!!!!!!!!!!!!!!!!!!!!
 	RETURN
 }
