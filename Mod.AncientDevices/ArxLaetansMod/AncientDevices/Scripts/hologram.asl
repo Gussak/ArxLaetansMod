@@ -2493,13 +2493,23 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	
 	// the bonus for the class is proportionally spread thru stats based on the stat influence at the skill
 	// the stat increases skills. the skills compose the class bonus. the class bonus is spread back to the stats.
+	Calc @«F_Constitution [
+		[ @«BM / 10 ] +
+		[ @«BT / 10 ] +
+		[ @«BW / 10 ] +
+		0
+	]
+	Calc @«F_Mental [ @«BM / 10 ]
+	Calc @«F_Dexterity [ @«BT / 10 ]
+	Calc @«F_Strength [ @«BW / 10 ]
+	/*
 	Calc @«F_Constitution [ @«FBS_Defense / @«TSAConstitution ] // because +10 constitution would add 30 to defense
 	Calc @«F_Strength [ [
 		[ @«FBS_Combat          * [ 20 / @«TSAStrength ] ] + // because +10 strength would add 20 to warriorCombat
 		[ @«FBS_Projectile      * [ 10 / @«TSAStrength ] ] + // because +10 strength would add 10 to warriorProjectile
 		[ @«FBS_ObjectKnowledge * [  5 / @«TSAStrength ] ] + // because +10 strength would add  5 to mageObjKnowledge
 		0
-	] / 3 ] // normalize per skills considered
+	] ]
 	Calc @«F_Dexterity [ [
 		[ @«FBS_Stealth         * [ 20 / @«TSADexterity ] ] +
 		[ @«FBS_Projectile      * [ 20 / @«TSADexterity ] ] +
@@ -2507,7 +2517,7 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		[ @«FBS_Combat          * [ 10 / @«TSADexterity ] ] +
 		[ @«FBS_ObjectKnowledge * [  5 / @«TSADexterity ] ] +
 		0
-	] / 5 ] // normalize per skills considered
+	] ]
 	Calc @«F_Mental [ [
 		[ @«FBS_Intuition       * [ 20 / @«TSAMental ] ] +
 		[ @«FBS_Casting         * [ 20 / @«TSAMental ] ] +
@@ -2515,7 +2525,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 		[ @«FBS_ObjectKnowledge * [ 15 / @«TSAMental ] ] +
 		[ @«FBS_Mechanism       * [ 10 / @«TSAMental ] ] +
 		0
-	] / 5 ]
+	] ]
+	*/
 	
 	/*KEEPCOMMENT: this buffing doesnt directly relates skill with stat because of the other influences from a single skill (ex.: 30 in defense) into skills of the same class, will end up in a not intended result into stats
 	// stats affect skills, this way skill buffs can affect stats for class focus
