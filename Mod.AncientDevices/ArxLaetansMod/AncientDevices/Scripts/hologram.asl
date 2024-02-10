@@ -2914,6 +2914,8 @@ ON InventoryOut () { Set £_aaaDebugScriptStackAndLog "On_InventoryOut" //this ha
 	SETEQUIP PROJECTILE   +~@«FProjectile~
 	SETEQUIP DEFENSE      +~@«FDefense~
 	
+	GoSub -p FUNCshowlocals §»force=1 ;
+	
 	RETURN
 }
 
