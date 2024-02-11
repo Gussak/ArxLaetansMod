@@ -399,3 +399,8 @@ public:
 			static Foo bar([](){return "the id";}(), [](){return 2.f;}());
 
 echo "Strength Mind Dexterity Constitution Stealth Mecanism Intuition EtheralLink ObjectKnowledge Casting Projectile CloseCombat Defense" |sed -r -e 's@([a-Z]*)@float min\1 = 10.f, float max\1 = 255.f, @g'
+
+WIP: optional roleplay class attribute and skills randomizer for mage thief and warrior thru rebirth command
+run this several times ex.: rebirth -r 1 1 1 50 w
+then run this: rebirth -r 0 0 20 -1 w
+where last 'w' 't' 'm' is the roleplay class focus option

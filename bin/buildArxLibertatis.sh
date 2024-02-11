@@ -72,8 +72,10 @@ function FUNCshowSettings() {
 if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	#if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	#if ! cmake -DDEVELOPER=1 -DDEBUG=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+	: {bDevMode:=true} #help
+	astrCmakeOpt=();if $bDevMode;then astrCmakeOpt+=(-DDEVELOPER=1);fi
 	#if ! cmake -DDEVELOPER=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-	if ! cmake ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
+	if ! cmake ${astrCmakeOpt[@]} ..;then # no quote at astrCmakeOpt !
 		exit 1
 	fi
 
@@ -167,3 +169,5 @@ SECFUNCexecA -ce cp -vRu ../data/core/* "${strDeployPath}/data/"
 if echoc -t ${fQuestionDelay} -q "make deploy path RO?";then
 	FUNCmakeRO "${strDeployPath}/"
 fi
+
+#common dev usage: clear;ARX_Debug=";.*;dummy;.*" bDevMode=true bLoop=false bRetryingBuild=true ./runArxLibertatis.sh
