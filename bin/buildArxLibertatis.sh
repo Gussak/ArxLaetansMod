@@ -158,7 +158,7 @@ function FUNCmakeRW() {
 }
 
 strDeployPath="../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/"
-while ! SECFUNCexecA -ce cp -Ru * "$strDeployPath";do
+while ! SECFUNCexecA -ce cp -Ru * "$strDeployPath";do #TODO less log: rsync -vahHAX --progress --exclude=".wh..wh.*" "./"* "$strDeployPath"
 	FUNCmakeRW "$strDeployPath"
 	echoc --info "deploy path RW done, retring copy"
 done

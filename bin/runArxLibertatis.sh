@@ -115,8 +115,8 @@ while true;do
 	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 	export ARX_WarnGoSubWithLocalScopeParams=true
 	export ARX_LogDateTimeFormat="h:m:s"
-	export ARX_WarnTimerIdMismatchCallLabel="hologram.asl"
-	export ARX_WarnTimerCallingGoSub="hologram.asl"
+	export ARX_TimerLabelMismatchWarn="hologram.asl"
+	export ARX_TimerCallingGoSubWarn="hologram.asl"
 	: ${ARX_Debug:=":.*/ArxGame.cpp:.*LOD.*:^(?!.*1856).*$"};export ARX_Debug # the first char ':' is the custom delimiter you can change. in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708" nop env -s ARX_Debug ":.*:.*(ARX_CHANGELEVEL_Push_IO|LOD).*:^(?!.*(1856|1863)).*$" nop env -l
 	declare |egrep "^ARX_"
 	
