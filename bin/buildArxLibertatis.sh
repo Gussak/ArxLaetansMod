@@ -102,7 +102,7 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	#done
 	if echoc -t ${fQuestionDelay} -q "use heavy debug (if not will use a light debug that misses a lot the breakpoints but runs much faster)?";then
 		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
-		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb -O0 -fno-omit-frame-pointer" # seems perfect but FPS drops to 3, difficult to test in-game
+		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb3 -O0 -fno-omit-frame-pointer -lboost_stacktrace_backtrace" # seems perfect but FPS drops to 3, difficult to test in-game
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 	else
 		#FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
