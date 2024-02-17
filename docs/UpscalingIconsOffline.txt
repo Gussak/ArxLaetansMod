@@ -1,0 +1,29 @@
+[Easy gather all icons]
+- in a file browser, at top game dir ArxLibertatis, search for all "[icon]" files (suggested: nemo, icon view, minimum zoom has no text)
+- copy them all to some folder (*1) (make sure them all RW before copying them)
+- delete all undefined icons (the ones with yellow ball and "?" in the center)
+- backup the folder (7z it)
+
+- convert all to png, Linux/CygWin:
+	clear;ls *.bmp |while read strFl;do convert -verbose "$strFl" "${strFl%.bmp}.png"; trash "$strFl";done
+
+[UpScayl has no command line options so needs to be run manually]
+- open upscayl
+- in settings: be sure it is 4x scale
+- in settings: be sure it is PNG output
+- option: batch mode
+- option: set the folder with the icons (*1)
+- option: model: general photo (ultrasharp)
+- ignore output folder setting
+- click upscayl button and wait
+
+- IF you want double upscale, Linux/Cygwin:
+	Delete all files from folder (*1), least the new folder inside it: upscayl_png_ultrasharp_4x
+	Symlink upscaleHelper.sh to (*1)
+	Run this (minimum width OR height to accept the file):
+		./upscaleHelper.sh --dupscale 128 128
+	Now run this auto generated file:
+		./moveSmallFilesUnique.sh
+	And finally click upscayl button again and wait.
+		All new files will be at upscayl_png_ultrasharp_4x.
+		You can copy them to the textures folder now and they will be recognized when preparing the LOD_ICON !
