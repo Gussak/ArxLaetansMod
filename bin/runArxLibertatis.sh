@@ -83,7 +83,7 @@ while true;do
 		#--debug="debug,info,console,warning,error,critical"
 		--debug-gl
 		--skiplogo
-		# skipintro?
+		--skipintro
 	);
 	#if echoc -t $fQuestionDelay -S asdf@Dskjfh todoa
 	if [[ -n "$strDbgWhatFile" ]];then
