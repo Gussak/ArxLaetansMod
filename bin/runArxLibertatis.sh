@@ -82,6 +82,8 @@ while true;do
 		#--debug="warn,error,debug" #TODOA this works???
 		#--debug="debug,info,console,warning,error,critical"
 		--debug-gl
+		--skiplogo
+		# skipintro?
 	);
 	#if echoc -t $fQuestionDelay -S asdf@Dskjfh todoa
 	if [[ -n "$strDbgWhatFile" ]];then
@@ -98,11 +100,17 @@ while true;do
 	if $bTermLogWithColors;then
 		acmd+=(unbuffer)
 	fi
-	: ${bForceDebugger:=false} #help
-	if $bForceDebugger || egrep "CMAKE_BUILD_TYPE:STRING=Debug" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
-		acmd+=(nemiver --use-launch-terminal)
-		if ! egrep "CMAKE_CXX_FLAGS_DEBUG:STRING.*O0.*fno-omit-frame-pointer" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
-			echoc --alert "using a light debug mode that misses a lot the breakpoints!!!"
+	
+	if ! egrep "CMAKE_CXX_FLAGS_DEBUG:STRING.*O0.*fno-omit-frame-pointer" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
+		echoc --alert "using a light debug mode that misses a lot the breakpoints!!!"
+	fi
+	
+	: ${bDebugger:=true} #help disable in case wanting to attach another debugger
+	if $bDebugger;then
+		: ${bForceDebugger:=false} #help
+		if $bForceDebugger || egrep "CMAKE_BUILD_TYPE:STRING=Debug" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
+			#acmd+=(nemiver --use-launch-terminal) # wont load sources anymore..
+			acmd+=(seergdb --run)
 		fi
 	fi
 	acmd+=(./arx "${acmdParams[@]}" "$@")
