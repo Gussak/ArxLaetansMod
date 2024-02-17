@@ -110,12 +110,14 @@ while true;do
 		: ${bForceDebugger:=false} #help
 		if $bForceDebugger || egrep "CMAKE_BUILD_TYPE:STRING=Debug" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
 			#acmd+=(nemiver --use-launch-terminal) # wont load sources anymore..
-			acmd+=(seergdb --run)
+			#acmd+=(seergdb --run)
+			acmd+=("$HOME/Projects/SeerGDB/SeerGDB.github/src/build/seergdb" --run)
 		fi
 	fi
 	acmd+=(./arx "${acmdParams[@]}" "$@")
 
 	################ manually set
+	export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true
 	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
 	export ARX_LimitShadowBlobsForVertexes=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
@@ -126,6 +128,7 @@ while true;do
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_TimerLabelMismatchWarn="hologram.asl"
 	export ARX_TimerCallingGoSubWarn="hologram.asl"
+	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
 	
 	################ updated from: env -lvd
 	export ARX_ConsoleColumns="180"; # how many text lines shall the console show. min=50;max=2147483647;
