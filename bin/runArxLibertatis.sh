@@ -131,31 +131,33 @@ while true;do
 	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
 	
 	################ updated from: env -lvd
-	export ARX_ConsoleColumns="180"; # how many text lines shall the console show. min=50;max=2147483647;
-	export ARX_ConsoleLines="50"; # how many text lines shall the console show. min=10;max=50;
-	export ARX_Debug=";.*;ARX_PLAYER_|getEnv|EnvVar;.*"; # ex.: ";ArxGame;LOD;.*". 
-	export ARX_DebugFile=".*"; # . 
-	export ARX_DebugFunc="ARX_PLAYER_|getEnv|EnvVar"; # . 
-	export ARX_DebugLine=".*"; # . 
-	export ARX_LODDeltaFPS="10"; # this is how much FPS above the minimum that will allow LOD to be improved for one item per iteration and for the distant LOD levels thru ARX_LODDistStep. min=1;max=2147483647;
-	export ARX_LODDistStep="300"; # this is the distance between each LOD activation. min=1;max=2147483647;
-	export ARX_LODFPSdelay="0.330000"; # a more responsive FPS check (less than 1s), so LOD can change faster. min=0.100000;max=1.000000;
-	export ARX_LODFullUpdateDelay="0.250000"; # instead of every frame, LOD will be computed after this delay in seconds. min=0.000000;max=340282346638528859811704183484516925440.000000;
-	export ARX_LODMax="perfect"; # set max LOD allowed. 
-	export ARX_LODMin="icon"; # set min LOD allowed. 
-	export ARX_LODMinimumFPS="15"; # this is the minimum FPS you think is acceptable to play the game at any time. min=1;max=2147483647;
-	export ARX_LODNearHighQualityAmount="1"; # how many nearby entities will be granted high LOD quality. min=0;max=2147483647;
-	export ARX_LODPlayerMoveDistToRecalcLOD="25.000000"; # how far shall player move to recalculate LOD after player moves this distance. min=10.000000;max=340282346638528859811704183484516925440.000000;
-	export ARX_LODRecalcDelay="0.500000"; # after this delay in seconds, LOD distance will be recalculated. min=0.100000;max=340282346638528859811704183484516925440.000000;
-	export ARX_LODallowPerfectOnHigh="true"; # . 
-	export ARX_LimitShadowBlobsForVertexes="9"; # . min=0;max=2147483647;
-	export ARX_LogDateTimeFormat="h:m:s"; # simplified date/time format "Y:M:D-h:m:s". 
-	export ARX_MaxTextureSize="0"; # . min=0;max=2147483647;
-	export ARX_MovementDetectedDistance="3.000000"; # . min=0.500000;max=340282346638528859811704183484516925440.000000;
-	export ARX_TimerCallingGoSubWarn="hologram.asl"; # (coding style suggestion) Timers should only call GoTo. This regex filters what scripts will show the warning.. 
-	export ARX_TimerLabelMismatchWarn="hologram.asl"; # (coding style suggestion) Timer label should match the begin of GoTo label. This regex filters what scripts will show the warning.. 	
+	: ${ARX_Allow3DModelsCache:="false"};export ARX_Allow3DModelsCache;  #help: all 3D models will be in a cache to duplicate from speeding up entity spawning. 
+	: ${ARX_ConsoleColumns:="100"};export ARX_ConsoleColumns;  #help: how many text lines shall the console show. min=50;max=2147483647;
+	: ${ARX_ConsoleLines:="10"};export ARX_ConsoleLines;  #help: how many text lines shall the console show. min=10;max=50;
+	: ${ARX_Debug:=";.*;LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*"};export ARX_Debug;  #help: the first custom char is the section token for @File@Func@Line ex.: ";ArxGame;LOD;.*". 
+	: ${ARX_DebugFile:=".*"};export ARX_DebugFile;  #help: regex for file names. 
+	: ${ARX_DebugFunc:="LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar"};export ARX_DebugFunc;  #help: regex for pretty function names. 
+	: ${ARX_DebugLine:=".*"};export ARX_DebugLine;  #help: regex for line numbers. tip: to ignore specific lines use ex.: ^(?!.*(1856|1863)).* . 
+	: ${ARX_DeveloperModeExperiments_IKnowWhatIAmDoing:="true"};export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing;  #help: this will allow experimental code that may break the game and the savegame. 
+	: ${ARX_LODDeltaFPS:="10"};export ARX_LODDeltaFPS;  #help: this is how much FPS above the minimum that will allow LOD to be improved for one item per iteration and for the distant LOD levels thru ARX_LODDistStep. min=1;max=2147483647;
+	: ${ARX_LODDistStep:="300"};export ARX_LODDistStep;  #help: this is the distance between each LOD activation. min=1;max=2147483647;
+	: ${ARX_LODFPSdelay:="0.330000"};export ARX_LODFPSdelay;  #help: a more responsive FPS check (less than 1s), so LOD can change faster. min=0.100000;max=1.000000;
+	: ${ARX_LODFullUpdateDelay:="0.250000"};export ARX_LODFullUpdateDelay;  #help: instead of every frame, LOD will be computed after this delay in seconds. min=0.000000;max=340282346638528859811704183484516925440.000000;
+	: ${ARX_LODMax:="perfect"};export ARX_LODMax;  #help: set max LOD allowed. 
+	: ${ARX_LODMin:="icon"};export ARX_LODMin;  #help: set min LOD allowed. 
+	: ${ARX_LODMinimumFPS:="15"};export ARX_LODMinimumFPS;  #help: this is the minimum FPS you think is acceptable to play the game at any time. min=1;max=2147483647;
+	: ${ARX_LODNearHighQualityAmount:="1"};export ARX_LODNearHighQualityAmount;  #help: how many nearby entities will be granted high LOD quality. min=0;max=2147483647;
+	: ${ARX_LODPlayerMoveDistToRecalcLOD:="25.000000"};export ARX_LODPlayerMoveDistToRecalcLOD;  #help: how far shall player move to recalculate LOD after player moves this distance. min=10.000000;max=340282346638528859811704183484516925440.000000;
+	: ${ARX_LODRecalcDelay:="0.500000"};export ARX_LODRecalcDelay;  #help: after this delay in seconds, LOD distance will be recalculated. min=0.100000;max=340282346638528859811704183484516925440.000000;
+	: ${ARX_LODallowPerfectOnHigh:="true"};export ARX_LODallowPerfectOnHigh;  #help: . 
+	: ${ARX_LODallowUpscaledIcons:="true"};export ARX_LODallowUpscaledIcons;  #help: upscaled icons can be placed at graph/obj3d/textures/ and will be used instead of normal icons. 
+	: ${ARX_LODenabled:="true"};export ARX_LODenabled;  #help: . 
+	: ${ARX_LimitShadowBlobsForVertexes:="9"};export ARX_LimitShadowBlobsForVertexes;  #help: . min=0;max=2147483647;
+	: ${ARX_LogDateTimeFormat:="h:m:s"};export ARX_LogDateTimeFormat;  #help: simplified date/time format "Y:M:D-h:m:s". 
+	: ${ARX_MaxTextureSize:="0"};export ARX_MaxTextureSize;  #help: . min=0;max=2147483647;
+	: ${ARX_MovementDetectedDistance:="3.000000"};export ARX_MovementDetectedDistance;  #help: . min=0.500000;max=340282346638528859811704183484516925440.000000;
 	
-	: ${ARX_Debug:=":.*/ArxGame.cpp:.*LOD.*:^(?!.*1856).*$"};export ARX_Debug # the first char ':' is the custom delimiter you can change. in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708" nop env -s ARX_Debug ":.*:.*(ARX_CHANGELEVEL_Push_IO|LOD).*:^(?!.*(1856|1863)).*$" nop env -l
+	: ${ARX_Debug:=":.*/ArxGame.cpp:.*LOD.*:^(?!.*(1856|1863)).*$"};export ARX_Debug # the first char ':' is the custom delimiter you can change. in console you can type this to ignore line 1856 and show only line 1708: env -s ARX_Debug ":.*/ArxGame.cpp.*.*:.*LOD.*:^(?!.*1856).*$|1708" nop env -s ARX_Debug ":.*:.*(ARX_CHANGELEVEL_Push_IO|LOD).*:^(?!.*(1856|1863)).*$" nop env -l
 	declare |egrep "^ARX_"
 	
 	# KEEP: linux command to generate some doc, but they can all be listed with console command `env -l` now! LC_ALL=C egrep 'platform::getEnvironmentVariableValue' --include="*.h" --include="*.cpp" -iRhI * |sed -r -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*)",[^,]*,[^,]*, *([^,\)]*).*@export \2=\3 # \1@' -e 's@.*platform::getEnvironmentVariableValue([^\(]*).*"(ARX_[^"]*).*@export \2=? # \1@'
