@@ -237,7 +237,7 @@ ___
 
 # __LICENSES__  
 
-The licenses are inside each compressed package.  
+The licenses are inside each folder and are related to all files there.
 
 ___
 
