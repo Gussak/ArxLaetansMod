@@ -8,20 +8,19 @@
 	clear;ls *.bmp |while read strFl;do sem -j+0 convert -verbose "$strFl" "${strFl%.bmp}.png" ';' trash "$strFl";done
 
 [UpScayl has no command line options so needs to be run manually]
-Obs.: may be tricky to work as you request, so keep trying.
 - open upscayl
 
 - SCALE MODE:
 	- in settings: be sure it is 4x scale
 	
-- WIDTH MODE, may not work, or only work after you giveup and try the 4x mode above, then it will do 512x (the previous setting will work) :)
+- WIDTH MODE: ISSUE:BUG:WORKAROUND:may not work, or only work after you giveup and try the 4x mode above, then it will do 512x (the previous setting may work)
 	- in settings: set scale to 1x (is a workaround to try force width below)
 	- in settings: at width, type 511 (or other (32xN)-1 ) and click the up arrow
 	
 - in settings: be sure it is JPG output
 - option: batch mode
 - option: set the folder with the icons (*1)
-- option: model: general photo (ULTRASHARP): ultrasharp is important because it keeps most black pixels totally black allowing transparency (so it is not perfect)
+- option: model: general photo (ULTRASHARP): ultrasharp is important because it keeps most black pixels totally black allowing transparency (so it is not perfect, the ideal is to render the 3D model to a high res image with transparency in blender)
 - ignore output folder setting
 - click upscayl button and wait
 
