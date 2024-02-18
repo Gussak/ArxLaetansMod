@@ -21,7 +21,7 @@ Obs.: may be tricky to work as you request, so keep trying.
 - in settings: be sure it is JPG output
 - option: batch mode
 - option: set the folder with the icons (*1)
-- option: model: general photo (ULTRASHARP): ultrasharp is important because it keeps all black pixels totally black allowing transparency
+- option: model: general photo (ULTRASHARP): ultrasharp is important because it keeps most black pixels totally black allowing transparency (so it is not perfect)
 - ignore output folder setting
 - click upscayl button and wait
 
