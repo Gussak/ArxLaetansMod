@@ -23,7 +23,8 @@ if [[ "$1" == "--dupscale" ]];then #help <w> <h> min "OR" sizes to accept file
 	};export -f FUNCdupscayl;
 	
 	: ${folder:=upscayl_png_ultrasharp_4x} #help
-	find "${folder}/" -iname "*.png" -exec bash -c "FUNCdupscayl '{}'" \;;
+	#find "${folder}/" -iname "*.png" -exec bash -c "FUNCdupscayl '{}'" \;;
+	ls *.bmp |while read strFl;do sem -j+0 FUNCdupscayl "$strFl" ';' echo "ThreadDone:$strFl";done
 	sort -u ./moveSmallFiles.sh >./moveSmallFilesUnique.sh;
 	trash ./moveSmallFiles.sh
 	chmod +x ./moveSmallFilesUnique.sh

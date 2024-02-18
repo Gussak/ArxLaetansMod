@@ -1,19 +1,27 @@
 [Easy gather all icons]
 - in a file browser, at top game dir ArxLibertatis, search for all "[icon]" files (suggested: nemo, icon view, minimum zoom has no text)
 - copy them all to some folder (*1) (make sure them all RW before copying them)
-- delete all undefined icons (the ones with yellow ball and "?" in the center)
+- delete all undefined icons (the ones with yellow ball and "?" in the center), order by size, they all have about 12kb
 - backup the folder (7z it)
 
-- convert all to png, Linux/CygWin:
-	clear;ls *.bmp |while read strFl;do convert -verbose "$strFl" "${strFl%.bmp}.png"; trash "$strFl";done
+- convert all to PNG (multithread), Linux/CygWin:
+	clear;ls *.bmp |while read strFl;do sem -j+0 convert -verbose "$strFl" "${strFl%.bmp}.png" ';' trash "$strFl";done
 
 [UpScayl has no command line options so needs to be run manually]
+Obs.: may be tricky to work as you request, so keep trying.
 - open upscayl
-- in settings: be sure it is 4x scale
-- in settings: be sure it is PNG output
+
+- SCALE MODE:
+	- in settings: be sure it is 4x scale
+	
+- WIDTH MODE, may not work, or only work after you giveup and try the 4x mode above, then it will do 512x (the previous setting will work) :)
+	- in settings: set scale to 1x (is a workaround to try force width below)
+	- in settings: at width, type 511 (or other (32xN)-1 ) and click the up arrow
+	
+- in settings: be sure it is JPG output
 - option: batch mode
 - option: set the folder with the icons (*1)
-- option: model: general photo (ultrasharp)
+- option: model: general photo (ULTRASHARP): ultrasharp is important because it keeps all black pixels totally black allowing transparency
 - ignore output folder setting
 - click upscayl button and wait
 
