@@ -1,0 +1,1 @@
+This work, "MagicVial" (https://github.com/Gussak/ArxLaetansMod), is licensed under CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) by Gussak (https://github.com/Gussak). Re-used and modified a part from "Magic potion" (https://skfb.ly/oJutV), licensed under CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) by sterbi13 (https://sketchfab.com/sterbi13).
