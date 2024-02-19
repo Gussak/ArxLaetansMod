@@ -105,7 +105,7 @@ while true;do
 		echoc --alert "using a light debug mode that misses a lot the breakpoints!!!"
 	fi
 	
-	: ${bDebugger:=true} #help disable in case wanting to attach another debugger
+	: ${bDebugger:=true} #help set to false in case wanting to attach another debugger (but can detach current also)
 	if $bDebugger;then
 		: ${bForceDebugger:=false} #help
 		if $bForceDebugger || egrep "CMAKE_BUILD_TYPE:STRING=Debug" "${strPathIni}/ArxLibertatis.github/build/CMakeCache.txt";then
@@ -128,12 +128,15 @@ while true;do
 	export ARX_TimerCallingGoSubWarn="hologram.asl"
 	export ARX_ConsoleLines=30
 	
+	###################################
 	## EXPERIMENTAL !!! enabling this may break things! all of these can be enabled dynamically (not sure but may break tho)
-	export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=false # this being true, will allow below experiments to run. if false will deny even if they are true. this && other; looks for cpp usages of g_allowExperiments
+	###################################
+	: ${ARX_DeveloperModeExperiments_IKnowWhatIAmDoing:=false};export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing # this being true, will allow below experiments to run. if false will deny even if they are true. this && other; looks for cpp usages of g_allowExperiments
 	#export ARX_AllowScriptPreCompilation=false #EXPERIMENTAL
 	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
-	export ARX_PrecompileAllowStaticText=false
-	export ARX_PrecompileAllowWords=false
+	export ARX_PrecompileAllowStaticText=true
+	export ARX_PrecompileAllowWords=true
+	export ARX_MaxTextureSize=0 #256 # still too glitchy
 	# shall all be coded default false: clear;LC_ALL=C egrep 'ARX_DeveloperModeExperiments_IKnowWhatIAmDoing|ARX_PrecompileAllowStaticText|ARX_PrecompileAllowWords|ARX_Allow3DModelsCache' --include="*.h" --include="*.cpp" -iRnIa * |grep -v false
 	
 	################ updated from: env -lvd, do not modify, copy to above and change there
