@@ -129,8 +129,9 @@ while true;do
 	export ARX_TimerLabelMismatchWarn="hologram.asl"
 	export ARX_TimerCallingGoSubWarn="hologram.asl"
 	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
+	export ARX_ConsoleLines=30
 	
-	################ updated from: env -lvd
+	################ updated from: env -lvd, do not modify, copy to above and change there
 	: ${ARX_Allow3DModelsCache:="false"};export ARX_Allow3DModelsCache;  #help: all 3D models will be in a cache to duplicate from speeding up entity spawning. 
 	: ${ARX_ConsoleColumns:="100"};export ARX_ConsoleColumns;  #help: how many text lines shall the console show. min=50;max=2147483647;
 	: ${ARX_ConsoleLines:="10"};export ARX_ConsoleLines;  #help: how many text lines shall the console show. min=10;max=50;
