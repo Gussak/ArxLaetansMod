@@ -117,19 +117,24 @@ while true;do
 	acmd+=(./arx "${acmdParams[@]}" "$@")
 
 	################ manually set
-	export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true
 	#export ARX_MaxTextureSize=512 #EXPERIMENTAL
 	export ARX_LimitShadowBlobsForVertexes=9
 	export ARX_MODDING=1 # this forces patching and overriding scripts everytime they are loaded and ignores the cache
 	export ARX_ScriptErrorPopupCommand='yad --no-markup --selectable-labels --title="%{title}" --text="%{message}" --form --field="%{details}":LBL --scroll --on-top --center --button="Edit:0" --button="Ignore:1" --button="Ignore10s:2" --button="Ignore60s:3" --button="Ignore10m:4" --button="Ignore1h:5"'
 	export ARX_ScriptCodeEditorCommand='geany "%{file}":%{line}'
-	export ARX_AllowScriptPreCompilation=1 #EXPERIMENTAL
 	export ARX_WarnGoSubWithLocalScopeParams=true
 	export ARX_LogDateTimeFormat="h:m:s"
 	export ARX_TimerLabelMismatchWarn="hologram.asl"
 	export ARX_TimerCallingGoSubWarn="hologram.asl"
-	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
 	export ARX_ConsoleLines=30
+	
+	## EXPERIMENTAL !!! enabling this may break things! all of these can be enabled dynamically (not sure but may break tho)
+	export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=false # this being true, will allow below experiments to run. if false will deny even if they are true. this && other; looks for cpp usages of g_allowExperiments
+	#export ARX_AllowScriptPreCompilation=false #EXPERIMENTAL
+	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
+	export ARX_PrecompileAllowStaticText=false
+	export ARX_PrecompileAllowWords=false
+	# shall all be coded default false: clear;LC_ALL=C egrep 'ARX_DeveloperModeExperiments_IKnowWhatIAmDoing|ARX_PrecompileAllowStaticText|ARX_PrecompileAllowWords|ARX_Allow3DModelsCache' --include="*.h" --include="*.cpp" -iRnIa * |grep -v false
 	
 	################ updated from: env -lvd, do not modify, copy to above and change there
 	: ${ARX_Allow3DModelsCache:="false"};export ARX_Allow3DModelsCache;  #help: all 3D models will be in a cache to duplicate from speeding up entity spawning. 
