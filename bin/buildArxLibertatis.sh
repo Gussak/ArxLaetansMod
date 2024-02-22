@@ -109,6 +109,7 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb3 -O0 -fno-omit-frame-pointer -lboost_stacktrace_backtrace ${strCallStackLib-}" # seems perfect but FPS drops to 3, difficult to test in-game
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 		FUNCpatchCache "CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING" "-rdynamic" # -rdynamic may cause some rare problems tho, didnt help to improve boost stacktrace output tho in rare cases..
+		FUNCpatchCache "BUILD_PROFILER_INSTRUMENT:BOOL" ON
 	else
 		#FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
 		if echoc -q "Debug (if not will be Release. It may be broken, better test it)?@Dy";then
@@ -116,11 +117,13 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 			FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-g"
 			FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
 			FUNCpatchCache "CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING" ""
+			FUNCpatchCache "BUILD_PROFILER_INSTRUMENT:BOOL" OFF
 		else
 			FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Release"
 			FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" ""
 			FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
 			FUNCpatchCache "CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING" ""
+			FUNCpatchCache "BUILD_PROFILER_INSTRUMENT:BOOL" OFF
 		fi
 	fi
 fi
