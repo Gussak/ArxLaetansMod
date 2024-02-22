@@ -136,10 +136,11 @@ while true;do
 	###################################
 	: ${ARX_DeveloperModeExperiments_IKnowWhatIAmDoing:=false};export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing # this being true, will allow below experiments to run. if false will deny even if they are true. this && other; looks for cpp usages of g_allowExperiments
 	#export ARX_AllowScriptPreCompilation=false #EXPERIMENTAL
-	export ARX_PrecompileAllowWords=false
-	export ARX_PrecompileAllowStaticText=false
-	export ARX_PrecompileAllowCommands=false # ?broken
-	export ARX_PrecompileAllowVarNames=false # ?broken
+	export ARX_PrecompileAllowWords=true
+	export ARX_PrecompileAllowStaticText=true
+	export ARX_PrecompileAllowCommands=true
+	export ARX_PrecompileAllowVarNames=true
+	export ARX_PrecompileAllowSkip=true
 	export ARX_Allow3DModelsCache=false #EXPERIMENTAL currently broken
 	export ARX_MaxTextureSize=0 #256 # still too glitchy
 	# shall all be coded default false: clear;LC_ALL=C egrep 'ARX_DeveloperModeExperiments_IKnowWhatIAmDoing|ARX_PrecompileAllowStaticText|ARX_PrecompileAllowWords|ARX_Allow3DModelsCache' --include="*.h" --include="*.cpp" -iRnIa * |grep -v false
@@ -187,4 +188,12 @@ while true;do
 done
 
 # easy current command line:
-#clear;SeerGDB_CustomCodeEditor="geany \"%{file}\":%{line}" ARX_PrecompileShowDecompileLog=false ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true ARX_Debug=";.*;Prec|LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*" bDevMode=true bLoop=false bRetryingBuild=true ./runArxLibertatis.sh
+#clear;\
+	SeerGDB_CustomCodeEditor="geany \"%{file}\":%{line}" \
+	ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true \
+	ARX_PrecompileShowDecompileLog=false \
+	ARX_Debug=";.*;Prec|LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*" \
+	bDevMode=true \
+	bLoop=false \
+	bRetryingBuild=true \
+	./runArxLibertatis.sh
