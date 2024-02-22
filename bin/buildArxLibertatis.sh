@@ -73,7 +73,10 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	#if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	#if ! cmake -DDEVELOPER=1 -DDEBUG=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	: {bDevMode:=true} #help
-	astrCmakeOpt=();if $bDevMode;then astrCmakeOpt+=(-DDEVELOPER=1);fi
+	astrCmakeOpt=();if $bDevMode;then
+		astrCmakeOpt+=(-DDEVELOPER=1);
+		#TODO ARX_DBGCPPTRACE how to let this define be recognized? see -lcpptrace below
+	fi
 	#if ! cmake -DDEVELOPER=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	if ! cmake ${astrCmakeOpt[@]} ..;then # no quote at astrCmakeOpt !
 		exit 1
@@ -102,9 +105,10 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 	#done
 	if echoc -t ${fQuestionDelay} -q "use heavy debug (if not will use a light debug that misses a lot the breakpoints but runs much faster)?";then
 		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
-		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb3 -O0 -fno-omit-frame-pointer -lboost_stacktrace_backtrace" # seems perfect but FPS drops to 3, difficult to test in-game
+		#TODO strCallStackLib="-I./thirdpartylibs/cpptrace/include -L./thirdpartylibs -lcpptrace" #https://github.com/jeremy-rifkin/cpptrace	#ifdef ARX_DBGCPPTRACE	#include <cpptrace/cpptrace.hpp> //cpptrace::generate_trace().print();	#endif	# is erroring: /usr/bin/ld.gold: error: cannot find -lcpptrace
+		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb3 -O0 -fno-omit-frame-pointer -lboost_stacktrace_backtrace ${strCallStackLib-}" # seems perfect but FPS drops to 3, difficult to test in-game
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
-		FUNCpatchCache "CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING" "-rdynamic" # this may cause some rare problems tho
+		FUNCpatchCache "CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING" "-rdynamic" # -rdynamic may cause some rare problems tho, didnt help to improve boost stacktrace output tho in rare cases..
 	else
 		#FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
 		if echoc -q "Debug (if not will be Release. It may be broken, better test it)?@Dy";then
@@ -131,7 +135,7 @@ if echoc -q -t ${fQuestionDelay} "check coding style for warnings?";then
 	if ! "${astrMakeCmd[@]}" style;then exit 1;fi
 fi
 #does not work :( astrMakeCmd+=(-e CPPFLAGS=-O0) #-O0 is important to let line breakpoints work in debuggers
-if echoc -t ${fQuestionDelay} -q "do not remake it all, just touch the files? (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
+if echoc -t ${fQuestionDelay} -q "just touch the files ? (do not remake it all...) (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
   astrMakeCmd+=(--touch)
 fi
 #doesnt work :( CPPFLAGS=-O0 "${astrMakeCmd[@]}"

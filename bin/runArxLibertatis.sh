@@ -76,7 +76,7 @@ while true;do
 	
 	strFlDbg="src/script/ScriptUtils.cpp"
 	nDbgLine="$(egrep "iDbgBrkPCount\+\+" "${strPathIni}/ArxLibertatis.github/${strFlDbg}" -n |cut -d: -f 1)"
-	echoc --info "On Nemiver create a breakpoint to function: @rDebugBreakpoint or ${strFlDbg} ${nDbgLine}"
+	echoc --info "On debugger create a breakpoint to function: @rDebugBreakpoint or ${strFlDbg} ${nDbgLine}"
 	acmdParams=(
 		--data-dir="../Arx Fatalis" #TODOA could just place data*.pak at libertatis path? or on a layer?
 		#--debug="warn,error,debug" #TODOA this works???
@@ -185,3 +185,6 @@ while true;do
 	if ! $bLoop;then break;fi
 	echoc -w "re-run (BUT HIT CTRL+C if it is not reading the newest changes you implemented, chache problem? RAM not ECC problem???)"
 done
+
+# easy current command line:
+#clear;SeerGDB_CustomCodeEditor="geany \"%{file}\":%{line}" ARX_PrecompileShowDecompileLog=false ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true ARX_Debug=";.*;Prec|LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*" bDevMode=true bLoop=false bRetryingBuild=true ./runArxLibertatis.sh
