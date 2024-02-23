@@ -22,12 +22,9 @@ set -eEu
 : ${bRetryingBuild:=false}; declare -p bRetryingBuild #help
 fQuestionDelay=9;if $bRetryingBuild;then fQuestionDelay=0.01;fi
 
-: ${bRebuildFullVerbose:=false} #help use to create the full log file with all make commands
-
 cd ArxLibertatis.github
 strLoggedPath="`pwd`"
 pwd
-if $bRebuildFullVerbose;then trash build;fi
 mkdir -vp build && cd build
 pwd
 #  -DARX_DEBUG=1
@@ -35,7 +32,7 @@ pwd
 #FAIL: export CMAKE_CXX_STANDARD=20 #this works like -std=c++20 ?
 #FAIL: cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DCMAKE_CXX_STANDARD=20 " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 if ! lsb_release -r -c |grep "22.04";then
-  if ! echoc -t ${fQuestionDelay} -q "this script is ready to make it work with ubuntu 22.04, continue anyway?";then
+  if ! echoc -t ${fQuestionDelay} -q "(N) this script is ready to make it work with ubuntu 22.04, continue anyway?";then
     exit 1
   fi
 fi  
@@ -50,17 +47,21 @@ if ! dpkg -s qtbase5-dev >/dev/null;then
   exit 1;
 fi
 
+strFlCMakeCache="`pwd`/CMakeCache.txt" # must be at "ArxLibertatis.github/build" !!!
+
 astrVarValoldValnew=()
 function FUNCpatchCache() {
+	egrep "${1}=" "${strFlCMakeCache}"
 	astrVarValoldValnew+=("$1" "" "$2")
 	if ! sed -i.`SECFUNCdtFmt --filename`.bkp -r \
 		-e "s'^${1}=.*'${1}=${2}'" \
-		"./CMakeCache.txt";then exit 1;fi
+		"${strFlCMakeCache}";then pwd; exit 1;fi
+	egrep "${1}=" "${strFlCMakeCache}"
 }
 function FUNCshowSettings() {
 	for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
 		strVar="${astrVarValoldValnew[i+0]}"
-		egrep "${strVar}=" ./CMakeCache.txt
+		egrep "${strVar}=" "${strFlCMakeCache}"
 	done
 }
 
@@ -69,7 +70,7 @@ function FUNCshowSettings() {
 	#"CMAKE_CXX_FLAGS_DEBUG:STRING" -g    "-ggdb -O0 -fno-omit-frame-pointer"
 	#"SET_OPTIMIZATION_FLAGS:BOOL"  ON    OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 #)
-if echoc -t ${fQuestionDelay} -q "run cmake?";then
+if echoc -t ${fQuestionDelay} -q "(Y) run cmake?";then
 	#if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	#if ! cmake -DDEVELOPER=1 -DDEBUG=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	: {bDevMode:=true} #help
@@ -78,41 +79,39 @@ if echoc -t ${fQuestionDelay} -q "run cmake?";then
 		#TODO ARX_DBGCPPTRACE how to let this define be recognized? see -lcpptrace below
 	fi
 	#if ! cmake -DDEVELOPER=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-	if ! cmake ${astrCmakeOpt[@]} ..;then # no quote at astrCmakeOpt !
+	
+	pwd
+	if ! SECFUNCexecA -ce cmake ${astrCmakeOpt[@]} ..;then # no quote at astrCmakeOpt !
+		pwd
 		exit 1
 	fi
 
+	echo "BEFORE:";FUNCshowSettings
+	
+	if [[ ! -f "$strFlCMakeCache" ]];then echoc -p "something is wrong. recreate ArxLibertatis.github path, copy .git to it, restore all files and run ./buildSimple.sh"; exit 1;fi
+	
+	: ${bRebuildFullVerbose:=false} #help use to create the full log file with all make commands
+	if ! $bRebuildFullVerbose && echoc -t ${fQuestionDelay} -q "(?) full verbose build?";then bRebuildFullVerbose=true;fi
 	if $bRebuildFullVerbose;then
-	#astrVarValoldValnew+=(
-		#"CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE TRUE
-	#)
 		FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  TRUE
 	else
 		FUNCpatchCache "CMAKE_VERBOSE_MAKEFILE:BOOL"  FALSE
 	fi
-
-	#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
-		#-e 's@SET_OPTIMIZATION_FLAGS:BOOL=ON@SET_OPTIMIZATION_FLAGS:BOOL=OFF@' \
-		#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
-	echo "BEFORE:";FUNCshowSettings
-	#for((i=0;i<${#astrVarValoldValnew[*]};i+=3));do
-		#strVar="${astrVarValoldValnew[i+0]}"
-		#strValOld="${astrVarValoldValnew[i+1]}"
-		#strValNew="${astrVarValoldValnew[i+2]}"
-		#sed -i.`SECFUNCdtFmt --filename`.bkp -r \
-			#-e "s'^${strVar}=.*$'${strVar}=${strValNew}'" \
-			#"./CMakeCache.txt" #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
-	#done
-	if echoc -t ${fQuestionDelay} -q "use heavy debug (if not will use a light debug that misses a lot the breakpoints but runs much faster)?";then
+	
+	if echoc -t ${fQuestionDelay} -q "(Y) use heavy debug (if not will use a light debug that misses a lot the breakpoints but runs much faster)?";then
 		FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
-		#TODO strCallStackLib="-I./thirdpartylibs/cpptrace/include -L./thirdpartylibs -lcpptrace" #https://github.com/jeremy-rifkin/cpptrace	#ifdef ARX_DBGCPPTRACE	#include <cpptrace/cpptrace.hpp> //cpptrace::generate_trace().print();	#endif	# is erroring: /usr/bin/ld.gold: error: cannot find -lcpptrace
+		
+		#TODO https://github.com/jeremy-rifkin/cpptrace	#ifdef ARX_DBGCPPTRACE	#include <cpptrace/cpptrace.hpp> //cpptrace::generate_trace().print();	#endif	# is erroring: /usr/bin/ld.gold: error: cannot find -lcpptrace
+		#strCallStackLib="-I./thirdpartylibs/cpptrace/include -L./thirdpartylibs -lcpptrace"
+		strCallStackLib="-I./thirdpartylibs/cpptrace/include -l:./thirdpartylibs/libcpptrace.a"
 		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb3 -O0 -fno-omit-frame-pointer -lboost_stacktrace_backtrace ${strCallStackLib-}" # seems perfect but FPS drops to 3, difficult to test in-game
+		
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 		FUNCpatchCache "CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING" "-rdynamic" # -rdynamic may cause some rare problems tho, didnt help to improve boost stacktrace output tho in rare cases..
 		FUNCpatchCache "BUILD_PROFILER_INSTRUMENT:BOOL" ON
 	else
 		#FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      ""
-		if echoc -q "Debug (if not will be Release. It may be broken, better test it)?@Dy";then
+		if echoc -q "(Y) Debug (if not will be Release. It may be broken, better test it)?@Dy";then
 			FUNCpatchCache "CMAKE_BUILD_TYPE:STRING"      "Debug"
 			FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-g"
 			FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  ON
@@ -134,11 +133,11 @@ echo "AFTER:";FUNCshowSettings
 : ${iMaxCores:=0} #help if the cpu is overheating, set this to 1. set to 0 to auto detect max cores.
 if((iMaxCores<1));then iMaxCores="`grep "core id" /proc/cpuinfo |wc -l`";fi
 astrMakeCmd=(unbuffer make -j "$iMaxCores")
-if echoc -q -t ${fQuestionDelay} "check coding style for warnings?";then
+if echoc -q -t ${fQuestionDelay} "(N) check coding style for warnings?";then
 	if ! "${astrMakeCmd[@]}" style;then exit 1;fi
 fi
 #does not work :( astrMakeCmd+=(-e CPPFLAGS=-O0) #-O0 is important to let line breakpoints work in debuggers
-if echoc -t ${fQuestionDelay} -q "just touch the files ? (do not remake it all...) (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
+if echoc -t ${fQuestionDelay} -q "(N) just touch the files ? (do not remake it all...) (this is useful if you know it doesnt need to recompile like in case you just changed a branch, but you need to touch the .cpp .h files that differ from previous branch tho)";then # --old-file=FILE may be usefull too
   astrMakeCmd+=(--touch)
 fi
 #doesnt work :( CPPFLAGS=-O0 "${astrMakeCmd[@]}"
@@ -176,7 +175,7 @@ done
 SECFUNCexecA -ce mkdir -vp "${strDeployPath}/data/"
 # localization and misc (from data/core) must end at data/ and not data/core/
 SECFUNCexecA -ce cp -vRu ../data/core/* "${strDeployPath}/data/"
-if echoc -t ${fQuestionDelay} -q "make deploy path RO?";then
+if echoc -t ${fQuestionDelay} -q "(N) make deploy path RO?";then
 	FUNCmakeRO "${strDeployPath}/"
 fi
 
