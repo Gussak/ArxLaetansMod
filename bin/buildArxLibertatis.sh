@@ -19,18 +19,14 @@ source <(secinit)
 
 set -eEu
 
-: ${bRetryingBuild:=false}; declare -p bRetryingBuild #help
-fQuestionDelay=9;if $bRetryingBuild;then fQuestionDelay=0.01;fi
+: ${bFastPrompts:=false}; declare -p bFastPrompts #help
+fQuestionDelay=9;if $bFastPrompts;then fQuestionDelay=0.01;fi
 
 cd ArxLibertatis.github
 strLoggedPath="`pwd`"
 pwd
 mkdir -vp build && cd build
 pwd
-#  -DARX_DEBUG=1
-#cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DARX_DEBUG_SHADOWBLOB " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-#FAIL: export CMAKE_CXX_STANDARD=20 #this works like -std=c++20 ?
-#FAIL: cmake -DDEVELOPER=ON -DCMAKE_CXX_FLAGS=" -DCMAKE_CXX_STANDARD=20 " .. #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 if ! lsb_release -r -c |grep "22.04";then
   if ! echoc -t ${fQuestionDelay} -q "(N) this script is ready to make it work with ubuntu 22.04, continue anyway?";then
     exit 1
@@ -71,21 +67,19 @@ function FUNCshowSettings() {
 	#"SET_OPTIMIZATION_FLAGS:BOOL"  ON    OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
 #)
 if echoc -t ${fQuestionDelay} -q "(Y) run cmake?";then
-	#if ! cmake -DDEVELOPER=ON ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-	#if ! cmake -DDEVELOPER=1 -DDEBUG=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
-	: {bDevMode:=true} #help
+	: ${bDevMode:=true} #help
 	astrCmakeOpt=();if $bDevMode;then
 		astrCmakeOpt+=(-DDEVELOPER=1);
 		#TODO ARX_DBGCPPTRACE how to let this define be recognized? see -lcpptrace below
 	fi
-	#if ! cmake -DDEVELOPER=1 ..;then #changes at DCMAKE_CXX_FLAGS forces recompile everything tho...
 	
-	pwd
+	pwd ################################# CMAKE #################################
 	if ! SECFUNCexecA -ce cmake ${astrCmakeOpt[@]} ..;then # no quote at astrCmakeOpt !
 		pwd
 		exit 1
 	fi
 
+	################################### CMAKE CFG ###################################
 	echo "BEFORE:";FUNCshowSettings
 	
 	if [[ ! -f "$strFlCMakeCache" ]];then echoc -p "something is wrong. recreate ArxLibertatis.github path, copy .git to it, restore all files and run ./buildSimple.sh"; exit 1;fi
@@ -103,7 +97,8 @@ if echoc -t ${fQuestionDelay} -q "(Y) run cmake?";then
 		
 		#TODO https://github.com/jeremy-rifkin/cpptrace	#ifdef ARX_DBGCPPTRACE	#include <cpptrace/cpptrace.hpp> //cpptrace::generate_trace().print();	#endif	# is erroring: /usr/bin/ld.gold: error: cannot find -lcpptrace
 		#strCallStackLib="-I./thirdpartylibs/cpptrace/include -L./thirdpartylibs -lcpptrace"
-		strCallStackLib="-I./thirdpartylibs/cpptrace/include -l:./thirdpartylibs/libcpptrace.a"
+		#strCallStackLib="-I./thirdpartylibs/cpptrace/include -l:./thirdpartylibs/libcpptrace.a"
+		#strCallStackLib="-L../thirdpartylibs/ -I../thirdpartylibs/cpptrace/include -lcpptrace -L/usr/lib/x86_64-linux-gnu/ -l:/usr/lib/x86_64-linux-gnu/libdwarf.a"
 		FUNCpatchCache "CMAKE_CXX_FLAGS_DEBUG:STRING" "-ggdb3 -O0 -fno-omit-frame-pointer -lboost_stacktrace_backtrace ${strCallStackLib-}" # seems perfect but FPS drops to 3, difficult to test in-game
 		
 		FUNCpatchCache "SET_OPTIMIZATION_FLAGS:BOOL"  OFF  # like -O0 above I guess.  #at build folder. This unoptimizes all the code so breakpoints hit perfectly in nemiver!
@@ -166,17 +161,26 @@ function FUNCmakeRW() {
 	SECFUNCexec -m "$FUNCNAME" -ce find "$1/" \( -perm -u-w \) -exec chmod u+w '{}' \;
 }
 
+############ DEPLOY
+
+pwd # at build path
+
+# deploy compiled files
 strDeployPath="../../../ArxLibertatis.layer7057.CoreNewerThanOverhaul-arx-libertatis-1.3-dev-2023-06-24-LinuxBuild/"
 while ! SECFUNCexecA -ce cp -Ru * "$strDeployPath";do #TODO less log: rsync -vahHAX --progress --exclude=".wh..wh.*" "./"* "$strDeployPath"
 	FUNCmakeRW "$strDeployPath"
 	echoc --info "deploy path RW done, retring copy"
 done
 
+# deploy localization and misc (from data/core) must end at data/ and not data/core/
 SECFUNCexecA -ce mkdir -vp "${strDeployPath}/data/"
-# localization and misc (from data/core) must end at data/ and not data/core/
 SECFUNCexecA -ce cp -vRu ../data/core/* "${strDeployPath}/data/"
 if echoc -t ${fQuestionDelay} -q "(N) make deploy path RO?";then
 	FUNCmakeRO "${strDeployPath}/"
 fi
 
-#common dev usage: clear;ARX_Debug=";.*;dummy;.*" bDevMode=true bLoop=false bRetryingBuild=true ./runArxLibertatis.sh
+# deploy new data files
+SECFUNCexecA -ce cp -vRu ../game "${strDeployPath}/"
+SECFUNCexecA -ce cp -vRu ../graph "${strDeployPath}/"
+
+#common dev usage: clear;ARX_Debug=";.*;dummy;.*" bDevMode=true bLoop=false bFastPrompts=true ./runArxLibertatis.sh

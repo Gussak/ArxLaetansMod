@@ -22,7 +22,7 @@ strPathRun="`realpath ../ArxLibertatis`"
 strFlLog="`realpath .`/log/arx.linux.`SECFUNCdtFmt --filename`.log"
 mkdir -vp "`dirname "$strFlLog"`"
 
-: ${bLoop:=true} #help
+: ${bLoop:=false} #help to just press a key to retry compiling, not that useful tho..
 while true;do
 	: ${bClear:=false} #help
 	if $bClear;then clear;fi
@@ -35,14 +35,15 @@ while true;do
 	if $bBuildB4Run;then 
 		cd "$strPathIni"
 		fQuestionDelay=9;
-		: ${bRetryingBuild:=false}; export bRetryingBuild #detected by buildArxLibertatis.sh
-		if ! $bRetryingBuild && echoc -t ${fQuestionDelay} -q "fast prompts?@Dy";then bRetryingBuild=true;fi
-		if $bRetryingBuild;then fQuestionDelay=0.01;fi
+		: ${bFastPrompts:=false}; export bFastPrompts #detected by buildArxLibertatis.sh
+		#if ! $bFastPrompts && echoc -t ${fQuestionDelay} -q "fast prompts?@Dy";then bFastPrompts=true;fi
+		if ! $bFastPrompts && echoc -t 1 -q "fast prompts?@Dy";then bFastPrompts=true;fi
+		if $bFastPrompts;then fQuestionDelay=0.01;fi
 		if echoc -q -t ${fQuestionDelay} "re-build it?@Dy";then
 			while ! ./buildArxLibertatis.sh;do 
 				if $bLoop;then
 					echoc -w "fix the code and retry";
-					bRetryingBuild=true
+					bFastPrompts=true
 				else
 					exit 1
 				fi
@@ -135,7 +136,7 @@ while true;do
 	# env -s ARX_DeveloperModeExperiments_IKnowWhatIAmDoing true	env -s ARX_PrecompileAllowWords true	env -s ARX_PrecompileAllowStaticText true	env -s ARX_PrecompileAllowCommands true	env -s ARX_PrecompileAllowVarNames true
 	###################################
 	: ${ARX_DeveloperModeExperiments_IKnowWhatIAmDoing:=false};export ARX_DeveloperModeExperiments_IKnowWhatIAmDoing # this being true, will allow below experiments to run. if false will deny even if they are true. this && other; looks for cpp usages of g_allowExperiments
-	#export ARX_AllowScriptPreCompilation=false #EXPERIMENTAL
+	: ${ARX_PrecompileShowDecompileLog:=false};export ARX_PrecompileShowDecompileLog
 	export ARX_PrecompileAllowWords=true
 	export ARX_PrecompileAllowStaticText=true
 	export ARX_PrecompileAllowCommands=true
@@ -189,11 +190,9 @@ done
 
 # easy current command line:
 #clear;\
-	SeerGDB_CustomCodeEditor="geany \"%{file}\":%{line}" \
 	ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true \
 	ARX_PrecompileShowDecompileLog=false \
 	ARX_Debug=";.*;Prec|LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*" \
 	bDevMode=true \
-	bLoop=false \
 	bRetryingBuild=true \
 	./runArxLibertatis.sh
