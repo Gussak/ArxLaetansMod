@@ -192,7 +192,7 @@ done
 #clear;\
 	ARX_DeveloperModeExperiments_IKnowWhatIAmDoing=true \
 	ARX_PrecompileShowDecompileLog=false \
-	ARX_Debug=";.*;Prec|LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*" \
+	ARX_Debug=";.*;PreC|skipWhitespace|LODIconAsSkin|ARX_PLAYER_|getEnv|EnvVar;.*" \
 	bDevMode=true \
 	bRetryingBuild=true \
 	./runArxLibertatis.sh
